@@ -1,6 +1,5 @@
 "use client";
-import React, { useState, useEffect } from "react";
-
+import React, { useState } from "react";
 import {
   DollarSign,
   TrendingUp,
@@ -12,19 +11,11 @@ import {
   ArrowRight,
   Check,
 } from "lucide-react";
+import { useTheme } from "@/providers/ThemeProvider";
 
 const FinanceTrackerHome = () => {
-  const [theme, setTheme] = useState<"light" | "dark">("light");
+  const { theme, toggleTheme } = useTheme();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-
-  useEffect(() => {
-    const savedTheme = theme;
-    document.documentElement.classList.toggle("dark", savedTheme === "dark");
-  }, [theme]);
-
-  const toggleTheme = () => {
-    setTheme((prev) => (prev === "light" ? "dark" : "light"));
-  };
 
   const features = [
     {

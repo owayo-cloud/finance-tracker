@@ -1,0 +1,10 @@
+# .gitignore
+node_modules/
+.env
+.env.local
+*.pyc
+__pycache__/
+.venv/
+frontend/.next/
+frontend/node_modules/
+backend/.venv/

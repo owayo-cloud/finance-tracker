@@ -12,6 +12,7 @@ import {
   Check,
 } from "lucide-react";
 import { useTheme } from "@/providers/ThemeProvider";
+import Link from "next/link";
 
 const FinanceTrackerHome = () => {
   const { theme, toggleTheme } = useTheme();
@@ -149,9 +150,19 @@ const FinanceTrackerHome = () => {
                   <Sun className="w-5 h-5 text-yellow-400" />
                 )}
               </button>
+              <Link
+                href="accounts/login"
+                className={`${
+                  theme === "dark"
+                    ? "bg-gray-700 hover:bg-gray-600"
+                    : "bg-gray-100 hover:bg-gray-200"
+                } transition`}
+              >
               <button className="bg-emerald-600 hover:bg-emerald-700 text-white px-6 py-2 rounded-lg transition">
                 Get Started
               </button>
+              </Link>
+              
             </div>
 
             <div className="md:hidden flex items-center space-x-2">

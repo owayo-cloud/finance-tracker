@@ -150,19 +150,12 @@ const FinanceTrackerHome = () => {
                   <Sun className="w-5 h-5 text-yellow-400" />
                 )}
               </button>
-              <Link
-                href="accounts/login"
-                className={`${
-                  theme === "dark"
-                    ? "bg-gray-700 hover:bg-gray-600"
-                    : "bg-gray-100 hover:bg-gray-200"
-                } transition`}
+              <a
+                href="/accounts/login"
+                className="bg-emerald-600 hover:bg-emerald-700 text-white px-6 py-2 rounded-lg transition flex items-center justify-center"
               >
-              <button className="bg-emerald-600 hover:bg-emerald-700 text-white px-6 py-2 rounded-lg transition">
                 Get Started
-              </button>
-              </Link>
-              
+              </a>
             </div>
 
             <div className="md:hidden flex items-center space-x-2">

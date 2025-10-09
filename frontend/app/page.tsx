@@ -11,8 +11,7 @@ import {
   ArrowRight,
   Check,
 } from "lucide-react";
-import { useTheme } from "@/providers/ThemeProvider";
-import Link from "next/link";
+import { useTheme } from "@/providers/ThemeProvider"
 
 const FinanceTrackerHome = () => {
   const { theme, toggleTheme } = useTheme();

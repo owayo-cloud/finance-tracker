@@ -9,7 +9,7 @@ from typing import Optional
 class UserCreate(BaseModel):
     username: str
     email: str
-    password: str
+    password: str  
 
 class UserLogin(BaseModel):
     username: str
@@ -22,7 +22,7 @@ class UserResponse(BaseModel):
     created_at: datetime
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 
 class TransactionBase(BaseModel):

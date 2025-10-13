@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from app.core.config import settings
-from app.db.session import engine
+from app.db.session import async_engine
 from app.db.base import Base
 
 app = FastAPI(
@@ -10,7 +10,7 @@ app = FastAPI(
 
 # Create all tables
 async def init_models():
-    async with engine.begin() as conn:
+    async with async_engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
 
 @app.on_event("startup")

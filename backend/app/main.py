@@ -18,5 +18,5 @@ async def startup_event():
     await init_models()
 
 @app.get("/")
-def root():
+async def root():
     return {"message": "Welcome to the Finance Tracker API"}

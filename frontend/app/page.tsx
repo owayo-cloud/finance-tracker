@@ -150,7 +150,7 @@ const FinanceTrackerHome = () => {
                 )}
               </button>
               <a
-                href="/accounts/login"
+                href="/auth"
                 className="bg-emerald-600 hover:bg-emerald-700 text-white px-6 py-2 rounded-lg transition flex items-center justify-center"
               >
                 Get Started

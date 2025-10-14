@@ -48,13 +48,13 @@ class User(Base):
         nullable=False
     )
     
-    # Relationships (will be uncommented as we create other models)
+    # Relationships
     # accounts = relationship("Account", back_populates="user", lazy="select")
     # categories = relationship("Category", back_populates="user", lazy="select")
     # transactions = relationship("Transaction", back_populates="user", lazy="select")
     # budgets = relationship("Budget", back_populates="user", lazy="select")
-    # refresh_tokens = relationship("RefreshToken", back_populates="user", lazy="select")
+    refresh_tokens = relationship("RefreshToken", back_populates="user", lazy="select", cascade="all, delete-orphan")
     
     def __repr__(self):
         """String representation for debugging."""
-        return f"<User(id={self.id}, email={self.email}, name={self.name})>"
+        return f"<User(id={self.id}, email={self.email}, name={self.full_name})>"

@@ -180,15 +180,16 @@ export default function FinanceDashboard() {
               href="#"
               className="flex items-center gap-3 px-3 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
             >
-              <LogOut className="w-5 h-5" />
-              Log Out
-            </a>
-            <a
-              href="#"
-              className="flex items-center gap-3 px-3 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
-            >
               <Settings className="w-5 h-5" />
               Settings
+            </a>
+
+            <a
+              href="#"
+              className="flex items-center gap-3 px-3 py-2.5 text-sm font-lg text-red-700 hover:bg-gray-100 rounded-lg transition-colors"
+            >
+              <LogOut className="w-5 h-5" />
+              Log Out
             </a>
           </nav>
 

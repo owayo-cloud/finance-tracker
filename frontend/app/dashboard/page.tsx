@@ -27,7 +27,7 @@ export default function FinanceDashboard() {
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const router = useRouter();
-  const [user, setUser] = useState<{ full_name: string } | null>(null);
+  const [user, setUser] = useState<{ full_name: string, email: string } | null>(null);
   
   useEffect(() => {
     const token = localStorage.getItem("access_token");
@@ -232,10 +232,10 @@ export default function FinanceDashboard() {
               </div>
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-medium text-gray-900 truncate">
-                  John Doe
+                  {user ? ` ${user.full_name}!` : "Loading..."}
                 </p>
                 <p className="text-xs text-gray-500 truncate">
-                  john@example.com
+                  {user ? ` ${user.email}!` : "Loading..."}
                 </p>
               </div>
             </div>

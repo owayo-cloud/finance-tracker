@@ -1,9 +1,8 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import {
   DollarSign,
   TrendingUp,
-  TrendingDown,
   ArrowUpRight,
   ArrowDownRight,
   Package,
@@ -21,11 +20,37 @@ import {
   Wallet,
   LogOut,
 } from "lucide-react";
+import { useRouter } from "next/navigation";
 
 export default function FinanceDashboard() {
   const [selectedPeriod, setSelectedPeriod] = useState("Month");
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const router = useRouter();
+  const [user, setUser] = useState<{ full_name: string } | null>(null);
+  
+  useEffect(() => {
+    const token = localStorage.getItem("access_token");
+    const expiry = localStorage.getItem("token_expiry");
+    const userData = localStorage.getItem("user");
+
+    if (!token || !expiry || Date.now() / 1000 > Number(expiry)){
+      localStorage.removeItem("access_token");
+      localStorage.removeItem("token_expiry");
+      localStorage.removeItem("user");
+      router.push("/auth"); // instant redirect
+      return;
+    }
+
+    //set user from local storage
+    if (userData) {
+      try{
+        setUser(JSON.parse(userData));
+      } catch{
+        console.error("Failed to parse user data");
+      }
+  }
+  }, [router]);
 
   // Simulated real-time data
   const [stats, setStats] = useState({
@@ -46,6 +71,12 @@ export default function FinanceDashboard() {
       }));
       setIsRefreshing(false);
     }, 1000);
+  };
+
+   // logout function
+  const handleLogout = () => {
+    localStorage.removeItem("access_token");
+    router.push("/auth"); // instant redirect
   };
 
   // Chart data
@@ -185,7 +216,7 @@ export default function FinanceDashboard() {
             </a>
 
             <a
-              href="#"
+              onClick={handleLogout}
               className="flex items-center gap-3 px-3 py-2.5 text-sm font-lg text-red-700 hover:bg-gray-100 rounded-lg transition-colors"
             >
               <LogOut className="w-5 h-5" />
@@ -267,10 +298,10 @@ export default function FinanceDashboard() {
             {/* Welcome Section */}
             <div>
               <h1 className="text-2xl font-bold text-gray-900">
-                Welcome back, John
+                {user ? `Welcome back, ${user.full_name}!` : "Loading..."}
               </h1>
               <p className="text-sm text-gray-500 mt-1">
-                Here's what's happening with your business today
+                Here&apos;s what&apos;s happening with your business today
               </p>
             </div>
 

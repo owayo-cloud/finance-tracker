@@ -47,5 +47,10 @@ async def create_tokens_for_user(db: AsyncSession, user: User):
     return TokenResponse(
         access_token=access_token, 
         refresh_token=refresh_token,
-        expires_in=settings.ACCESS_TOKEN_EXPIRE_MINUTES * 60
-        )
+        expires_in=settings.ACCESS_TOKEN_EXPIRE_MINUTES * 60,
+        user={
+            "id": user.id,
+            "email": user.email,
+            "full_name": user.name
+        }
+    )

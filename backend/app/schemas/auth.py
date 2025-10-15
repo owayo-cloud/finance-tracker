@@ -14,3 +14,4 @@ class TokenResponse(BaseModel):
     refresh_token: str
     expires_in: int  # in seconds
     token_type: str = "bearer"
+    user: dict

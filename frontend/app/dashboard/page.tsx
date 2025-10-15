@@ -19,6 +19,7 @@ import {
   X,
   CreditCard,
   Wallet,
+  LogOut,
 } from "lucide-react";
 
 export default function FinanceDashboard() {
@@ -174,6 +175,13 @@ export default function FinanceDashboard() {
             >
               <Package className="w-5 h-5" />
               Products
+            </a>
+            <a
+              href="#"
+              className="flex items-center gap-3 px-3 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
+            >
+              <LogOut className="w-5 h-5" />
+              Log Out
             </a>
             <a
               href="#"

@@ -31,7 +31,7 @@ export default function FinanceLogin() {
     setLoading(true);
 
     if (!isLogin && password !== confirmPassword) {
-      setMessage("⚠️ Passwords do not match!");
+      setMessage(" Passwords do not match!");
       setLoading(false);
       return;
     }
@@ -54,6 +54,7 @@ export default function FinanceLogin() {
         if (isLogin) {
           //save token/expiry and redirect
           localStorage.setItem("access_token", data.access_token);
+          localStorage.setItem("user", JSON.stringify(data.user));
 
           // calculate absolute expiry defaults to 1 hour if not provided
           const expiresIn = Number(data.expires_in) || 3600;
@@ -61,24 +62,24 @@ export default function FinanceLogin() {
           localStorage.setItem("token_expiry", expiryTimestamp.toString());
 
           setMessage("Login successful! Redirecting...");
-          window.location.href = "/dashboard"
+          setTimeout(() => (window.location.href = "/dashboard"), 800);
           // router.replace("/dashboard"); //redirects instantly
         } else {
-          setMessage("🎉 Account created successfully! You can now log in.");
+          setMessage(" Account created successfully! You can now log in.");
           setIsLogin(true);
         }
       } else {
         setMessage(data.detail || "Something went wrong!");
       }
     } catch (error) {
-      setMessage("⚠️ Unable to connect to the server.");
+      setMessage(" Unable to connect to the server.");
     } finally {
       setLoading(false);
     }
   };
 
   const handleGoogleLogin = () => {
-    setMessage("🔄 Google OAuth integration coming soon!");
+    setMessage(" Google OAuth integration coming soon!");
   };
 
   return (
@@ -92,7 +93,7 @@ export default function FinanceLogin() {
 
       <div className="w-full max-w-md bg-white dark:bg-gray-800 shadow-xl rounded-2xl p-8 transition-all duration-300 hover:shadow-2xl border border-gray-100 dark:border-gray-700">
         <h2 className="text-2xl font-semibold text-center mb-6 text-gray-800 dark:text-gray-100">
-          {isLogin ? "Welcome Back 👋" : "Create an Account 🪙"}
+          {isLogin ? "Welcome Back" : "Create an Account"}
         </h2>
 
         <form onSubmit={handleSubmit} className="space-y-5">
@@ -197,9 +198,9 @@ export default function FinanceLogin() {
           {message && (
             <p
               className={`text-sm text-center font-medium ${
-                message.includes("✅") || message.includes("🎉")
-                  ? "text-emerald-600 dark:text-emerald-400"
-                  : "text-red-500 dark:text-red-400"
+                message.includes("") || message.includes("")
+                  ? "text-green-600 dark:text-green-400"
+                  : "text-green-500 dark:text-green-400"
               }`}
             >
               {message}

@@ -1,67 +1,82 @@
 "use client";
-import { useEffect, useState } from "react";
-import {
-  DollarSign,
-  TrendingUp,
-  ArrowUpRight,
-  ArrowDownRight,
-  Package,
-  Users,
-  ShoppingCart,
-  Activity,
-  Download,
-  RefreshCw,
-  Bell,
-  Search,
-  Settings,
-  Menu,
-  X,
-  CreditCard,
-  Wallet,
-  LogOut,
-} from "lucide-react";
+
+import { useEffect, useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
+import { AlertCircle, DollarSign, Users, ShoppingCart, TrendingUp, ArrowUpRight, ArrowDownRight } from "lucide-react";
+
+import { Sidebar } from "@/components/dashboard/layout/Sidebar";
+import { TopBar } from "@/components/dashboard/layout/TopBar";
+import { NotificationPanel } from "@/components/dashboard/NotificationPanel";
+
+interface User {
+  full_name: string;
+  email: string;
+}
+
+interface Stats {
+  revenue: number;
+  users: number;
+  sales: number;
+  growth: number;
+}
 
 export default function FinanceDashboard() {
-  const [selectedPeriod, setSelectedPeriod] = useState("Month");
-  const [isRefreshing, setIsRefreshing] = useState(false);
-  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [selectedPeriod, setSelectedPeriod] = useState<string>("Month");
+  const [isRefreshing, setIsRefreshing] = useState<boolean>(false);
+  const [sidebarOpen, setSidebarOpen] = useState<boolean>(false);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState<boolean>(false);
+  const [notificationOpen, setNotificationOpen] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [authError, setAuthError] = useState<string | null>(null);
   const router = useRouter();
-  const [user, setUser] = useState<{ full_name: string, email: string } | null>(null);
-  
+  const [user, setUser] = useState<User | null>(null);
+
   useEffect(() => {
-    const token = localStorage.getItem("access_token");
-    const expiry = localStorage.getItem("token_expiry");
-    const userData = localStorage.getItem("user");
+    const validateAuth = async () => {
+      try {
+        const token = localStorage.getItem("access_token");
+        const expiry = localStorage.getItem("token_expiry");
+        const userData = localStorage.getItem("user");
 
-    if (!token || !expiry || Date.now() / 1000 > Number(expiry)){
-      localStorage.removeItem("access_token");
-      localStorage.removeItem("token_expiry");
-      localStorage.removeItem("user");
-      router.push("/auth"); // instant redirect
-      return;
-    }
+        if (!token || !expiry) throw new Error("Missing authentication credentials");
 
-    //set user from local storage
-    if (userData) {
-      try{
-        setUser(JSON.parse(userData));
-      } catch{
-        console.error("Failed to parse user data");
+        const expiryTime = Number(expiry);
+        if (isNaN(expiryTime) || Date.now() / 1000 > expiryTime)
+          throw new Error("Session expired");
+
+        if (userData) {
+          const parsedUser = JSON.parse(userData);
+          if (!parsedUser.full_name || !parsedUser.email)
+            throw new Error("Invalid user data");
+          setUser(parsedUser);
+        } else throw new Error("User data not found");
+
+        setIsLoading(false);
+      } catch (error) {
+        localStorage.removeItem("access_token");
+        localStorage.removeItem("token_expiry");
+        localStorage.removeItem("user");
+
+        const errorMessage = error instanceof Error ? error.message : "Authentication failed";
+        setAuthError(errorMessage);
+        setTimeout(() => router.push("/auth"), 1500);
       }
-  }
+    };
+
+    validateAuth();
   }, [router]);
 
-  // Simulated real-time data
-  const [stats, setStats] = useState({
+  const [stats, setStats] = useState<Stats>({
     revenue: 56789,
     users: 1234,
     sales: 345,
     growth: 8.5,
   });
 
-  const handleRefresh = () => {
+  const handleRefresh = useCallback(() => {
+    if (isRefreshing) return;
     setIsRefreshing(true);
+
     setTimeout(() => {
       setStats((prev) => ({
         revenue: prev.revenue + Math.floor(Math.random() * 1000),
@@ -71,527 +86,196 @@ export default function FinanceDashboard() {
       }));
       setIsRefreshing(false);
     }, 1000);
-  };
+  }, [isRefreshing]);
 
-   // logout function
-  const handleLogout = () => {
+  const handleLogout = useCallback(() => {
     localStorage.removeItem("access_token");
-    router.push("/auth"); // instant redirect
-  };
+    localStorage.removeItem("token_expiry");
+    localStorage.removeItem("user");
+    router.push("/auth");
+  }, [router]);
 
-  // Chart data
-  const revenueData = [
-    { label: "Jan", value: 42000 },
-    { label: "Feb", value: 38000 },
-    { label: "Mar", value: 51000 },
-    { label: "Apr", value: 45000 },
-    { label: "May", value: 58000 },
-    { label: "Jun", value: 62000 },
-  ];
+  if (isLoading)
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-100 dark:bg-gray-900">
+        <div className="text-center">
+          <div className="w-16 h-16 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto"></div>
+          <p className="mt-4 text-gray-700 dark:text-gray-300 font-medium">Loading dashboard...</p>
+        </div>
+      </div>
+    );
 
-  // Transaction data
-  const transactions = [
-    {
-      id: 1,
-      name: "John Doe",
-      amount: 2450,
-      status: "Paid",
-      date: "Oct 15, 2025",
-      type: "Sale",
-    },
-    {
-      id: 2,
-      name: "Jane Smith",
-      amount: 1890,
-      status: "Pending",
-      date: "Oct 14, 2025",
-      type: "Subscription",
-    },
-    {
-      id: 3,
-      name: "Alice Johnson",
-      amount: 3200,
-      status: "Paid",
-      date: "Oct 14, 2025",
-      type: "Sale",
-    },
-    {
-      id: 4,
-      name: "Bob Williams",
-      amount: 950,
-      status: "Paid",
-      date: "Oct 13, 2025",
-      type: "Refund",
-    },
-    {
-      id: 5,
-      name: "Carol Davis",
-      amount: 1500,
-      status: "Failed",
-      date: "Oct 12, 2025",
-      type: "Sale",
-    },
-    {
-      id: 6,
-      name: "David Brown",
-      amount: 2100,
-      status: "Paid",
-      date: "Oct 12, 2025",
-      type: "Subscription",
-    },
-  ];
+  if (authError)
+    return (
+      <div className="min-h-screen bg-gray-100 dark:bg-gray-900 flex items-center justify-center">
+        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl p-8 max-w-md w-full mx-4">
+          <div className="flex items-center justify-center w-12 h-12 bg-red-100 dark:bg-red-900/30 rounded-full mx-auto">
+            <AlertCircle className="w-6 h-6 text-red-600 dark:text-red-400" />
+          </div>
+          <h2 className="mt-4 text-xl font-bold text-gray-900 dark:text-gray-100 text-center">
+            Authentication Error
+          </h2>
+          <p className="mt-2 text-gray-600 dark:text-gray-400 text-center">{authError}</p>
+          <p className="mt-4 text-sm text-gray-500 dark:text-gray-500 text-center">
+            Redirecting to login...
+          </p>
+        </div>
+      </div>
+    );
 
-  // Category breakdown
-  const categories = [
-    { name: "Products", value: 45, color: "bg-blue-500" },
-    { name: "Services", value: 30, color: "bg-green-500" },
-    { name: "Subscriptions", value: 25, color: "bg-purple-500" },
+  const statsData = [
+    {
+      title: "Total Revenue",
+      value: `$${stats.revenue.toLocaleString()}`,
+      change: "+12.5%",
+      isPositive: true,
+      icon: DollarSign,
+      gradient: "from-blue-500 to-blue-600",
+      lightBg: "bg-blue-50"
+    },
+    {
+      title: "Total Users",
+      value: stats.users.toLocaleString(),
+      change: "+8.2%",
+      isPositive: true,
+      icon: Users,
+      gradient: "from-emerald-500 to-emerald-600",
+      lightBg: "bg-emerald-50"
+    },
+    {
+      title: "Active Sales",
+      value: stats.sales.toLocaleString(),
+      change: "-2.4%",
+      isPositive: false,
+      icon: ShoppingCart,
+      gradient: "from-violet-500 to-violet-600",
+      lightBg: "bg-violet-50"
+    },
+    {
+      title: "Growth Rate",
+      value: `${stats.growth}%`,
+      change: "+5.1%",
+      isPositive: true,
+      icon: TrendingUp,
+      gradient: "from-amber-500 to-amber-600",
+      lightBg: "bg-amber-50"
+    }
   ];
 
   return (
-    <div className="min-h-screen bg-gray-50 flex">
-      {/* Sidebar */}
-      <aside
-        className={`${
-          sidebarOpen ? "translate-x-0" : "-translate-x-full"
-        } lg:translate-x-0 fixed lg:static inset-y-0 left-0 z-50 w-64 bg-white border-r border-gray-200 transition-transform duration-300 ease-in-out`}
-      >
-        <div className="h-full flex flex-col">
-          {/* Logo */}
-          <div className="h-16 flex items-center justify-between px-6 border-b border-gray-200">
-            <div className="flex items-center gap-2">
-              <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg flex items-center justify-center">
-                <DollarSign className="w-5 h-5 text-white" />
-              </div>
-              <span className="text-xl font-bold text-gray-900">FinApp</span>
-            </div>
-            <button onClick={() => setSidebarOpen(false)} className="lg:hidden">
-              <X className="w-6 h-6 text-gray-600" />
-            </button>
-          </div>
+    <div className="relative min-h-screen bg-gray-100 dark:bg-gray-900">
+      <Sidebar
+        isOpen={sidebarOpen}
+        isCollapsed={sidebarCollapsed}
+        onClose={() => setSidebarOpen(false)}
+        onToggleCollapse={() => setSidebarCollapsed(!sidebarCollapsed)}
+        onLogout={handleLogout}
+        user={user}
+      />
 
-          {/* Navigation */}
-          <nav className="flex-1 px-4 py-6 space-y-1">
-            <a
-              href="#"
-              className="flex items-center gap-3 px-3 py-2.5 text-sm font-medium text-white bg-blue-500 rounded-lg"
-            >
-              <Activity className="w-5 h-5" />
-              Dashboard
-            </a>
-            <a
-              href="#"
-              className="flex items-center gap-3 px-3 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
-            >
-              <Wallet className="w-5 h-5" />
-              Transactions
-            </a>
-            <a
-              href="#"
-              className="flex items-center gap-3 px-3 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
-            >
-              <CreditCard className="w-5 h-5" />
-              Payments
-            </a>
-            <a
-              href="#"
-              className="flex items-center gap-3 px-3 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
-            >
-              <Users className="w-5 h-5" />
-              Customers
-            </a>
-            <a
-              href="#"
-              className="flex items-center gap-3 px-3 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
-            >
-              <Package className="w-5 h-5" />
-              Products
-            </a>
-            <a
-              href="#"
-              className="flex items-center gap-3 px-3 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
-            >
-              <Settings className="w-5 h-5" />
-              Settings
-            </a>
-
-            <a
-              onClick={handleLogout}
-              className="flex items-center gap-3 px-3 py-2.5 text-sm font-lg text-red-700 hover:bg-gray-100 rounded-lg transition-colors"
-            >
-              <LogOut className="w-5 h-5" />
-              Log Out
-            </a>
-          </nav>
-
-          {/* User Profile */}
-          <div className="p-4 border-t border-gray-200">
-            <div className="flex items-center gap-3 px-3 py-2">
-              <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full flex items-center justify-center text-white font-semibold">
-                JD
-              </div>
-              <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium text-gray-900 truncate">
-                  {user ? ` ${user.full_name}!` : "Loading..."}
-                </p>
-                <p className="text-xs text-gray-500 truncate">
-                  {user ? ` ${user.email}!` : "Loading..."}
-                </p>
-              </div>
-            </div>
-          </div>
+      <div className="flex flex-col min-h-screen">
+        <div className={`fixed top-0 right-0 left-0 z-30 transition-all duration-300 ${sidebarCollapsed ? 'lg:left-20' : 'lg:left-64'}`}>
+          <TopBar
+            user={user}
+            selectedPeriod={selectedPeriod}
+            onPeriodChange={setSelectedPeriod}
+            onMenuClick={() => setSidebarOpen(true)}
+          />
         </div>
-      </aside>
 
-      {/* Main Content */}
-      <div className="flex-1 flex flex-col min-w-0">
-        {/* Top Header */}
-        <header className="h-16 bg-white border-b border-gray-200 flex items-center justify-between px-6">
-          <div className="flex items-center gap-4">
-            <button onClick={() => setSidebarOpen(true)} className="lg:hidden">
-              <Menu className="w-6 h-6 text-gray-600" />
-            </button>
-            <div className="relative hidden sm:block">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
-              <input
-                type="text"
-                placeholder="Search transactions..."
-                className="pl-10 pr-4 py-2 w-64 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              />
-            </div>
-          </div>
-
-          <div className="flex items-center gap-3">
-            <button className="relative p-2 hover:bg-gray-100 rounded-lg transition-colors">
-              <Bell className="w-5 h-5 text-gray-600" />
-              <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full"></span>
-            </button>
-
-            <button
-              onClick={handleRefresh}
-              className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
-              disabled={isRefreshing}
-            >
-              <RefreshCw
-                className={`w-5 h-5 text-gray-600 ${
-                  isRefreshing ? "animate-spin" : ""
-                }`}
-              />
-            </button>
-
-            <select
-              value={selectedPeriod}
-              onChange={(e) => setSelectedPeriod(e.target.value)}
-              className="px-4 py-2 border border-gray-200 rounded-lg text-sm font-medium text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
-            >
-              <option>Week</option>
-              <option>Month</option>
-              <option>Quarter</option>
-              <option>Year</option>
-            </select>
-          </div>
-        </header>
-
-        {/* Dashboard Content */}
-        <main className="flex-1 overflow-y-auto p-6">
-          <div className="max-w-7xl mx-auto space-y-6">
-            {/* Welcome Section */}
-            <div>
-              <h1 className="text-2xl font-bold text-gray-900">
-                {user ? `Welcome back, ${user.full_name}!` : "Loading..."}
-              </h1>
-              <p className="text-sm text-gray-500 mt-1">
-                Here&apos;s what&apos;s happening with your business today
-              </p>
-            </div>
-
-            {/* Stats Grid */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-              {/* Revenue Card */}
-              <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 hover:shadow-md transition-shadow">
-                <div className="flex items-center justify-between mb-4">
-                  <div className="bg-blue-500 bg-opacity-10 rounded-lg p-3">
-                    <DollarSign className="w-6 h-6 text-blue-600" />
-                  </div>
-                  <div className="flex items-center gap-1 text-sm font-medium text-green-600">
-                    <ArrowUpRight className="w-4 h-4" />
-                    +12.5%
-                  </div>
-                </div>
-                <div>
-                  <p className="text-gray-500 text-sm font-medium">
-                    Total Revenue
-                  </p>
-                  <p className="text-2xl font-bold text-gray-900 mt-1">
-                    ${stats.revenue.toLocaleString()}
-                  </p>
-                </div>
-              </div>
-
-              {/* Users Card */}
-              <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 hover:shadow-md transition-shadow">
-                <div className="flex items-center justify-between mb-4">
-                  <div className="bg-green-500 bg-opacity-10 rounded-lg p-3">
-                    <Users className="w-6 h-6 text-green-600" />
-                  </div>
-                  <div className="flex items-center gap-1 text-sm font-medium text-green-600">
-                    <ArrowUpRight className="w-4 h-4" />
-                    +8.2%
-                  </div>
-                </div>
-                <div>
-                  <p className="text-gray-500 text-sm font-medium">
-                    Total Users
-                  </p>
-                  <p className="text-2xl font-bold text-gray-900 mt-1">
-                    {stats.users.toLocaleString()}
-                  </p>
-                </div>
-              </div>
-
-              {/* Sales Card */}
-              <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 hover:shadow-md transition-shadow">
-                <div className="flex items-center justify-between mb-4">
-                  <div className="bg-purple-500 bg-opacity-10 rounded-lg p-3">
-                    <ShoppingCart className="w-6 h-6 text-purple-600" />
-                  </div>
-                  <div className="flex items-center gap-1 text-sm font-medium text-red-600">
-                    <ArrowDownRight className="w-4 h-4" />
-                    -2.4%
-                  </div>
-                </div>
-                <div>
-                  <p className="text-gray-500 text-sm font-medium">
-                    Active Sales
-                  </p>
-                  <p className="text-2xl font-bold text-gray-900 mt-1">
-                    {stats.sales}
-                  </p>
-                </div>
-              </div>
-
-              {/* Growth Card */}
-              <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 hover:shadow-md transition-shadow">
-                <div className="flex items-center justify-between mb-4">
-                  <div className="bg-orange-500 bg-opacity-10 rounded-lg p-3">
-                    <TrendingUp className="w-6 h-6 text-orange-600" />
-                  </div>
-                  <div className="flex items-center gap-1 text-sm font-medium text-green-600">
-                    <ArrowUpRight className="w-4 h-4" />
-                    +5.1%
-                  </div>
-                </div>
-                <div>
-                  <p className="text-gray-500 text-sm font-medium">
-                    Growth Rate
-                  </p>
-                  <p className="text-2xl font-bold text-gray-900 mt-1">
-                    {stats.growth}%
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            {/* Charts Row */}
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-              {/* Revenue Chart */}
-              <div className="lg:col-span-2 bg-white rounded-xl shadow-sm border border-gray-100 p-6">
-                <div className="flex items-center justify-between mb-6">
-                  <div>
-                    <h3 className="text-lg font-semibold text-gray-900">
-                      Revenue Overview
-                    </h3>
-                    <p className="text-sm text-gray-500 mt-1">
-                      Monthly revenue performance
-                    </p>
-                  </div>
-                </div>
-
-                <div className="relative h-64">
-                  <div className="flex items-end justify-between h-full gap-3">
-                    {revenueData.map((item, idx) => {
-                      const maxValue = Math.max(
-                        ...revenueData.map((d) => d.value)
-                      );
-                      const heightPercent = (item.value / maxValue) * 100;
-
-                      return (
-                        <div
-                          key={idx}
-                          className="flex-1 flex flex-col items-center gap-2"
-                        >
-                          <div className="w-full flex items-end justify-center relative group">
-                            <div
-                              className="w-full bg-gradient-to-t from-blue-500 to-blue-400 rounded-t-lg hover:from-blue-600 hover:to-blue-500 transition-all cursor-pointer"
-                              style={{ height: `${heightPercent}%` }}
-                            >
-                              <div className="absolute -top-8 left-1/2 transform -translate-x-1/2 bg-gray-900 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
-                                ${item.value.toLocaleString()}
-                              </div>
-                            </div>
-                          </div>
-                          <span className="text-xs font-medium text-gray-500">
-                            {item.label}
-                          </span>
-                        </div>
-                      );
-                    })}
-                  </div>
-                </div>
-              </div>
-
-              {/* Category Breakdown */}
-              <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
-                <h3 className="text-lg font-semibold text-gray-900 mb-6">
-                  Revenue by Category
-                </h3>
-
-                <div className="space-y-4">
-                  {categories.map((category, idx) => (
-                    <div key={idx}>
-                      <div className="flex items-center justify-between mb-2">
-                        <span className="text-sm font-medium text-gray-700">
-                          {category.name}
-                        </span>
-                        <span className="text-sm font-semibold text-gray-900">
-                          {category.value}%
-                        </span>
-                      </div>
-                      <div className="relative w-full h-2 bg-gray-100 rounded-full overflow-hidden">
-                        <div
-                          className={`absolute top-0 left-0 h-full ${category.color} rounded-full transition-all duration-500`}
-                          style={{ width: `${category.value}%` }}
-                        />
-                      </div>
-                    </div>
-                  ))}
-                </div>
-
-                <div className="mt-6 p-4 bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-xs font-medium text-blue-900 uppercase">
-                        Monthly Target
-                      </p>
-                      <p className="text-2xl font-bold text-blue-900 mt-1">
-                        $60K
-                      </p>
-                    </div>
-                    <div className="text-right">
-                      <p className="text-xs font-medium text-blue-700">
-                        Current
-                      </p>
-                      <p className="text-lg font-bold text-blue-900">$42.5K</p>
-                    </div>
-                  </div>
-                  <div className="mt-3 relative w-full h-2 bg-blue-200 rounded-full overflow-hidden">
-                    <div
-                      className="absolute top-0 left-0 h-full bg-blue-600 rounded-full"
-                      style={{ width: "70.8%" }}
-                    />
-                  </div>
-                  <p className="text-xs text-blue-700 mt-2 font-medium">
-                    70.8% completed
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            {/* Transactions Table */}
-            <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
-              <div className="flex items-center justify-between mb-6">
-                <div>
-                  <h3 className="text-lg font-semibold text-gray-900">
-                    Recent Transactions
-                  </h3>
-                  <p className="text-sm text-gray-500 mt-1">
-                    Latest customer transactions
-                  </p>
-                </div>
-                <button className="px-4 py-2 text-sm font-medium text-blue-600 hover:bg-blue-50 rounded-lg transition-colors flex items-center gap-2">
-                  <Download className="w-4 h-4" />
-                  Export
-                </button>
-              </div>
-
-              <div className="overflow-x-auto">
-                <table className="w-full">
-                  <thead>
-                    <tr className="border-b border-gray-100">
-                      <th className="text-left py-3 px-4 text-xs font-semibold text-gray-500 uppercase">
-                        Customer
-                      </th>
-                      <th className="text-left py-3 px-4 text-xs font-semibold text-gray-500 uppercase">
-                        Type
-                      </th>
-                      <th className="text-left py-3 px-4 text-xs font-semibold text-gray-500 uppercase">
-                        Amount
-                      </th>
-                      <th className="text-left py-3 px-4 text-xs font-semibold text-gray-500 uppercase">
-                        Status
-                      </th>
-                      <th className="text-left py-3 px-4 text-xs font-semibold text-gray-500 uppercase">
-                        Date
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {transactions.map((transaction) => (
-                      <tr
-                        key={transaction.id}
-                        className="border-b border-gray-50 hover:bg-gray-50 transition-colors"
-                      >
-                        <td className="py-4 px-4">
-                          <div className="flex items-center gap-3">
-                            <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center text-white font-medium text-sm">
-                              {transaction.name.charAt(0)}
-                            </div>
-                            <span className="font-medium text-gray-900">
-                              {transaction.name}
-                            </span>
-                          </div>
-                        </td>
-                        <td className="py-4 px-4">
-                          <span className="text-sm text-gray-600">
-                            {transaction.type}
-                          </span>
-                        </td>
-                        <td className="py-4 px-4 font-semibold text-gray-900">
-                          ${transaction.amount.toLocaleString()}
-                        </td>
-                        <td className="py-4 px-4">
+        <main className={`flex-1 pt-16 transition-all duration-300 ${sidebarCollapsed ? 'lg:ml-20' : 'lg:ml-64'}`}>
+          <div className="p-4 md:p-6 lg:p-8">
+            <div className="max-w-screen-2xl mx-auto space-y-6">
+              {/* Stats Grid */}
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4 md:gap-6">
+                {statsData.map((stat, index) => (
+                  <div
+                    key={index}
+                    className="relative bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6 shadow-sm hover:shadow-md transition-shadow"
+                  >
+                    <div className="flex items-center justify-between">
+                      <div className="flex-1">
+                        <p className="text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">
+                          {stat.title}
+                        </p>
+                        <h3 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-3">
+                          {stat.value}
+                        </h3>
+                        <div className="flex items-center gap-1">
+                          {stat.isPositive ? (
+                            <ArrowUpRight className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
+                          ) : (
+                            <ArrowDownRight className="w-4 h-4 text-red-600 dark:text-red-400" />
+                          )}
                           <span
-                            className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium ${
-                              transaction.status === "Paid"
-                                ? "bg-green-50 text-green-700"
-                                : transaction.status === "Pending"
-                                ? "bg-yellow-50 text-yellow-700"
-                                : "bg-red-50 text-red-700"
+                            className={`text-sm font-semibold ${
+                              stat.isPositive ? "text-emerald-600 dark:text-emerald-400" : "text-red-600 dark:text-red-400"
                             }`}
                           >
-                            {transaction.status}
+                            {stat.change}
                           </span>
-                        </td>
-                        <td className="py-4 px-4 text-sm text-gray-500">
-                          {transaction.date}
-                        </td>
-                      </tr>
+                          <span className="text-xs text-gray-500 dark:text-gray-500 ml-1">vs last month</span>
+                        </div>
+                      </div>
+                      <div className={`flex items-center justify-center w-14 h-14 rounded-full bg-gradient-to-br ${stat.gradient}`}>
+                        <stat.icon className="w-7 h-7 text-white" />
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              {/* Additional Content Sections */}
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+                {/* Recent Activity */}
+                <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6 shadow-sm">
+                  <h3 className="text-lg font-bold text-gray-900 dark:text-gray-100 mb-4">Recent Activity</h3>
+                  <div className="space-y-4">
+                    {[1, 2, 3, 4].map((item) => (
+                      <div key={item} className="flex items-center gap-3 pb-3 border-b border-gray-100 dark:border-gray-700 last:border-0">
+                        <div className="w-10 h-10 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center flex-shrink-0">
+                          <DollarSign className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm font-medium text-gray-900 dark:text-gray-100 truncate">New transaction received</p>
+                          <p className="text-xs text-gray-500 dark:text-gray-500">2 minutes ago</p>
+                        </div>
+                        <span className="text-sm font-semibold text-gray-900 dark:text-gray-100">$450</span>
+                      </div>
                     ))}
-                  </tbody>
-                </table>
+                  </div>
+                </div>
+
+                {/* Quick Stats */}
+                <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6 shadow-sm">
+                  <h3 className="text-lg font-bold text-gray-900 dark:text-gray-100 mb-4">Quick Stats</h3>
+                  <div className="space-y-4">
+                    {[
+                      { label: "Conversion Rate", value: "3.2%", color: "bg-emerald-500" },
+                      { label: "Avg Order Value", value: "$142", color: "bg-blue-500" },
+                      { label: "Customer Retention", value: "87%", color: "bg-violet-500" },
+                      { label: "Active Sessions", value: "234", color: "bg-amber-500" }
+                    ].map((item, index) => (
+                      <div key={index} className="flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                          <div className={`w-2 h-2 rounded-full ${item.color}`}></div>
+                          <span className="text-sm font-medium text-gray-700 dark:text-gray-300">{item.label}</span>
+                        </div>
+                        <span className="text-sm font-bold text-gray-900 dark:text-gray-100">{item.value}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
               </div>
             </div>
           </div>
         </main>
       </div>
 
-      {/* Sidebar Overlay for Mobile */}
-      {sidebarOpen && (
-        <div
-          className="fixed inset-0 bg-black bg-opacity-50 z-40 lg:hidden"
-          onClick={() => setSidebarOpen(false)}
-        />
-      )}
+      <NotificationPanel
+        isOpen={notificationOpen}
+        onClose={() => setNotificationOpen(false)}
+      />
     </div>
   );
 }

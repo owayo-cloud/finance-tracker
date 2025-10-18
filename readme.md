@@ -66,7 +66,8 @@ source .venv/bin/activate   # (Linux/Mac)
 ### install dependencies
 pip install -r requirements.txt
 
-
+setup database
+cd backend
 Run Database Migrations
 
 (If using Alembic or manual creation)
@@ -83,3 +84,17 @@ await Base.metadata.create_all(bind=engine)
 
 6️⃣ Start the Development Server
 uvicorn app.main:app --reload
+
+# Docker Setup
+- setup postgres
+docker run --name postgres -e POSTGRES_USER=postgres -e POSTGRES_PASSWORD=secret -p 5432:5432 -v ~/postgres_data:/data/db -d postgres:15-alpine
+ - startup postgres
+docker start postgres
+ - stop postgres
+docker stop postgres
+ - create financedb
+docker exec -it postgres createdb --username=postgres --owner=postgres financedb
+ - access docker shell db
+docker exec -it postgres psql -U postgres financedb
+
+

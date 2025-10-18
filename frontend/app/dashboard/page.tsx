@@ -3,125 +3,59 @@
 import { useEffect, useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { AlertCircle, DollarSign, Users, ShoppingCart, TrendingUp, ArrowUpRight, ArrowDownRight } from "lucide-react";
-
 import { Sidebar } from "@/components/dashboard/layout/Sidebar";
 import { TopBar } from "@/components/dashboard/layout/TopBar";
 import { NotificationPanel } from "@/components/dashboard/NotificationPanel";
+import { ErrorBoundary } from "@/components/dashboard/ErrorBoundary";
+import { AuthProvider, useAuth } from "@/contexts/AuthContext";
+import { apiService, Stats, Activity, Notification } from "@/services/apiService";
 
-interface User {
-  full_name: string;
-  email: string;
-}
-
-interface Stats {
-  revenue: number;
-  users: number;
-  sales: number;
-  growth: number;
-}
-
-export default function FinanceDashboard() {
+function DashboardContent() {
+  const { user, logout } = useAuth();
   const [selectedPeriod, setSelectedPeriod] = useState<string>("Month");
   const [isRefreshing, setIsRefreshing] = useState<boolean>(false);
   const [sidebarOpen, setSidebarOpen] = useState<boolean>(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState<boolean>(false);
   const [notificationOpen, setNotificationOpen] = useState<boolean>(false);
-  const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [authError, setAuthError] = useState<string | null>(null);
-  const router = useRouter();
-  const [user, setUser] = useState<User | null>(null);
+  const [stats, setStats] = useState<Stats>({ revenue: 0, users: 0, sales: 0, growth: 0 });
+  const [recentActivity, setRecentActivity] = useState<Activity[]>([]);
+  const [notifications, setNotifications] = useState<Notification[]>([]);
 
   useEffect(() => {
-    const validateAuth = async () => {
+    const loadData = async () => {
       try {
-        const token = localStorage.getItem("access_token");
-        const expiry = localStorage.getItem("token_expiry");
-        const userData = localStorage.getItem("user");
+        const [statsData, activityData, notifData] = await Promise.all([
+          apiService.fetchStats(selectedPeriod),
+          apiService.fetchRecentActivity(),
+          apiService.fetchNotifications()
+        ]);
 
-        if (!token || !expiry) throw new Error("Missing authentication credentials");
-
-        const expiryTime = Number(expiry);
-        if (isNaN(expiryTime) || Date.now() / 1000 > expiryTime)
-          throw new Error("Session expired");
-
-        if (userData) {
-          const parsedUser = JSON.parse(userData);
-          if (!parsedUser.full_name || !parsedUser.email)
-            throw new Error("Invalid user data");
-          setUser(parsedUser);
-        } else throw new Error("User data not found");
-
-        setIsLoading(false);
+        setStats(statsData);
+        setRecentActivity(activityData);
+        setNotifications(notifData);
       } catch (error) {
-        localStorage.removeItem("access_token");
-        localStorage.removeItem("token_expiry");
-        localStorage.removeItem("user");
-
-        const errorMessage = error instanceof Error ? error.message : "Authentication failed";
-        setAuthError(errorMessage);
-        setTimeout(() => router.push("/auth"), 1500);
+        console.error("failed to load data:", error);
       }
     };
 
-    validateAuth();
-  }, [router]);
+    loadData();
+  }, [selectedPeriod]);
 
-  const [stats, setStats] = useState<Stats>({
-    revenue: 56789,
-    users: 1234,
-    sales: 345,
-    growth: 8.5,
-  });
-
-  const handleRefresh = useCallback(() => {
+  const handleRefresh = useCallback(async () => {
     if (isRefreshing) return;
     setIsRefreshing(true);
 
-    setTimeout(() => {
-      setStats((prev) => ({
-        revenue: prev.revenue + Math.floor(Math.random() * 1000),
-        users: prev.users + Math.floor(Math.random() * 10),
-        sales: prev.sales + Math.floor(Math.random() * 5),
-        growth: +(prev.growth + (Math.random() - 0.5)).toFixed(1),
-      }));
+    try {
+      const newStats = await apiService.fetchStats(selectedPeriod);
+      setStats(newStats);
+    } catch (error) {
+      console.error("Refresh failed:", error);
+    } finally {
       setIsRefreshing(false);
-    }, 1000);
-  }, [isRefreshing]);
+    }
+  }, [isRefreshing, selectedPeriod]);
 
-  const handleLogout = useCallback(() => {
-    localStorage.removeItem("access_token");
-    localStorage.removeItem("token_expiry");
-    localStorage.removeItem("user");
-    router.push("/auth");
-  }, [router]);
-
-  if (isLoading)
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-100 dark:bg-gray-900">
-        <div className="text-center">
-          <div className="w-16 h-16 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto"></div>
-          <p className="mt-4 text-gray-700 dark:text-gray-300 font-medium">Loading dashboard...</p>
-        </div>
-      </div>
-    );
-
-  if (authError)
-    return (
-      <div className="min-h-screen bg-gray-100 dark:bg-gray-900 flex items-center justify-center">
-        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl p-8 max-w-md w-full mx-4">
-          <div className="flex items-center justify-center w-12 h-12 bg-red-100 dark:bg-red-900/30 rounded-full mx-auto">
-            <AlertCircle className="w-6 h-6 text-red-600 dark:text-red-400" />
-          </div>
-          <h2 className="mt-4 text-xl font-bold text-gray-900 dark:text-gray-100 text-center">
-            Authentication Error
-          </h2>
-          <p className="mt-2 text-gray-600 dark:text-gray-400 text-center">{authError}</p>
-          <p className="mt-4 text-sm text-gray-500 dark:text-gray-500 text-center">
-            Redirecting to login...
-          </p>
-        </div>
-      </div>
-    );
+  const unreadCount = notifications.filter(n => !n.read).length;
 
   const statsData = [
     {
@@ -130,8 +64,7 @@ export default function FinanceDashboard() {
       change: "+12.5%",
       isPositive: true,
       icon: DollarSign,
-      gradient: "from-blue-500 to-blue-600",
-      lightBg: "bg-blue-50"
+      gradient: "from-blue-500 to-blue-600"
     },
     {
       title: "Total Users",
@@ -139,8 +72,7 @@ export default function FinanceDashboard() {
       change: "+8.2%",
       isPositive: true,
       icon: Users,
-      gradient: "from-emerald-500 to-emerald-600",
-      lightBg: "bg-emerald-50"
+      gradient: "from-emerald-500 to-emerald-600"
     },
     {
       title: "Active Sales",
@@ -148,8 +80,7 @@ export default function FinanceDashboard() {
       change: "-2.4%",
       isPositive: false,
       icon: ShoppingCart,
-      gradient: "from-violet-500 to-violet-600",
-      lightBg: "bg-violet-50"
+      gradient: "from-violet-500 to-violet-600"
     },
     {
       title: "Growth Rate",
@@ -157,8 +88,7 @@ export default function FinanceDashboard() {
       change: "+5.1%",
       isPositive: true,
       icon: TrendingUp,
-      gradient: "from-amber-500 to-amber-600",
-      lightBg: "bg-amber-50"
+      gradient: "from-amber-500 to-amber-600"
     }
   ];
 
@@ -169,7 +99,7 @@ export default function FinanceDashboard() {
         isCollapsed={sidebarCollapsed}
         onClose={() => setSidebarOpen(false)}
         onToggleCollapse={() => setSidebarCollapsed(!sidebarCollapsed)}
-        onLogout={handleLogout}
+        onLogout={logout}
         user={user}
       />
 
@@ -180,12 +110,27 @@ export default function FinanceDashboard() {
             selectedPeriod={selectedPeriod}
             onPeriodChange={setSelectedPeriod}
             onMenuClick={() => setSidebarOpen(true)}
+            onNotificationClick={() => setNotificationOpen(true)}
+            notificationCount={unreadCount}
           />
         </div>
 
         <main className={`flex-1 pt-16 transition-all duration-300 ${sidebarCollapsed ? 'lg:ml-20' : 'lg:ml-64'}`}>
           <div className="p-4 md:p-6 lg:p-8">
             <div className="max-w-screen-2xl mx-auto space-y-6">
+              <div className="flex items-center justify-between mb-6">
+                <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">
+                  {selectedPeriod}ly Overview
+                </h1>
+                <button
+                  onClick={handleRefresh}
+                  disabled={isRefreshing}
+                  className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                >
+                  {isRefreshing ? "Refreshing..." : "Refresh Data"}
+                </button>
+              </div>
+              
               {/* Stats Grid */}
               <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4 md:gap-6">
                 {statsData.map((stat, index) => (
@@ -214,7 +159,7 @@ export default function FinanceDashboard() {
                           >
                             {stat.change}
                           </span>
-                          <span className="text-xs text-gray-500 dark:text-gray-500 ml-1">vs last month</span>
+                          <span className="text-xs text-gray-500 dark:text-gray-500 ml-1">vs last {selectedPeriod.toLowerCase()}</span>
                         </div>
                       </div>
                       <div className={`flex items-center justify-center w-14 h-14 rounded-full bg-gradient-to-br ${stat.gradient}`}>
@@ -225,22 +170,28 @@ export default function FinanceDashboard() {
                 ))}
               </div>
 
-              {/* Additional Content Sections */}
+              {/* Additional Content */}
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
                 {/* Recent Activity */}
                 <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6 shadow-sm">
                   <h3 className="text-lg font-bold text-gray-900 dark:text-gray-100 mb-4">Recent Activity</h3>
                   <div className="space-y-4">
-                    {[1, 2, 3, 4].map((item) => (
-                      <div key={item} className="flex items-center gap-3 pb-3 border-b border-gray-100 dark:border-gray-700 last:border-0">
+                    {recentActivity.map((item) => (
+                      <div key={item.id} className="flex items-center gap-3 pb-3 border-b border-gray-100 dark:border-gray-700 last:border-0">
                         <div className="w-10 h-10 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center flex-shrink-0">
                           <DollarSign className="w-5 h-5 text-blue-600 dark:text-blue-400" />
                         </div>
                         <div className="flex-1 min-w-0">
-                          <p className="text-sm font-medium text-gray-900 dark:text-gray-100 truncate">New transaction received</p>
-                          <p className="text-xs text-gray-500 dark:text-gray-500">2 minutes ago</p>
+                          <p className="text-sm font-medium text-gray-900 dark:text-gray-100 truncate">
+                            {item.description}
+                          </p>
+                          <p className="text-xs text-gray-500">{item.time}</p>
                         </div>
-                        <span className="text-sm font-semibold text-gray-900 dark:text-gray-100">$450</span>
+                        {item.amount > 0 && (
+                          <span className="text-sm font-semibold text-gray-900 dark:text-gray-100">
+                            ${item.amount}
+                          </span>
+                        )}
                       </div>
                     ))}
                   </div>
@@ -275,7 +226,57 @@ export default function FinanceDashboard() {
       <NotificationPanel
         isOpen={notificationOpen}
         onClose={() => setNotificationOpen(false)}
+        notifications={notifications}
       />
     </div>
+  );
+}
+
+function LoadingScreen() {
+  return (
+    <div className="min-h-screen flex items-center justify-center bg-gray-100 dark:bg-gray-900">
+      <div className="text-center">
+        <div className="w-16 h-16 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto"></div>
+        <p className="mt-4 text-gray-700 dark:text-gray-300 font-medium">Loading dashboard...</p>
+      </div>
+    </div>
+  );
+}
+
+function ErrorScreen({ error }: { error: string }) {
+  return (
+    <div className="min-h-screen bg-gray-100 dark:bg-gray-900 flex items-center justify-center">
+      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl p-8 max-w-md w-full mx-4">
+        <div className="flex items-center justify-center w-12 h-12 bg-red-100 dark:bg-red-900/30 rounded-full mx-auto">
+          <AlertCircle className="w-6 h-6 text-red-600 dark:text-red-400" />
+        </div>
+        <h2 className="mt-4 text-xl font-bold text-gray-900 dark:text-gray-100 text-center">
+          Authentication Error
+        </h2>
+        <p className="mt-2 text-gray-600 dark:text-gray-400 text-center">{error}</p>
+        <p className="mt-4 text-sm text-gray-500 text-center">
+          Please refresh the page to try again
+        </p>
+      </div>
+    </div>
+  );
+}
+
+function DashboardWrapper() {
+  const { isLoading, authError } = useAuth();
+
+  if (isLoading) return <LoadingScreen />;
+  if (authError) return <ErrorScreen error={authError} />;
+  
+  return <DashboardContent />;
+}
+
+export default function FinanceDashboard() {
+  return (
+    <ErrorBoundary>
+      <AuthProvider>
+        <DashboardWrapper />
+      </AuthProvider>
+    </ErrorBoundary>
   );
 }

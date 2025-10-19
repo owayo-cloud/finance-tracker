@@ -95,24 +95,24 @@ export function Sidebar({
           {/* Navigation */}
           <nav className="flex-1 px-3 py-6 space-y-1">
             {[
-              { name: "Dashboard", icon: Activity },
-              { name: "Transactions", icon: Wallet },
-              { name: "Payments", icon: CreditCard },
-              { name: "Customers", icon: Users },
-              { name: "Products", icon: Package },
-              { name: "Settings", icon: Settings },
+              { name: "Dashboard", icon: Activity, href: "" },
+              { name: "Transactions", icon: Wallet, href: "/dashboard/transactions" },
+              { name: "Payments", icon: CreditCard, href: "dashboard/payments" },
+              { name: "Customers", icon: Users, href: "dashboard/customers" },
+              { name: "Products", icon: Package, href: "/dashboard/products" },
+              { name: "Settings", icon: Settings, href: "/settings" },
             ].map((item) => (
               <a
-                key={item.name}
-                href="#"
-                className={`flex items-center gap-3 px-3 py-2.5 text-sm font-medium rounded-lg transition-colors ${
-                  item.name === "Dashboard"
-                    ? "bg-blue-500 text-white"
-                    : "text-gray-700 hover:bg-gray-100"
-                }`}
+              key={item.name}
+              href={item.href}
+              className={`flex items-center gap-3 px-3 py-2.5 text-sm font-medium rounded-lg transition-colors ${
+                item.name === "Dashboard"
+                ? "bg-blue-500 text-white"
+                : "text-gray-700 hover:bg-gray-100"
+              }`}
               >
-                <item.icon className="w-5 h-5" />
-                {!isCollapsed && <span>{item.name}</span>}
+              <item.icon className="w-5 h-5" />
+              {!isCollapsed && <span>{item.name}</span>}
               </a>
             ))}
 

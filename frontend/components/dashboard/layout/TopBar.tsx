@@ -30,7 +30,7 @@ export function TopBar({
 
   const toggleTheme = () => {
     setTheme(prev => prev === "light" ? "dark" : "light");
-    // Add your theme toggle logic here
+    // theme toggle logic
     document.documentElement.classList.toggle("dark");
   };
 
@@ -95,14 +95,16 @@ export function TopBar({
 
         {/* Period Selector */}
         <select
+          title="Select period"
+          aria-label="Select period"
           value={selectedPeriod}
           onChange={(e) => onPeriodChange(e.target.value)}
           className="hidden sm:block px-3 py-2 border border-gray-200 dark:border-gray-700 rounded-lg text-sm font-medium text-gray-700 dark:text-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-800"
         >
-          <option>Day</option>
-          <option>Week</option>
-          <option>Month</option>
-          <option>Year</option>
+          <option value="Day">Day</option>
+          <option value="Week">Week</option>
+          <option value="Month">Month</option>
+          <option value="Year">Year</option>
         </select>
 
         {/* Profile Menu */}
@@ -134,16 +136,16 @@ export function TopBar({
                   </p>
                 </div>
                 <a
-                  href="#"
+                  href="/profile"
                   className="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700"
                 >
-                  Profile Settings
+                  Profile
                 </a>
                 <a
-                  href="#"
+                  href="/account"
                   className="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700"
                 >
-                  Account Settings
+                  Account
                 </a>
                 <a
                   href="#"

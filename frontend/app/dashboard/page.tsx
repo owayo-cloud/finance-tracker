@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
-import { useRouter } from "next/navigation";
 import { AlertCircle, DollarSign, Users, ShoppingCart, TrendingUp, ArrowUpRight, ArrowDownRight } from "lucide-react";
 import { Sidebar } from "@/components/dashboard/layout/Sidebar";
 import { TopBar } from "@/components/dashboard/layout/TopBar";
@@ -226,7 +225,6 @@ function DashboardContent() {
       <NotificationPanel
         isOpen={notificationOpen}
         onClose={() => setNotificationOpen(false)}
-        notifications={notifications}
       />
     </div>
   );

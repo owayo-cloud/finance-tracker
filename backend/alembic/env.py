@@ -12,24 +12,24 @@ from app.db.base import Base
 from app.core.config import settings
 
 # Import all models here so Alembic can detect them
-from app.models.user import User
-from app.models.account import Account
-from app.models.transaction import Transaction
-from app.models.category import Category
-from app.models.budget import Budget
-from app.models.refresh_token import RefreshToken
-
+from app.models.models import *
 # Alembic Config object
 config = context.config
 
-# Load .env database URL dynamically
-config.set_main_option("sqlalchemy.url", settings.DATABASE_URL_SYNC)
+# Load .env database URL dynamically, but only override the alembic.ini
+# value when we actually have a non-empty value from our settings. This
+# avoids replacing a valid URL in alembic.ini with an empty string which
+# would cause SQLAlchemy to fail parsing the URL.
+db_url_from_settings = settings.DATABASE_URL_SYNC or settings.DATABASE_URL
+if db_url_from_settings:
+    config.set_main_option("sqlalchemy.url", db_url_from_settings)
 
 # Interpret config file for Python logging.
 if config.config_file_name is not None:
     fileConfig(config.config_file_name)
 
-target_metadata = Base.metadata
+engine = create_engine(db_url_from_settings)
+target_metadata = Base.metadata.create_all(engine)
 
 
 def run_migrations_offline():

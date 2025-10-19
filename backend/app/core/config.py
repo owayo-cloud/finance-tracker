@@ -5,6 +5,7 @@ Loads and validates environment variables using Pydantic Settings.
 
 from pydantic_settings import BaseSettings, SettingsConfigDict
 from typing import List
+import os
 
 
 class Settings(BaseSettings):
@@ -62,10 +63,9 @@ class Settings(BaseSettings):
         extra="ignore"  # Ignore extra fields in .env
     )
 
-
 # Create a single instance to be imported throughout the app
+# Let Pydantic Settings automatically load from .env file (as configured in model_config)
 settings = Settings()
-
 
 # Validate critical settings on import
 def validate_settings():
@@ -73,6 +73,14 @@ def validate_settings():
     Validate critical configuration values.
     Raises ValueError if configuration is invalid.
     """
+    # Ensure required environment-backed settings are provided
+    if not settings.DATABASE_URL:
+        raise ValueError("DATABASE_URL must be set in environment or .env")
+    if not settings.DATABASE_URL_SYNC:
+        raise ValueError("DATABASE_URL_SYNC must be set in environment or .env")
+    if not settings.SECRET_KEY:
+        raise ValueError("SECRET_KEY must be set in environment or .env")
+
     if settings.ENVIRONMENT == "production":
         if settings.SECRET_KEY == "your-super-secret-key-change-this-in-production":
             raise ValueError(
@@ -95,5 +103,12 @@ def validate_settings():
         )
 
 
-# Run validation
-validate_settings()
+# Do NOT run validation at import time. Some tooling (for example Alembic)
+# imports this module without the full application environment and will
+# fail if validation is performed on import. Call `validate_settings()`
+# explicitly from the application entrypoint when you want to enforce
+# runtime checks (for example, in `app/main.py` or startup scripts).
+if __name__ == "__main__":
+    # When executed directly, perform validation so developers can
+    # verify their local .env / environment configuration.
+    validate_settings()

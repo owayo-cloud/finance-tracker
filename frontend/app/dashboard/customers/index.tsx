@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { 
+import {
   Users,
   Plus,
   Search,
@@ -10,24 +10,19 @@ import {
   List,
   Edit,
   Trash2,
-  MoreVertical,
   Eye,
   Mail,
   Phone,
   MapPin,
   Star,
   TrendingUp,
-  ShoppingBag,
   DollarSign,
-  ChevronRight,
-  Home,
-  UserCircle,
-  Calendar,
   Award,
   AlertCircle,
   Check,
-  X
+  X,
 } from "lucide-react";
+import BreadCrumbs from "@/components/dashboard/layout/BreadCrumb";
 
 export default function CustomersPage() {
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
@@ -43,7 +38,7 @@ export default function CustomersPage() {
       change: "+12.5%",
       isPositive: true,
       icon: Users,
-      gradient: "from-blue-500 to-blue-600"
+      gradient: "from-blue-500 to-blue-600",
     },
     {
       label: "Active This Month",
@@ -51,7 +46,7 @@ export default function CustomersPage() {
       change: "+8.2%",
       isPositive: true,
       icon: TrendingUp,
-      gradient: "from-emerald-500 to-emerald-600"
+      gradient: "from-emerald-500 to-emerald-600",
     },
     {
       label: "Avg. Order Value",
@@ -59,15 +54,15 @@ export default function CustomersPage() {
       change: "+15.3%",
       isPositive: true,
       icon: DollarSign,
-      gradient: "from-violet-500 to-violet-600"
+      gradient: "from-violet-500 to-violet-600",
     },
     {
       label: "VIP Customers",
       value: "148",
       count: "Top tier",
       icon: Award,
-      gradient: "from-amber-500 to-amber-600"
-    }
+      gradient: "from-amber-500 to-amber-600",
+    },
   ];
 
   const customers = [
@@ -78,11 +73,11 @@ export default function CustomersPage() {
       phone: "+1 (555) 123-4567",
       location: "New York, NY",
       orders: 45,
-      totalSpent: 12450.00,
+      totalSpent: 12450.0,
       status: "vip",
       rating: 4.9,
       joinDate: "2024-01-15",
-      lastOrder: "2025-10-18"
+      lastOrder: "2025-10-18",
     },
     {
       id: "CUST-002",
@@ -91,11 +86,11 @@ export default function CustomersPage() {
       phone: "+1 (555) 234-5678",
       location: "San Francisco, CA",
       orders: 32,
-      totalSpent: 8920.00,
+      totalSpent: 8920.0,
       status: "active",
       rating: 4.7,
       joinDate: "2024-02-20",
-      lastOrder: "2025-10-17"
+      lastOrder: "2025-10-17",
     },
     {
       id: "CUST-003",
@@ -104,11 +99,11 @@ export default function CustomersPage() {
       phone: "+1 (555) 345-6789",
       location: "Austin, TX",
       orders: 28,
-      totalSpent: 7650.00,
+      totalSpent: 7650.0,
       status: "active",
       rating: 4.8,
       joinDate: "2024-03-10",
-      lastOrder: "2025-10-19"
+      lastOrder: "2025-10-19",
     },
     {
       id: "CUST-004",
@@ -117,11 +112,11 @@ export default function CustomersPage() {
       phone: "+1 (555) 456-7890",
       location: "Seattle, WA",
       orders: 3,
-      totalSpent: 450.00,
+      totalSpent: 450.0,
       status: "inactive",
       rating: 4.2,
       joinDate: "2024-08-05",
-      lastOrder: "2025-08-15"
+      lastOrder: "2025-08-15",
     },
     {
       id: "CUST-005",
@@ -130,11 +125,11 @@ export default function CustomersPage() {
       phone: "+1 (555) 567-8901",
       location: "Boston, MA",
       orders: 67,
-      totalSpent: 18900.00,
+      totalSpent: 18900.0,
       status: "vip",
       rating: 5.0,
       joinDate: "2023-11-20",
-      lastOrder: "2025-10-19"
+      lastOrder: "2025-10-19",
     },
     {
       id: "CUST-006",
@@ -143,11 +138,11 @@ export default function CustomersPage() {
       phone: "+1 (555) 678-9012",
       location: "Miami, FL",
       orders: 19,
-      totalSpent: 5230.00,
+      totalSpent: 5230.0,
       status: "active",
       rating: 4.5,
       joinDate: "2024-04-15",
-      lastOrder: "2025-10-16"
+      lastOrder: "2025-10-16",
     },
     {
       id: "CUST-007",
@@ -156,11 +151,11 @@ export default function CustomersPage() {
       phone: "+1 (555) 789-0123",
       location: "Chicago, IL",
       orders: 12,
-      totalSpent: 3420.00,
+      totalSpent: 3420.0,
       status: "active",
       rating: 4.6,
       joinDate: "2024-05-22",
-      lastOrder: "2025-10-14"
+      lastOrder: "2025-10-14",
     },
     {
       id: "CUST-008",
@@ -169,51 +164,59 @@ export default function CustomersPage() {
       phone: "+1 (555) 890-1234",
       location: "Denver, CO",
       orders: 8,
-      totalSpent: 2180.00,
+      totalSpent: 2180.0,
       status: "new",
       rating: 4.3,
       joinDate: "2025-09-10",
-      lastOrder: "2025-10-12"
-    }
+      lastOrder: "2025-10-12",
+    },
   ];
 
   const getStatusBadge = (status: string) => {
     const styles = {
       vip: "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400",
-      active: "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400",
-      inactive: "bg-gray-100 text-gray-700 dark:bg-gray-900/30 dark:text-gray-400",
-      new: "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400"
+      active:
+        "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400",
+      inactive:
+        "bg-gray-100 text-gray-700 dark:bg-gray-900/30 dark:text-gray-400",
+      new: "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400",
     };
-    
+
     const labels = {
       vip: "VIP",
       active: "Active",
       inactive: "Inactive",
-      new: "New"
+      new: "New",
     };
 
     const icons = {
       vip: Award,
       active: Check,
       inactive: AlertCircle,
-      new: Star
+      new: Star,
     };
 
     const Icon = icons[status as keyof typeof icons];
-    
+
     return (
-      <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold ${styles[status as keyof typeof styles]}`}>
+      <span
+        className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold ${
+          styles[status as keyof typeof styles]
+        }`}
+      >
         <Icon className="w-3 h-3" />
         {labels[status as keyof typeof labels]}
       </span>
     );
   };
 
-  const filteredCustomers = customers.filter(c => {
-    const matchesSearch = c.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
-                         c.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         c.id.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesFilter = selectedFilter === "all" || c.status === selectedFilter;
+  const filteredCustomers = customers.filter((c) => {
+    const matchesSearch =
+      c.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      c.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      c.id.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesFilter =
+      selectedFilter === "all" || c.status === selectedFilter;
     return matchesSearch && matchesFilter;
   });
 
@@ -221,27 +224,14 @@ export default function CustomersPage() {
     <div className="min-h-screen bg-gray-100 dark:bg-gray-900">
       <div className="max-w-screen-2xl mx-auto p-4 md:p-6 lg:p-8">
         {/* Breadcrumbs */}
-        <nav className="flex items-center gap-2 text-sm mb-4">
-          <button className="flex items-center gap-1 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 transition-colors">
-            <Home className="w-4 h-4" />
-            <span>Dashboard</span>
-          </button>
-          <ChevronRight className="w-4 h-4 text-gray-400" />
-          <button className="flex items-center gap-1 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 transition-colors">
-            <ShoppingBag className="w-4 h-4" />
-            <span>Sales</span>
-          </button>
-          <ChevronRight className="w-4 h-4 text-gray-400" />
-          <span className="text-gray-900 dark:text-gray-100 font-medium flex items-center gap-1">
-            <Users className="w-4 h-4" />
-            Customers
-          </span>
-        </nav>
+        <BreadCrumbs />
 
         {/* Header */}
         <div className="flex items-center justify-between mb-6">
           <div>
-            <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Customers</h1>
+            <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">
+              Customers
+            </h1>
             <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
               Manage your customer relationships and data
             </p>
@@ -272,19 +262,29 @@ export default function CustomersPage() {
                   </h3>
                   {stat.change && (
                     <div className="flex items-center gap-1">
-                      {stat.isPositive && <TrendingUp className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />}
-                      <span className={`text-sm font-semibold ${
-                        stat.isPositive ? "text-emerald-600 dark:text-emerald-400" : "text-gray-600 dark:text-gray-400"
-                      }`}>
+                      {stat.isPositive && (
+                        <TrendingUp className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
+                      )}
+                      <span
+                        className={`text-sm font-semibold ${
+                          stat.isPositive
+                            ? "text-emerald-600 dark:text-emerald-400"
+                            : "text-gray-600 dark:text-gray-400"
+                        }`}
+                      >
                         {stat.change}
                       </span>
                     </div>
                   )}
                   {stat.count && (
-                    <p className="text-xs text-gray-500 dark:text-gray-500">{stat.count}</p>
+                    <p className="text-xs text-gray-500 dark:text-gray-500">
+                      {stat.count}
+                    </p>
                   )}
                 </div>
-                <div className={`flex items-center justify-center w-12 h-12 rounded-full bg-gradient-to-br ${stat.gradient}`}>
+                <div
+                  className={`flex items-center justify-center w-12 h-12 rounded-full bg-gradient-to-br ${stat.gradient}`}
+                >
                   <stat.icon className="w-6 h-6 text-white" />
                 </div>
               </div>
@@ -319,7 +319,7 @@ export default function CustomersPage() {
                     <Filter className="w-4 h-4" />
                     Filter
                   </button>
-                  
+
                   {showFilters && (
                     <div className="absolute top-full mt-2 right-0 w-48 bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg shadow-lg z-10">
                       <div className="p-2">
@@ -328,7 +328,7 @@ export default function CustomersPage() {
                           { label: "VIP", value: "vip" },
                           { label: "Active", value: "active" },
                           { label: "Inactive", value: "inactive" },
-                          { label: "New", value: "new" }
+                          { label: "New", value: "new" },
                         ].map((filter) => (
                           <button
                             key={filter.value}
@@ -388,7 +388,10 @@ export default function CustomersPage() {
                     {/* Header */}
                     <div className="flex items-start justify-between mb-4">
                       <div className="w-12 h-12 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center text-white font-semibold text-lg">
-                        {customer.name.split(' ').map(n => n[0]).join('')}
+                        {customer.name
+                          .split(" ")
+                          .map((n) => n[0])
+                          .join("")}
                       </div>
                       <div className="opacity-0 group-hover:opacity-100 transition-opacity flex gap-1">
                         <button className="p-1.5 text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/30 rounded-lg transition-colors">
@@ -405,7 +408,9 @@ export default function CustomersPage() {
                       <h3 className="font-semibold text-gray-900 dark:text-gray-100 mb-1">
                         {customer.name}
                       </h3>
-                      <p className="text-xs text-gray-500 dark:text-gray-400 mb-2">{customer.id}</p>
+                      <p className="text-xs text-gray-500 dark:text-gray-400 mb-2">
+                        {customer.id}
+                      </p>
                       {getStatusBadge(customer.status)}
                     </div>
 
@@ -429,13 +434,17 @@ export default function CustomersPage() {
                     <div className="pt-4 border-t border-gray-200 dark:border-gray-700">
                       <div className="grid grid-cols-2 gap-4">
                         <div>
-                          <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">Total Spent</p>
+                          <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">
+                            Total Spent
+                          </p>
                           <p className="text-sm font-bold text-gray-900 dark:text-gray-100">
                             ${customer.totalSpent.toLocaleString()}
                           </p>
                         </div>
                         <div>
-                          <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">Orders</p>
+                          <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">
+                            Orders
+                          </p>
                           <p className="text-sm font-bold text-gray-900 dark:text-gray-100">
                             {customer.orders}
                           </p>
@@ -491,17 +500,25 @@ export default function CustomersPage() {
                 </thead>
                 <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
                   {filteredCustomers.map((customer) => (
-                    <tr key={customer.id} className="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
+                    <tr
+                      key={customer.id}
+                      className="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors"
+                    >
                       <td className="px-6 py-4">
                         <div className="flex items-center gap-3">
                           <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center text-white font-semibold text-sm flex-shrink-0">
-                            {customer.name.split(' ').map(n => n[0]).join('')}
+                            {customer.name
+                              .split(" ")
+                              .map((n) => n[0])
+                              .join("")}
                           </div>
                           <div>
                             <p className="text-sm font-semibold text-gray-900 dark:text-gray-100">
                               {customer.name}
                             </p>
-                            <p className="text-xs text-gray-500 dark:text-gray-400">{customer.id}</p>
+                            <p className="text-xs text-gray-500 dark:text-gray-400">
+                              {customer.id}
+                            </p>
                           </div>
                         </div>
                       </td>
@@ -509,7 +526,9 @@ export default function CustomersPage() {
                         <div className="space-y-1">
                           <div className="flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300">
                             <Mail className="w-3.5 h-3.5 text-gray-400" />
-                            <span className="truncate max-w-[200px]">{customer.email}</span>
+                            <span className="truncate max-w-[200px]">
+                              {customer.email}
+                            </span>
                           </div>
                           <div className="flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300">
                             <Phone className="w-3.5 h-3.5 text-gray-400" />
@@ -520,7 +539,9 @@ export default function CustomersPage() {
                       <td className="px-6 py-4">
                         <div className="flex items-center gap-2">
                           <MapPin className="w-4 h-4 text-gray-400" />
-                          <span className="text-sm text-gray-700 dark:text-gray-300">{customer.location}</span>
+                          <span className="text-sm text-gray-700 dark:text-gray-300">
+                            {customer.location}
+                          </span>
                         </div>
                       </td>
                       <td className="px-6 py-4">
@@ -589,7 +610,9 @@ export default function CustomersPage() {
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
           <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
             <div className="p-6 border-b border-gray-200 dark:border-gray-700">
-              <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100">Add New Customer</h2>
+              <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100">
+                Add New Customer
+              </h2>
               <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
                 Create a new customer profile
               </p>

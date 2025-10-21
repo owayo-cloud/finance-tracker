@@ -12,7 +12,7 @@ interface AuthContextType {
   user: User | null;
   isLoading: boolean;
   authError: string | null;
-  logout: () => void;
+  logout: () => Promise<void>;
   validateAuth: () => Promise<void>;
 }
 
@@ -23,6 +23,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [authError, setAuthError] = useState<string | null>(null);
   const router = useRouter();
+  const API_BASE = "http://127.0.0.1:8000/auth";
 
   const validateAuth = useCallback(async () => {
     try {
@@ -65,6 +66,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       if (typeof window !== "undefined") {
         localStorage.removeItem("access_token");
         localStorage.removeItem("token_expiry");
+        localStorage.removeItem("refresh_token");
         localStorage.removeItem("user");
       }
 
@@ -79,14 +81,34 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }
   }, [router]);
 
-  const logout = useCallback(() => {
-    if (typeof window !== "undefined") {
-      localStorage.removeItem("access_token");
-      localStorage.removeItem("token_expiry");
-      localStorage.removeItem("user");
+  const logout = useCallback(async () => {
+    // Try to notify backend to revoke the refresh token. Even if this fails, proceed to clear local state.
+    try {
+      if (typeof window !== "undefined") {
+        const refresh = localStorage.getItem("refresh_token");
+        if (refresh) {
+          await fetch(`${API_BASE}/logout`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ refresh_token: refresh }),
+            // don't throw on non-2xx - we still clear local state below
+          });
+        }
+      }
+    } catch (err) {
+      // network or server error - log and continue clearing local state
+      // eslint-disable-next-line no-console
+      console.warn("Logout request failed:", err);
+    } finally {
+      if (typeof window !== "undefined") {
+        localStorage.removeItem("access_token");
+        localStorage.removeItem("token_expiry");
+        localStorage.removeItem("refresh_token");
+        localStorage.removeItem("user");
+      }
+      setUser(null);
+      router.push("/auth");
     }
-    setUser(null);
-    router.push("/auth");
   }, [router]);
 
   useEffect(() => {

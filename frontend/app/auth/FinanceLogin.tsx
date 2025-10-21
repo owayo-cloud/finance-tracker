@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import React, { useState } from "react";
 //import { useRouter } from "next/navigation";
 import {
   DollarSign,
@@ -25,13 +25,13 @@ export default function FinanceLogin() {
 
   const API_BASE = "http://127.0.0.1:8000/auth";
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setMessage("");
     setLoading(true);
 
     if (!isLogin && password !== confirmPassword) {
-      setMessage(" Passwords do not match!");
+      setMessage("Passwords do not match!");
       setLoading(false);
       return;
     }
@@ -52,8 +52,11 @@ export default function FinanceLogin() {
 
       if (response.ok) {
         if (isLogin) {
-          //save token/expiry and redirect
+          //save tokens/expiry and redirect
           localStorage.setItem("access_token", data.access_token);
+          if (data.refresh_token) {
+            localStorage.setItem("refresh_token", data.refresh_token);
+          }
           localStorage.setItem("user", JSON.stringify(data.user));
 
           // calculate absolute expiry defaults to 1 hour if not provided
@@ -65,14 +68,16 @@ export default function FinanceLogin() {
           setTimeout(() => (window.location.href = "/dashboard"), 800);
           // router.replace("/dashboard"); //redirects instantly
         } else {
-          setMessage(" Account created successfully! You can now log in.");
+          setMessage("Account created successfully! You can now log in.");
           setIsLogin(true);
         }
       } else {
-        setMessage(data.detail || "Something went wrong!");
+        // prefer structured error message when available
+        const errMsg = data?.detail || data?.message || data?.error || "Something went wrong!";
+        setMessage(errMsg);
       }
     } catch (error) {
-      setMessage(" Unable to connect to the server.");
+      setMessage("Unable to connect to the server.");
     } finally {
       setLoading(false);
     }
@@ -197,11 +202,7 @@ export default function FinanceLogin() {
 
           {message && (
             <p
-              className={`text-sm text-center font-medium ${
-                message.includes("") || message.includes("")
-                  ? "text-green-600 dark:text-green-400"
-                  : "text-green-500 dark:text-green-400"
-              }`}
+              className={`text-sm text-center font-medium ${/success|redirecting|created|account/i.test(message) ? "text-green-600 dark:text-green-400" : "text-red-600 dark:text-red-400"}`}
             >
               {message}
             </p>

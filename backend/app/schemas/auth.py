@@ -15,3 +15,6 @@ class TokenResponse(BaseModel):
     expires_in: int  # in seconds
     token_type: str = "bearer"
     user: dict
+
+class LogoutRequest(BaseModel):
+    refresh_token: str

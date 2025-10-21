@@ -1,8 +1,8 @@
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 from fastapi import HTTPException
-from app.models.user import User
-from app.models.refresh_token import RefreshToken
+from app.models.models import User
+from app.models.models import RefreshToken
 from app.schemas.auth import TokenResponse
 from app.services.token_service import create_access_token, create_refresh_token
 from app.core.security import verify_password, hash_password
@@ -54,3 +54,12 @@ async def create_tokens_for_user(db: AsyncSession, user: User):
             "full_name": user.name
         }
     )
+
+
+async def logout_user(db: AsyncSession, refresh_token: str):
+    result = await db.execute(select(RefreshToken).filter(RefreshToken.token == refresh_token))
+    db_token = result.scalar_one_or_none()
+    if db_token:
+        setattr(db_token, "is_revoked", True)
+        await db.commit()
+

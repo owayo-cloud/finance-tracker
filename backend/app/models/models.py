@@ -79,8 +79,8 @@ class Category(Base):
     
     # Relationships
     user = relationship("User", back_populates="categories")
-    # transactions = relationship("Transaction", back_populates="category", lazy="select")
-    # budgets = relationship("Budget", back_populates="category", lazy="select")
+    transactions = relationship("Transaction", back_populates="category", lazy="select")
+    budgets = relationship("Budget", back_populates="category", lazy="select")
     
     def __repr__(self):
         """String representation for debugging."""
@@ -162,7 +162,7 @@ class Account(Base):
     
     # Relationships
     user = relationship("User", back_populates="accounts")
-    # transactions = relationship("Transaction", back_populates="account", lazy="select")
+    transactions = relationship("Transaction", back_populates="account", lazy="select")
     
     def __repr__(self):
         """String representation for debugging."""
@@ -250,10 +250,10 @@ class User(Base):
     )
     
     # Relationships
-    # accounts = relationship("Account", back_populates="user", lazy="select")
-    # categories = relationship("Category", back_populates="user", lazy="select")
-    # transactions = relationship("Transaction", back_populates="user", lazy="select")
-    # budgets = relationship("Budget", back_populates="user", lazy="select")
+    accounts = relationship("Account", back_populates="user", lazy="select")
+    categories = relationship("Category", back_populates="user", lazy="select")
+    transactions = relationship("Transaction", back_populates="user", lazy="select")
+    budgets = relationship("Budget", back_populates="user", lazy="select")
     refresh_tokens = relationship("RefreshToken", back_populates="user", lazy="select", cascade="all, delete-orphan")
     
     def __repr__(self):

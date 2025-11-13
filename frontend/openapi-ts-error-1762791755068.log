@@ -1,0 +1,13 @@
+[2025-11-10T16:22:35.068Z] Error: Error opening file "/home/_0x7a/code/gigs/finance-tracker/frontend/openapi.json" 
+ENOENT: no such file or directory, open '/home/_0x7a/code/gigs/finance-tracker/frontend/openapi.json'
+Stack:
+JSONParserError: Error opening file "/home/_0x7a/code/gigs/finance-tracker/frontend/openapi.json" 
+ENOENT: no such file or directory, open '/home/_0x7a/code/gigs/finance-tracker/frontend/openapi.json'
+    at Object.handler (/home/_0x7a/code/gigs/finance-tracker/frontend/node_modules/.pnpm/@hey-api+json-schema-ref-parser@1.0.6/node_modules/@hey-api/json-schema-ref-parser/dist/lib/resolvers/file.js:58:19)
+    at async $RefParser.parse (/home/_0x7a/code/gigs/finance-tracker/frontend/node_modules/.pnpm/@hey-api+json-schema-ref-parser@1.0.6/node_modules/@hey-api/json-schema-ref-parser/dist/lib/index.js:195:17)
+    at async $RefParser.bundle (/home/_0x7a/code/gigs/finance-tracker/frontend/node_modules/.pnpm/@hey-api+json-schema-ref-parser@1.0.6/node_modules/@hey-api/json-schema-ref-parser/dist/lib/index.js:122:9)
+    at async ea (/home/_0x7a/code/gigs/finance-tracker/frontend/node_modules/.pnpm/@hey-api+openapi-ts@0.73.0_typescript@5.9.3/node_modules/@hey-api/openapi-ts/dist/index.cjs:12:1892)
+    at async Ys (/home/_0x7a/code/gigs/finance-tracker/frontend/node_modules/.pnpm/@hey-api+openapi-ts@0.73.0_typescript@5.9.3/node_modules/@hey-api/openapi-ts/dist/index.cjs:38:121903)
+    at async Promise.all (index 0)
+    at async d$ (/home/_0x7a/code/gigs/finance-tracker/frontend/node_modules/.pnpm/@hey-api+openapi-ts@0.73.0_typescript@5.9.3/node_modules/@hey-api/openapi-ts/dist/index.cjs:1338:4627)
+    at async start (/home/_0x7a/code/gigs/finance-tracker/frontend/node_modules/.pnpm/@hey-api+openapi-ts@0.73.0_typescript@5.9.3/node_modules/@hey-api/openapi-ts/bin/index.cjs:131:21)

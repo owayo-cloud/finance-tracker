@@ -9,17 +9,22 @@ export type Body_login_login_access_token = {
     client_secret?: (string | null);
 };
 
+export type Body_media_upload_image = {
+    file: (Blob | File);
+};
+
 export type HTTPValidationError = {
     detail?: Array<ValidationError>;
 };
 
 export type MediaPublic = {
-    uuid: string;
     file_name: string;
+    file_path: string;
     mime_type?: (string | null);
     size: number;
     id: string;
     created_at: string;
+    url: string;
 };
 
 export type Message = {
@@ -194,6 +199,33 @@ export type LoginRecoverPasswordHtmlContentData = {
 };
 
 export type LoginRecoverPasswordHtmlContentResponse = (string);
+
+export type MediaUploadImageData = {
+    formData: Body_media_upload_image;
+};
+
+export type MediaUploadImageResponse = (MediaPublic);
+
+export type MediaServeImageData = {
+    mediaId: string;
+};
+
+export type MediaServeImageResponse = (unknown);
+
+export type MediaDeleteMediaData = {
+    mediaId: string;
+};
+
+export type MediaDeleteMediaResponse = ({
+    [key: string]: (string);
+});
+
+export type MediaListMediaData = {
+    limit?: number;
+    skip?: number;
+};
+
+export type MediaListMediaResponse = (Array<MediaPublic>);
 
 export type PrivateCreateUserData = {
     requestBody: PrivateUserCreate;

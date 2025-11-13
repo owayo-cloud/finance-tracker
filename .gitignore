@@ -8,3 +8,7 @@ htmlcov
 .venv
 .github/copilot-instructions.md
 frontend/node_modules/*
+
+# Uploaded files (but keep directory structure)
+backend/uploads/**/*
+!backend/uploads/**/.gitkeep

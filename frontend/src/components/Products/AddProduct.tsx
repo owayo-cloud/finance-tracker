@@ -15,13 +15,16 @@ import {
   SelectValueText,
   Textarea,
   createListCollection,
+  Image,
+  Flex,
+  IconButton,
 } from "@chakra-ui/react"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
-import { useEffect, useState, useMemo } from "react"
+import { useEffect, useState, useMemo, useRef } from "react"
 import { type SubmitHandler, useForm } from "react-hook-form"
-import { FaPlus, FaImage } from "react-icons/fa"
+import { FaPlus, FaImage, FaTimes } from "react-icons/fa"
 
-import { type ProductCreate, ProductsService } from "@/client"
+import { type ProductCreate, ProductsService, MediaService } from "@/client"
 import type { ApiError } from "@/client/core/ApiError"
 import useCustomToast from "@/hooks/useCustomToast"
 import { handleError } from "@/utils"
@@ -38,6 +41,10 @@ import { Field } from "../ui/field"
 
 const AddProduct = () => {
   const [isOpen, setIsOpen] = useState(false)
+  const [imageFile, setImageFile] = useState<File | null>(null)
+  const [imagePreview, setImagePreview] = useState<string | null>(null)
+  const [uploadingImage, setUploadingImage] = useState(false)
+  const fileInputRef = useRef<HTMLInputElement>(null)
   const queryClient = useQueryClient()
   const { showSuccessToast } = useCustomToast()
 
@@ -129,11 +136,38 @@ const AddProduct = () => {
   }, [tagsData])
 
   const mutation = useMutation({
-    mutationFn: (data: ProductCreate) =>
-      ProductsService.createProduct({ requestBody: data }),
+    mutationFn: async (data: ProductCreate) => {
+      let imageId = data.image_id
+
+      // Upload image if one was selected
+      if (imageFile) {
+        setUploadingImage(true)
+        try {
+          const formData = new FormData()
+          formData.append("file", imageFile)
+
+          const uploadedMedia = await MediaService.uploadImage({
+            formData: { file: imageFile }
+          })
+
+          imageId = uploadedMedia.id
+        } catch (error) {
+          setUploadingImage(false)
+          throw error
+        }
+        setUploadingImage(false)
+      }
+
+      // Create product with image_id
+      return ProductsService.createProduct({
+        requestBody: { ...data, image_id: imageId }
+      })
+    },
     onSuccess: () => {
       showSuccessToast("Product created successfully.")
       reset()
+      setImageFile(null)
+      setImagePreview(null)
       setIsOpen(false)
     },
     onError: (err: ApiError) => {
@@ -143,6 +177,40 @@ const AddProduct = () => {
       queryClient.invalidateQueries({ queryKey: ["products"] })
     },
   })
+
+  const handleImageSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0]
+    if (file) {
+      // Validate file type
+      if (!file.type.startsWith("image/")) {
+        handleError({ message: "Please select an image file" } as ApiError)
+        return
+      }
+
+      // Validate file size (5MB max)
+      if (file.size > 5 * 1024 * 1024) {
+        handleError({ message: "Image size must be less than 5MB" } as ApiError)
+        return
+      }
+
+      setImageFile(file)
+
+      // Create preview
+      const reader = new FileReader()
+      reader.onloadend = () => {
+        setImagePreview(reader.result as string)
+      }
+      reader.readAsDataURL(file)
+    }
+  }
+
+  const removeImage = () => {
+    setImageFile(null)
+    setImagePreview(null)
+    if (fileInputRef.current) {
+      fileInputRef.current.value = ""
+    }
+  }
 
   const onSubmit: SubmitHandler<ProductCreate> = (data) => {
     mutation.mutate(data)
@@ -428,25 +496,60 @@ const AddProduct = () => {
                 {/* Product Image Upload */}
                 <Field
                   label="Product Image"
-                  helperText="Upload an image for this product (optional)"
+                  helperText="Upload an image for this product (optional, max 5MB)"
                 >
-                  <Box
-                    border="2px dashed"
-                    borderColor="gray.300"
-                    borderRadius="md"
-                    p={6}
-                    textAlign="center"
-                    cursor="pointer"
-                    _hover={{ borderColor: "teal.400" }}
-                  >
-                    <FaImage size={24} color="gray" />
-                    <Text mt={2} fontSize="sm" color="gray.600">
-                      Click to upload image
-                    </Text>
-                    <Text fontSize="xs" color="gray.500">
-                      PNG, JPG up to 2MB
-                    </Text>
-                  </Box>
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept="image/*"
+                    onChange={handleImageSelect}
+                    style={{ display: "none" }}
+                  />
+                  
+                  {imagePreview ? (
+                    <Box position="relative">
+                      <Image
+                        src={imagePreview}
+                        alt="Product preview"
+                        borderRadius="md"
+                        maxH="200px"
+                        objectFit="cover"
+                        w="full"
+                      />
+                      <IconButton
+                        position="absolute"
+                        top={2}
+                        right={2}
+                        size="sm"
+                        colorScheme="red"
+                        onClick={removeImage}
+                        aria-label="Remove image"
+                      >
+                        <FaTimes />
+                      </IconButton>
+                    </Box>
+                  ) : (
+                    <Box
+                      border="2px dashed"
+                      borderColor={{ base: "gray.600", _light: "gray.300" }}
+                      borderRadius="md"
+                      p={6}
+                      textAlign="center"
+                      cursor="pointer"
+                      _hover={{ borderColor: "teal.400" }}
+                      onClick={() => fileInputRef.current?.click()}
+                    >
+                      <Flex direction="column" align="center" gap={2}>
+                        <FaImage size={24} />
+                        <Text fontSize="sm">
+                          Click to upload image
+                        </Text>
+                        <Text fontSize="xs" color={{ base: "gray.400", _light: "gray.500" }}>
+                          PNG, JPG up to 5MB
+                        </Text>
+                      </Flex>
+                    </Box>
+                  )}
                 </Field>
               </VStack>
             </SimpleGrid>
@@ -457,7 +560,7 @@ const AddProduct = () => {
               <Button
                 variant="outline"
                 colorScheme="gray"
-                disabled={isSubmitting}
+                disabled={isSubmitting || uploadingImage}
                 size="md"
               >
                 Cancel
@@ -466,11 +569,11 @@ const AddProduct = () => {
             <Button
               colorScheme="teal"
               type="submit"
-              disabled={!isValid}
-              loading={isSubmitting}
+              disabled={!isValid || uploadingImage}
+              loading={isSubmitting || uploadingImage}
               size="md"
             >
-              Create Product
+              {uploadingImage ? "Uploading..." : "Create Product"}
             </Button>
           </DialogFooter>
         </form>

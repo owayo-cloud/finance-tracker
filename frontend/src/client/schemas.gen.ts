@@ -55,6 +55,19 @@ export const Body_login_login_access_tokenSchema = {
     title: 'Body_login-login_access_token'
 } as const;
 
+export const Body_media_upload_imageSchema = {
+    properties: {
+        file: {
+            type: 'string',
+            format: 'binary',
+            title: 'File'
+        }
+    },
+    type: 'object',
+    required: ['file'],
+    title: 'Body_media-upload_image'
+} as const;
+
 export const HTTPValidationErrorSchema = {
     properties: {
         detail: {
@@ -71,15 +84,15 @@ export const HTTPValidationErrorSchema = {
 
 export const MediaPublicSchema = {
     properties: {
-        uuid: {
-            type: 'string',
-            maxLength: 36,
-            title: 'Uuid'
-        },
         file_name: {
             type: 'string',
             maxLength: 255,
             title: 'File Name'
+        },
+        file_path: {
+            type: 'string',
+            maxLength: 500,
+            title: 'File Path'
         },
         mime_type: {
             anyOf: [
@@ -106,10 +119,14 @@ export const MediaPublicSchema = {
             type: 'string',
             format: 'date-time',
             title: 'Created At'
+        },
+        url: {
+            type: 'string',
+            title: 'Url'
         }
     },
     type: 'object',
-    required: ['uuid', 'file_name', 'size', 'id', 'created_at'],
+    required: ['file_name', 'file_path', 'size', 'id', 'created_at', 'url'],
     title: 'MediaPublic'
 } as const;
 

@@ -1,35 +1,33 @@
+import sentry_sdk
 from fastapi import FastAPI
-from app.core.config import settings
-from app.db.session import async_engine
-from app.db.base import Base
-from app.routers import auth
-from fastapi.middleware.cors import CORSMiddleware
+from fastapi.routing import APIRoute
+from starlette.middleware.cors import CORSMiddleware
 
+from app.api.main import api_router
+from app.core.config import settings
+
+
+def custom_generate_unique_id(route: APIRoute) -> str:
+    return f"{route.tags[0]}-{route.name}"
+
+
+if settings.SENTRY_DSN and settings.ENVIRONMENT != "local":
+    sentry_sdk.init(dsn=str(settings.SENTRY_DSN), enable_tracing=True)
 
 app = FastAPI(
-    title=settings.APP_NAME,
-    version=settings.APP_VERSION
+    title=settings.PROJECT_NAME,
+    openapi_url=f"{settings.API_V1_STR}/openapi.json",
+    generate_unique_id_function=custom_generate_unique_id,
 )
 
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["http://localhost:3000", "http://127.0.0.1:3000"],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
+# Set all CORS enabled origins
+if settings.all_cors_origins:
+    app.add_middleware(
+        CORSMiddleware,
+        allow_origins=settings.all_cors_origins,
+        allow_credentials=True,
+        allow_methods=["*"],
+        allow_headers=["*"],
+    )
 
-app.include_router(auth.router)
-
-# Create all tables
-async def init_models():
-    async with async_engine.begin() as conn:
-        await conn.run_sync(Base.metadata.create_all)
-
-@app.on_event("startup")
-async def startup_event():
-    await init_models()
-
-@app.get("/")
-async def root():
-    return {"message": "Welcome to the Finance Tracker API"}
+app.include_router(api_router, prefix=settings.API_V1_STR)

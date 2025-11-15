@@ -50,8 +50,16 @@ const useAuth = () => {
 
   const loginMutation = useMutation({
     mutationFn: login,
-    onSuccess: () => {
-      navigate({ to: "/" })
+    onSuccess: async () => {
+      // Fetch user data to determine role
+      const userData = await UsersService.readUserMe()
+      
+      // Redirect based on user role
+      if (userData.is_superuser) {
+        navigate({ to: "/" }) // Admin dashboard
+      } else {
+        navigate({ to: "/sales" }) // Cashier dashboard (sales)
+      }
     },
     onError: (err: ApiError) => {
       handleError(err)

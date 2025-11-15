@@ -18,13 +18,12 @@ export type HTTPValidationError = {
 };
 
 export type MediaPublic = {
+    uuid: string;
     file_name: string;
-    file_path: string;
     mime_type?: (string | null);
     size: number;
     id: string;
     created_at: string;
-    url: string;
 };
 
 export type Message = {
@@ -34,6 +33,18 @@ export type Message = {
 export type NewPassword = {
     token: string;
     new_password: string;
+};
+
+export type PaymentMethodPublic = {
+    name: string;
+    description?: (string | null);
+    is_active?: boolean;
+    id: string;
+};
+
+export type PaymentMethodsPublic = {
+    data: Array<PaymentMethodPublic>;
+    count: number;
 };
 
 export type PrivateUserCreate = {
@@ -116,6 +127,82 @@ export type ProductUpdate = {
     status_id?: (string | null);
     tag_id?: (string | null);
     image_id?: (string | null);
+};
+
+export type SaleCreate = {
+    product_id: string;
+    quantity: number;
+    unit_price: (number | string);
+    total_amount: (number | string);
+    payment_method_id: string;
+    customer_name?: (string | null);
+    notes?: (string | null);
+};
+
+export type SalePublic = {
+    product_id: string;
+    quantity: number;
+    unit_price: string;
+    total_amount: string;
+    payment_method_id: string;
+    customer_name?: (string | null);
+    notes?: (string | null);
+    id: string;
+    sale_date: string;
+    product: ProductPublic;
+    payment_method: PaymentMethodPublic;
+    voided: boolean;
+};
+
+export type SalesPublic = {
+    data: Array<SalePublic>;
+    count: number;
+};
+
+export type StockEntriesPublic = {
+    data: Array<StockEntryPublic>;
+    count: number;
+};
+
+export type StockEntryCreate = {
+    product_id: string;
+    entry_date?: string;
+    opening_stock: number;
+    added_stock?: number;
+    total_stock: number;
+    sales?: number;
+    closing_stock: number;
+    physical_count?: (number | null);
+    variance?: (number | null);
+    amount?: (number | string | null);
+    notes?: (string | null);
+};
+
+export type StockEntryPublic = {
+    product_id: string;
+    entry_date?: string;
+    opening_stock: number;
+    added_stock?: number;
+    total_stock: number;
+    sales?: number;
+    closing_stock: number;
+    physical_count?: (number | null);
+    variance?: (number | null);
+    amount?: (string | null);
+    notes?: (string | null);
+    id: string;
+    created_at: string;
+    product: ProductPublic;
+};
+
+export type StockEntryUpdate = {
+    added_stock?: (number | null);
+    sales?: (number | null);
+    closing_stock?: (number | null);
+    physical_count?: (number | null);
+    variance?: (number | null);
+    amount?: (number | string | null);
+    notes?: (string | null);
 };
 
 export type Token = {
@@ -240,8 +327,11 @@ export type ProductsReadStatusesResponse = (Array<ProductStatusPublic>);
 export type ProductsReadTagsResponse = (Array<ProductTagPublic>);
 
 export type ProductsReadProductsData = {
+    categoryId?: (string | null);
     limit?: number;
+    name?: (string | null);
     skip?: number;
+    statusId?: (string | null);
 };
 
 export type ProductsReadProductsResponse = (ProductsPublic);
@@ -253,23 +343,144 @@ export type ProductsCreateProductData = {
 export type ProductsCreateProductResponse = (ProductPublic);
 
 export type ProductsReadProductData = {
-    id: number;
+    id: string;
 };
 
 export type ProductsReadProductResponse = (ProductPublic);
 
 export type ProductsUpdateProductData = {
-    id: number;
+    id: string;
     requestBody: ProductUpdate;
 };
 
 export type ProductsUpdateProductResponse = (ProductPublic);
 
 export type ProductsDeleteProductData = {
-    id: number;
+    id: string;
 };
 
 export type ProductsDeleteProductResponse = ({
+    [key: string]: (string);
+});
+
+export type SalesReadPaymentMethodsData = {
+    limit?: number;
+    skip?: number;
+};
+
+export type SalesReadPaymentMethodsResponse = (PaymentMethodsPublic);
+
+export type SalesSearchProductsForSaleData = {
+    /**
+     * Maximum results to return
+     */
+    limit?: number;
+    /**
+     * Search query
+     */
+    q: string;
+    /**
+     * Filter by tag ID
+     */
+    tagId?: (string | null);
+};
+
+export type SalesSearchProductsForSaleResponse = (Array<ProductPublic>);
+
+export type SalesCreateSaleData = {
+    requestBody: SaleCreate;
+};
+
+export type SalesCreateSaleResponse = (SalePublic);
+
+export type SalesReadSalesData = {
+    /**
+     * Filter sales until this date
+     */
+    endDate?: (string | null);
+    limit?: number;
+    /**
+     * Filter by payment method
+     */
+    paymentMethodId?: (string | null);
+    /**
+     * Filter by product ID
+     */
+    productId?: (string | null);
+    skip?: number;
+    /**
+     * Filter sales from this date
+     */
+    startDate?: (string | null);
+    /**
+     * Filter by product tag
+     */
+    tagId?: (string | null);
+};
+
+export type SalesReadSalesResponse = (SalesPublic);
+
+export type SalesGetTodaySalesSummaryResponse = ({
+    [key: string]: unknown;
+});
+
+export type SalesReadSaleData = {
+    saleId: string;
+};
+
+export type SalesReadSaleResponse = (SalePublic);
+
+export type SalesDeleteSaleData = {
+    saleId: string;
+};
+
+export type SalesDeleteSaleResponse = (unknown);
+
+export type StockEntriesSearchProductsForStockEntryData = {
+    /**
+     * Maximum results to return
+     */
+    limit?: number;
+    /**
+     * Search query
+     */
+    q: string;
+};
+
+export type StockEntriesSearchProductsForStockEntryResponse = (Array<ProductPublic>);
+
+export type StockEntriesReadStockEntriesData = {
+    limit?: number;
+    productId?: (string | null);
+    skip?: number;
+};
+
+export type StockEntriesReadStockEntriesResponse = (StockEntriesPublic);
+
+export type StockEntriesCreateStockEntryData = {
+    requestBody: StockEntryCreate;
+};
+
+export type StockEntriesCreateStockEntryResponse = (StockEntryPublic);
+
+export type StockEntriesReadStockEntryData = {
+    id: string;
+};
+
+export type StockEntriesReadStockEntryResponse = (StockEntryPublic);
+
+export type StockEntriesUpdateStockEntryData = {
+    id: string;
+    requestBody: StockEntryUpdate;
+};
+
+export type StockEntriesUpdateStockEntryResponse = (StockEntryPublic);
+
+export type StockEntriesDeleteStockEntryData = {
+    id: string;
+};
+
+export type StockEntriesDeleteStockEntryResponse = ({
     [key: string]: (string);
 });
 

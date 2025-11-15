@@ -2,6 +2,7 @@ import uuid
 from typing import Any, Generic, TypeVar
 
 from sqlmodel import Session, select
+from sqlalchemy.orm import selectinload
 
 from app.core.security import get_password_hash, verify_password
 from app.models import User, UserCreate, UserUpdate, Product, ProductCreate, ProductUpdate
@@ -59,7 +60,7 @@ class CRUDBase(Generic[ModelType, CreateSchemaType, UpdateSchemaType]):
 
 class CRUDProduct(CRUDBase[Product, ProductCreate, ProductUpdate]):
     def create(
-        self, db: Session, *, obj_in: ProductCreate, created_by_id: int
+        self, db: Session, *, obj_in: ProductCreate, created_by_id: uuid.UUID
     ) -> Product:
         db_obj = Product.model_validate(
             obj_in, update={"created_by_id": created_by_id}
@@ -67,7 +68,47 @@ class CRUDProduct(CRUDBase[Product, ProductCreate, ProductUpdate]):
         db.add(db_obj)
         db.commit()
         db.refresh(db_obj)
-        return db_obj
+
+        # Eagerly load relationships for the newly created object
+        statement = (
+            select(Product)
+            .where(Product.id == db_obj.id)
+            .options(
+                selectinload(Product.category),
+                selectinload(Product.status),
+                selectinload(Product.tag),
+                selectinload(Product.image),
+            )
+        )
+        refreshed_obj = db.exec(statement).one()
+        return refreshed_obj
+
+    def update(self, db: Session, *, db_obj: Product, obj_in: ProductUpdate) -> Product:
+        obj_data = obj_in.model_dump(exclude_unset=True)
+        db_obj.sqlmodel_update(obj_data)
+        db.add(db_obj)
+        db.commit()
+        db.refresh(db_obj)
+
+        # Eagerly load relationships for the updated object
+        statement = (
+            select(Product)
+            .where(Product.id == db_obj.id)
+            .options(
+                selectinload(Product.category),
+                selectinload(Product.status),
+                selectinload(Product.tag),
+                selectinload(Product.image),
+            )
+        )
+        refreshed_obj = db.exec(statement).one()
+        return refreshed_obj
+
+    def remove(self, db: Session, *, id: uuid.UUID) -> Product:
+        obj = db.get(Product, id)
+        db.delete(obj)
+        db.commit()
+        return obj
 
 
 product = CRUDProduct(Product)

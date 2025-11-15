@@ -90,7 +90,7 @@ const Sidebar = () => {
                   borderRadius="lg"
                   w="full"
                   _hover={{
-                    bg: "gray.100",
+                    bg: { base: "gray.700", _light: "gray.100" },
                   }}
                   transition="all 0.2s"
                 >
@@ -99,7 +99,7 @@ const Sidebar = () => {
                 </Flex>
                 
                 {currentUser?.email && (
-                  <Text fontSize="xs" color="gray.600" mt={2} truncate>
+                  <Text fontSize="xs" color={{ base: "gray.400", _light: "gray.600" }} mt={2} truncate>
                     {currentUser.email}
                   </Text>
                 )}

@@ -18,15 +18,15 @@ import type { IconType } from "react-icons/lib"
 import type { UserPublic } from "@/client"
 
 const items = [
-  { icon: FiHome, title: "Dashboard", path: "/" },
-  { icon: FiBox, title: "Stock Entry", path: "/stock-entry" },
-  { icon: FiShoppingCart, title: "Sales", path: "/sales" },
+  { icon: FiHome, title: "Dashboard", path: "/", adminOnly: true }, // Admin only
+  { icon: FiShoppingCart, title: "Sales", path: "/sales" }, // Available to all
+  { icon: FiBox, title: "Stock Entry", path: "/stock-entry" }, // Available to all
   { icon: FiPackage, title: "Products", path: "/products", adminOnly: true },
-  { icon: FiBarChart2, title: "Reports", path: "/reports" },
+  { icon: FiBarChart2, title: "Reports", path: "/reports", adminOnly: true },
   { icon: TbReceiptDollar, title: "Shift Reconciliation", path: "/shift-reconciliation" },
   { icon: FiDollarSign, title: "Expenses", path: "/expenses", adminOnly: true },
-  { icon: FiTrendingUp, title: "Debts", path: "/debts" },
-  { icon: FiSettings, title: "User Settings", path: "/settings" },
+  { icon: FiTrendingUp, title: "Debts", path: "/debts", adminOnly: true },
+  { icon: FiSettings, title: "User Settings", path: "/settings" }, // Available to all
 ]
 
 interface SidebarItemsProps {

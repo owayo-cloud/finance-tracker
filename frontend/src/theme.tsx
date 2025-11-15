@@ -5,11 +5,18 @@ export const system = createSystem(defaultConfig, {
   globalCss: {
     html: {
       fontSize: "16px",
+      colorScheme: {
+        base: "dark",
+        _light: "light",
+        _dark: "dark",
+      },
     },
     body: {
       fontSize: "0.875rem",
       margin: 0,
       padding: 0,
+      bg: "bg.canvas",
+      color: "text.primary",
     },
     ".main-link": {
       color: "ui.main",
@@ -71,6 +78,28 @@ export const system = createSystem(defaultConfig, {
             base: "{colors.whiteAlpha.200}",
             _light: "{colors.gray.200}",
             _dark: "{colors.whiteAlpha.200}",
+          },
+        },
+        "border.subtle": {
+          value: {
+            base: "{colors.gray.700}",
+            _light: "{colors.gray.200}",
+            _dark: "{colors.gray.700}",
+          },
+        },
+        // Input/form colors
+        "input.bg": {
+          value: {
+            base: "{colors.gray.800}",
+            _light: "{colors.white}",
+            _dark: "{colors.gray.800}",
+          },
+        },
+        "input.border": {
+          value: {
+            base: "{colors.gray.600}",
+            _light: "{colors.gray.300}",
+            _dark: "{colors.gray.600}",
           },
         },
       },

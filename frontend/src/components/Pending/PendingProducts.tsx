@@ -5,11 +5,13 @@ const PendingProducts = () => (
   <Table.Root size={{ base: "sm", md: "md" }}>
     <Table.Header>
       <Table.Row>
-        <Table.ColumnHeader>Name</Table.ColumnHeader>
-        <Table.ColumnHeader>Description</Table.ColumnHeader>
+        <Table.ColumnHeader>Product</Table.ColumnHeader>
         <Table.ColumnHeader>Category</Table.ColumnHeader>
-        <Table.ColumnHeader>Current Stock</Table.ColumnHeader>
+        <Table.ColumnHeader>Tag</Table.ColumnHeader>
+        <Table.ColumnHeader>Buying Price</Table.ColumnHeader>
         <Table.ColumnHeader>Selling Price</Table.ColumnHeader>
+        <Table.ColumnHeader>Current Stock</Table.ColumnHeader>
+        <Table.ColumnHeader>Reorder Level</Table.ColumnHeader>
         <Table.ColumnHeader>Status</Table.ColumnHeader>
         <Table.ColumnHeader>Actions</Table.ColumnHeader>
       </Table.Row>

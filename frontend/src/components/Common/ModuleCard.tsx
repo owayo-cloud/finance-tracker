@@ -58,14 +58,14 @@ const ModuleCard = ({
               fontSize={{ base: "md", md: "lg" }} 
               fontWeight="semibold" 
               lineHeight="tight"
-              noOfLines={2}
+              lineClamp={2}
             >
               {title}
             </Text>
             <Text 
               fontSize="sm"
               color={{ base: "gray.400", _light: "gray.600" }}
-              noOfLines={1}
+              lineClamp={1}
             >
               {description}
             </Text>

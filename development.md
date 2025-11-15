@@ -68,6 +68,17 @@ cd backend
 fastapi dev app/main.py
 ```
 
+# stop + remove (if exists)
+```bash
+docker ps -a --filter "name=postgres" -q | ForEach-Object { docker rm -f $_ } 2>$null
+```
+
+# run new Postgres container (detached) using your .env file
+```bash
+docker run --rm -d --name postgres -e POSTGRES_PASSWORD=changethis -e POSTGRES_USER=postgres -e POSTGRES_DB=app -p 5432:5432 postgres:17
+```
+
+
 ## Docker Compose in `localhost.tiangolo.com`
 
 When you start the Docker Compose stack, it uses `localhost` by default, with different ports for each service (backend, frontend, adminer, etc).

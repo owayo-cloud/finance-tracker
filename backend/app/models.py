@@ -76,8 +76,8 @@ class UsersPublic(SQLModel):
 # ==================== MEDIA MODELS ====================
 
 class MediaBase(SQLModel):
+    uuid: str = Field(max_length=36, unique=True)
     file_name: str = Field(max_length=255)
-    file_path: str = Field(max_length=500)  # Relative path from uploads directory
     mime_type: Optional[str] = Field(default=None, max_length=100)
     size: int
 
@@ -88,7 +88,6 @@ class MediaCreate(MediaBase):
 
 class MediaUpdate(SQLModel):
     file_name: Optional[str] = Field(default=None, max_length=255)
-    file_path: Optional[str] = Field(default=None, max_length=500)
     mime_type: Optional[str] = None
 
 
@@ -105,7 +104,8 @@ class Media(MediaBase, table=True):
 class MediaPublic(MediaBase):
     id: uuid.UUID
     created_at: datetime
-    url: str  # Full URL to access the image
+    
+    model_config = {"from_attributes": True}
     
 
 # ==================== CATEGORY MODELS ====================
@@ -141,6 +141,8 @@ class ProductCategory(ProductCategoryBase, table=True):
 class ProductCategoryPublic(ProductCategoryBase):
     id: uuid.UUID
     created_at: datetime
+    
+    model_config = {"from_attributes": True}
 
 
 class ProductCategoriesPublic(SQLModel):
@@ -179,6 +181,8 @@ class ProductStatus(ProductStatusBase, table=True):
 class ProductStatusPublic(ProductStatusBase):
     id: uuid.UUID
     
+    model_config = {"from_attributes": True}
+    
     
 # ==================== PRODUCT TAG MODELS ====================
 
@@ -213,6 +217,8 @@ class ProductTag(ProductTagBase, table=True):
 class ProductTagPublic(ProductTagBase):
     id: uuid.UUID
     created_at: datetime
+    
+    model_config = {"from_attributes": True}
 
 
 class ProductTagsPublic(SQLModel):
@@ -274,6 +280,8 @@ class ProductPublic(ProductBase):
     status: ProductStatusPublic
     tag: ProductTagPublic
     image: Optional[MediaPublic]
+    
+    model_config = {"from_attributes": True}
 
 class ProductsPublic(SQLModel):
     data: list[ProductPublic]
@@ -322,6 +330,8 @@ class StockEntryPublic(StockEntryBase):
     id: uuid.UUID
     created_at: datetime
     product: ProductPublic
+    
+    model_config = {"from_attributes": True}
 
 class StockEntriesPublic(SQLModel):
     data: list[StockEntryPublic]

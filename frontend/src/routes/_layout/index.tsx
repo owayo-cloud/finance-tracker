@@ -1,5 +1,5 @@
 import { Box, Container, Grid, Heading, Text } from "@chakra-ui/react"
-import { createFileRoute } from "@tanstack/react-router"
+import { createFileRoute, redirect } from "@tanstack/react-router"
 import {
   FiBarChart2,
   FiBox,
@@ -13,9 +13,26 @@ import { TbReceiptDollar } from "react-icons/tb"
 
 import useAuth from "@/hooks/useAuth"
 import ModuleCard from "@/components/Common/ModuleCard"
+import { UsersService } from "@/client"
 
 export const Route = createFileRoute("/_layout/")({
   component: Dashboard,
+  beforeLoad: async () => {
+    // CRITICAL: Ensure only admins can access the admin dashboard
+    try {
+      const user = await UsersService.readUserMe()
+      
+      // If user is a cashier (not superuser), redirect to sales dashboard
+      if (!user.is_superuser) {
+        throw redirect({
+          to: "/sales",
+        })
+      }
+    } catch (error) {
+      // Re-throw redirect errors
+      throw error
+    }
+  },
 })
 
 function Dashboard() {

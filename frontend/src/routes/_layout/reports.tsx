@@ -1,7 +1,6 @@
 import { Container, Heading, Text } from "@chakra-ui/react"
 import { createFileRoute } from "@tanstack/react-router"
 
-// @ts-expect-error - Route will be registered after Vite regenerates routeTree.gen.ts
 export const Route = createFileRoute("/_layout/reports")({
   component: Reports,
 })

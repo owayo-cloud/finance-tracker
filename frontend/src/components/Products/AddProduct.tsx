@@ -18,11 +18,13 @@ import {
   Image,
   Flex,
   IconButton,
+  Icon,
 } from "@chakra-ui/react"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { useEffect, useState, useMemo, useRef } from "react"
 import { type SubmitHandler, useForm } from "react-hook-form"
-import { FaPlus, FaImage, FaTimes } from "react-icons/fa"
+import { FaPlus, FaImage, FaTimes, FaInfoCircle } from "react-icons/fa"
+import { Tooltip } from "../ui/tooltip"
 
 import { type ProductCreate, ProductsService, MediaService } from "@/client"
 import type { ApiError } from "@/client/core/ApiError"
@@ -44,9 +46,32 @@ const AddProduct = () => {
   const [imageFile, setImageFile] = useState<File | null>(null)
   const [imagePreview, setImagePreview] = useState<string | null>(null)
   const [uploadingImage, setUploadingImage] = useState(false)
+  const [buyingPriceDisplay, setBuyingPriceDisplay] = useState("")
+  const [sellingPriceDisplay, setSellingPriceDisplay] = useState("")
   const fileInputRef = useRef<HTMLInputElement>(null)
   const queryClient = useQueryClient()
   const { showSuccessToast } = useCustomToast()
+
+  // Format number with thousand delimiter
+  const formatNumber = (value: string): string => {
+    // Remove all non-digit characters except decimal point
+    const cleanValue = value.replace(/[^\d.]/g, "")
+    
+    // Split by decimal point
+    const parts = cleanValue.split(".")
+    
+    // Add thousand separators to integer part
+    parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ",")
+    
+    // Rejoin with decimal point (limit to 2 decimal places)
+    return parts.length > 1 ? `${parts[0]}.${parts[1].slice(0, 2)}` : parts[0]
+  }
+
+  // Parse formatted number back to number
+  const parseFormattedNumber = (value: string): number => {
+    const cleanValue = value.replace(/,/g, "")
+    return parseFloat(cleanValue) || 0
+  }
 
   const { data: categoriesData, isLoading: loadingCategories } = useQuery({
     queryKey: ["categories"],
@@ -99,11 +124,31 @@ const AddProduct = () => {
     register("tag_id", {
       required: "Product tag is required",
     })
+
+    register("buying_price", {
+      required: "Buying price is required.",
+      validate: (value) => {
+        const numValue = typeof value === "string" ? parseFloat(value) : value
+        if (numValue <= 0) return "Buying price must be greater than 0"
+        return true
+      },
+    })
+
+    register("selling_price", {
+      required: "Selling price is required.",
+      validate: (value) => {
+        const numValue = typeof value === "string" ? parseFloat(value) : value
+        if (numValue <= 0) return "Selling price must be greater than 0"
+        return true
+      },
+    })
   }, [register])
 
   // Create collections for Select components
   const categoriesCollection = useMemo(() => {
-    if (!categoriesData?.data) return createListCollection({ items: [] })
+    if (!categoriesData?.data) {
+      return createListCollection<{ label: string; value: string }>({ items: [] })
+    }
     
     return createListCollection({
       items: categoriesData.data.map((category) => ({
@@ -114,7 +159,9 @@ const AddProduct = () => {
   }, [categoriesData])
 
   const statusesCollection = useMemo(() => {
-    if (!statusesData) return createListCollection({ items: [] })
+    if (!statusesData) {
+      return createListCollection<{ label: string; value: string }>({ items: [] })
+    }
     
     return createListCollection({
       items: statusesData.map((status) => ({
@@ -125,7 +172,9 @@ const AddProduct = () => {
   }, [statusesData])
 
   const tagsCollection = useMemo(() => {
-    if (!tagsData) return createListCollection({ items: [] })
+    if (!tagsData) {
+      return createListCollection<{ label: string; value: string }>({ items: [] })
+    }
     
     return createListCollection({
       items: tagsData.map((tag) => ({
@@ -168,6 +217,8 @@ const AddProduct = () => {
       reset()
       setImageFile(null)
       setImagePreview(null)
+      setBuyingPriceDisplay("")
+      setSellingPriceDisplay("")
       setIsOpen(false)
     },
     onError: (err: ApiError) => {
@@ -218,7 +269,7 @@ const AddProduct = () => {
 
   return (
     <DialogRoot
-      size="2xl"
+      size="xl"
       placement="center"
       open={isOpen}
       onOpenChange={({ open }) => setIsOpen(open)}
@@ -229,9 +280,8 @@ const AddProduct = () => {
           my={4} 
           colorScheme="teal"
           size="md"
-          leftIcon={<FaPlus />}
         >
-          Add Product
+          <FaPlus /> Add Product
         </Button>
       </DialogTrigger>
       <DialogContent maxWidth="800px">
@@ -300,7 +350,7 @@ const AddProduct = () => {
                     </SelectTrigger>
                     <SelectContent>
                       {loadingCategories ? (
-                        <SelectItem item={{ label: "Loading categories...", value: "loading" }} disabled>
+                        <SelectItem item={{ label: "Loading categories...", value: "loading" }}>
                           Loading categories...
                         </SelectItem>
                       ) : categoriesCollection.items.length > 0 ? (
@@ -310,7 +360,7 @@ const AddProduct = () => {
                           </SelectItem>
                         ))
                       ) : (
-                        <SelectItem item={{ label: "No categories available", value: "none" }} disabled>
+                        <SelectItem item={{ label: "No categories available", value: "none" }}>
                           No categories available
                         </SelectItem>
                       )}
@@ -339,7 +389,7 @@ const AddProduct = () => {
                     </SelectTrigger>
                     <SelectContent>
                       {loadingStatuses ? (
-                        <SelectItem item={{ label: "Loading statuses...", value: "loading" }} disabled>
+                        <SelectItem item={{ label: "Loading statuses...", value: "loading" }}>
                           Loading statuses...
                         </SelectItem>
                       ) : statusesCollection.items.length > 0 ? (
@@ -349,7 +399,7 @@ const AddProduct = () => {
                           </SelectItem>
                         ))
                       ) : (
-                        <SelectItem item={{ label: "No statuses available", value: "none" }} disabled>
+                        <SelectItem item={{ label: "No statuses available", value: "none" }}>
                           No statuses available
                         </SelectItem>
                       )}
@@ -378,7 +428,7 @@ const AddProduct = () => {
                     </SelectTrigger>
                     <SelectContent>
                       {loadingTags ? (
-                        <SelectItem item={{ label: "Loading tags...", value: "loading" }} disabled>
+                        <SelectItem item={{ label: "Loading tags...", value: "loading" }}>
                           Loading tags...
                         </SelectItem>
                       ) : tagsCollection.items.length > 0 ? (
@@ -388,7 +438,7 @@ const AddProduct = () => {
                           </SelectItem>
                         ))
                       ) : (
-                        <SelectItem item={{ label: "No tags available", value: "none" }} disabled>
+                        <SelectItem item={{ label: "No tags available", value: "none" }}>
                           No tags available
                         </SelectItem>
                       )}
@@ -408,21 +458,20 @@ const AddProduct = () => {
                   flex={1}
                 >
                   <Input
-                    {...register("buying_price", {
-                      required: "Buying price is required.",
-                      valueAsNumber: true,
-                      min: {
-                        value: 0.01,
-                        message: "Buying price must be greater than 0",
-                      },
-                    })}
-                    placeholder="0.00"
-                    type="number"
-                    step="0.01"
+                    value={buyingPriceDisplay}
+                    onChange={(e) => {
+                      const formatted = formatNumber(e.target.value)
+                      setBuyingPriceDisplay(formatted)
+                      const numericValue = parseFormattedNumber(formatted)
+                      setValue("buying_price", numericValue, { shouldValidate: true })
+                    }}
+                    placeholder="0"
+                    type="text"
                     size="md"
                     borderRadius="md"
                   />
-                </Field>                  <Field
+                </Field>
+                  <Field
                     required
                     invalid={!!errors.selling_price}
                     errorText={errors.selling_price?.message}
@@ -430,17 +479,15 @@ const AddProduct = () => {
                     flex={1}
                   >
                     <Input
-                      {...register("selling_price", {
-                        required: "Selling price is required.",
-                        valueAsNumber: true,
-                        min: {
-                          value: 0.01,
-                          message: "Selling price must be greater than 0",
-                        },
-                      })}
-                      placeholder="0.00"
-                      type="number"
-                      step="0.01"
+                      value={sellingPriceDisplay}
+                      onChange={(e) => {
+                        const formatted = formatNumber(e.target.value)
+                        setSellingPriceDisplay(formatted)
+                        const numericValue = parseFormattedNumber(formatted)
+                        setValue("selling_price", numericValue, { shouldValidate: true })
+                      }}
+                      placeholder="0"
+                      type="text"
                       size="md"
                       borderRadius="md"
                     />
@@ -474,7 +521,19 @@ const AddProduct = () => {
                   <Field
                     invalid={!!errors.reorder_level}
                     errorText={errors.reorder_level?.message}
-                    label="Reorder Level"
+                    label={
+                      <HStack gap={1}>
+                        <Text>Reorder Level</Text>
+                        <Tooltip
+                          content="The minimum stock quantity at which you should reorder this product to avoid running out of stock."
+                          positioning={{ placement: "top" }}
+                        >
+                          <Icon color={{ base: "blue.400", _light: "blue.600" }} cursor="help">
+                            <FaInfoCircle />
+                          </Icon>
+                        </Tooltip>
+                      </HStack>
+                    }
                     flex={1}
                   >
                     <Input

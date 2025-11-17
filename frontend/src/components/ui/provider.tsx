@@ -9,7 +9,11 @@ import { Toaster } from "./toaster"
 export function CustomProvider(props: PropsWithChildren) {
   return (
     <ChakraProvider value={system}>
-      <ColorModeProvider defaultTheme="dark">
+      <ColorModeProvider 
+        defaultTheme="dark"
+        forcedTheme={undefined}
+        storageKey="chakra-ui-color-mode"
+      >
         {props.children}
       </ColorModeProvider>
       <Toaster />

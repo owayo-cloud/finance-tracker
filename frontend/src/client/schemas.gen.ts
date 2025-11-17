@@ -84,15 +84,15 @@ export const HTTPValidationErrorSchema = {
 
 export const MediaPublicSchema = {
     properties: {
+        uuid: {
+            type: 'string',
+            maxLength: 36,
+            title: 'Uuid'
+        },
         file_name: {
             type: 'string',
             maxLength: 255,
             title: 'File Name'
-        },
-        file_path: {
-            type: 'string',
-            maxLength: 500,
-            title: 'File Path'
         },
         mime_type: {
             anyOf: [
@@ -119,14 +119,10 @@ export const MediaPublicSchema = {
             type: 'string',
             format: 'date-time',
             title: 'Created At'
-        },
-        url: {
-            type: 'string',
-            title: 'Url'
         }
     },
     type: 'object',
-    required: ['file_name', 'file_path', 'size', 'id', 'created_at', 'url'],
+    required: ['uuid', 'file_name', 'size', 'id', 'created_at'],
     title: 'MediaPublic'
 } as const;
 
@@ -158,6 +154,60 @@ export const NewPasswordSchema = {
     type: 'object',
     required: ['token', 'new_password'],
     title: 'NewPassword'
+} as const;
+
+export const PaymentMethodPublicSchema = {
+    properties: {
+        name: {
+            type: 'string',
+            maxLength: 100,
+            title: 'Name'
+        },
+        description: {
+            anyOf: [
+                {
+                    type: 'string',
+                    maxLength: 500
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Description'
+        },
+        is_active: {
+            type: 'boolean',
+            title: 'Is Active',
+            default: true
+        },
+        id: {
+            type: 'string',
+            format: 'uuid',
+            title: 'Id'
+        }
+    },
+    type: 'object',
+    required: ['name', 'id'],
+    title: 'PaymentMethodPublic'
+} as const;
+
+export const PaymentMethodsPublicSchema = {
+    properties: {
+        data: {
+            items: {
+                '$ref': '#/components/schemas/PaymentMethodPublic'
+            },
+            type: 'array',
+            title: 'Data'
+        },
+        count: {
+            type: 'integer',
+            title: 'Count'
+        }
+    },
+    type: 'object',
+    required: ['data', 'count'],
+    title: 'PaymentMethodsPublic'
 } as const;
 
 export const PrivateUserCreateSchema = {
@@ -661,6 +711,486 @@ export const ProductsPublicSchema = {
     type: 'object',
     required: ['data', 'count'],
     title: 'ProductsPublic'
+} as const;
+
+export const SaleCreateSchema = {
+    properties: {
+        product_id: {
+            type: 'string',
+            format: 'uuid',
+            title: 'Product Id'
+        },
+        quantity: {
+            type: 'integer',
+            exclusiveMinimum: 0,
+            title: 'Quantity'
+        },
+        unit_price: {
+            anyOf: [
+                {
+                    type: 'number',
+                    exclusiveMinimum: 0
+                },
+                {
+                    type: 'string',
+                    pattern: '^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d{0,2}0*$'
+                }
+            ],
+            title: 'Unit Price'
+        },
+        total_amount: {
+            anyOf: [
+                {
+                    type: 'number',
+                    exclusiveMinimum: 0
+                },
+                {
+                    type: 'string',
+                    pattern: '^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d{0,2}0*$'
+                }
+            ],
+            title: 'Total Amount'
+        },
+        payment_method_id: {
+            type: 'string',
+            format: 'uuid',
+            title: 'Payment Method Id'
+        },
+        customer_name: {
+            anyOf: [
+                {
+                    type: 'string',
+                    maxLength: 255
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Customer Name'
+        },
+        notes: {
+            anyOf: [
+                {
+                    type: 'string',
+                    maxLength: 1000
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Notes'
+        }
+    },
+    type: 'object',
+    required: ['product_id', 'quantity', 'unit_price', 'total_amount', 'payment_method_id'],
+    title: 'SaleCreate'
+} as const;
+
+export const SalePublicSchema = {
+    properties: {
+        product_id: {
+            type: 'string',
+            format: 'uuid',
+            title: 'Product Id'
+        },
+        quantity: {
+            type: 'integer',
+            exclusiveMinimum: 0,
+            title: 'Quantity'
+        },
+        unit_price: {
+            type: 'string',
+            pattern: '^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d{0,2}0*$',
+            title: 'Unit Price'
+        },
+        total_amount: {
+            type: 'string',
+            pattern: '^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d{0,2}0*$',
+            title: 'Total Amount'
+        },
+        payment_method_id: {
+            type: 'string',
+            format: 'uuid',
+            title: 'Payment Method Id'
+        },
+        customer_name: {
+            anyOf: [
+                {
+                    type: 'string',
+                    maxLength: 255
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Customer Name'
+        },
+        notes: {
+            anyOf: [
+                {
+                    type: 'string',
+                    maxLength: 1000
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Notes'
+        },
+        id: {
+            type: 'string',
+            format: 'uuid',
+            title: 'Id'
+        },
+        sale_date: {
+            type: 'string',
+            format: 'date-time',
+            title: 'Sale Date'
+        },
+        product: {
+            '$ref': '#/components/schemas/ProductPublic'
+        },
+        payment_method: {
+            '$ref': '#/components/schemas/PaymentMethodPublic'
+        },
+        voided: {
+            type: 'boolean',
+            title: 'Voided'
+        }
+    },
+    type: 'object',
+    required: ['product_id', 'quantity', 'unit_price', 'total_amount', 'payment_method_id', 'id', 'sale_date', 'product', 'payment_method', 'voided'],
+    title: 'SalePublic'
+} as const;
+
+export const SalesPublicSchema = {
+    properties: {
+        data: {
+            items: {
+                '$ref': '#/components/schemas/SalePublic'
+            },
+            type: 'array',
+            title: 'Data'
+        },
+        count: {
+            type: 'integer',
+            title: 'Count'
+        }
+    },
+    type: 'object',
+    required: ['data', 'count'],
+    title: 'SalesPublic'
+} as const;
+
+export const StockEntriesPublicSchema = {
+    properties: {
+        data: {
+            items: {
+                '$ref': '#/components/schemas/StockEntryPublic'
+            },
+            type: 'array',
+            title: 'Data'
+        },
+        count: {
+            type: 'integer',
+            title: 'Count'
+        }
+    },
+    type: 'object',
+    required: ['data', 'count'],
+    title: 'StockEntriesPublic'
+} as const;
+
+export const StockEntryCreateSchema = {
+    properties: {
+        product_id: {
+            type: 'string',
+            format: 'uuid',
+            title: 'Product Id'
+        },
+        entry_date: {
+            type: 'string',
+            format: 'date-time',
+            title: 'Entry Date'
+        },
+        opening_stock: {
+            type: 'integer',
+            minimum: 0,
+            title: 'Opening Stock'
+        },
+        added_stock: {
+            type: 'integer',
+            minimum: 0,
+            title: 'Added Stock',
+            default: 0
+        },
+        total_stock: {
+            type: 'integer',
+            minimum: 0,
+            title: 'Total Stock'
+        },
+        sales: {
+            type: 'integer',
+            minimum: 0,
+            title: 'Sales',
+            default: 0
+        },
+        closing_stock: {
+            type: 'integer',
+            minimum: 0,
+            title: 'Closing Stock'
+        },
+        physical_count: {
+            anyOf: [
+                {
+                    type: 'integer',
+                    minimum: 0
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Physical Count'
+        },
+        variance: {
+            anyOf: [
+                {
+                    type: 'integer'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Variance'
+        },
+        amount: {
+            anyOf: [
+                {
+                    type: 'number'
+                },
+                {
+                    type: 'string',
+                    pattern: '^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d{0,2}0*$'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Amount'
+        },
+        notes: {
+            anyOf: [
+                {
+                    type: 'string',
+                    maxLength: 1000
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Notes'
+        }
+    },
+    type: 'object',
+    required: ['product_id', 'opening_stock', 'total_stock', 'closing_stock'],
+    title: 'StockEntryCreate'
+} as const;
+
+export const StockEntryPublicSchema = {
+    properties: {
+        product_id: {
+            type: 'string',
+            format: 'uuid',
+            title: 'Product Id'
+        },
+        entry_date: {
+            type: 'string',
+            format: 'date-time',
+            title: 'Entry Date'
+        },
+        opening_stock: {
+            type: 'integer',
+            minimum: 0,
+            title: 'Opening Stock'
+        },
+        added_stock: {
+            type: 'integer',
+            minimum: 0,
+            title: 'Added Stock',
+            default: 0
+        },
+        total_stock: {
+            type: 'integer',
+            minimum: 0,
+            title: 'Total Stock'
+        },
+        sales: {
+            type: 'integer',
+            minimum: 0,
+            title: 'Sales',
+            default: 0
+        },
+        closing_stock: {
+            type: 'integer',
+            minimum: 0,
+            title: 'Closing Stock'
+        },
+        physical_count: {
+            anyOf: [
+                {
+                    type: 'integer',
+                    minimum: 0
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Physical Count'
+        },
+        variance: {
+            anyOf: [
+                {
+                    type: 'integer'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Variance'
+        },
+        amount: {
+            anyOf: [
+                {
+                    type: 'string',
+                    pattern: '^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d{0,2}0*$'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Amount'
+        },
+        notes: {
+            anyOf: [
+                {
+                    type: 'string',
+                    maxLength: 1000
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Notes'
+        },
+        id: {
+            type: 'string',
+            format: 'uuid',
+            title: 'Id'
+        },
+        created_at: {
+            type: 'string',
+            format: 'date-time',
+            title: 'Created At'
+        },
+        product: {
+            '$ref': '#/components/schemas/ProductPublic'
+        }
+    },
+    type: 'object',
+    required: ['product_id', 'opening_stock', 'total_stock', 'closing_stock', 'id', 'created_at', 'product'],
+    title: 'StockEntryPublic'
+} as const;
+
+export const StockEntryUpdateSchema = {
+    properties: {
+        added_stock: {
+            anyOf: [
+                {
+                    type: 'integer',
+                    minimum: 0
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Added Stock'
+        },
+        sales: {
+            anyOf: [
+                {
+                    type: 'integer',
+                    minimum: 0
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Sales'
+        },
+        closing_stock: {
+            anyOf: [
+                {
+                    type: 'integer',
+                    minimum: 0
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Closing Stock'
+        },
+        physical_count: {
+            anyOf: [
+                {
+                    type: 'integer',
+                    minimum: 0
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Physical Count'
+        },
+        variance: {
+            anyOf: [
+                {
+                    type: 'integer'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Variance'
+        },
+        amount: {
+            anyOf: [
+                {
+                    type: 'number'
+                },
+                {
+                    type: 'string',
+                    pattern: '^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d{0,2}0*$'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Amount'
+        },
+        notes: {
+            anyOf: [
+                {
+                    type: 'string'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Notes'
+        }
+    },
+    type: 'object',
+    title: 'StockEntryUpdate'
 } as const;
 
 export const TokenSchema = {

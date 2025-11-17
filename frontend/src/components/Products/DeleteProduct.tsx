@@ -24,16 +24,23 @@ import {
 
 interface DeleteProductProps {
   product: ProductPublic
-  children: React.ReactNode
+  children?: React.ReactNode
+  isOpen?: boolean
+  onOpenChange?: (open: boolean) => void
+  'data-testid'?: string
 }
 
-const DeleteProduct = ({ product, children }: DeleteProductProps) => {
-  const [isOpen, setIsOpen] = useState(false)
+const DeleteProduct = ({ product, children, isOpen: controlledIsOpen, onOpenChange, 'data-testid': testId }: DeleteProductProps) => {
+  const [internalIsOpen, setInternalIsOpen] = useState(false)
   const queryClient = useQueryClient()
   const { showSuccessToast } = useCustomToast()
+  
+  // Use controlled or internal state
+  const isOpen = controlledIsOpen !== undefined ? controlledIsOpen : internalIsOpen
+  const setIsOpen = onOpenChange || setInternalIsOpen
 
   const deleteProductMutation = useMutation({
-     mutationFn: (id: string) => ProductsService.deleteProduct({ id: Number(id) }),
+     mutationFn: (id: string) => ProductsService.deleteProduct({ id }),
     onSuccess: () => {
       showSuccessToast("Product deleted successfully.")
       setIsOpen(false)
@@ -58,8 +65,12 @@ const DeleteProduct = ({ product, children }: DeleteProductProps) => {
       placement="center"
       open={isOpen}
       onOpenChange={({ open }) => setIsOpen(open)}
+      data-testid={testId}
     >
-      <DialogTrigger asChild>{children}</DialogTrigger>
+      {/* Only render trigger if children provided and not controlled */}
+      {children && controlledIsOpen === undefined && (
+        <DialogTrigger asChild>{children}</DialogTrigger>
+      )}
       <DialogContent>
         <DialogHeader>
           <DialogTitle>Delete Product</DialogTitle>

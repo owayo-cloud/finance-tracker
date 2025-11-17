@@ -15,13 +15,12 @@ import { Route as RecoverPasswordRouteImport } from './routes/recover-password'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as LayoutRouteImport } from './routes/_layout'
 import { Route as LayoutIndexRouteImport } from './routes/_layout/index'
-import { Route as LayoutStockEntyRouteImport } from './routes/_layout/stock-enty'
+import { Route as LayoutStockEntryRouteImport } from './routes/_layout/stock-entry'
 import { Route as LayoutShiftReconciliationRouteImport } from './routes/_layout/shift-reconciliation'
 import { Route as LayoutSettingsRouteImport } from './routes/_layout/settings'
 import { Route as LayoutSalesRouteImport } from './routes/_layout/sales'
 import { Route as LayoutReportsRouteImport } from './routes/_layout/reports'
 import { Route as LayoutProductsRouteImport } from './routes/_layout/products'
-import { Route as LayoutItemsRouteImport } from './routes/_layout/items'
 import { Route as LayoutExpensesRouteImport } from './routes/_layout/expenses'
 import { Route as LayoutDebtsRouteImport } from './routes/_layout/debts'
 import { Route as LayoutAdminRouteImport } from './routes/_layout/admin'
@@ -55,9 +54,9 @@ const LayoutIndexRoute = LayoutIndexRouteImport.update({
   path: '/',
   getParentRoute: () => LayoutRoute,
 } as any)
-const LayoutStockEntyRoute = LayoutStockEntyRouteImport.update({
-  id: '/stock-enty',
-  path: '/stock-enty',
+const LayoutStockEntryRoute = LayoutStockEntryRouteImport.update({
+  id: '/stock-entry',
+  path: '/stock-entry',
   getParentRoute: () => LayoutRoute,
 } as any)
 const LayoutShiftReconciliationRoute =
@@ -86,11 +85,6 @@ const LayoutProductsRoute = LayoutProductsRouteImport.update({
   path: '/products',
   getParentRoute: () => LayoutRoute,
 } as any)
-const LayoutItemsRoute = LayoutItemsRouteImport.update({
-  id: '/items',
-  path: '/items',
-  getParentRoute: () => LayoutRoute,
-} as any)
 const LayoutExpensesRoute = LayoutExpensesRouteImport.update({
   id: '/expenses',
   path: '/expenses',
@@ -115,13 +109,12 @@ export interface FileRoutesByFullPath {
   '/admin': typeof LayoutAdminRoute
   '/debts': typeof LayoutDebtsRoute
   '/expenses': typeof LayoutExpensesRoute
-  '/items': typeof LayoutItemsRoute
   '/products': typeof LayoutProductsRoute
   '/reports': typeof LayoutReportsRoute
   '/sales': typeof LayoutSalesRoute
   '/settings': typeof LayoutSettingsRoute
   '/shift-reconciliation': typeof LayoutShiftReconciliationRoute
-  '/stock-enty': typeof LayoutStockEntyRoute
+  '/stock-entry': typeof LayoutStockEntryRoute
   '/': typeof LayoutIndexRoute
 }
 export interface FileRoutesByTo {
@@ -132,13 +125,12 @@ export interface FileRoutesByTo {
   '/admin': typeof LayoutAdminRoute
   '/debts': typeof LayoutDebtsRoute
   '/expenses': typeof LayoutExpensesRoute
-  '/items': typeof LayoutItemsRoute
   '/products': typeof LayoutProductsRoute
   '/reports': typeof LayoutReportsRoute
   '/sales': typeof LayoutSalesRoute
   '/settings': typeof LayoutSettingsRoute
   '/shift-reconciliation': typeof LayoutShiftReconciliationRoute
-  '/stock-enty': typeof LayoutStockEntyRoute
+  '/stock-entry': typeof LayoutStockEntryRoute
   '/': typeof LayoutIndexRoute
 }
 export interface FileRoutesById {
@@ -151,13 +143,12 @@ export interface FileRoutesById {
   '/_layout/admin': typeof LayoutAdminRoute
   '/_layout/debts': typeof LayoutDebtsRoute
   '/_layout/expenses': typeof LayoutExpensesRoute
-  '/_layout/items': typeof LayoutItemsRoute
   '/_layout/products': typeof LayoutProductsRoute
   '/_layout/reports': typeof LayoutReportsRoute
   '/_layout/sales': typeof LayoutSalesRoute
   '/_layout/settings': typeof LayoutSettingsRoute
   '/_layout/shift-reconciliation': typeof LayoutShiftReconciliationRoute
-  '/_layout/stock-enty': typeof LayoutStockEntyRoute
+  '/_layout/stock-entry': typeof LayoutStockEntryRoute
   '/_layout/': typeof LayoutIndexRoute
 }
 export interface FileRouteTypes {
@@ -170,13 +161,12 @@ export interface FileRouteTypes {
     | '/admin'
     | '/debts'
     | '/expenses'
-    | '/items'
     | '/products'
     | '/reports'
     | '/sales'
     | '/settings'
     | '/shift-reconciliation'
-    | '/stock-enty'
+    | '/stock-entry'
     | '/'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -187,13 +177,12 @@ export interface FileRouteTypes {
     | '/admin'
     | '/debts'
     | '/expenses'
-    | '/items'
     | '/products'
     | '/reports'
     | '/sales'
     | '/settings'
     | '/shift-reconciliation'
-    | '/stock-enty'
+    | '/stock-entry'
     | '/'
   id:
     | '__root__'
@@ -205,13 +194,12 @@ export interface FileRouteTypes {
     | '/_layout/admin'
     | '/_layout/debts'
     | '/_layout/expenses'
-    | '/_layout/items'
     | '/_layout/products'
     | '/_layout/reports'
     | '/_layout/sales'
     | '/_layout/settings'
     | '/_layout/shift-reconciliation'
-    | '/_layout/stock-enty'
+    | '/_layout/stock-entry'
     | '/_layout/'
   fileRoutesById: FileRoutesById
 }
@@ -267,11 +255,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LayoutIndexRouteImport
       parentRoute: typeof LayoutRoute
     }
-    '/_layout/stock-enty': {
-      id: '/_layout/stock-enty'
-      path: '/stock-enty'
-      fullPath: '/stock-enty'
-      preLoaderRoute: typeof LayoutStockEntyRouteImport
+    '/_layout/stock-entry': {
+      id: '/_layout/stock-entry'
+      path: '/stock-entry'
+      fullPath: '/stock-entry'
+      preLoaderRoute: typeof LayoutStockEntryRouteImport
       parentRoute: typeof LayoutRoute
     }
     '/_layout/shift-reconciliation': {
@@ -309,13 +297,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LayoutProductsRouteImport
       parentRoute: typeof LayoutRoute
     }
-    '/_layout/items': {
-      id: '/_layout/items'
-      path: '/items'
-      fullPath: '/items'
-      preLoaderRoute: typeof LayoutItemsRouteImport
-      parentRoute: typeof LayoutRoute
-    }
     '/_layout/expenses': {
       id: '/_layout/expenses'
       path: '/expenses'
@@ -344,13 +325,12 @@ interface LayoutRouteChildren {
   LayoutAdminRoute: typeof LayoutAdminRoute
   LayoutDebtsRoute: typeof LayoutDebtsRoute
   LayoutExpensesRoute: typeof LayoutExpensesRoute
-  LayoutItemsRoute: typeof LayoutItemsRoute
   LayoutProductsRoute: typeof LayoutProductsRoute
   LayoutReportsRoute: typeof LayoutReportsRoute
   LayoutSalesRoute: typeof LayoutSalesRoute
   LayoutSettingsRoute: typeof LayoutSettingsRoute
   LayoutShiftReconciliationRoute: typeof LayoutShiftReconciliationRoute
-  LayoutStockEntyRoute: typeof LayoutStockEntyRoute
+  LayoutStockEntryRoute: typeof LayoutStockEntryRoute
   LayoutIndexRoute: typeof LayoutIndexRoute
 }
 
@@ -358,13 +338,12 @@ const LayoutRouteChildren: LayoutRouteChildren = {
   LayoutAdminRoute: LayoutAdminRoute,
   LayoutDebtsRoute: LayoutDebtsRoute,
   LayoutExpensesRoute: LayoutExpensesRoute,
-  LayoutItemsRoute: LayoutItemsRoute,
   LayoutProductsRoute: LayoutProductsRoute,
   LayoutReportsRoute: LayoutReportsRoute,
   LayoutSalesRoute: LayoutSalesRoute,
   LayoutSettingsRoute: LayoutSettingsRoute,
   LayoutShiftReconciliationRoute: LayoutShiftReconciliationRoute,
-  LayoutStockEntyRoute: LayoutStockEntyRoute,
+  LayoutStockEntryRoute: LayoutStockEntryRoute,
   LayoutIndexRoute: LayoutIndexRoute,
 }
 

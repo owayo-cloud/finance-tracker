@@ -3,7 +3,7 @@
 import type { CancelablePromise } from './core/CancelablePromise';
 import { OpenAPI } from './core/OpenAPI';
 import { request as __request } from './core/request';
-import type { LoginLoginAccessTokenData, LoginLoginAccessTokenResponse, LoginTestTokenResponse, LoginRecoverPasswordData, LoginRecoverPasswordResponse, LoginResetPasswordData, LoginResetPasswordResponse, LoginRecoverPasswordHtmlContentData, LoginRecoverPasswordHtmlContentResponse, MediaUploadImageData, MediaUploadImageResponse, MediaServeImageData, MediaServeImageResponse, MediaDeleteMediaData, MediaDeleteMediaResponse, MediaListMediaData, MediaListMediaResponse, PrivateCreateUserData, PrivateCreateUserResponse, ProductsReadCategoriesResponse, ProductsReadStatusesResponse, ProductsReadTagsResponse, ProductsReadProductsData, ProductsReadProductsResponse, ProductsCreateProductData, ProductsCreateProductResponse, ProductsReadProductData, ProductsReadProductResponse, ProductsUpdateProductData, ProductsUpdateProductResponse, ProductsDeleteProductData, ProductsDeleteProductResponse, UsersReadUsersData, UsersReadUsersResponse, UsersCreateUserData, UsersCreateUserResponse, UsersReadUserMeResponse, UsersDeleteUserMeResponse, UsersUpdateUserMeData, UsersUpdateUserMeResponse, UsersUpdatePasswordMeData, UsersUpdatePasswordMeResponse, UsersRegisterUserData, UsersRegisterUserResponse, UsersReadUserByIdData, UsersReadUserByIdResponse, UsersUpdateUserData, UsersUpdateUserResponse, UsersDeleteUserData, UsersDeleteUserResponse, UtilsTestEmailData, UtilsTestEmailResponse, UtilsHealthCheckResponse } from './types.gen';
+import type { LoginLoginAccessTokenData, LoginLoginAccessTokenResponse, LoginTestTokenResponse, LoginRecoverPasswordData, LoginRecoverPasswordResponse, LoginResetPasswordData, LoginResetPasswordResponse, LoginRecoverPasswordHtmlContentData, LoginRecoverPasswordHtmlContentResponse, MediaUploadImageData, MediaUploadImageResponse, MediaServeImageData, MediaServeImageResponse, MediaDeleteMediaData, MediaDeleteMediaResponse, MediaListMediaData, MediaListMediaResponse, PrivateCreateUserData, PrivateCreateUserResponse, ProductsReadCategoriesResponse, ProductsReadStatusesResponse, ProductsReadTagsResponse, ProductsReadProductsData, ProductsReadProductsResponse, ProductsCreateProductData, ProductsCreateProductResponse, ProductsReadProductData, ProductsReadProductResponse, ProductsUpdateProductData, ProductsUpdateProductResponse, ProductsDeleteProductData, ProductsDeleteProductResponse, SalesReadPaymentMethodsData, SalesReadPaymentMethodsResponse, SalesSearchProductsForSaleData, SalesSearchProductsForSaleResponse, SalesCreateSaleData, SalesCreateSaleResponse, SalesReadSalesData, SalesReadSalesResponse, SalesGetTodaySalesSummaryResponse, SalesReadSaleData, SalesReadSaleResponse, SalesDeleteSaleData, SalesDeleteSaleResponse, StockEntriesSearchProductsForStockEntryData, StockEntriesSearchProductsForStockEntryResponse, StockEntriesReadStockEntriesData, StockEntriesReadStockEntriesResponse, StockEntriesCreateStockEntryData, StockEntriesCreateStockEntryResponse, StockEntriesReadStockEntryData, StockEntriesReadStockEntryResponse, StockEntriesUpdateStockEntryData, StockEntriesUpdateStockEntryResponse, StockEntriesDeleteStockEntryData, StockEntriesDeleteStockEntryResponse, UsersReadUsersData, UsersReadUsersResponse, UsersCreateUserData, UsersCreateUserResponse, UsersReadUserMeResponse, UsersDeleteUserMeResponse, UsersUpdateUserMeData, UsersUpdateUserMeResponse, UsersUpdatePasswordMeData, UsersUpdatePasswordMeResponse, UsersRegisterUserData, UsersRegisterUserResponse, UsersReadUserByIdData, UsersReadUserByIdResponse, UsersUpdateUserData, UsersUpdateUserResponse, UsersDeleteUserData, UsersDeleteUserResponse, UtilsTestEmailData, UtilsTestEmailResponse, UtilsHealthCheckResponse } from './types.gen';
 
 export class LoginService {
     /**
@@ -255,10 +255,20 @@ export class ProductsService {
     
     /**
      * Read Products
-     * Retrieve products.
+     * Retrieve products with optional filtering.
+     *
+     * Args:
+     * skip: Number of products to skip (pagination)
+     * limit: Number of products to return (max 100)
+     * name: Filter by product name (partial match, case-insensitive)
+     * category_id: Filter by category ID
+     * status_id: Filter by status ID
      * @param data The data for the request.
      * @param data.skip
      * @param data.limit
+     * @param data.name
+     * @param data.categoryId
+     * @param data.statusId
      * @returns ProductsPublic Successful Response
      * @throws ApiError
      */
@@ -268,7 +278,10 @@ export class ProductsService {
             url: '/api/v1/products/',
             query: {
                 skip: data.skip,
-                limit: data.limit
+                limit: data.limit,
+                name: data.name,
+                category_id: data.categoryId,
+                status_id: data.statusId
             },
             errors: {
                 422: 'Validation Error'
@@ -353,6 +366,316 @@ export class ProductsService {
         return __request(OpenAPI, {
             method: 'DELETE',
             url: '/api/v1/products/{id}',
+            path: {
+                id: data.id
+            },
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+}
+
+export class SalesService {
+    /**
+     * Read Payment Methods
+     * Retrieve all available payment methods.
+     * Used for cashier to select payment method during sale.
+     * @param data The data for the request.
+     * @param data.skip
+     * @param data.limit
+     * @returns PaymentMethodsPublic Successful Response
+     * @throws ApiError
+     */
+    public static readPaymentMethods(data: SalesReadPaymentMethodsData = {}): CancelablePromise<SalesReadPaymentMethodsResponse> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/v1/sales/payment-methods',
+            query: {
+                skip: data.skip,
+                limit: data.limit
+            },
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+    
+    /**
+     * Search Products For Sale
+     * Fast product search for sales cart.
+     * Searches by name or tag.
+     * Only returns products with status 'Active' and stock > 0.
+     * @param data The data for the request.
+     * @param data.q Search query
+     * @param data.tagId Filter by tag ID
+     * @param data.limit Maximum results to return
+     * @returns ProductPublic Successful Response
+     * @throws ApiError
+     */
+    public static searchProductsForSale(data: SalesSearchProductsForSaleData): CancelablePromise<SalesSearchProductsForSaleResponse> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/v1/sales/search-products',
+            query: {
+                q: data.q,
+                tag_id: data.tagId,
+                limit: data.limit
+            },
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+    
+    /**
+     * Create Sale
+     * Create a new sale and update product stock.
+     * This is an atomic operation - both sale creation and stock update happen together.
+     *
+     * Business Rules:
+     * - Product must have sufficient stock
+     * - Stock is automatically decremented
+     * - Sale amount is calculated from product selling price × quantity
+     * @param data The data for the request.
+     * @param data.requestBody
+     * @returns SalePublic Successful Response
+     * @throws ApiError
+     */
+    public static createSale(data: SalesCreateSaleData): CancelablePromise<SalesCreateSaleResponse> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/api/v1/sales',
+            body: data.requestBody,
+            mediaType: 'application/json',
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+    
+    /**
+     * Read Sales
+     * Retrieve sales with optional filtering.
+     * Admins see all sales, cashiers see only their own sales.
+     * @param data The data for the request.
+     * @param data.skip
+     * @param data.limit
+     * @param data.productId Filter by product ID
+     * @param data.paymentMethodId Filter by payment method
+     * @param data.startDate Filter sales from this date
+     * @param data.endDate Filter sales until this date
+     * @param data.tagId Filter by product tag
+     * @returns SalesPublic Successful Response
+     * @throws ApiError
+     */
+    public static readSales(data: SalesReadSalesData = {}): CancelablePromise<SalesReadSalesResponse> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/v1/sales',
+            query: {
+                skip: data.skip,
+                limit: data.limit,
+                product_id: data.productId,
+                payment_method_id: data.paymentMethodId,
+                start_date: data.startDate,
+                end_date: data.endDate,
+                tag_id: data.tagId
+            },
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+    
+    /**
+     * Get Today Sales Summary
+     * Get today's sales summary for the current cashier.
+     * Returns total sales, total amount, and breakdown by payment method.
+     * @returns unknown Successful Response
+     * @throws ApiError
+     */
+    public static getTodaySalesSummary(): CancelablePromise<SalesGetTodaySalesSummaryResponse> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/v1/sales/today-summary'
+        });
+    }
+    
+    /**
+     * Read Sale
+     * Get sale by ID.
+     * Cashiers can only view their own sales.
+     * @param data The data for the request.
+     * @param data.saleId
+     * @returns SalePublic Successful Response
+     * @throws ApiError
+     */
+    public static readSale(data: SalesReadSaleData): CancelablePromise<SalesReadSaleResponse> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/v1/sales/{sale_id}',
+            path: {
+                sale_id: data.saleId
+            },
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+    
+    /**
+     * Delete Sale
+     * Delete a sale (admin only).
+     * Note: This also restores the product stock.
+     * @param data The data for the request.
+     * @param data.saleId
+     * @returns unknown Successful Response
+     * @throws ApiError
+     */
+    public static deleteSale(data: SalesDeleteSaleData): CancelablePromise<SalesDeleteSaleResponse> {
+        return __request(OpenAPI, {
+            method: 'DELETE',
+            url: '/api/v1/sales/{sale_id}',
+            path: {
+                sale_id: data.saleId
+            },
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+}
+
+export class StockEntriesService {
+    /**
+     * Search Products For Stock Entry
+     * Blazingly fast product search for stock entry.
+     * Searches by name, category name, or tag name.
+     * Returns products with all relationships loaded.
+     * @param data The data for the request.
+     * @param data.q Search query
+     * @param data.limit Maximum results to return
+     * @returns ProductPublic Successful Response
+     * @throws ApiError
+     */
+    public static searchProductsForStockEntry(data: StockEntriesSearchProductsForStockEntryData): CancelablePromise<StockEntriesSearchProductsForStockEntryResponse> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/v1/stock-entries/search-products',
+            query: {
+                q: data.q,
+                limit: data.limit
+            },
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+    
+    /**
+     * Read Stock Entries
+     * Retrieve stock entries.
+     * Optionally filter by product_id.
+     * @param data The data for the request.
+     * @param data.skip
+     * @param data.limit
+     * @param data.productId
+     * @returns StockEntriesPublic Successful Response
+     * @throws ApiError
+     */
+    public static readStockEntries(data: StockEntriesReadStockEntriesData = {}): CancelablePromise<StockEntriesReadStockEntriesResponse> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/v1/stock-entries/',
+            query: {
+                skip: data.skip,
+                limit: data.limit,
+                product_id: data.productId
+            },
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+    
+    /**
+     * Create Stock Entry
+     * Create new stock entry.
+     * @param data The data for the request.
+     * @param data.requestBody
+     * @returns StockEntryPublic Successful Response
+     * @throws ApiError
+     */
+    public static createStockEntry(data: StockEntriesCreateStockEntryData): CancelablePromise<StockEntriesCreateStockEntryResponse> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/api/v1/stock-entries/',
+            body: data.requestBody,
+            mediaType: 'application/json',
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+    
+    /**
+     * Read Stock Entry
+     * Get stock entry by ID.
+     * @param data The data for the request.
+     * @param data.id
+     * @returns StockEntryPublic Successful Response
+     * @throws ApiError
+     */
+    public static readStockEntry(data: StockEntriesReadStockEntryData): CancelablePromise<StockEntriesReadStockEntryResponse> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/v1/stock-entries/{id}',
+            path: {
+                id: data.id
+            },
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+    
+    /**
+     * Update Stock Entry
+     * Update a stock entry.
+     * @param data The data for the request.
+     * @param data.id
+     * @param data.requestBody
+     * @returns StockEntryPublic Successful Response
+     * @throws ApiError
+     */
+    public static updateStockEntry(data: StockEntriesUpdateStockEntryData): CancelablePromise<StockEntriesUpdateStockEntryResponse> {
+        return __request(OpenAPI, {
+            method: 'PATCH',
+            url: '/api/v1/stock-entries/{id}',
+            path: {
+                id: data.id
+            },
+            body: data.requestBody,
+            mediaType: 'application/json',
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+    
+    /**
+     * Delete Stock Entry
+     * Delete a stock entry.
+     * @param data The data for the request.
+     * @param data.id
+     * @returns string Successful Response
+     * @throws ApiError
+     */
+    public static deleteStockEntry(data: StockEntriesDeleteStockEntryData): CancelablePromise<StockEntriesDeleteStockEntryResponse> {
+        return __request(OpenAPI, {
+            method: 'DELETE',
+            url: '/api/v1/stock-entries/{id}',
             path: {
                 id: data.id
             },

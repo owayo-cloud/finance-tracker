@@ -14,7 +14,6 @@ import {
   IconButton,
   VStack,
   HStack,
-  Separator,
 } from "@chakra-ui/react"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { useState, useMemo } from "react"
@@ -23,7 +22,7 @@ import { FiPlus, FiMinus, FiTrash2, FiShoppingCart, FiSearch } from "react-icons
 import { ProductsService, SalesService, UsersService, type ProductPublic } from "../../client"
 import useCustomToast from "../../hooks/useCustomToast"
 
-// Utility function to format currency with thousand delimiters
+
 function formatCurrency(amount: number): string {
   return amount.toLocaleString('en-US', {
     minimumFractionDigits: 2,
@@ -34,8 +33,7 @@ function formatCurrency(amount: number): string {
 export const Route = createFileRoute("/_layout/sales")({
   component: Sales,
   beforeLoad: async () => {
-    // CRITICAL: Ensure only cashiers can access the sales dashboard
-    // Admins should use the admin dashboard (/) instead
+    // Only cashiers can access the sales dashboard
     try {
       const user = await UsersService.readUserMe()
       
@@ -46,13 +44,12 @@ export const Route = createFileRoute("/_layout/sales")({
         })
       }
     } catch (error) {
-      // Re-throw redirect errors
       throw error
     }
   },
 })
 
-// ThemedSelect component for consistent styling
+
 function ThemedSelect({
   value,
   onChange,
@@ -114,7 +111,7 @@ function Sales() {
   // Fetch product tags for filtering
   const { data: tags } = useQuery({
     queryKey: ["product-tags"],
-    queryFn: () => ProductsService.readProductTags({}),
+    queryFn: () => ProductsService.readProductTags(),
   })
 
   // Fetch payment methods
@@ -147,12 +144,16 @@ function Sales() {
     mutationFn: (data: {
       productId: string
       quantity: number
+      unitPrice: number
+      totalAmount: number
       paymentMethodId: string
     }) =>
       SalesService.createSale({
         requestBody: {
           product_id: data.productId,
           quantity: data.quantity,
+          unit_price: data.unitPrice,
+          total_amount: data.totalAmount,
           payment_method_id: data.paymentMethodId,
         },
       }),
@@ -161,7 +162,7 @@ function Sales() {
     },
     onError: (error: any) => {
       const detail = error.body?.detail || "Failed to create sale"
-      showToast("Error", detail, "error")
+      showToast.showErrorToast(detail)
       throw error // Re-throw to stop batch processing
     },
   })
@@ -173,7 +174,7 @@ function Sales() {
       if (existingItem) {
         // Check stock availability
         if (existingItem.quantity + 1 > (product.current_stock || 0)) {
-          showToast("Warning", "Insufficient stock", "warning")
+          showToast.showErrorToast("Insufficient stock")
           return prevCart
         }
         return prevCart.map((item) =>
@@ -198,7 +199,7 @@ function Sales() {
             const newQuantity = item.quantity + delta
             // Check stock availability
             if (newQuantity > (item.product.current_stock || 0)) {
-              showToast("Warning", "Insufficient stock", "warning")
+              showToast.showErrorToast("Insufficient stock")
               return item
             }
             return { ...item, quantity: newQuantity }
@@ -223,12 +224,12 @@ function Sales() {
   // Complete sale
   const completeSale = async () => {
     if (cart.length === 0) {
-      showToast("Warning", "Cart is empty", "warning")
+      showToast.showErrorToast("Cart is empty")
       return
     }
 
     if (!selectedPaymentMethod) {
-      showToast("Warning", "Please select a payment method", "warning")
+      showToast.showErrorToast("Please select a payment method")
       return
     }
 
@@ -239,23 +240,26 @@ function Sales() {
         const currentProduct = await ProductsService.readProduct({ id: item.product.id })
         
         if (!currentProduct.current_stock || currentProduct.current_stock < item.quantity) {
-          showToast(
-            "Error", 
-            `Insufficient stock for Ksh {item.product.name}. Available: Ksh {currentProduct.current_stock || 0}`, 
-            "error"
+          showToast.showErrorToast(
+            `Insufficient stock for ${item.product.name}. Available: ${currentProduct.current_stock || 0}`
           )
           return
         }
 
+        const unitPrice = Number(item.product.selling_price)
+        const totalAmount = unitPrice * item.quantity
+
         await createSale.mutateAsync({
           productId: item.product.id,
           quantity: item.quantity,
+          unitPrice: unitPrice,
+          totalAmount: totalAmount,
           paymentMethodId: selectedPaymentMethod,
         })
       }
 
       // All sales successful
-      showToast("Success", `Ksh {cart.length} sale(s) completed successfully`, "success")
+      showToast.showSuccessToast(`${cart.length} sale(s) completed successfully`)
       queryClient.invalidateQueries({ queryKey: ["today-summary"] })
       queryClient.invalidateQueries({ queryKey: ["search-products"] })
 
@@ -338,7 +342,7 @@ function Sales() {
                   >
                     All
                   </Button>
-                  {tags?.data?.map((tag) => (
+                  {tags?.map((tag: { id: string; name: string }) => (
                     <Button
                       key={tag.id}
                       size="sm"
@@ -387,7 +391,7 @@ function Sales() {
                           <Badge colorScheme="blue" alignSelf="flex-start" fontSize="xs">
                             {product.tag?.name}
                           </Badge>
-                          <Text fontWeight="bold" fontSize="sm" noOfLines={2} minH="40px">
+                          <Text fontWeight="bold" fontSize="sm" lineClamp={2} minH="40px">
                             {product.name}
                           </Text>
                           <Flex justify="space-between" align="center" mt={2}>
@@ -479,7 +483,7 @@ function Sales() {
                   >
                     <Flex justify="space-between" align="start" mb={2}>
                       <VStack align="start" flex={1} gap={1}>
-                        <Text fontWeight="bold" fontSize="sm" noOfLines={2}>
+                        <Text fontWeight="bold" fontSize="sm" lineClamp={2}>
                           {item.product.name}
                         </Text>
                         <Text fontSize="xs" color="gray.500">
@@ -583,7 +587,7 @@ function Sales() {
               </Button>
 
               {/* Today's Summary (Collapsible) */}
-              {todaySummary && todaySummary.total_sales > 0 && (
+              {todaySummary && (todaySummary as any).total_sales > 0 && (
                 <Box
                   mt={2}
                   p={3}
@@ -597,11 +601,11 @@ function Sales() {
                   </Text>
                   <Flex justify="space-between" fontSize="sm">
                     <Text>Sales</Text>
-                    <Text fontWeight="bold">Ksh {formatCurrency(Number(todaySummary.total_amount) || 0)}</Text>
+                    <Text fontWeight="bold">Ksh {formatCurrency(Number((todaySummary as any).total_amount) || 0)}</Text>
                   </Flex>
                   <Flex justify="space-between" fontSize="sm" color="gray.500">
-                    <Text>{todaySummary.total_sales} transactions</Text>
-                    <Text>{todaySummary.total_items} items</Text>
+                    <Text>{(todaySummary as any).total_sales} transactions</Text>
+                    <Text>{(todaySummary as any).total_items} items</Text>
                   </Flex>
                 </Box>
               )}

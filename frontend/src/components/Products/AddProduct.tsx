@@ -83,10 +83,7 @@ const AddProduct = () => {
     queryFn: () => ProductsService.readStatuses(),
   })
 
-  const { data: tagsData, isLoading: loadingTags } = useQuery({
-    queryKey: ["tags"],
-    queryFn: () => ProductsService.readProductTags(),
-  })
+
 
   const {
     register,
@@ -102,11 +99,10 @@ const AddProduct = () => {
       description: "",
       buying_price: 0,
       selling_price: 0,
-      current_stock: 0,
+      current_stock: 1,
       reorder_level: 0,
       category_id: "",
       status_id: "",
-      tag_id: "",
       image_id: undefined,
     },
   })
@@ -121,9 +117,7 @@ const AddProduct = () => {
       required: "Status is required",
     })
 
-    register("tag_id", {
-      required: "Product tag is required",
-    })
+
 
     register("buying_price", {
       required: "Buying price is required.",
@@ -136,9 +130,16 @@ const AddProduct = () => {
 
     register("selling_price", {
       required: "Selling price is required.",
-      validate: (value) => {
+      validate: (value, formValues) => {
         const numValue = typeof value === "string" ? parseFloat(value) : value
+        const buyingPrice = typeof formValues.buying_price === "string" 
+          ? parseFloat(formValues.buying_price) 
+          : formValues.buying_price
+        
         if (numValue <= 0) return "Selling price must be greater than 0"
+        if (numValue <= buyingPrice) {
+          return "Selling price must be greater than buying price"
+        }
         return true
       },
     })
@@ -171,18 +172,7 @@ const AddProduct = () => {
     })
   }, [statusesData])
 
-  const tagsCollection = useMemo(() => {
-    if (!tagsData) {
-      return createListCollection<{ label: string; value: string }>({ items: [] })
-    }
-    
-    return createListCollection({
-      items: tagsData.map((tag) => ({
-        label: tag.name,
-        value: String(tag.id),
-      })),
-    })
-  }, [tagsData])
+
 
   const mutation = useMutation({
     mutationFn: async (data: ProductCreate) => {
@@ -407,44 +397,7 @@ const AddProduct = () => {
                   </SelectRoot>
                 </Field>
 
-                <Field
-                  required
-                  invalid={!!errors.tag_id}
-                  errorText={errors.tag_id?.message}
-                  label="Product Tag"
-                >
-                  <SelectRoot
-                    collection={tagsCollection}
-                    size="md"
-                    onValueChange={(e) => {
-                      const selectedValue = e.value[0]
-                      if (selectedValue && selectedValue !== "loading" && selectedValue !== "none") {
-                        setValue("tag_id", selectedValue, { shouldValidate: true })
-                      }
-                    }}
-                  >
-                    <SelectTrigger borderRadius="md">
-                      <SelectValueText placeholder="Select a product tag" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {loadingTags ? (
-                        <SelectItem item={{ label: "Loading tags...", value: "loading" }}>
-                          Loading tags...
-                        </SelectItem>
-                      ) : tagsCollection.items.length > 0 ? (
-                        tagsCollection.items.map((item) => (
-                          <SelectItem key={item.value} item={item}>
-                            {item.label}
-                          </SelectItem>
-                        ))
-                      ) : (
-                        <SelectItem item={{ label: "No tags available", value: "none" }}>
-                          No tags available
-                        </SelectItem>
-                      )}
-                    </SelectContent>
-                  </SelectRoot>
-                </Field>
+                
               </VStack>
 
               {/* Right Column */}
@@ -507,11 +460,11 @@ const AddProduct = () => {
                         required: "Current stock is required.",
                         valueAsNumber: true,
                         min: {
-                          value: 0,
-                          message: "Stock cannot be negative",
+                          value: 1,
+                          message: "Stock must be at least 1",
                         },
                       })}
-                      placeholder="0"
+                      placeholder="1"
                       type="number"
                       size="md"
                       borderRadius="md"

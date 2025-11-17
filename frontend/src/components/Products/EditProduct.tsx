@@ -7,15 +7,20 @@ import {
   HStack,
   Badge,
   Separator,
+  Image,
+  Flex,
+  IconButton,
 } from "@chakra-ui/react"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
-import { useState } from "react"
+import { useState, useRef } from "react"
 import { type SubmitHandler, useForm } from "react-hook-form"
+import { FaImage, FaTimes } from "react-icons/fa"
 
 import {
   type ProductPublic,
   type ProductUpdate,
   ProductsService,
+  MediaService,
 } from "@/client"
 import type { ApiError } from "@/client/core/ApiError"
 import useCustomToast from "@/hooks/useCustomToast"
@@ -42,6 +47,10 @@ interface EditProductProps {
 
 const EditProduct = ({ product, children, isOpen: controlledIsOpen, onOpenChange, 'data-testid': testId }: EditProductProps) => {
   const [internalIsOpen, setInternalIsOpen] = useState(false)
+  const [imageFile, setImageFile] = useState<File | null>(null)
+  const [imagePreview, setImagePreview] = useState<string | null>(null)
+  const [uploadingImage, setUploadingImage] = useState(false)
+  const fileInputRef = useRef<HTMLInputElement>(null)
   const queryClient = useQueryClient()
   const { showSuccessToast } = useCustomToast()
   
@@ -61,10 +70,35 @@ const EditProduct = ({ product, children, isOpen: controlledIsOpen, onOpenChange
   })
 
   const mutation = useMutation({
-    mutationFn: (data: ProductUpdate) =>
-      ProductsService.updateProduct({ id: product.id, requestBody: data }),
+    mutationFn: async (data: ProductUpdate) => {
+      let imageId = data.image_id
+
+      // Upload image if one was selected
+      if (imageFile) {
+        setUploadingImage(true)
+        try {
+          const uploadedMedia = await MediaService.uploadImage({
+            formData: { file: imageFile }
+          })
+
+          imageId = uploadedMedia.id
+        } catch (error) {
+          setUploadingImage(false)
+          throw error
+        }
+        setUploadingImage(false)
+      }
+
+      // Update product with image_id
+      return ProductsService.updateProduct({ 
+        id: product.id, 
+        requestBody: { ...data, image_id: imageId } 
+      })
+    },
     onSuccess: () => {
       showSuccessToast("Product updated successfully! ✅")
+      setImageFile(null)
+      setImagePreview(null)
       setIsOpen(false)
     },
     onError: (err: ApiError) => {
@@ -75,17 +109,55 @@ const EditProduct = ({ product, children, isOpen: controlledIsOpen, onOpenChange
     },
   })
 
+  const handleImageSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0]
+    if (file) {
+      // Validate file type
+      if (!file.type.startsWith("image/")) {
+        handleError({ message: "Please select an image file" } as ApiError)
+        return
+      }
+
+      // Validate file size (5MB max)
+      if (file.size > 5 * 1024 * 1024) {
+        handleError({ message: "Image size must be less than 5MB" } as ApiError)
+        return
+      }
+
+      setImageFile(file)
+
+      // Create preview
+      const reader = new FileReader()
+      reader.onloadend = () => {
+        setImagePreview(reader.result as string)
+      }
+      reader.readAsDataURL(file)
+    }
+  }
+
+  const removeImage = () => {
+    setImageFile(null)
+    setImagePreview(null)
+    if (fileInputRef.current) {
+      fileInputRef.current.value = ""
+    }
+  }
+
   const onSubmit: SubmitHandler<ProductUpdate> = (data) => {
     mutation.mutate(data)
   }
 
   const handleClose = () => {
     reset()
+    setImageFile(null)
+    setImagePreview(null)
     setIsOpen(false)
   }
 
   const handleOpen = () => {
     reset(product) // Reset form with current product data
+    setImageFile(null)
+    setImagePreview(null)
     setIsOpen(true)
   }
 
@@ -221,8 +293,8 @@ const EditProduct = ({ product, children, isOpen: controlledIsOpen, onOpenChange
                           valueAsNumber: true,
                           required: "Buying price is required",
                           min: {
-                            value: 0,
-                            message: "Buying price must be at least 0",
+                            value: 0.01,
+                            message: "Buying price must be greater than 0",
                           },
                         })}
                         placeholder="0.00"
@@ -235,15 +307,24 @@ const EditProduct = ({ product, children, isOpen: controlledIsOpen, onOpenChange
                       invalid={!!errors.selling_price}
                       errorText={errors.selling_price?.message}
                       label="Selling Price (KES)"
-                      helperText="Retail price for customers"
+                      helperText="Must be greater than buying price"
                     >
                       <Input
                         {...register("selling_price", {
                           valueAsNumber: true,
                           required: "Selling price is required",
-                          min: {
-                            value: 0.01,
-                            message: "Selling price must be greater than 0",
+                          validate: (value, formValues) => {
+                            const numValue = typeof value === "number" ? value : parseFloat(String(value))
+                            if (!numValue || numValue <= 0) {
+                              return "Selling price must be greater than 0"
+                            }
+                            const buyingPrice = typeof formValues.buying_price === "number" 
+                              ? formValues.buying_price 
+                              : parseFloat(String(formValues.buying_price || 0))
+                            if (numValue <= buyingPrice) {
+                              return "Selling price must be greater than buying price"
+                            }
+                            return true
                           },
                         })}
                         placeholder="0.00"
@@ -256,17 +337,17 @@ const EditProduct = ({ product, children, isOpen: controlledIsOpen, onOpenChange
                       invalid={!!errors.current_stock}
                       errorText={errors.current_stock?.message}
                       label="Current Stock"
-                      helperText="Available units in inventory"
+                      helperText="Available units in inventory (minimum 1)"
                     >
                       <Input
                         {...register("current_stock", {
                           valueAsNumber: true,
                           min: {
-                            value: 0,
-                            message: "Stock cannot be negative",
+                            value: 1,
+                            message: "Stock must be at least 1",
                           },
                         })}
-                        placeholder="0"
+                        placeholder="1"
                         type="number"
                       />
                     </Field>
@@ -289,6 +370,87 @@ const EditProduct = ({ product, children, isOpen: controlledIsOpen, onOpenChange
                         type="number"
                       />
                     </Field>
+
+                    {/* Product Image Upload */}
+                    <Field
+                      label="Product Image"
+                      helperText="Upload a new image to replace the current one (optional, max 5MB)"
+                    >
+                      <input
+                        ref={fileInputRef}
+                        type="file"
+                        accept="image/*"
+                        onChange={handleImageSelect}
+                        style={{ display: "none" }}
+                      />
+                      
+                      {imagePreview ? (
+                        <Box position="relative">
+                          <Image
+                            src={imagePreview}
+                            alt="Product preview"
+                            borderRadius="md"
+                            maxH="200px"
+                            objectFit="cover"
+                            w="full"
+                          />
+                          <IconButton
+                            position="absolute"
+                            top={2}
+                            right={2}
+                            size="sm"
+                            colorScheme="red"
+                            onClick={removeImage}
+                            aria-label="Remove image"
+                          >
+                            <FaTimes />
+                          </IconButton>
+                        </Box>
+                      ) : product.image?.id ? (
+                        <Box>
+                          <Text fontSize="sm" mb={2} color="gray.400">
+                            Current Image:
+                          </Text>
+                          <Image
+                            src={`/api/v1/media/serve/${product.image.id}`}
+                            alt={product.name}
+                            borderRadius="md"
+                            maxH="200px"
+                            objectFit="cover"
+                            w="full"
+                            mb={2}
+                          />
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => fileInputRef.current?.click()}
+                          >
+                            Replace Image
+                          </Button>
+                        </Box>
+                      ) : (
+                        <Box
+                          border="2px dashed"
+                          borderColor={{ base: "gray.600", _light: "gray.300" }}
+                          borderRadius="md"
+                          p={6}
+                          textAlign="center"
+                          cursor="pointer"
+                          _hover={{ borderColor: "teal.400" }}
+                          onClick={() => fileInputRef.current?.click()}
+                        >
+                          <Flex direction="column" align="center" gap={2}>
+                            <FaImage size={24} />
+                            <Text fontSize="sm">
+                              Click to upload image
+                            </Text>
+                            <Text fontSize="xs" color={{ base: "gray.400", _light: "gray.500" }}>
+                              PNG, JPG up to 5MB
+                            </Text>
+                          </Flex>
+                        </Box>
+                      )}
+                    </Field>
                   </VStack>
                 </form>
               </Box>
@@ -299,7 +461,7 @@ const EditProduct = ({ product, children, isOpen: controlledIsOpen, onOpenChange
             <Button
               variant="outline"
               colorScheme="gray"
-              disabled={isSubmitting}
+              disabled={isSubmitting || uploadingImage}
               onClick={handleClose}
               flex="1"
             >
@@ -309,11 +471,11 @@ const EditProduct = ({ product, children, isOpen: controlledIsOpen, onOpenChange
               colorScheme="teal"
               type="submit"
               form="edit-product-form"
-              disabled={!isDirty || !isValid}
-              loading={isSubmitting}
+              disabled={!isDirty || !isValid || uploadingImage}
+              loading={isSubmitting || uploadingImage}
               flex="1"
             >
-              Update Product
+              {uploadingImage ? "Uploading..." : "Update Product"}
             </Button>
           </DrawerFooter>
         </DrawerContent>

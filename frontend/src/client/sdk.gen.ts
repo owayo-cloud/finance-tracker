@@ -3,7 +3,7 @@
 import type { CancelablePromise } from './core/CancelablePromise';
 import { OpenAPI } from './core/OpenAPI';
 import { request as __request } from './core/request';
-import type { LoginLoginAccessTokenData, LoginLoginAccessTokenResponse, LoginTestTokenResponse, LoginRecoverPasswordData, LoginRecoverPasswordResponse, LoginResetPasswordData, LoginResetPasswordResponse, LoginRecoverPasswordHtmlContentData, LoginRecoverPasswordHtmlContentResponse, MediaUploadImageData, MediaUploadImageResponse, MediaServeImageData, MediaServeImageResponse, MediaDeleteMediaData, MediaDeleteMediaResponse, MediaListMediaData, MediaListMediaResponse, PrivateCreateUserData, PrivateCreateUserResponse, ProductsReadCategoriesResponse, ProductsReadStatusesResponse, ProductsReadTagsResponse, ProductsReadProductsData, ProductsReadProductsResponse, ProductsCreateProductData, ProductsCreateProductResponse, ProductsReadProductData, ProductsReadProductResponse, ProductsUpdateProductData, ProductsUpdateProductResponse, ProductsDeleteProductData, ProductsDeleteProductResponse, SalesReadPaymentMethodsData, SalesReadPaymentMethodsResponse, SalesSearchProductsForSaleData, SalesSearchProductsForSaleResponse, SalesCreateSaleData, SalesCreateSaleResponse, SalesReadSalesData, SalesReadSalesResponse, SalesGetTodaySalesSummaryResponse, SalesReadSaleData, SalesReadSaleResponse, SalesDeleteSaleData, SalesDeleteSaleResponse, StockEntriesSearchProductsForStockEntryData, StockEntriesSearchProductsForStockEntryResponse, StockEntriesReadStockEntriesData, StockEntriesReadStockEntriesResponse, StockEntriesCreateStockEntryData, StockEntriesCreateStockEntryResponse, StockEntriesReadStockEntryData, StockEntriesReadStockEntryResponse, StockEntriesUpdateStockEntryData, StockEntriesUpdateStockEntryResponse, StockEntriesDeleteStockEntryData, StockEntriesDeleteStockEntryResponse, UsersReadUsersData, UsersReadUsersResponse, UsersCreateUserData, UsersCreateUserResponse, UsersReadUserMeResponse, UsersDeleteUserMeResponse, UsersUpdateUserMeData, UsersUpdateUserMeResponse, UsersUpdatePasswordMeData, UsersUpdatePasswordMeResponse, UsersRegisterUserData, UsersRegisterUserResponse, UsersReadUserByIdData, UsersReadUserByIdResponse, UsersUpdateUserData, UsersUpdateUserResponse, UsersDeleteUserData, UsersDeleteUserResponse, UtilsTestEmailData, UtilsTestEmailResponse, UtilsHealthCheckResponse } from './types.gen';
+import type { LoginLoginAccessTokenData, LoginLoginAccessTokenResponse, LoginTestTokenResponse, LoginRecoverPasswordData, LoginRecoverPasswordResponse, LoginResetPasswordData, LoginResetPasswordResponse, LoginRecoverPasswordHtmlContentData, LoginRecoverPasswordHtmlContentResponse, MediaUploadImageData, MediaUploadImageResponse, MediaServeImageData, MediaServeImageResponse, MediaDeleteMediaData, MediaDeleteMediaResponse, MediaListMediaData, MediaListMediaResponse, PrivateCreateUserData, PrivateCreateUserResponse, ProductsReadCategoriesResponse, ProductsReadStatusesResponse, ProductsReadProductsData, ProductsReadProductsResponse, ProductsCreateProductData, ProductsCreateProductResponse, ProductsReadProductData, ProductsReadProductResponse, ProductsUpdateProductData, ProductsUpdateProductResponse, ProductsDeleteProductData, ProductsDeleteProductResponse, SalesReadPaymentMethodsData, SalesReadPaymentMethodsResponse, SalesSearchProductsForSaleData, SalesSearchProductsForSaleResponse, SalesCreateSaleData, SalesCreateSaleResponse, SalesReadSalesData, SalesReadSalesResponse, SalesGetTodaySalesSummaryResponse, SalesReadSaleData, SalesReadSaleResponse, SalesDeleteSaleData, SalesDeleteSaleResponse, StockEntriesSearchProductsForStockEntryData, StockEntriesSearchProductsForStockEntryResponse, StockEntriesReadStockEntriesData, StockEntriesReadStockEntriesResponse, StockEntriesCreateStockEntryData, StockEntriesCreateStockEntryResponse, StockEntriesReadStockEntryData, StockEntriesReadStockEntryResponse, StockEntriesUpdateStockEntryData, StockEntriesUpdateStockEntryResponse, StockEntriesDeleteStockEntryData, StockEntriesDeleteStockEntryResponse, UsersReadUsersData, UsersReadUsersResponse, UsersCreateUserData, UsersCreateUserResponse, UsersReadUserMeResponse, UsersDeleteUserMeResponse, UsersUpdateUserMeData, UsersUpdateUserMeResponse, UsersUpdatePasswordMeData, UsersUpdatePasswordMeResponse, UsersRegisterUserData, UsersRegisterUserResponse, UsersReadUserByIdData, UsersReadUserByIdResponse, UsersUpdateUserData, UsersUpdateUserResponse, UsersDeleteUserData, UsersDeleteUserResponse, UtilsTestEmailData, UtilsTestEmailResponse, UtilsHealthCheckResponse } from './types.gen';
 
 export class LoginService {
     /**
@@ -241,19 +241,6 @@ export class ProductsService {
     }
     
     /**
-     * Read Tags
-     * Retrieve product tags.
-     * @returns ProductTagPublic Successful Response
-     * @throws ApiError
-     */
-    public static readProductTags(): CancelablePromise<ProductsReadTagsResponse> {
-        return __request(OpenAPI, {
-            method: 'GET',
-            url: '/api/v1/products/tags'
-        });
-    }
-    
-    /**
      * Read Products
      * Retrieve products with optional filtering.
      *
@@ -404,11 +391,11 @@ export class SalesService {
     /**
      * Search Products For Sale
      * Fast product search for sales cart.
-     * Searches by name or tag.
+     * Searches by name or category.
      * Only returns products with status 'Active' and stock > 0.
      * @param data The data for the request.
      * @param data.q Search query
-     * @param data.tagId Filter by tag ID
+     * @param data.categoryId Filter by category ID
      * @param data.limit Maximum results to return
      * @returns ProductPublic Successful Response
      * @throws ApiError
@@ -419,7 +406,7 @@ export class SalesService {
             url: '/api/v1/sales/search-products',
             query: {
                 q: data.q,
-                tag_id: data.tagId,
+                category_id: data.categoryId,
                 limit: data.limit
             },
             errors: {
@@ -434,9 +421,11 @@ export class SalesService {
      * This is an atomic operation - both sale creation and stock update happen together.
      *
      * Business Rules:
-     * - Product must have sufficient stock
+     * - Product must exist and be active
+     * - Product must have sufficient stock (real-time check)
      * - Stock is automatically decremented
-     * - Sale amount is calculated from product selling price × quantity
+     * - Sale amount is calculated from product selling price ├ù quantity
+     * - Each sale is tracked to the cashier who created it
      * @param data The data for the request.
      * @param data.requestBody
      * @returns SalePublic Successful Response
@@ -465,7 +454,7 @@ export class SalesService {
      * @param data.paymentMethodId Filter by payment method
      * @param data.startDate Filter sales from this date
      * @param data.endDate Filter sales until this date
-     * @param data.tagId Filter by product tag
+     * @param data.categoryId Filter by product category
      * @returns SalesPublic Successful Response
      * @throws ApiError
      */
@@ -480,7 +469,7 @@ export class SalesService {
                 payment_method_id: data.paymentMethodId,
                 start_date: data.startDate,
                 end_date: data.endDate,
-                tag_id: data.tagId
+                category_id: data.categoryId
             },
             errors: {
                 422: 'Validation Error'
@@ -551,7 +540,7 @@ export class StockEntriesService {
     /**
      * Search Products For Stock Entry
      * Blazingly fast product search for stock entry.
-     * Searches by name, category name, or tag name.
+     * Searches by name or category name.
      * Returns products with all relationships loaded.
      * @param data The data for the request.
      * @param data.q Search query

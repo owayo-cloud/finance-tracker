@@ -11,7 +11,6 @@ from app.models import (
     Product, ProductCreate, ProductPublic, ProductsPublic, ProductUpdate,
     ProductCategory, ProductCategoriesPublic,
     ProductStatus, ProductStatusPublic,
-    ProductTag, ProductTagPublic
 )
 
 
@@ -44,18 +43,6 @@ def read_statuses(session: SessionDep) -> Any:
     return statuses
 
 
-# ==================== PRODUCT TAGS ====================
-
-@router.get("/tags", response_model=list[ProductTagPublic])
-def read_tags(session: SessionDep) -> Any:
-    """
-    Retrieve product tags.
-    """
-    statement = select(ProductTag)
-    tags = session.exec(statement).all()
-    return tags
-
-
 # ==================== PRODUCTS CRUD ====================
 
 @router.get("/", response_model=ProductsPublic)
@@ -81,7 +68,6 @@ def read_products(
     statement = select(Product).options(
         selectinload(Product.category),
         selectinload(Product.status),
-        selectinload(Product.tag),
         selectinload(Product.image)
     )
 
@@ -176,7 +162,6 @@ def update_product(
         .options(
             selectinload(Product.category),
             selectinload(Product.status),
-            selectinload(Product.tag),
             selectinload(Product.image)
         )
     )

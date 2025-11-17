@@ -362,11 +362,6 @@ export const ProductCreateSchema = {
             format: 'uuid',
             title: 'Status Id'
         },
-        tag_id: {
-            type: 'string',
-            format: 'uuid',
-            title: 'Tag Id'
-        },
         image_id: {
             anyOf: [
                 {
@@ -381,7 +376,7 @@ export const ProductCreateSchema = {
         }
     },
     type: 'object',
-    required: ['name', 'buying_price', 'selling_price', 'category_id', 'status_id', 'tag_id'],
+    required: ['name', 'buying_price', 'selling_price', 'category_id', 'status_id'],
     title: 'ProductCreate'
 } as const;
 
@@ -442,11 +437,6 @@ export const ProductPublicSchema = {
             format: 'uuid',
             title: 'Status Id'
         },
-        tag_id: {
-            type: 'string',
-            format: 'uuid',
-            title: 'Tag Id'
-        },
         image_id: {
             anyOf: [
                 {
@@ -475,9 +465,6 @@ export const ProductPublicSchema = {
         status: {
             '$ref': '#/components/schemas/ProductStatusPublic'
         },
-        tag: {
-            '$ref': '#/components/schemas/ProductTagPublic'
-        },
         image: {
             anyOf: [
                 {
@@ -490,7 +477,7 @@ export const ProductPublicSchema = {
         }
     },
     type: 'object',
-    required: ['name', 'buying_price', 'selling_price', 'category_id', 'status_id', 'tag_id', 'id', 'created_at', 'category', 'status', 'tag', 'image'],
+    required: ['name', 'buying_price', 'selling_price', 'category_id', 'status_id', 'id', 'created_at', 'category', 'status', 'image'],
     title: 'ProductPublic'
 } as const;
 
@@ -522,41 +509,6 @@ export const ProductStatusPublicSchema = {
     type: 'object',
     required: ['name', 'id'],
     title: 'ProductStatusPublic'
-} as const;
-
-export const ProductTagPublicSchema = {
-    properties: {
-        name: {
-            type: 'string',
-            maxLength: 100,
-            title: 'Name'
-        },
-        description: {
-            anyOf: [
-                {
-                    type: 'string',
-                    maxLength: 500
-                },
-                {
-                    type: 'null'
-                }
-            ],
-            title: 'Description'
-        },
-        id: {
-            type: 'string',
-            format: 'uuid',
-            title: 'Id'
-        },
-        created_at: {
-            type: 'string',
-            format: 'date-time',
-            title: 'Created At'
-        }
-    },
-    type: 'object',
-    required: ['name', 'id', 'created_at'],
-    title: 'ProductTagPublic'
 } as const;
 
 export const ProductUpdateSchema = {
@@ -664,18 +616,6 @@ export const ProductUpdateSchema = {
                 }
             ],
             title: 'Status Id'
-        },
-        tag_id: {
-            anyOf: [
-                {
-                    type: 'string',
-                    format: 'uuid'
-                },
-                {
-                    type: 'null'
-                }
-            ],
-            title: 'Tag Id'
         },
         image_id: {
             anyOf: [

@@ -75,7 +75,6 @@ export type ProductCreate = {
     reorder_level?: (number | null);
     category_id: string;
     status_id: string;
-    tag_id: string;
     image_id?: (string | null);
 };
 
@@ -88,13 +87,11 @@ export type ProductPublic = {
     reorder_level?: (number | null);
     category_id: string;
     status_id: string;
-    tag_id: string;
     image_id?: (string | null);
     id: string;
     created_at: string;
     category: ProductCategoryPublic;
     status: ProductStatusPublic;
-    tag: ProductTagPublic;
     image: (MediaPublic | null);
 };
 
@@ -109,13 +106,6 @@ export type ProductStatusPublic = {
     id: string;
 };
 
-export type ProductTagPublic = {
-    name: string;
-    description?: (string | null);
-    id: string;
-    created_at: string;
-};
-
 export type ProductUpdate = {
     name?: (string | null);
     description?: (string | null);
@@ -125,7 +115,6 @@ export type ProductUpdate = {
     reorder_level?: (number | null);
     category_id?: (string | null);
     status_id?: (string | null);
-    tag_id?: (string | null);
     image_id?: (string | null);
 };
 
@@ -324,8 +313,6 @@ export type ProductsReadCategoriesResponse = (ProductCategoriesPublic);
 
 export type ProductsReadStatusesResponse = (Array<ProductStatusPublic>);
 
-export type ProductsReadTagsResponse = (Array<ProductTagPublic>);
-
 export type ProductsReadProductsData = {
     categoryId?: (string | null);
     limit?: number;
@@ -372,6 +359,10 @@ export type SalesReadPaymentMethodsResponse = (PaymentMethodsPublic);
 
 export type SalesSearchProductsForSaleData = {
     /**
+     * Filter by category ID
+     */
+    categoryId?: (string | null);
+    /**
      * Maximum results to return
      */
     limit?: number;
@@ -379,10 +370,6 @@ export type SalesSearchProductsForSaleData = {
      * Search query
      */
     q: string;
-    /**
-     * Filter by tag ID
-     */
-    tagId?: (string | null);
 };
 
 export type SalesSearchProductsForSaleResponse = (Array<ProductPublic>);
@@ -394,6 +381,10 @@ export type SalesCreateSaleData = {
 export type SalesCreateSaleResponse = (SalePublic);
 
 export type SalesReadSalesData = {
+    /**
+     * Filter by product category
+     */
+    categoryId?: (string | null);
     /**
      * Filter sales until this date
      */
@@ -412,10 +403,6 @@ export type SalesReadSalesData = {
      * Filter sales from this date
      */
     startDate?: (string | null);
-    /**
-     * Filter by product tag
-     */
-    tagId?: (string | null);
 };
 
 export type SalesReadSalesResponse = (SalesPublic);

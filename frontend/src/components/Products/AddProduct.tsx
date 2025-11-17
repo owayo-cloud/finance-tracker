@@ -85,7 +85,7 @@ const AddProduct = () => {
 
   const { data: tagsData, isLoading: loadingTags } = useQuery({
     queryKey: ["tags"],
-    queryFn: () => ProductsService.readTags(),
+    queryFn: () => ProductsService.readProductTags(),
   })
 
   const {

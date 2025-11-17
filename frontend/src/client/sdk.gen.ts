@@ -246,7 +246,7 @@ export class ProductsService {
      * @returns ProductTagPublic Successful Response
      * @throws ApiError
      */
-    public static readTags(): CancelablePromise<ProductsReadTagsResponse> {
+    public static readProductTags(): CancelablePromise<ProductsReadTagsResponse> {
         return __request(OpenAPI, {
             method: 'GET',
             url: '/api/v1/products/tags'

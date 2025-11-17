@@ -26,10 +26,10 @@ def search_products_for_stock_entry(
 ) -> Any:
     """
     Blazingly fast product search for stock entry.
-    Searches by name, category name, or tag name.
+    Searches by name or category name.
     Returns products with all relationships loaded.
     """
-    from app.models import ProductCategory, ProductTag
+    from app.models import ProductCategory
     
     # Build search pattern for case-insensitive search
     search_pattern = f"%{q}%"
@@ -37,19 +37,16 @@ def search_products_for_stock_entry(
     statement = (
         select(Product)
         .join(Product.category)
-        .join(Product.tag)
         .join(Product.status)
         .where(
             or_(
                 Product.name.ilike(search_pattern),
-                ProductCategory.name.ilike(search_pattern),
-                ProductTag.name.ilike(search_pattern)
+                ProductCategory.name.ilike(search_pattern)
             )
         )
         .options(
             selectinload(Product.category),
             selectinload(Product.status),
-            selectinload(Product.tag),
             selectinload(Product.image)
         )
         .limit(limit)

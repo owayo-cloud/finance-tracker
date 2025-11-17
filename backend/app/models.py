@@ -76,7 +76,7 @@ class UsersPublic(SQLModel):
 # ==================== MEDIA MODELS ====================
 
 class MediaBase(SQLModel):
-    uuid: str = Field(max_length=36, unique=True)
+    file_path: str = Field(max_length=500)
     file_name: str = Field(max_length=255)
     mime_type: Optional[str] = Field(default=None, max_length=100)
     size: int
@@ -104,6 +104,7 @@ class Media(MediaBase, table=True):
 class MediaPublic(MediaBase):
     id: uuid.UUID
     created_at: datetime
+    url: Optional[str] = None  # Added for serving the image
     
     model_config = {"from_attributes": True}
     
@@ -184,48 +185,6 @@ class ProductStatusPublic(ProductStatusBase):
     model_config = {"from_attributes": True}
     
     
-# ==================== PRODUCT TAG MODELS ====================
-
-class ProductTagBase(SQLModel):
-    name: str = Field(max_length=100, unique=True, index=True)
-    description: Optional[str] = Field(default=None, max_length=500)
-    
-
-class ProductTagCreate(ProductTagBase):
-    pass
-
-
-class ProductTagUpdate(SQLModel):
-    name: Optional[str] = Field(default=None, max_length=100)
-    description: Optional[str] = Field(default=None, max_length=500)
-    
-
-class ProductTag(ProductTagBase, table=True):
-    __tablename__ = "product_tag"
-    """
-    Tags: Whisky, Vodka, Wine, Champagne, Cognac & Brandy, 
-    Beers, Ciders, Beers-infusions, Tequila, Rum, Gin, Soft-Drinks, Smokes
-    """
-    id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
-    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
-    updated_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
-    
-    # Relationships
-    products: list["Product"] = Relationship(back_populates="tag")
-
-
-class ProductTagPublic(ProductTagBase):
-    id: uuid.UUID
-    created_at: datetime
-    
-    model_config = {"from_attributes": True}
-
-
-class ProductTagsPublic(SQLModel):
-    data: list[ProductTagPublic]
-    count: int
-    
-    
 # ==================== PRODUCT MODELS ====================
 
 class ProductBase(SQLModel):
@@ -233,12 +192,11 @@ class ProductBase(SQLModel):
     description: Optional[str] = Field(default=None, max_length=1000)
     buying_price: Decimal = Field(decimal_places=2, gt=0)
     selling_price: Decimal = Field(decimal_places=2, gt=0)
-    current_stock: int = Field(default=0, ge=0)  # Fixed: removed decimal_places
-    reorder_level: Optional[int] = Field(default=None, ge=0)  # Added to base
+    current_stock: int = Field(default=0, ge=0)
+    reorder_level: Optional[int] = Field(default=None, ge=0)
     category_id: uuid.UUID = Field(foreign_key="product_category.id")
     status_id: uuid.UUID = Field(foreign_key="product_status.id")
-    tag_id: uuid.UUID = Field(foreign_key="product_tag.id")
-    image_id: Optional[uuid.UUID] = Field(default=None, foreign_key="media.id")  # FIXED: Changed from uuid.Optional[UUID]
+    image_id: Optional[uuid.UUID] = Field(default=None, foreign_key="media.id")
 
 class ProductCreate(ProductBase):
     pass
@@ -251,10 +209,9 @@ class ProductUpdate(SQLModel):
     selling_price: Optional[Decimal] = Field(default=None, decimal_places=2, gt=0)
     current_stock: Optional[int] = Field(default=None, ge=0)
     reorder_level: Optional[int] = Field(default=None, ge=0)
-    category_id: Optional[uuid.UUID] = Field(default=None, foreign_key="product_category.id")  # FIXED
-    status_id: Optional[uuid.UUID] = Field(default=None, foreign_key="product_status.id")  # FIXED
-    tag_id: Optional[uuid.UUID] = Field(default=None, foreign_key="product_tag.id")
-    image_id: Optional[uuid.UUID] = Field(default=None, foreign_key="media.id")  # FIXED
+    category_id: Optional[uuid.UUID] = Field(default=None, foreign_key="product_category.id")
+    status_id: Optional[uuid.UUID] = Field(default=None, foreign_key="product_status.id")
+    image_id: Optional[uuid.UUID] = Field(default=None, foreign_key="media.id")
 
 class Product(ProductBase, table=True):
     __tablename__ = "product"
@@ -267,7 +224,6 @@ class Product(ProductBase, table=True):
     # Relationships
     category: ProductCategory = Relationship(back_populates="products")
     status: ProductStatus = Relationship(back_populates="products")
-    tag: ProductTag = Relationship(back_populates="products")
     created_by: User = Relationship(back_populates="products")
     image: Optional[Media] = Relationship(back_populates="products")
     stock_entries: list["StockEntry"] = Relationship(back_populates="product")
@@ -278,7 +234,6 @@ class ProductPublic(ProductBase):
     created_at: datetime
     category: ProductCategoryPublic
     status: ProductStatusPublic
-    tag: ProductTagPublic
     image: Optional[MediaPublic]
     
     model_config = {"from_attributes": True}

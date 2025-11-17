@@ -60,8 +60,9 @@ async def upload_image(
             detail=f"Invalid file extension. Allowed extensions: {', '.join(ALLOWED_EXTENSIONS)}"
         )
     
-    # Generate unique filename
-    unique_filename = f"{uuid_lib.uuid4()}{file_ext}"
+    # Generate unique filename with UUID
+    file_uuid = str(uuid_lib.uuid4())
+    unique_filename = f"{file_uuid}{file_ext}"
     
     # Get upload directory
     upload_dir = get_upload_dir()
@@ -77,11 +78,11 @@ async def upload_image(
             detail=f"Failed to save file: {str(e)}"
         )
     
-    # Create media record in database
+    # Create media record in database with relative path
     relative_path = f"products/{unique_filename}"
     media_in = MediaCreate(
-        file_name=file.filename or unique_filename,
         file_path=relative_path,
+        file_name=unique_filename,
         mime_type=file.content_type,
         size=len(content)
     )

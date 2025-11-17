@@ -2,7 +2,7 @@ from sqlmodel import Session, create_engine, select
 
 from app import crud
 from app.core.config import settings
-from app.models import User, UserCreate, ProductTag, ProductCategory, ProductStatus
+from app.models import User, UserCreate, ProductCategory, ProductStatus
 
 engine = create_engine(str(settings.SQLALCHEMY_DATABASE_URI))
 
@@ -34,44 +34,6 @@ def init_db(session: Session) -> None:
 
     _seed_product_categories(session)
     _seed_product_statuses(session)
-    _seed_product_tags(session)
-
-
-def _seed_product_tags(session: Session) -> None:
-    import logging
-
-    logger = logging.getLogger(__name__)
-
-    tags = [
-        {"name": "Whisky", "description": "Whisky and whiskey products"},
-        {"name": "Vodka", "description": "Vodka products"},
-        {"name": "Wine", "description": "Wine products"},
-        {"name": "Champagne", "description": "Champagne and sparkling wine"},
-        {"name": "Cognac & Brandy", "description": "Cognac and brandy products"},
-        {"name": "Beers", "description": "Beer products"},
-        {"name": "Ciders", "description": "Cider products"},
-        {"name": "Beers-infusions", "description": "Beer infusions and flavored beers"},
-        {"name": "Tequila", "description": "Tequila products"},
-        {"name": "Rum", "description": "Rum products"},
-        {"name": "Gin", "description": "Gin products"},
-        {
-            "name": "Soft-Drinks",
-            "description": "Soft drinks and non-alcoholic beverages",
-        },
-        {"name": "Smokes", "description": "Cigarettes and tobacco products"},
-    ]
-
-    for tag_data in tags:
-        statement = select(ProductTag).where(ProductTag.name == tag_data["name"])
-        existing_tag = session.exec(statement).first()
-
-        if not existing_tag:
-            tag = ProductTag(**tag_data)
-            session.add(tag)
-            logger.info(f"Created product tag: {tag_data['name']}")
-
-    session.commit()
-    logger.info("Product tags seeded successfully")
 
 
 def _seed_product_categories(session: Session) -> None:
@@ -80,10 +42,19 @@ def _seed_product_categories(session: Session) -> None:
     logger = logging.getLogger(__name__)
 
     categories = [
-        {"name": "Bottles", "description": "Bottled spirits and liquors"},
-        {"name": "Cans", "description": "Canned beverages and beers"},
-        {"name": "Wines", "description": "Wine products"},
-        {"name": "Others", "description": "Other products and miscellaneous items"},
+        {"name": "Whisky", "description": "Whisky and whiskey products"},
+        {"name": "Vodka", "description": "Vodka products"},
+        {"name": "Wine", "description": "Wine products"},
+        {"name": "Champagne", "description": "Champagne and sparkling wines"},
+        {"name": "Cognac & Brandy", "description": "Cognac and brandy products"},
+        {"name": "Beers", "description": "Beer products"},
+        {"name": "Ciders", "description": "Cider products"},
+        {"name": "Beers-infusions", "description": "Beer infusions and flavored beers"},
+        {"name": "Tequila", "description": "Tequila products"},
+        {"name": "Rum", "description": "Rum products"},
+        {"name": "Gin", "description": "Gin products"},
+        {"name": "Soft-Drinks", "description": "Non-alcoholic beverages"},
+        {"name": "Smokes", "description": "Tobacco products"},
     ]
 
     for category_data in categories:

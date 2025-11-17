@@ -319,13 +319,12 @@ function ProductsTable() {
     })
   }, [category, status])
 
-  // Column visibility state - hide Stock, BP, SP, Description, Image, Category by default
+  // Column visibility state - hide Stock, BP, SP, Description, Image by default
   const [visibleColumns, setVisibleColumns] = useState({
     image: false,
     name: true,
     description: false,
-    category: false,
-    tag: true,
+    category: true,
     buyingPrice: false,
     sellingPrice: false,
     currentStock: false,
@@ -712,10 +711,6 @@ function ProductsTable() {
               {visibleColumns.category ? <FiEye /> : <FiEyeOff />}
               Category
             </MenuItem>
-            <MenuItem value="tag" onClick={() => toggleColumn("tag")}>
-              {visibleColumns.tag ? <FiEye /> : <FiEyeOff />}
-              Tag
-            </MenuItem>
             <MenuItem value="buyingPrice" onClick={() => toggleColumn("buyingPrice")}>
               {visibleColumns.buyingPrice ? <FiEye /> : <FiEyeOff />}
               Buying Price
@@ -746,7 +741,6 @@ function ProductsTable() {
             {/* {visibleColumns.image && <Table.ColumnHeader>Image</Table.ColumnHeader>} */}
             {visibleColumns.name && <Table.ColumnHeader>Product</Table.ColumnHeader>}
             {visibleColumns.category && <Table.ColumnHeader>Category</Table.ColumnHeader>}
-            {visibleColumns.tag && <Table.ColumnHeader>Tag</Table.ColumnHeader>}
             {visibleColumns.buyingPrice && <Table.ColumnHeader>Buying Price</Table.ColumnHeader>}
             {visibleColumns.sellingPrice && <Table.ColumnHeader>Selling Price</Table.ColumnHeader>}
             {visibleColumns.currentStock && <Table.ColumnHeader>Current Stock</Table.ColumnHeader>}
@@ -784,13 +778,6 @@ function ProductsTable() {
                 <Table.Cell>
                   <Badge colorScheme="purple" size="sm">
                     {product.category?.name || "-"}
-                  </Badge>
-                </Table.Cell>
-              )}
-              {visibleColumns.tag && (
-                <Table.Cell>
-                  <Badge colorScheme="blue" size="sm">
-                    {product.tag?.name || "-"}
                   </Badge>
                 </Table.Cell>
               )}

@@ -104,14 +104,14 @@ function Sales() {
   
   // State management
   const [searchQuery, setSearchQuery] = useState("")
-  const [selectedTagId, setSelectedTagId] = useState<string>("")
+  const [selectedCategoryId, setSelectedCategoryId] = useState<string>("")
   const [cart, setCart] = useState<CartItem[]>([])
   const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<string>("")
 
-  // Fetch product tags for filtering
-  const { data: tags } = useQuery({
-    queryKey: ["product-tags"],
-    queryFn: () => ProductsService.readProductTags(),
+  // Fetch product categories for filtering
+  const { data: categories } = useQuery({
+    queryKey: ["categories"],
+    queryFn: () => ProductsService.readCategories(),
   })
 
   // Fetch payment methods
@@ -129,14 +129,15 @@ function Sales() {
 
   // Search products mutation
   const searchProducts = useQuery({
-    queryKey: ["search-products", searchQuery, selectedTagId],
+    queryKey: ["search-products", searchQuery, selectedCategoryId],
     queryFn: () =>
       SalesService.searchProductsForSale({
         q: searchQuery || "a", // Default search to show some products
-        tagId: selectedTagId || undefined,
+        categoryId: selectedCategoryId || undefined,
         limit: 50,
       }),
-    enabled: searchQuery.length > 0 || selectedTagId.length > 0,
+    // Always enabled - when "All" is selected, show all products
+    enabled: true,
   })
 
   // Create sale mutation
@@ -336,21 +337,21 @@ function Sales() {
                 <Flex gap={2} flexWrap="wrap">
                   <Button
                     size="sm"
-                    variant={selectedTagId === "" ? "solid" : "outline"}
-                    colorScheme={selectedTagId === "" ? "blue" : "gray"}
-                    onClick={() => setSelectedTagId("")}
+                    variant={selectedCategoryId === "" ? "solid" : "outline"}
+                    colorScheme={selectedCategoryId === "" ? "blue" : "gray"}
+                    onClick={() => setSelectedCategoryId("")}
                   >
                     All
                   </Button>
-                  {tags?.map((tag: { id: string; name: string }) => (
+                  {categories?.data?.map((category: { id: string; name: string }) => (
                     <Button
-                      key={tag.id}
+                      key={category.id}
                       size="sm"
-                      variant={selectedTagId === tag.id ? "solid" : "outline"}
-                      colorScheme={selectedTagId === tag.id ? "blue" : "gray"}
-                      onClick={() => setSelectedTagId(tag.id)}
+                      variant={selectedCategoryId === category.id ? "solid" : "outline"}
+                      colorScheme={selectedCategoryId === category.id ? "blue" : "gray"}
+                      onClick={() => setSelectedCategoryId(category.id)}
                     >
-                      {tag.name}
+                      {category.name}
                     </Button>
                   ))}
                 </Flex>
@@ -360,67 +361,63 @@ function Sales() {
 
           {/* Scrollable Product Grid */}
           <Box flex={1} overflowY="auto" p={4}>
-            {searchQuery || selectedTagId ? (
-              searchProducts.isLoading ? (
-                <Grid templateColumns="repeat(auto-fill, minmax(160px, 1fr))" gap={3}>
-                  {[...Array(8)].map((_, i) => (
-                    <Box key={i} h="200px" bg="var(--chakra-colors-bg-surface)" borderRadius="lg" />
-                  ))}
-                </Grid>
-              ) : searchProducts.data && searchProducts.data.length > 0 ? (
-                <Grid templateColumns="repeat(auto-fill, minmax(160px, 1fr))" gap={3}>
-                  {searchProducts.data.map((product) => (
-                    <Card.Root
-                      key={product.id}
-                      cursor="pointer"
-                      onClick={() => addToCart(product)}
-                      borderWidth={1}
-                      borderColor="var(--chakra-colors-input-border)"
-                      transition="all 0.2s"
-                      _hover={{
-                        borderColor: "var(--chakra-colors-border-focused)",
-                        boxShadow: "lg",
-                        transform: "translateY(-2px)",
-                      }}
-                      _active={{
-                        transform: "scale(0.98)",
-                      }}
-                    >
-                      <Card.Body p={3}>
-                        <VStack align="stretch" gap={2}>
-                          <Badge colorScheme="blue" alignSelf="flex-start" fontSize="xs">
-                            {product.tag?.name}
-                          </Badge>
-                          <Text fontWeight="bold" fontSize="sm" lineClamp={2} minH="40px">
-                            {product.name}
+            {searchProducts.isLoading ? (
+              <Grid templateColumns="repeat(auto-fill, minmax(160px, 1fr))" gap={3}>
+                {[...Array(8)].map((_, i) => (
+                  <Box key={i} h="200px" bg="var(--chakra-colors-bg-surface)" borderRadius="lg" />
+                ))}
+              </Grid>
+            ) : searchProducts.data && searchProducts.data.length > 0 ? (
+              <Grid templateColumns="repeat(auto-fill, minmax(160px, 1fr))" gap={3}>
+                {searchProducts.data.map((product) => (
+                  <Card.Root
+                    key={product.id}
+                    cursor="pointer"
+                    onClick={() => addToCart(product)}
+                    borderWidth={1}
+                    borderColor="var(--chakra-colors-input-border)"
+                    transition="all 0.2s"
+                    _hover={{
+                      borderColor: "var(--chakra-colors-border-focused)",
+                      boxShadow: "lg",
+                      transform: "translateY(-2px)",
+                    }}
+                    _active={{
+                      transform: "scale(0.98)",
+                    }}
+                  >
+                    <Card.Body p={3}>
+                      <VStack align="stretch" gap={2}>
+                        <Badge colorScheme="purple" alignSelf="flex-start" fontSize="xs">
+                          {product.category?.name}
+                        </Badge>
+                        <Text fontWeight="bold" fontSize="sm" lineClamp={2} minH="40px">
+                          {product.name}
+                        </Text>
+                        <Flex justify="space-between" align="center" mt={2}>
+                          <Text fontSize="xl" fontWeight="bold" color="green.500">
+                            Ksh {formatCurrency(Number(product.selling_price))}
                           </Text>
-                          <Flex justify="space-between" align="center" mt={2}>
-                            <Text fontSize="xl" fontWeight="bold" color="green.500">
-                              Ksh {formatCurrency(Number(product.selling_price))}
-                            </Text>
-                          </Flex>
-                          <Text fontSize="xs" color="gray.500">
-                            Stock: {product.current_stock}
-                          </Text>
-                          <Button size="sm" colorScheme="blue" w="full">
-                            Add
-                          </Button>
-                        </VStack>
-                      </Card.Body>
-                    </Card.Root>
-                  ))}
-                </Grid>
-              ) : (
-                <Flex direction="column" align="center" justify="center" h="full" gap={4}>
-                  <Text fontSize="lg" color="gray.500">No products found</Text>
-                  <Text fontSize="sm" color="gray.400">Try a different search or category</Text>
-                </Flex>
-              )
+                        </Flex>
+                        <Text fontSize="xs" color="gray.500">
+                          Stock: {product.current_stock}
+                        </Text>
+                        <Button size="sm" colorScheme="blue" w="full">
+                          Add
+                        </Button>
+                      </VStack>
+                    </Card.Body>
+                  </Card.Root>
+                ))}
+              </Grid>
             ) : (
               <Flex direction="column" align="center" justify="center" h="full" gap={4}>
-                <FiSearch size={48} color="var(--chakra-colors-gray-400)" />
-                <Text fontSize="lg" color="gray.500">Search for products to add to cart</Text>
-                <Text fontSize="sm" color="gray.400">Use the search bar or select a category</Text>
+                <Text fontSize="lg" color="gray.500">No products found</Text>
+                <Text fontSize="sm" color="gray.400">
+                  {searchQuery || selectedCategoryId 
+                    ? "Try a different search or category" 
+                    : "No products available"}
+                </Text>
               </Flex>
             )}
           </Box>

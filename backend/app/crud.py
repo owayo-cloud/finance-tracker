@@ -76,7 +76,6 @@ class CRUDProduct(CRUDBase[Product, ProductCreate, ProductUpdate]):
             .options(
                 selectinload(Product.category),
                 selectinload(Product.status),
-                selectinload(Product.tag),
                 selectinload(Product.image),
             )
         )
@@ -97,7 +96,6 @@ class CRUDProduct(CRUDBase[Product, ProductCreate, ProductUpdate]):
             .options(
                 selectinload(Product.category),
                 selectinload(Product.status),
-                selectinload(Product.tag),
                 selectinload(Product.image),
             )
         )

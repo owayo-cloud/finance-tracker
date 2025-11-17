@@ -10,7 +10,7 @@ from app.api.deps import AdminUser, CurrentUser, SessionDep
 from app.models import (
     Sale, SaleCreate, SaleUpdate, SalePublic, SalesPublic,
     Product, PaymentMethod, PaymentMethodPublic, PaymentMethodsPublic,
-    User, ProductPublic, ProductTag
+    User, ProductPublic
 )
 
 
@@ -52,12 +52,12 @@ def search_products_for_sale(
     session: SessionDep,
     current_user: CurrentUser,
     q: str = Query(..., min_length=1, description="Search query"),
-    tag_id: Optional[str] = Query(None, description="Filter by tag ID"),
+    category_id: Optional[str] = Query(None, description="Filter by category ID"),
     limit: int = Query(50, le=100, description="Maximum results to return")
 ) -> Any:
     """
     Fast product search for sales cart.
-    Searches by name or tag.
+    Searches by name or category.
     Only returns products with status 'Active' and stock > 0.
     """
     from app.models import ProductCategory, ProductStatus
@@ -71,14 +71,13 @@ def search_products_for_sale(
         Product.current_stock > 0
     ]
     
-    # Add tag filter if provided
-    if tag_id:
-        conditions.append(Product.tag_id == tag_id)
+    # Add category filter if provided
+    if category_id:
+        conditions.append(Product.category_id == category_id)
     
     statement = (
         select(Product)
         .join(Product.category)
-        .join(Product.tag)
         .join(Product.status)
         .where(
             and_(
@@ -89,16 +88,15 @@ def search_products_for_sale(
         )
         .options(
             selectinload(Product.category),
-            selectinload(Product.tag),
             selectinload(Product.status),
             selectinload(Product.image)
         )
         .limit(limit)
     )
     
-    # Add tag filter if specified
-    if tag_id:
-        statement = statement.where(Product.tag_id == tag_id)
+    # Add category filter if specified
+    if category_id:
+        statement = statement.where(Product.category_id == category_id)
     
     products = session.exec(statement).all()
     
@@ -203,7 +201,7 @@ def read_sales(
     payment_method_id: Optional[str] = Query(None, description="Filter by payment method"),
     start_date: Optional[date] = Query(None, description="Filter sales from this date"),
     end_date: Optional[date] = Query(None, description="Filter sales until this date"),
-    tag_id: Optional[str] = Query(None, description="Filter by product tag")
+    category_id: Optional[str] = Query(None, description="Filter by product category")
 ) -> Any:
     """
     Retrieve sales with optional filtering.
@@ -245,10 +243,10 @@ def read_sales(
     if end_date:
         conditions.append(Sale.sale_date <= end_date)
     
-    # Tag filter requires joining with Product
-    if tag_id:
+    # Category filter requires joining with Product
+    if category_id:
         statement = statement.join(Product, Sale.product_id == Product.id)
-        conditions.append(Product.tag_id == tag_id)
+        conditions.append(Product.category_id == category_id)
     
     if conditions:
         statement = statement.where(and_(*conditions))

@@ -16,15 +16,91 @@ import {
 } from "../ui/drawer"
 import SidebarItems from "./SidebarItems"
 
+// Shared scrollbar styles
+const SCROLLBAR_STYLES = {
+  "&::-webkit-scrollbar": {
+    width: "8px",
+  },
+  "&::-webkit-scrollbar-track": {
+    background: "transparent",
+    borderRadius: "4px",
+  },
+  "&::-webkit-scrollbar-thumb": {
+    background: "rgba(59, 130, 246, 0.3)",
+    borderRadius: "4px",
+    border: "2px solid transparent",
+    backgroundClip: "content-box",
+  },
+  "&::-webkit-scrollbar-thumb:hover": {
+    background: "rgba(59, 130, 246, 0.5)",
+    backgroundClip: "content-box",
+  },
+  "&::-webkit-scrollbar-thumb:active": {
+    background: "rgba(59, 130, 246, 0.7)",
+    backgroundClip: "content-box",
+  },
+  scrollbarWidth: "thin",
+  scrollbarColor: "rgba(59, 130, 246, 0.3) transparent",
+} as const
+
+// Shared color values
+const COLORS = {
+  glassBg: { base: "rgba(15, 20, 30, 0.95)", _light: "rgba(255, 255, 255, 0.95)" },
+  footerBg: { base: "rgba(10, 14, 20, 0.6)", _light: "rgba(255, 255, 255, 0.6)" },
+  border: { base: "rgba(59, 130, 246, 0.2)", _light: "rgba(59, 130, 246, 0.3)" },
+  text: { base: "gray.300", _light: "gray.700" },
+  subtext: { base: "gray.400", _light: "gray.600" },
+} as const
+
+// Footer component used in both mobile and desktop
+const SidebarFooter = ({ currentUser, logout }: { currentUser?: UserPublic | null; logout: () => void }) => (
+  <Box 
+    borderTop="1px solid" 
+    borderColor={COLORS.border}
+    bg={COLORS.footerBg}
+    p={4}
+  >
+    <Flex
+      as="button"
+      onClick={logout}
+      alignItems="center"
+      gap={3}
+      px={3}
+      py={2}
+      borderRadius="lg"
+      w="full"
+      color={COLORS.text}
+      aria-label="Log out of your account"
+      _hover={{
+        bg: "rgba(59, 130, 246, 0.1)",
+        color: "#60a5fa",
+        transform: "translateX(2px)",
+      }}
+      transition="all 0.2s"
+    >
+      <FiLogOut aria-hidden="true" />
+      <Text fontSize="sm" fontWeight="medium">Log Out</Text>
+    </Flex>
+    
+    {currentUser?.full_name && (
+      <Text fontSize="xs" color={COLORS.subtext} mt={2} truncate>
+        {currentUser.full_name}
+      </Text>
+    )}
+  </Box>
+)
+
 const Sidebar = () => {
   const queryClient = useQueryClient()
   const currentUser = queryClient.getQueryData<UserPublic>(["currentUser"])
   const { logout } = useAuth()
   const [open, setOpen] = useState(false)
 
+  const handleClose = () => setOpen(false)
+
   return (
     <>
-      {/* Mobile */}
+      {/* Mobile Drawer */}
       <DrawerRoot
         placement="start"
         open={open}
@@ -36,7 +112,7 @@ const Sidebar = () => {
             variant="ghost"
             color="gray.300"
             display={{ base: "flex", md: "none" }}
-            aria-label="Open Menu"
+            aria-label="Open navigation menu"
             position="absolute"
             zIndex="100"
             m={4}
@@ -55,161 +131,43 @@ const Sidebar = () => {
             <FaBars />
           </IconButton>
         </DrawerTrigger>
-        <DrawerContent maxW="xs" bg={{ base: "rgba(15, 20, 30, 0.98)", _light: "rgba(255, 255, 255, 0.98)" }} backdropFilter="blur(20px)">
+        <DrawerContent 
+          maxW="xs" 
+          bg={{ base: "rgba(15, 20, 30, 0.98)", _light: "rgba(255, 255, 255, 0.98)" }} 
+          backdropFilter="blur(20px)"
+        >
           <DrawerCloseTrigger />
-          <DrawerBody 
-            p={0}
-            bg={{ base: "rgba(15, 20, 30, 0.95)", _light: "rgba(255, 255, 255, 0.95)" }}
-            css={{
-              "&::-webkit-scrollbar": {
-                width: "8px",
-              },
-              "&::-webkit-scrollbar-track": {
-                background: "transparent",
-              },
-              "&::-webkit-scrollbar-thumb": {
-                background: "rgba(59, 130, 246, 0.3)",
-                borderRadius: "4px",
-              },
-              "&::-webkit-scrollbar-thumb:hover": {
-                background: "rgba(59, 130, 246, 0.5)",
-              },
-              scrollbarWidth: "thin",
-              scrollbarColor: "rgba(59, 130, 246, 0.3) transparent",
-            }}
-          >
+          <DrawerBody p={0} bg={COLORS.glassBg} css={SCROLLBAR_STYLES}>
             <Flex flexDir="column" h="full">
               <Box flex="1" overflowY="auto" p={4}>
-                <SidebarItems onClose={() => setOpen(false)} />
+                <SidebarItems onClose={handleClose} />
               </Box>
               
-              {/* Footer section - always visible */}
-              <Box 
-                borderTop="1px solid" 
-                borderColor={{ base: "rgba(59, 130, 246, 0.2)", _light: "rgba(59, 130, 246, 0.3)" }}
-                bg={{ base: "rgba(10, 14, 20, 0.6)", _light: "rgba(255, 255, 255, 0.6)" }}
-                p={4}
-              >
-                <Flex
-                  as="button"
-                  onClick={() => {
-                    logout()
-                  }}
-                  alignItems="center"
-                  gap={3}
-                  px={3}
-                  py={2}
-                  borderRadius="lg"
-                  w="full"
-                  color={{ base: "gray.300", _light: "gray.700" }}
-                  _hover={{
-                    bg: "rgba(59, 130, 246, 0.1)",
-                    color: "#60a5fa",
-                    transform: "translateX(2px)",
-                  }}
-                  transition="all 0.2s"
-                >
-                  <FiLogOut />
-                  <Text fontWeight="medium">Log Out</Text>
-                </Flex>
-                
-                {currentUser?.full_name && (
-                  <Text fontSize="xs" color={{ base: "gray.400", _light: "gray.600" }} mt={2} truncate>
-                    {currentUser.full_name}
-                  </Text>
-                )}
-              </Box>
+              <SidebarFooter currentUser={currentUser} logout={logout} />
             </Flex>
           </DrawerBody>
-          <DrawerCloseTrigger />
         </DrawerContent>
       </DrawerRoot>
 
-      {/* Desktop */}
+      {/* Desktop Sidebar */}
       <Box
         display={{ base: "none", md: "flex" }}
         position="sticky"
-        bg={{ base: "rgba(15, 20, 30, 0.95)", _light: "rgba(255, 255, 255, 0.95)" }}
+        bg={COLORS.glassBg}
         backdropFilter="blur(20px) saturate(180%)"
         borderRight="1px solid"
-        borderColor={{ base: "rgba(59, 130, 246, 0.2)", _light: "rgba(59, 130, 246, 0.3)" }}
+        borderColor={COLORS.border}
         top={0}
         minW="xs"
         h="100vh"
         flexDirection="column"
         boxShadow={{ base: "4px 0 20px rgba(0, 0, 0, 0.3)", _light: "4px 0 20px rgba(0, 0, 0, 0.1)" }}
       >
-        {/* Scrollable menu items */}
-        <Box 
-          flex="1"
-          overflowY="auto"
-          p={4}
-          css={{
-            "&::-webkit-scrollbar": {
-              width: "8px",
-            },
-            "&::-webkit-scrollbar-track": {
-              background: "transparent",
-              borderRadius: "4px",
-            },
-            "&::-webkit-scrollbar-thumb": {
-              background: "rgba(59, 130, 246, 0.3)",
-              borderRadius: "4px",
-              border: "2px solid transparent",
-              backgroundClip: "content-box",
-            },
-            "&::-webkit-scrollbar-thumb:hover": {
-              background: "rgba(59, 130, 246, 0.5)",
-              backgroundClip: "content-box",
-            },
-            "&::-webkit-scrollbar-thumb:active": {
-              background: "rgba(59, 130, 246, 0.7)",
-              backgroundClip: "content-box",
-            },
-            // Firefox
-            scrollbarWidth: "thin",
-            scrollbarColor: "rgba(59, 130, 246, 0.3) transparent",
-          }}
-        >
+        <Box flex="1" overflowY="auto" p={4} css={SCROLLBAR_STYLES}>
           <SidebarItems />
         </Box>
 
-        {/* Footer section - always visible */}
-        <Box 
-          borderTop="1px solid" 
-          borderColor={{ base: "rgba(59, 130, 246, 0.2)", _light: "rgba(59, 130, 246, 0.3)" }}
-          bg={{ base: "rgba(10, 14, 20, 0.6)", _light: "rgba(255, 255, 255, 0.6)" }}
-          p={4}
-        >
-          <Flex
-            as="button"
-            onClick={() => {
-              logout()
-            }}
-            alignItems="center"
-            gap={3}
-            px={3}
-            py={2}
-            borderRadius="lg"
-            w="full"
-            color={{ base: "gray.300", _light: "gray.700" }}
-            _hover={{
-              bg: "rgba(59, 130, 246, 0.1)",
-              color: "#60a5fa",
-              transform: "translateX(2px)",
-            }}
-            transition="all 0.2s"
-          >
-            <FiLogOut />
-            <Text fontSize="sm" fontWeight="medium">Log Out</Text>
-          </Flex>
-          
-          {currentUser?.full_name && (
-            <Text fontSize="xs" color={{ base: "gray.400", _light: "gray.600" }} mt={2} truncate>
-              {currentUser.full_name}
-            </Text>
-          )}
-        </Box>
+        <SidebarFooter currentUser={currentUser} logout={logout} />
       </Box>
     </>
   )

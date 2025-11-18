@@ -1,10 +1,16 @@
+import logging
+
 from sqlmodel import Session, create_engine, select
 
 from app import crud
 from app.core.config import settings
+from app.core.logging_config import get_logger
 from app.models import User, UserCreate, ProductCategory, ProductStatus
 
+logger = get_logger(__name__)
+
 engine = create_engine(str(settings.SQLALCHEMY_DATABASE_URI))
+logger.info(f"✅ Database engine created: {settings.POSTGRES_SERVER}:{settings.POSTGRES_PORT}/{settings.POSTGRES_DB}")
 
 
 # make sure all SQLModel models are imported (app.models) before initializing DB
@@ -13,6 +19,9 @@ engine = create_engine(str(settings.SQLALCHEMY_DATABASE_URI))
 
 
 def init_db(session: Session) -> None:
+    """Initialize database with initial data"""
+    logger.info("🔄 Initializing database...")
+    
     # Tables should be created with Alembic migrations
     # But if you don't want to use migrations, create
     # the tables un-commenting the next lines
@@ -25,21 +34,23 @@ def init_db(session: Session) -> None:
         select(User).where(User.email == settings.FIRST_SUPERUSER)
     ).first()
     if not user:
+        logger.info(f"👤 Creating first superuser: {settings.FIRST_SUPERUSER}")
         user_in = UserCreate(
             email=settings.FIRST_SUPERUSER,
             password=settings.FIRST_SUPERUSER_PASSWORD,
             is_superuser=True,
         )
         user = crud.create_user(session=session, user_create=user_in)
+        logger.info(f"✅ Superuser created successfully")
+    else:
+        logger.info(f"✅ Superuser already exists: {settings.FIRST_SUPERUSER}")
 
     _seed_product_categories(session)
     _seed_product_statuses(session)
+    logger.info("✅ Database initialization complete")
 
 
 def _seed_product_categories(session: Session) -> None:
-    import logging
-
-    logger = logging.getLogger(__name__)
 
     categories = [
         {"name": "Whisky", "description": "Whisky and whiskey products"},
@@ -73,9 +84,6 @@ def _seed_product_categories(session: Session) -> None:
 
 
 def _seed_product_statuses(session: Session) -> None:
-    import logging
-
-    logger = logging.getLogger(__name__)
 
     statuses = [
         {"name": "Active", "description": "Product is active and available for sale"},

@@ -32,21 +32,6 @@ function formatCurrency(amount: number): string {
 
 export const Route = createFileRoute("/_layout/sales")({
   component: Sales,
-  beforeLoad: async () => {
-    // Only cashiers can access the sales dashboard
-    try {
-      const user = await UsersService.readUserMe()
-      
-      // If user is an admin (superuser), redirect to admin dashboard
-      if (user.is_superuser) {
-        throw redirect({
-          to: "/",
-        })
-      }
-    } catch (error) {
-      throw error
-    }
-  },
 })
 
 
@@ -275,7 +260,7 @@ function Sales() {
   }
 
   return (
-    <Container maxW="full" p={0} h="calc(100vh - 60px)">
+    <Container maxW="full" p={0} h="calc(100vh - 120px)">
       {/* POS-Style Two-Panel Layout */}
       <Grid 
         templateColumns={{ base: "1fr", lg: "1fr 400px" }} 
@@ -300,7 +285,13 @@ function Sales() {
             borderColor="var(--chakra-colors-input-border)"
             p={4}
           >
-            <Heading size="lg" mb={4}>Product Search</Heading>
+            <Heading 
+              size="lg" 
+              mb={4}
+              color={{ base: "#e5e7eb", _light: "#111827" }}
+            >
+              Product Search
+            </Heading>
             
             {/* Search and Filter */}
             <Stack gap={3}>
@@ -412,8 +403,8 @@ function Sales() {
               </Grid>
             ) : (
               <Flex direction="column" align="center" justify="center" h="full" gap={4}>
-                <Text fontSize="lg" color="gray.500">No products found</Text>
-                <Text fontSize="sm" color="gray.400">
+                <Text fontSize="lg" color={{ base: "#d1d5db", _light: "#6b7280" }}>No products found</Text>
+                <Text fontSize="sm" color={{ base: "#9ca3af", _light: "#9ca3af" }}>
                   {searchQuery || selectedCategoryId 
                     ? "Try a different search or category" 
                     : "No products available"}
@@ -436,7 +427,10 @@ function Sales() {
             p={4}
           >
             <Flex justify="space-between" align="center">
-              <Heading size="md">
+              <Heading 
+                size="md"
+                color={{ base: "#e5e7eb", _light: "#111827" }}
+              >
                 <HStack>
                   <FiShoppingCart />
                   <Text>Cart ({cartItemsCount})</Text>
@@ -460,10 +454,10 @@ function Sales() {
             {cart.length === 0 ? (
               <Flex direction="column" align="center" justify="center" h="full" gap={4}>
                 <FiShoppingCart size={48} color="var(--chakra-colors-gray-400)" />
-                <Text fontSize="lg" color="gray.500" textAlign="center">
+                <Text fontSize="lg" color={{ base: "#d1d5db", _light: "#6b7280" }} textAlign="center">
                   Cart is empty
                 </Text>
-                <Text fontSize="sm" color="gray.400" textAlign="center">
+                <Text fontSize="sm" color={{ base: "#9ca3af", _light: "#9ca3af" }} textAlign="center">
                   Search and click products to add
                 </Text>
               </Flex>

@@ -30,7 +30,12 @@ function UserSettings() {
 
   return (
     <Container maxW="full" minH="100vh">
-      <Heading size="lg" textAlign={{ base: "center", md: "left" }} py={12}>
+      <Heading 
+        size="lg" 
+        textAlign={{ base: "center", md: "left" }} 
+        py={12}
+        color={{ base: "#e5e7eb", _light: "#111827" }}
+      >
         User Settings
       </Heading>
 

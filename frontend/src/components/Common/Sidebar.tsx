@@ -34,20 +34,32 @@ const Sidebar = () => {
         <DrawerTrigger asChild>
           <IconButton
             variant="ghost"
-            color="inherit"
+            color="gray.300"
             display={{ base: "flex", md: "none" }}
             aria-label="Open Menu"
             position="absolute"
             zIndex="100"
             m={4}
+            bg="rgba(15, 20, 30, 0.8)"
+            backdropFilter="blur(10px)"
+            border="1px solid"
+            borderColor="rgba(59, 130, 246, 0.2)"
+            _hover={{
+              bg: "rgba(59, 130, 246, 0.1)",
+              color: "#60a5fa",
+              borderColor: "rgba(59, 130, 246, 0.4)",
+              transform: "scale(1.1)",
+            }}
+            transition="all 0.2s"
           >
             <FaBars />
           </IconButton>
         </DrawerTrigger>
-        <DrawerContent maxW="xs">
+        <DrawerContent maxW="xs" bg={{ base: "rgba(15, 20, 30, 0.98)", _light: "rgba(255, 255, 255, 0.98)" }} backdropFilter="blur(20px)">
           <DrawerCloseTrigger />
           <DrawerBody 
             p={0}
+            bg={{ base: "rgba(15, 20, 30, 0.95)", _light: "rgba(255, 255, 255, 0.95)" }}
             css={{
               "&::-webkit-scrollbar": {
                 width: "8px",
@@ -56,14 +68,14 @@ const Sidebar = () => {
                 background: "transparent",
               },
               "&::-webkit-scrollbar-thumb": {
-                background: "var(--chakra-colors-gray-300)",
+                background: "rgba(59, 130, 246, 0.3)",
                 borderRadius: "4px",
               },
               "&::-webkit-scrollbar-thumb:hover": {
-                background: "var(--chakra-colors-gray-400)",
+                background: "rgba(59, 130, 246, 0.5)",
               },
               scrollbarWidth: "thin",
-              scrollbarColor: "var(--chakra-colors-gray-300) transparent",
+              scrollbarColor: "rgba(59, 130, 246, 0.3) transparent",
             }}
           >
             <Flex flexDir="column" h="full">
@@ -74,8 +86,8 @@ const Sidebar = () => {
               {/* Footer section - always visible */}
               <Box 
                 borderTop="1px solid" 
-                borderColor="border.subtle"
-                bg="bg.subtle"
+                borderColor={{ base: "rgba(59, 130, 246, 0.2)", _light: "rgba(59, 130, 246, 0.3)" }}
+                bg={{ base: "rgba(10, 14, 20, 0.6)", _light: "rgba(255, 255, 255, 0.6)" }}
                 p={4}
               >
                 <Flex
@@ -89,18 +101,21 @@ const Sidebar = () => {
                   py={2}
                   borderRadius="lg"
                   w="full"
+                  color={{ base: "gray.300", _light: "gray.700" }}
                   _hover={{
-                    bg: { base: "gray.700", _light: "gray.100" },
+                    bg: "rgba(59, 130, 246, 0.1)",
+                    color: "#60a5fa",
+                    transform: "translateX(2px)",
                   }}
                   transition="all 0.2s"
                 >
                   <FiLogOut />
-                  <Text>Log Out</Text>
+                  <Text fontWeight="medium">Log Out</Text>
                 </Flex>
                 
-                {currentUser?.email && (
+                {currentUser?.full_name && (
                   <Text fontSize="xs" color={{ base: "gray.400", _light: "gray.600" }} mt={2} truncate>
-                    {currentUser.email}
+                    {currentUser.full_name}
                   </Text>
                 )}
               </Box>
@@ -114,13 +129,15 @@ const Sidebar = () => {
       <Box
         display={{ base: "none", md: "flex" }}
         position="sticky"
-        bg={{ base: "gray.800", _light: "white" }}
+        bg={{ base: "rgba(15, 20, 30, 0.95)", _light: "rgba(255, 255, 255, 0.95)" }}
+        backdropFilter="blur(20px) saturate(180%)"
         borderRight="1px solid"
-        borderColor={{ base: "gray.700", _light: "gray.200" }}
+        borderColor={{ base: "rgba(59, 130, 246, 0.2)", _light: "rgba(59, 130, 246, 0.3)" }}
         top={0}
         minW="xs"
         h="100vh"
         flexDirection="column"
+        boxShadow={{ base: "4px 0 20px rgba(0, 0, 0, 0.3)", _light: "4px 0 20px rgba(0, 0, 0, 0.1)" }}
       >
         {/* Scrollable menu items */}
         <Box 
@@ -136,22 +153,22 @@ const Sidebar = () => {
               borderRadius: "4px",
             },
             "&::-webkit-scrollbar-thumb": {
-              background: "var(--chakra-colors-gray-400)",
+              background: "rgba(59, 130, 246, 0.3)",
               borderRadius: "4px",
               border: "2px solid transparent",
               backgroundClip: "content-box",
             },
             "&::-webkit-scrollbar-thumb:hover": {
-              background: "var(--chakra-colors-gray-500)",
+              background: "rgba(59, 130, 246, 0.5)",
               backgroundClip: "content-box",
             },
             "&::-webkit-scrollbar-thumb:active": {
-              background: "var(--chakra-colors-gray-600)",
+              background: "rgba(59, 130, 246, 0.7)",
               backgroundClip: "content-box",
             },
             // Firefox
             scrollbarWidth: "thin",
-            scrollbarColor: "var(--chakra-colors-gray-400) transparent",
+            scrollbarColor: "rgba(59, 130, 246, 0.3) transparent",
           }}
         >
           <SidebarItems />
@@ -160,7 +177,8 @@ const Sidebar = () => {
         {/* Footer section - always visible */}
         <Box 
           borderTop="1px solid" 
-          borderColor={{ base: "gray.700", _light: "gray.200" }}
+          borderColor={{ base: "rgba(59, 130, 246, 0.2)", _light: "rgba(59, 130, 246, 0.3)" }}
+          bg={{ base: "rgba(10, 14, 20, 0.6)", _light: "rgba(255, 255, 255, 0.6)" }}
           p={4}
         >
           <Flex
@@ -174,18 +192,21 @@ const Sidebar = () => {
             py={2}
             borderRadius="lg"
             w="full"
+            color={{ base: "gray.300", _light: "gray.700" }}
             _hover={{
-              bg: { base: "gray.700", _light: "gray.100" },
+              bg: "rgba(59, 130, 246, 0.1)",
+              color: "#60a5fa",
+              transform: "translateX(2px)",
             }}
             transition="all 0.2s"
           >
             <FiLogOut />
-            <Text fontSize="sm">Log Out</Text>
+            <Text fontSize="sm" fontWeight="medium">Log Out</Text>
           </Flex>
           
-          {currentUser?.email && (
+          {currentUser?.full_name && (
             <Text fontSize="xs" color={{ base: "gray.400", _light: "gray.600" }} mt={2} truncate>
-              {currentUser.email}
+              {currentUser.full_name}
             </Text>
           )}
         </Box>

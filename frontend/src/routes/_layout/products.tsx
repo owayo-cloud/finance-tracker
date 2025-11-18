@@ -906,7 +906,10 @@ function Products() {
         pb={8}
       >
         <Flex justify="space-between" align="center">
-          <Heading size="lg">
+          <Heading 
+            size="lg"
+            color={{ base: "#e5e7eb", _light: "#111827" }}
+          >
             Products Catalog
           </Heading>
         </Flex>

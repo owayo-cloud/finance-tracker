@@ -8,10 +8,15 @@ export const Route = createFileRoute("/_layout/expenses")({
 function Expenses() {
   return (
     <Container maxW="full">
-      <Heading size="lg" pt={12} mb={4}>
+      <Heading 
+        size="lg" 
+        pt={12} 
+        mb={4}
+        color={{ base: "#e5e7eb", _light: "#111827" }}
+      >
         Expenses Management
       </Heading>
-      <Text color="gray.600">
+      <Text color={{ base: "#d1d5db", _light: "#6b7280" }}>
         Track operational expenses, categorize costs, and analyze spending trends.
       </Text>
       {/* Expenses functionality will be implemented here */}

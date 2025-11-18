@@ -18,6 +18,7 @@ import { Route as LayoutIndexRouteImport } from './routes/_layout/index'
 import { Route as LayoutStockEntryRouteImport } from './routes/_layout/stock-entry'
 import { Route as LayoutShiftReconciliationRouteImport } from './routes/_layout/shift-reconciliation'
 import { Route as LayoutSettingsRouteImport } from './routes/_layout/settings'
+import { Route as LayoutSalesListRouteImport } from './routes/_layout/sales-list'
 import { Route as LayoutSalesRouteImport } from './routes/_layout/sales'
 import { Route as LayoutReportsRouteImport } from './routes/_layout/reports'
 import { Route as LayoutProductsRouteImport } from './routes/_layout/products'
@@ -71,6 +72,11 @@ const LayoutSettingsRoute = LayoutSettingsRouteImport.update({
   path: '/settings',
   getParentRoute: () => LayoutRoute,
 } as any)
+const LayoutSalesListRoute = LayoutSalesListRouteImport.update({
+  id: '/sales-list',
+  path: '/sales-list',
+  getParentRoute: () => LayoutRoute,
+} as any)
 const LayoutSalesRoute = LayoutSalesRouteImport.update({
   id: '/sales',
   path: '/sales',
@@ -119,6 +125,7 @@ export interface FileRoutesByFullPath {
   '/products': typeof LayoutProductsRoute
   '/reports': typeof LayoutReportsRoute
   '/sales': typeof LayoutSalesRoute
+  '/sales-list': typeof LayoutSalesListRoute
   '/settings': typeof LayoutSettingsRoute
   '/shift-reconciliation': typeof LayoutShiftReconciliationRoute
   '/stock-entry': typeof LayoutStockEntryRouteWithChildren
@@ -136,6 +143,7 @@ export interface FileRoutesByTo {
   '/products': typeof LayoutProductsRoute
   '/reports': typeof LayoutReportsRoute
   '/sales': typeof LayoutSalesRoute
+  '/sales-list': typeof LayoutSalesListRoute
   '/settings': typeof LayoutSettingsRoute
   '/shift-reconciliation': typeof LayoutShiftReconciliationRoute
   '/stock-entry': typeof LayoutStockEntryRouteWithChildren
@@ -155,6 +163,7 @@ export interface FileRoutesById {
   '/_layout/products': typeof LayoutProductsRoute
   '/_layout/reports': typeof LayoutReportsRoute
   '/_layout/sales': typeof LayoutSalesRoute
+  '/_layout/sales-list': typeof LayoutSalesListRoute
   '/_layout/settings': typeof LayoutSettingsRoute
   '/_layout/shift-reconciliation': typeof LayoutShiftReconciliationRoute
   '/_layout/stock-entry': typeof LayoutStockEntryRouteWithChildren
@@ -174,6 +183,7 @@ export interface FileRouteTypes {
     | '/products'
     | '/reports'
     | '/sales'
+    | '/sales-list'
     | '/settings'
     | '/shift-reconciliation'
     | '/stock-entry'
@@ -191,6 +201,7 @@ export interface FileRouteTypes {
     | '/products'
     | '/reports'
     | '/sales'
+    | '/sales-list'
     | '/settings'
     | '/shift-reconciliation'
     | '/stock-entry'
@@ -209,6 +220,7 @@ export interface FileRouteTypes {
     | '/_layout/products'
     | '/_layout/reports'
     | '/_layout/sales'
+    | '/_layout/sales-list'
     | '/_layout/settings'
     | '/_layout/shift-reconciliation'
     | '/_layout/stock-entry'
@@ -289,6 +301,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LayoutSettingsRouteImport
       parentRoute: typeof LayoutRoute
     }
+    '/_layout/sales-list': {
+      id: '/_layout/sales-list'
+      path: '/sales-list'
+      fullPath: '/sales-list'
+      preLoaderRoute: typeof LayoutSalesListRouteImport
+      parentRoute: typeof LayoutRoute
+    }
     '/_layout/sales': {
       id: '/_layout/sales'
       path: '/sales'
@@ -359,6 +378,7 @@ interface LayoutRouteChildren {
   LayoutProductsRoute: typeof LayoutProductsRoute
   LayoutReportsRoute: typeof LayoutReportsRoute
   LayoutSalesRoute: typeof LayoutSalesRoute
+  LayoutSalesListRoute: typeof LayoutSalesListRoute
   LayoutSettingsRoute: typeof LayoutSettingsRoute
   LayoutShiftReconciliationRoute: typeof LayoutShiftReconciliationRoute
   LayoutStockEntryRoute: typeof LayoutStockEntryRouteWithChildren
@@ -372,6 +392,7 @@ const LayoutRouteChildren: LayoutRouteChildren = {
   LayoutProductsRoute: LayoutProductsRoute,
   LayoutReportsRoute: LayoutReportsRoute,
   LayoutSalesRoute: LayoutSalesRoute,
+  LayoutSalesListRoute: LayoutSalesListRoute,
   LayoutSettingsRoute: LayoutSettingsRoute,
   LayoutShiftReconciliationRoute: LayoutShiftReconciliationRoute,
   LayoutStockEntryRoute: LayoutStockEntryRouteWithChildren,

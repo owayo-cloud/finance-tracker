@@ -60,6 +60,13 @@ export const ColorModeButton = React.forwardRef<
         aria-label="Toggle color mode"
         size="sm"
         ref={ref}
+        color="gray.300"
+        _hover={{
+          bg: "rgba(59, 130, 246, 0.1)",
+          color: "#60a5fa",
+          transform: "scale(1.1)",
+        }}
+        transition="all 0.2s"
         {...props}
         css={{
           _icon: {

@@ -566,10 +566,14 @@ function StockEntry() {
         {/* Header */}
         <Flex justify="space-between" align="start">
           <Box>
-            <Heading size="lg" mb={2}>
+            <Heading 
+              size="lg" 
+              mb={2}
+              color={{ base: "#e5e7eb", _light: "#111827" }}
+            >
               Product Stock Management
             </Heading>
-            <Text color={{ base: "gray.500", _light: "gray.600" }}>
+            <Text color={{ base: "#d1d5db", _light: "#6b7280" }}>
               Select a product to record stock entry, deliveries, and sales.
               {totalProducts > 0 && ` Managing ${totalProducts} products total.`}
             </Text>

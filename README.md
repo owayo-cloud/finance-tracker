@@ -111,13 +111,30 @@ docker compose watch
 This will:
 - Build and start all services (backend, frontend, database, etc.)
 - Watch for file changes and automatically rebuild
+- **Frontend**: Runs Vite dev server with **Hot Module Replacement (HMR)** - browser auto-refreshes on code changes
+- **Backend**: Auto-reloads on Python file changes
 - Make services available at:
-  - Frontend: http://localhost:5173
+  - Frontend: http://localhost:5173 (with live reload)
   - Backend API: http://localhost:8000
   - API Docs: http://localhost:8000/docs
   - Adminer (DB): http://localhost:8080
   - Traefik UI: http://localhost:8090
   - MailCatcher: http://localhost:1080
+
+#### Auto-Refresh Features
+
+✅ **Frontend (Vite HMR)**:
+- Changes to React components automatically update in the browser without full page reload
+- CSS changes apply instantly
+- State is preserved during updates (where possible)
+
+✅ **Backend (FastAPI --reload)**:
+- Python code changes trigger automatic server restart
+- No need to manually restart the backend
+
+✅ **File Watching**:
+- Docker Compose `watch` mode syncs file changes into containers
+- Both frontend and backend detect changes automatically
 
 ### Local Backend Development (Optional)
 
@@ -153,6 +170,53 @@ source .venv/bin/activate
 
 ```bash
 fastapi dev app/main.py
+```
+
+### Viewing Logs
+
+The application includes comprehensive logging with colored output to help you see what's happening:
+
+#### Docker Compose Logs
+
+**View all logs:**
+```bash
+docker compose logs -f
+```
+
+**View specific service logs:**
+```bash
+# Backend logs
+docker compose logs -f backend
+
+# Frontend logs
+docker compose logs -f frontend
+
+# Database logs
+docker compose logs -f db
+```
+
+**View last N lines:**
+```bash
+docker compose logs --tail 100 backend
+```
+
+#### Log Features
+
+The backend includes:
+- 🎨 **Colored logs** - Different colors for INFO, WARNING, ERROR levels
+- 📊 **Request/Response logging** - See all API requests with status codes and timing
+- 🚀 **Startup logs** - Detailed information when the app starts
+- 🔄 **Database logs** - Connection status and initialization progress
+- ⚠️ **Error logs** - Full stack traces for debugging
+
+**Example log output:**
+```
+2025-11-18 13:20:00 | INFO     | app.main | ============================================================
+2025-11-18 13:20:00 | INFO     | app.main | 🚀 Starting Finance Tracker
+2025-11-18 13:20:00 | INFO     | app.main | 📍 Environment: local
+2025-11-18 13:20:00 | INFO     | app.main | 🌐 API URL: /api/v1
+2025-11-18 13:20:01 | INFO     | app.main | → GET /api/v1/users/me | Client: 172.18.0.1
+2025-11-18 13:20:01 | INFO     | app.main | ← GET /api/v1/users/me | Status: 200 | Time: 0.045s
 ```
 
 ### Troubleshooting
@@ -195,6 +259,25 @@ uv python install 3.10
 # Then sync with explicit Python version
 uv sync --python 3.10
 ```
+
+#### Debugging with Logs
+
+If something isn't working:
+
+1. **Check backend logs**:
+   ```bash
+   docker compose logs backend --tail 50
+   ```
+
+2. **Check for errors**:
+   ```bash
+   docker compose logs backend | findstr ERROR
+   ```
+
+3. **Watch logs in real-time**:
+   ```bash
+   docker compose logs -f backend frontend
+   ```
 
 
 ### Configure

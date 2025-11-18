@@ -3,6 +3,7 @@ import { createFileRoute, Outlet, redirect } from "@tanstack/react-router"
 
 import Navbar from "@/components/Common/Navbar"
 import Sidebar from "@/components/Common/Sidebar"
+import Breadcrumbs from "@/components/Common/Breadcrumbs"
 import { isLoggedIn } from "@/hooks/useAuth"
 import { UsersService } from "@/client"
 
@@ -23,13 +24,7 @@ export const Route = createFileRoute("/_layout")({
       const cashierAllowedPaths = ['/sales', '/settings', '/stock-entry', '/shift-reconciliation', '/debts', '/reports']
       
       if (user.is_superuser) {
-        // ADMIN: Cannot access cashier-exclusive dashboard
-        // Admin trying to access /sales should be redirected to admin dashboard
-        if (location.pathname === '/sales') {
-          throw redirect({
-            to: "/",
-          })
-        }
+        // ADMIN: Can access all routes including sales
       } else {
         // CASHIER: Can only access specific paths
         const isAllowedPath = cashierAllowedPaths.some(path => 
@@ -61,7 +56,8 @@ function Layout() {
     <Flex 
       direction="column" 
       h="100vh" 
-      bg={{ base: "gray.900", _light: "gray.50" }}
+      bg="bg.canvas"
+      overflow="hidden"
     >
       <Navbar />
       <Flex flex="1" overflow="hidden">
@@ -71,8 +67,17 @@ function Layout() {
           direction="column" 
           p={4} 
           overflowY="auto"
-          bg={{ base: "gray.900", _light: "gray.50" }}
+          overflowX="hidden"
+          bg="bg.canvas"
+          css={{
+            "&::-webkit-scrollbar": {
+              display: "none",
+            },
+            scrollbarWidth: "none",
+            msOverflowStyle: "none",
+          }}
         >
+          <Breadcrumbs />
           <Outlet />
         </Flex>
       </Flex>

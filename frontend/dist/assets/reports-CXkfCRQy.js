@@ -1,0 +1,1 @@
+import{j as s,C as e,T as n}from"./index-CxzheAlx.js";import{H as r}from"./index-D7ZSCJA-.js";function o(){return s.jsxs(e,{maxW:"full",children:[s.jsx(r,{size:"lg",pt:12,mb:4,children:"Reports & Analytics"}),s.jsx(n,{color:"gray.600",children:"View sales reports, stock movements, financial summaries, and business insights."})]})}export{o as component};

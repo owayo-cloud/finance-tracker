@@ -1,0 +1,1 @@
+import{a5 as t}from"./index-U_CCWg91.js";const{withProvider:e,withContext:o}=t({key:"card"}),d=e("div","root"),i=o("div","body");o("div","header");o("div","footer");o("h3","title");o("p","description");export{d as C,i as a};

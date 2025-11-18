@@ -25,6 +25,13 @@
 
 ### Dashboard Login
 
+The login page features:
+- ✨ Real-time form validation with visual feedback
+- 🎨 Modern, animated UI with gradient backgrounds
+- 🔒 Secure password input with strength indicators
+- ✅ Success/error states with clear messaging
+- ♿ Full accessibility support (ARIA labels, keyboard navigation)
+
 [![API docs](img/login.png)](https://github.com/fastapi/full-stack-fastapi-template)
 
 ### Dashboard - Admin
@@ -66,6 +73,127 @@ git clone https://github.com/owayo-cloud/finance-tracker.git
 
 ```bash
 cd finance-tracker
+```
+
+## Quick Start
+
+### Prerequisites
+
+- [Docker](https://www.docker.com/) and Docker Compose
+- [uv](https://docs.astral.sh/uv/) for Python package management (for local backend development)
+
+### Installing uv (Windows)
+
+If you're on Windows and don't have `uv` installed, run:
+
+```powershell
+powershell -ExecutionPolicy ByPass -c "irm https://astral.sh/uv/install.ps1 | iex"
+```
+
+Then add it to your PATH for the current session:
+
+```powershell
+$env:Path = "$env:USERPROFILE\.local\bin;$env:Path"
+```
+
+To make it permanent, add `C:\Users\<YourUsername>\.local\bin` to your system PATH.
+
+### Starting the Application
+
+1. **Configure environment variables** - Copy `.env.example` to `.env` and update the required values (see [Configure](#configure) section below).
+
+2. **Start with Docker Compose**:
+
+```bash
+docker compose watch
+```
+
+This will:
+- Build and start all services (backend, frontend, database, etc.)
+- Watch for file changes and automatically rebuild
+- Make services available at:
+  - Frontend: http://localhost:5173
+  - Backend API: http://localhost:8000
+  - API Docs: http://localhost:8000/docs
+  - Adminer (DB): http://localhost:8080
+  - Traefik UI: http://localhost:8090
+  - MailCatcher: http://localhost:1080
+
+### Local Backend Development (Optional)
+
+If you want to run the backend locally instead of in Docker:
+
+1. **Install Python 3.10+** (required for `psycopg-binary` compatibility)
+
+2. **Install dependencies**:
+
+```bash
+cd backend
+uv sync --python 3.10
+```
+
+3. **Activate virtual environment**:
+
+**Windows (PowerShell):**
+```powershell
+.venv\Scripts\Activate.ps1
+```
+
+**Windows (CMD):**
+```cmd
+.venv\Scripts\activate.bat
+```
+
+**Linux/Mac:**
+```bash
+source .venv/bin/activate
+```
+
+4. **Run the development server**:
+
+```bash
+fastapi dev app/main.py
+```
+
+### Troubleshooting
+
+#### Port Already in Use
+
+If you get an error like `port is already allocated`:
+
+1. **Check what's using the port**:
+
+```powershell
+# Windows
+netstat -ano | findstr :5432
+
+# Or check Docker containers
+docker ps -a | findstr 5432
+```
+
+2. **Stop conflicting containers**:
+
+```bash
+docker stop <container-name>
+```
+
+Or change the port mapping in `docker-compose.yml` if you need both services running.
+
+#### Docker Build Fails
+
+- **Frontend build errors**: Make sure `vite.config.ts` has `open: false` for production builds (already configured)
+- **Backend build errors**: Ensure Docker has enough resources allocated (4GB+ RAM recommended)
+
+#### Python Version Issues
+
+If `uv sync` fails with Python version errors:
+
+```bash
+# Install Python 3.10 using uv
+uv python install 3.10
+
+# Then sync with explicit Python version
+uv sync --python 3.10
 ```
 
 
@@ -114,9 +242,25 @@ Before running the project, review and update the following input variables in y
 
 Backend docs: [backend/README.md](./backend/README.md).
 
+**Key Features:**
+- Python 3.10+ with `uv` for fast dependency management
+- FastAPI with automatic OpenAPI documentation
+- SQLModel ORM with PostgreSQL
+- Alembic for database migrations
+- Pytest for testing with coverage reports
+
 ## Frontend Development
 
 Frontend docs: [frontend/README.md](./frontend/README.md).
+
+**Key Features:**
+- React 19 with TypeScript
+- Vite for fast development and optimized builds
+- Chakra UI v3 for modern, accessible components
+- TanStack Router for type-safe routing
+- Automatic API client generation from OpenAPI schema
+- Dark mode support
+- Playwright for E2E testing
 
 ## Deployment
 

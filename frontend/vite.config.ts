@@ -5,7 +5,7 @@ import { defineConfig } from "vite"
 import { visualizer } from 'rollup-plugin-visualizer';
 
 // https://vitejs.dev/config/
-export default defineConfig({
+export default defineConfig(({ mode }) => ({
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),
@@ -17,6 +17,9 @@ export default defineConfig({
       autoCodeSplitting: true,
     }),
     react(),
-    visualizer({ open: true, filename: 'bundle-analysis.html' })
+    visualizer({ 
+      open: mode === 'development' && process.env.CI !== 'true',
+      filename: 'bundle-analysis.html' 
+    })
   ],
-})
+}))

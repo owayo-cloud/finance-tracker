@@ -1,1 +1,0 @@
-import{j as e,C as r,T as t}from"./index-CxzheAlx.js";import{H as s}from"./index-D7ZSCJA-.js";function o(){return e.jsxs(r,{maxW:"full",children:[e.jsx(s,{size:"lg",pt:12,mb:4,children:"Debts & Credit Management"}),e.jsx(t,{color:"gray.600",children:"Track credit sales, customer account balances, payment history, and aging reports."})]})}export{o as component};

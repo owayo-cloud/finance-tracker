@@ -1,1 +1,0 @@
-import{j as i,C as n,T as o}from"./index-CxzheAlx.js";import{H as t}from"./index-D7ZSCJA-.js";function r(){return i.jsxs(n,{maxW:"full",children:[i.jsx(t,{size:"lg",pt:12,mb:4,children:"Shift Reconciliation"}),i.jsx(o,{color:"gray.600",children:"End-of-shift reconciliation: physical count, variance tracking, and payment method summaries."})]})}export{r as component};

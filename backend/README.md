@@ -13,19 +13,54 @@ Start the local development environment with Docker Compose following the guide 
 
 By default, the dependencies are managed with [uv](https://docs.astral.sh/uv/), go there and install it.
 
+### Installing uv
+
+**Windows:**
+```powershell
+powershell -ExecutionPolicy ByPass -c "irm https://astral.sh/uv/install.ps1 | iex"
+$env:Path = "$env:USERPROFILE\.local\bin;$env:Path"
+```
+
+**Linux/Mac:**
+```bash
+curl -LsSf https://astral.sh/uv/install.sh | sh
+```
+
+### Installing Dependencies
+
 From `./backend/` you can install all the dependencies with:
 
 ```console
-$ uv sync
+$ uv sync --python 3.10
 ```
 
-Then you can activate the virtual environment with:
+**Note:** Python 3.10-3.13 is required. Python 3.14+ is not yet supported by `psycopg-binary`.
+
+If you don't have Python 3.10 installed, `uv` can install it for you:
 
 ```console
-$ source .venv/bin/activate
+$ uv python install 3.10
+$ uv sync --python 3.10
 ```
 
-Make sure your editor is using the correct Python virtual environment, with the interpreter at `backend/.venv/bin/python`.
+### Activating the Virtual Environment
+
+**Windows (PowerShell):**
+```powershell
+.venv\Scripts\Activate.ps1
+```
+
+**Windows (CMD):**
+```cmd
+.venv\Scripts\activate.bat
+```
+
+**Linux/Mac:**
+```bash
+source .venv/bin/activate
+```
+
+Make sure your editor is using the correct Python virtual environment, with the interpreter at `backend/.venv/bin/python` (or `backend\.venv\Scripts\python.exe` on Windows).
 
 Modify or add SQLModel models for data and SQL tables in `./backend/app/models.py`, API endpoints in `./backend/app/api/`, CRUD (Create, Read, Update, Delete) utils in `./backend/app/crud.py`.
 

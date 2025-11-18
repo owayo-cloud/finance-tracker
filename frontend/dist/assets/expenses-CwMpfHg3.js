@@ -1,1 +1,0 @@
-import{j as e,C as n,T as s}from"./index-CxzheAlx.js";import{H as a}from"./index-D7ZSCJA-.js";function t(){return e.jsxs(n,{maxW:"full",children:[e.jsx(a,{size:"lg",pt:12,mb:4,children:"Expenses Management"}),e.jsx(s,{color:"gray.600",children:"Track operational expenses, categorize costs, and analyze spending trends."})]})}export{t as component};

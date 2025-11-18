@@ -16,7 +16,7 @@ import {
   For,
 } from "@chakra-ui/react";
 import { useQuery, useQueryClient, useMutation } from "@tanstack/react-query";
-import { FiEdit, FiPackage, FiX, FiChevronLeft, FiChevronRight } from "react-icons/fi";
+import { FiEdit, FiPackage, FiX, FiChevronLeft, FiChevronRight, FiUpload } from "react-icons/fi";
 import { Button } from "../../components/ui/button";
 import { Field } from "../../components/ui/field";
 import {
@@ -32,6 +32,8 @@ import type { ProductPublic, StockEntryCreate } from "../../client";
 import { StockEntriesService, ProductsService } from "../../client";
 import useCustomToast from "../../hooks/useCustomToast";
 import { handleError } from "../../utils";
+import AddProduct from "../../components/Products/AddProduct";
+import useAuth from "../../hooks/useAuth";
 
 export const Route = createFileRoute("/_layout/stock-entry")({
   component: StockEntry,
@@ -469,6 +471,7 @@ function ProductCard({
 
 // Main Component
 function StockEntry() {
+  const { user: currentUser } = useAuth()
   const [searchQuery, setSearchQuery] = useState("");
   const [debouncedSearchQuery, setDebouncedSearchQuery] = useState("");
   const [selectedProduct, setSelectedProduct] = useState<ProductPublic | null>(
@@ -561,15 +564,32 @@ function StockEntry() {
     <Container maxW="full" minH="100vh" py={8}>
       <VStack gap={6} align="stretch">
         {/* Header */}
-        <Box>
-          <Heading size="lg" mb={2}>
-            Product Stock Management
-          </Heading>
-          <Text color={{ base: "gray.500", _light: "gray.600" }}>
-            Select a product to record stock entry, deliveries, and sales.
-            {totalProducts > 0 && ` Managing ${totalProducts} products total.`}
-          </Text>
-        </Box>
+        <Flex justify="space-between" align="start">
+          <Box>
+            <Heading size="lg" mb={2}>
+              Product Stock Management
+            </Heading>
+            <Text color={{ base: "gray.500", _light: "gray.600" }}>
+              Select a product to record stock entry, deliveries, and sales.
+              {totalProducts > 0 && ` Managing ${totalProducts} products total.`}
+            </Text>
+          </Box>
+          <HStack gap={3}>
+            {/* Bulk Import button - only for admins */}
+            {currentUser?.is_superuser && (
+              <Button
+                variant="outline"
+                colorScheme="blue"
+                onClick={() => {
+                  window.location.href = "/stock-entry/bulk-import"
+                }}
+              >
+                <FiUpload /> Bulk Import
+              </Button>
+            )}
+            <AddProduct />
+          </HStack>
+        </Flex>
 
         {/* Filters */}
         <Box p={4} borderWidth="1px" borderRadius="lg">

@@ -112,15 +112,30 @@ const EditProduct = ({ product, children, isOpen: controlledIsOpen, onOpenChange
   const handleImageSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0]
     if (file) {
-      // Validate file type
-      if (!file.type.startsWith("image/")) {
-        handleError({ message: "Please select an image file" } as ApiError)
+      // Strict validation: Only .jpg, .jpeg, and .png files
+      const validTypes = ['image/jpeg', 'image/jpg', 'image/png']
+      const validExtensions = ['.jpg', '.jpeg', '.png']
+      const fileName = file.name.toLowerCase()
+      const fileExtension = fileName.substring(fileName.lastIndexOf('.'))
+      
+      if (!validTypes.includes(file.type) || !validExtensions.includes(fileExtension)) {
+        handleError({ 
+          message: "Invalid file type. Only .jpg, .jpeg, and .png images are allowed." 
+        } as ApiError)
+        // Reset the file input
+        if (fileInputRef.current) {
+          fileInputRef.current.value = ""
+        }
         return
       }
 
       // Validate file size (5MB max)
       if (file.size > 5 * 1024 * 1024) {
         handleError({ message: "Image size must be less than 5MB" } as ApiError)
+        // Reset the file input
+        if (fileInputRef.current) {
+          fileInputRef.current.value = ""
+        }
         return
       }
 
@@ -374,12 +389,12 @@ const EditProduct = ({ product, children, isOpen: controlledIsOpen, onOpenChange
                     {/* Product Image Upload */}
                     <Field
                       label="Product Image"
-                      helperText="Upload a new image to replace the current one (optional, max 5MB)"
+                      helperText="Upload a JPG or PNG image (max 5MB)"
                     >
                       <input
                         ref={fileInputRef}
                         type="file"
-                        accept="image/*"
+                        accept=".jpg,.jpeg,.png,image/jpeg,image/png"
                         onChange={handleImageSelect}
                         style={{ display: "none" }}
                       />
@@ -388,11 +403,14 @@ const EditProduct = ({ product, children, isOpen: controlledIsOpen, onOpenChange
                         <Box position="relative">
                           <Image
                             src={imagePreview}
-                            alt="Product preview"
+                            alt="New product preview"
                             borderRadius="md"
-                            maxH="200px"
-                            objectFit="cover"
+                            maxH="250px"
+                            objectFit="contain"
                             w="full"
+                            bg={{ base: "gray.800", _light: "gray.50" }}
+                            border="1px solid"
+                            borderColor={{ base: "gray.700", _light: "gray.200" }}
                           />
                           <IconButton
                             position="absolute"
@@ -401,31 +419,56 @@ const EditProduct = ({ product, children, isOpen: controlledIsOpen, onOpenChange
                             size="sm"
                             colorScheme="red"
                             onClick={removeImage}
-                            aria-label="Remove image"
+                            aria-label="Remove new image"
                           >
                             <FaTimes />
                           </IconButton>
+                          <Badge
+                            position="absolute"
+                            bottom={2}
+                            left={2}
+                            colorScheme="green"
+                            size="sm"
+                          >
+                            New Image Selected
+                          </Badge>
                         </Box>
                       ) : product.image?.id ? (
                         <Box>
-                          <Text fontSize="sm" mb={2} color="gray.400">
+                          <Text fontSize="sm" mb={2} color={{ base: "gray.400", _light: "gray.600" }} fontWeight="medium">
                             Current Image:
                           </Text>
-                          <Image
-                            src={`/api/v1/media/serve/${product.image.id}`}
-                            alt={product.name}
-                            borderRadius="md"
-                            maxH="200px"
-                            objectFit="cover"
-                            w="full"
-                            mb={2}
-                          />
+                          <Box position="relative">
+                            <Image
+                              src={`/api/v1/media/serve/${product.image.id}`}
+                              alt={product.name}
+                              borderRadius="md"
+                              maxH="250px"
+                              objectFit="contain"
+                              w="full"
+                              bg={{ base: "gray.800", _light: "gray.50" }}
+                              border="1px solid"
+                              borderColor={{ base: "gray.700", _light: "gray.200" }}
+                              mb={3}
+                            />
+                            <Badge
+                              position="absolute"
+                              bottom={14}
+                              left={2}
+                              colorScheme="blue"
+                              size="sm"
+                            >
+                              Current
+                            </Badge>
+                          </Box>
                           <Button
                             size="sm"
                             variant="outline"
+                            colorScheme="teal"
                             onClick={() => fileInputRef.current?.click()}
+                            w="full"
                           >
-                            Replace Image
+                            <FaImage /> Replace Image
                           </Button>
                         </Box>
                       ) : (

@@ -222,15 +222,30 @@ const AddProduct = () => {
   const handleImageSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0]
     if (file) {
-      // Validate file type
-      if (!file.type.startsWith("image/")) {
-        handleError({ message: "Please select an image file" } as ApiError)
+      // Strict validation: Only .jpg, .jpeg, and .png files
+      const validTypes = ['image/jpeg', 'image/jpg', 'image/png']
+      const validExtensions = ['.jpg', '.jpeg', '.png']
+      const fileName = file.name.toLowerCase()
+      const fileExtension = fileName.substring(fileName.lastIndexOf('.'))
+      
+      if (!validTypes.includes(file.type) || !validExtensions.includes(fileExtension)) {
+        handleError({ 
+          message: "Invalid file type. Only .jpg, .jpeg, and .png images are allowed." 
+        } as ApiError)
+        // Reset the file input
+        if (fileInputRef.current) {
+          fileInputRef.current.value = ""
+        }
         return
       }
 
       // Validate file size (5MB max)
       if (file.size > 5 * 1024 * 1024) {
         handleError({ message: "Image size must be less than 5MB" } as ApiError)
+        // Reset the file input
+        if (fileInputRef.current) {
+          fileInputRef.current.value = ""
+        }
         return
       }
 
@@ -508,12 +523,12 @@ const AddProduct = () => {
                 {/* Product Image Upload */}
                 <Field
                   label="Product Image"
-                  helperText="Upload an image for this product (optional, max 5MB)"
+                  helperText="Upload a JPG or PNG image (max 5MB)"
                 >
                   <input
                     ref={fileInputRef}
                     type="file"
-                    accept="image/*"
+                    accept=".jpg,.jpeg,.png,image/jpeg,image/png"
                     onChange={handleImageSelect}
                     style={{ display: "none" }}
                   />
@@ -525,8 +540,9 @@ const AddProduct = () => {
                         alt="Product preview"
                         borderRadius="md"
                         maxH="200px"
-                        objectFit="cover"
+                        objectFit="contain"
                         w="full"
+                        bg={{ base: "gray.800", _light: "gray.50" }}
                       />
                       <IconButton
                         position="absolute"

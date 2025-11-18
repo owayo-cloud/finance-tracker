@@ -21,7 +21,6 @@ import { z } from "zod"
 import { useState, useEffect } from "react"
 
 import { ProductsService } from "@/client"
-import AddProduct from "@/components/Products/AddProduct"
 import ProductActionsMenu from "@/components/Products/ProductActionsMenu"
 import PendingProducts from "@/components/Pending/PendingProducts"
 import useCustomToast from "@/hooks/useCustomToast"
@@ -319,9 +318,9 @@ function ProductsTable() {
     })
   }, [category, status])
 
-  // Column visibility state - hide Stock, BP, SP, Description, Image by default
+  // Column visibility state - show Image by default, hide Stock, BP, SP, Description
   const [visibleColumns, setVisibleColumns] = useState({
-    image: false,
+    image: true,
     name: true,
     description: false,
     category: true,
@@ -703,9 +702,9 @@ function ProductsTable() {
             </Button>
           </MenuTrigger>
           <MenuContent>
-            <MenuItem value="name" onClick={() => toggleColumn("name")}>
-              {visibleColumns.name ? <FiEye /> : <FiEyeOff />}
-              Product
+            <MenuItem value="image" onClick={() => toggleColumn("image")}>
+              {visibleColumns.image ? <FiEye /> : <FiEyeOff />}
+              Image
             </MenuItem>
             <MenuItem value="category" onClick={() => toggleColumn("category")}>
               {visibleColumns.category ? <FiEye /> : <FiEyeOff />}
@@ -738,8 +737,8 @@ function ProductsTable() {
       <Table.Root size={{ base: "sm", md: "md" }} variant="outline">
         <Table.Header>
           <Table.Row>
-            {/* {visibleColumns.image && <Table.ColumnHeader>Image</Table.ColumnHeader>} */}
-            {visibleColumns.name && <Table.ColumnHeader>Product</Table.ColumnHeader>}
+            {visibleColumns.image && <Table.ColumnHeader>Image</Table.ColumnHeader>}
+            <Table.ColumnHeader>Product</Table.ColumnHeader>
             {visibleColumns.category && <Table.ColumnHeader>Category</Table.ColumnHeader>}
             {visibleColumns.buyingPrice && <Table.ColumnHeader>Buying Price</Table.ColumnHeader>}
             {visibleColumns.sellingPrice && <Table.ColumnHeader>Selling Price</Table.ColumnHeader>}
@@ -772,7 +771,7 @@ function ProductsTable() {
                   )}
                 </Table.Cell>
               )}
-              {visibleColumns.name && <Table.Cell fontWeight="medium">{product.name}</Table.Cell>}
+              <Table.Cell fontWeight="medium">{product.name}</Table.Cell>
               {visibleColumns.description && <Table.Cell>{product.description || "-"}</Table.Cell>}
               {visibleColumns.category && (
                 <Table.Cell>
@@ -908,9 +907,8 @@ function Products() {
       >
         <Flex justify="space-between" align="center">
           <Heading size="lg">
-            Products Management
+            Products Catalog
           </Heading>
-          <AddProduct />
         </Flex>
         <ProductsTable />
       </Flex>

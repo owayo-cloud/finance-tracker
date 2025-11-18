@@ -3,7 +3,8 @@ from datetime import datetime, timezone
 from decimal import Decimal
 
 from pydantic import EmailStr
-from sqlmodel import Field, Relationship, SQLModel
+from sqlmodel import Field, Relationship, SQLModel, Column
+from sqlalchemy import JSON
 
 from typing import Optional, TYPE_CHECKING
 
@@ -662,3 +663,152 @@ class ShiftReconciliationPublic(ShiftReconciliationBase):
 class ShiftReconciliationsPublic(SQLModel):
     data: list[ShiftReconciliationPublic]
     count: int
+
+
+# ==================== BULK IMPORT MODELS ====================
+
+class ValidationError(SQLModel):
+    """Validation error for a specific field in an import row."""
+    field: str
+    message: str
+    severity: str = "error"  # error, warning
+
+
+class ImportRowStatus(str):
+    """Status of an individual import row."""
+    VALID = "valid"
+    ERROR = "error"
+    WARNING = "warning"
+    DUPLICATE = "duplicate"
+
+
+class ImportRow(SQLModel):
+    """Represents a single row in the bulk import."""
+    row_number: int
+    data: dict  # Raw data from uploaded file
+    mapped_data: Optional[dict] = None  # Data after column mapping
+    errors: list[ValidationError] = []
+    warnings: list[str] = []
+    is_duplicate: bool = False
+    duplicate_product_id: Optional[uuid.UUID] = None
+    status: str = ImportRowStatus.VALID  # valid, error, warning, duplicate
+
+
+class BulkImportSessionBase(SQLModel):
+    """Base model for bulk import session."""
+    filename: str = Field(max_length=255)
+    total_rows: int = Field(ge=0)
+    valid_rows: int = Field(default=0, ge=0)
+    error_rows: int = Field(default=0, ge=0)
+    duplicate_rows: int = Field(default=0, ge=0)
+    imported_rows: int = Field(default=0, ge=0)
+    status: str = Field(default="uploaded", max_length=50)  # uploaded, mapped, validated, importing, completed, failed
+    column_mapping: Optional[dict] = None  # Maps uploaded columns to system fields
+    import_options: Optional[dict] = None  # Tags, status, notes etc.
+    duplicate_action: str = Field(default="skip", max_length=20)  # skip, update, create
+    
+
+class BulkImportSessionCreate(SQLModel):
+    filename: str = Field(max_length=255)
+    total_rows: int = Field(ge=0)
+    
+
+class BulkImportSessionUpdate(SQLModel):
+    column_mapping: Optional[dict] = None
+    import_options: Optional[dict] = None
+    duplicate_action: Optional[str] = None
+    status: Optional[str] = None
+    valid_rows: Optional[int] = None
+    error_rows: Optional[int] = None
+    duplicate_rows: Optional[int] = None
+    imported_rows: Optional[int] = None
+
+
+class BulkImportSession(BulkImportSessionBase, table=True):
+    """Database model for bulk import session."""
+    __tablename__ = "bulk_import_session"
+    id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
+    created_by_id: uuid.UUID = Field(foreign_key="user.id")
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    updated_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    completed_at: Optional[datetime] = None
+    
+    # Override dict fields to use JSON column type
+    column_mapping: Optional[dict] = Field(default=None, sa_column=Column(JSON))
+    import_options: Optional[dict] = Field(default=None, sa_column=Column(JSON))
+    
+
+class BulkImportSessionPublic(BulkImportSessionBase):
+    id: uuid.UUID
+    created_at: datetime
+    completed_at: Optional[datetime] = None
+    
+    model_config = {"from_attributes": True}
+
+
+class ColumnMappingRequest(SQLModel):
+    """Request model for column mapping."""
+    session_id: uuid.UUID
+    column_mapping: dict  # e.g., {"Product Name": "name", "Selling Price": "selling_price"}
+    default_category_id: Optional[uuid.UUID] = None
+    default_status_id: Optional[uuid.UUID] = None
+
+
+class ColumnMappingResponse(SQLModel):
+    """Response after column mapping with validation results."""
+    session_id: uuid.UUID
+    total_rows: int
+    valid_rows: int
+    error_rows: int
+    duplicate_rows: int
+    preview_rows: list[ImportRow]  # First 5 rows with validation results
+
+
+class BulkImportValidationResponse(SQLModel):
+    """Response for validation endpoint."""
+    session_id: uuid.UUID
+    rows: list[ImportRow]
+    total_count: int
+    valid_count: int
+    error_count: int
+    duplicate_count: int
+
+
+class FixRowRequest(SQLModel):
+    """Request to fix a specific row."""
+    session_id: uuid.UUID
+    row_number: int
+    updated_data: dict
+
+
+class BulkImportFinalRequest(SQLModel):
+    """Final import request with options."""
+    session_id: uuid.UUID
+    skip_errors: bool = True
+    duplicate_action: str = "skip"  # skip, update, create
+    tags: list[str] = []
+    notes: Optional[str] = None
+
+
+class BulkImportProgress(SQLModel):
+    """Progress update during import."""
+    session_id: uuid.UUID
+    status: str  # importing, completed, failed
+    progress: int  # 0-100
+    imported_count: int
+    failed_count: int
+    current_row: Optional[int] = None
+    error_message: Optional[str] = None
+
+
+class BulkImportResult(SQLModel):
+    """Final result of bulk import."""
+    import_id: uuid.UUID
+    session_id: uuid.UUID
+    success_count: int
+    error_count: int
+    duplicate_count: int
+    total_processed: int
+    duration_seconds: float
+    imported_product_ids: list[uuid.UUID] = []
+    errors: list[dict] = []  # Detailed error information

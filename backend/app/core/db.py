@@ -10,7 +10,7 @@ from app.models import User, UserCreate, ProductCategory, ProductStatus
 logger = get_logger(__name__)
 
 engine = create_engine(str(settings.SQLALCHEMY_DATABASE_URI))
-logger.info(f"✅ Database engine created: {settings.POSTGRES_SERVER}:{settings.POSTGRES_PORT}/{settings.POSTGRES_DB}")
+logger.info(f"Database engine created: {settings.POSTGRES_SERVER}:{settings.POSTGRES_PORT}/{settings.POSTGRES_DB}")
 
 
 # make sure all SQLModel models are imported (app.models) before initializing DB
@@ -34,7 +34,7 @@ def init_db(session: Session) -> None:
         select(User).where(User.email == settings.FIRST_SUPERUSER)
     ).first()
     if not user:
-        logger.info(f"👤 Creating first superuser: {settings.FIRST_SUPERUSER}")
+        logger.info(f"Creating first superuser: {settings.FIRST_SUPERUSER}")
         user_in = UserCreate(
             email=settings.FIRST_SUPERUSER,
             password=settings.FIRST_SUPERUSER_PASSWORD,

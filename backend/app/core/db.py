@@ -20,7 +20,7 @@ logger.info(f"✅ Database engine created: {settings.POSTGRES_SERVER}:{settings.
 
 def init_db(session: Session) -> None:
     """Initialize database with initial data"""
-    logger.info("🔄 Initializing database...")
+    logger.info("Initializing database...")
     
     # Tables should be created with Alembic migrations
     # But if you don't want to use migrations, create
@@ -41,14 +41,13 @@ def init_db(session: Session) -> None:
             is_superuser=True,
         )
         user = crud.create_user(session=session, user_create=user_in)
-        logger.info(f"✅ Superuser created successfully")
+        logger.info(f"Superuser created successfully")
     else:
-        logger.info(f"✅ Superuser already exists: {settings.FIRST_SUPERUSER}")
+        logger.info(f"Superuser already exists: {settings.FIRST_SUPERUSER}")
 
     _seed_product_categories(session)
     _seed_product_statuses(session)
-    logger.info("✅ Database initialization complete")
-
+    logger.info("Database initialization complete")
 
 def _seed_product_categories(session: Session) -> None:
 

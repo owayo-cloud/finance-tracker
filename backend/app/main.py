@@ -4,6 +4,7 @@ from contextlib import asynccontextmanager
 
 from fastapi import FastAPI, Request
 from fastapi.routing import APIRoute
+from fastapi.responses import JSONResponse
 from starlette.middleware.cors import CORSMiddleware
 from starlette.middleware.base import BaseHTTPMiddleware
 
@@ -28,7 +29,7 @@ class LoggingMiddleware(BaseHTTPMiddleware):
         
         # Log request
         logger.info(
-            f"→ {request.method} {request.url.path} | "
+            f"-> {request.method} {request.url.path} | "
             f"Client: {request.client.host if request.client else 'unknown'}"
         )
         
@@ -46,7 +47,7 @@ class LoggingMiddleware(BaseHTTPMiddleware):
             )
             
             logger.info(
-                f"← {request.method} {request.url.path} | "
+                f"<- {request.method} {request.url.path} | "
                 f"Status: {status_color}{response.status_code}\033[0m | "
                 f"Time: {process_time:.3f}s"
             )
@@ -55,7 +56,7 @@ class LoggingMiddleware(BaseHTTPMiddleware):
         except Exception as e:
             process_time = time.time() - start_time
             logger.error(
-                f"✗ {request.method} {request.url.path} | "
+                f"X {request.method} {request.url.path} | "
                 f"Error: {str(e)} | Time: {process_time:.3f}s",
                 exc_info=True
             )
@@ -67,18 +68,18 @@ async def lifespan(app: FastAPI):
     """Lifespan context manager for startup and shutdown events"""
     # Startup
     logger.info("=" * 60)
-    logger.info(f"🚀 Starting {settings.PROJECT_NAME}")
-    logger.info(f"📍 Environment: {settings.ENVIRONMENT}")
-    logger.info(f"🌐 API URL: {settings.API_V1_STR}")
-    logger.info(f"🔗 Frontend: {settings.FRONTEND_HOST}")
-    logger.info(f"🗄️  Database: {settings.POSTGRES_SERVER}:{settings.POSTGRES_PORT}/{settings.POSTGRES_DB}")
+    logger.info(f"Starting {settings.PROJECT_NAME}")
+    logger.info(f"Environment: {settings.ENVIRONMENT}")
+    logger.info(f"API URL: {settings.API_V1_STR}")
+    logger.info(f"Frontend: {settings.FRONTEND_HOST}")
+    logger.info(f"Database: {settings.POSTGRES_SERVER}:{settings.POSTGRES_PORT}/{settings.POSTGRES_DB}")
     logger.info("=" * 60)
     
     yield
     
     # Shutdown
     logger.info("=" * 60)
-    logger.info(f"🛑 Shutting down {settings.PROJECT_NAME}")
+    logger.info(f"Shutting down {settings.PROJECT_NAME}")
     logger.info("=" * 60)
 
 
@@ -86,9 +87,9 @@ if settings.SENTRY_DSN and settings.ENVIRONMENT != "local":
     try:
         import sentry_sdk
         sentry_sdk.init(dsn=str(settings.SENTRY_DSN), enable_tracing=True)
-        logger.info("✅ Sentry initialized")
+        logger.info("Sentry initialized")
     except ImportError:
-        logger.warning("⚠️  Sentry SDK not installed, skipping Sentry initialization")
+        logger.warning("Sentry SDK not installed, skipping Sentry initialization")
 
 app = FastAPI(
     title=settings.PROJECT_NAME,
@@ -97,10 +98,6 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
-# Add logging middleware
-app.add_middleware(LoggingMiddleware)
-
-# Set all CORS enabled origins
 if settings.all_cors_origins:
     app.add_middleware(
         CORSMiddleware,
@@ -109,7 +106,23 @@ if settings.all_cors_origins:
         allow_methods=["*"],
         allow_headers=["*"],
     )
-    logger.info(f"✅ CORS enabled for origins: {settings.all_cors_origins}")
+
+
+app.add_middleware(LoggingMiddleware)
+
+# # Add global exception handler to ensure CORS headers on errors
+# @app.exception_handler(Exception)
+# async def global_exception_handler(request: Request, exc: Exception):
+#     """Ensure CORS headers are included in error responses"""
+#     logger.error(f"Global exception handler: {exc}", exc_info=True)
+#     return JSONResponse(
+#         status_code=500,
+#         content={"detail": "Internal server error"},
+#         headers={
+#             "Access-Control-Allow-Origin": request.headers.get("origin", "*"),
+#             "Access-Control-Allow-Credentials": "true",
+#         }
+#     )
 
 app.include_router(api_router, prefix=settings.API_V1_STR)
-logger.info(f"✅ API router mounted at {settings.API_V1_STR}")
+logger.info(f"API router mounted at {settings.API_V1_STR}")

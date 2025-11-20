@@ -1,0 +1,51 @@
+Category,Product Name,Selling Price,Buying Price,Current Stock,Reorder Level,Description
+Beers,Tusker Lager 500ml,180.00,150.00,120,20,Premium Kenyan lager beer
+Beers,Guinness 330ml,200.00,165.00,85,15,Classic Irish stout
+Beers,White Cap Lager 500ml,170.00,140.00,95,20,Popular Kenyan beer
+Beers,Pilsner 500ml,160.00,130.00,110,25,Light lager beer
+Whisky,Johnnie Walker Red Label 750ml,1500.00,1250.00,15,5,Blended Scotch whisky
+Vodka,Smirnoff Vodka 750ml,1200.00,980.00,22,8,Premium vodka
+Soft-Drinks,Coca-Cola 500ml,80.00,60.00,200,50,Classic cola soft drink
+Soft-Drinks,Fanta Orange 500ml,75.00,55.00,150,40,Orange flavored soda
+Soft-Drinks,Sprite 500ml,75.00,55.00,130,40,Lemon-lime soft drink
+Soft-Drinks,Red Bull 250ml,180.00,150.00,60,20,Energy drink
+Beers,Heineken 330ml,220.00,180.00,45,15,Dutch premium lager
+Beers,Corona Extra 355ml,250.00,210.00,30,10,Mexican beer with lime
+Cognac & Brandy,Baileys Irish Cream 750ml,2200.00,1800.00,12,5,Irish cream liqueur
+Whisky,Jameson Irish Whiskey 750ml,1800.00,1500.00,18,6,Irish whiskey
+Vodka,Absolut Vodka 750ml,1400.00,1150.00,14,5,Swedish vodka
+Rum,Captain Morgan Spiced Rum 750ml,1300.00,1050.00,16,6,Spiced Caribbean rum
+Whisky,Jack Daniel's Tennessee Whiskey 750ml,2500.00,2100.00,10,4,American whiskey
+Whisky,Chivas Regal 12Y 750ml,3500.00,2900.00,8,3,Premium Scotch whisky
+Cognac & Brandy,Hennessy VS Cognac 700ml,4200.00,3500.00,6,2,French cognac
+Vodka,Grey Goose Vodka 750ml,3800.00,3200.00,7,3,Premium French vodka
+Champagne,Moët & Chandon Champagne 750ml,6500.00,5400.00,5,2,French champagne
+Beers,Tusker Malt 500ml,190.00,155.00,80,15,Malt lager beer
+Beers,Balozi Lager 500ml,150.00,120.00,100,25,Budget lager beer
+Beers,Senator Lager 500ml,140.00,110.00,105,25,Affordable lager beer
+Beers,Kilimanjaro Premium Lager 500ml,180.00,145.00,70,15,Tanzanian lager
+Soft-Drinks,Alvaro Non-Alcoholic 330ml,90.00,70.00,50,20,Non-alcoholic malt drink
+Ciders,Tusker Cider 330ml,200.00,165.00,40,15,Apple cider
+Ciders,Savanna Dry 330ml,190.00,155.00,55,18,South African cider
+Ciders,Hunters Gold 330ml,185.00,150.00,60,20,Kenyan cider
+Beers-infusions,Smirnoff Ice 275ml,150.00,120.00,75,25,Flavored malt beverage
+Rum,Bacardi Superior Rum 750ml,1400.00,1150.00,13,5,White rum
+Gin,Tanqueray Gin 750ml,1800.00,1500.00,11,4,London dry gin
+Gin,Bombay Sapphire Gin 750ml,2000.00,1650.00,9,4,Premium gin
+Gin,Beefeater Gin 750ml,1500.00,1250.00,14,5,Classic London gin
+Gin,Gordon's Gin 750ml,1200.00,980.00,17,6,London dry gin
+Cognac & Brandy,Amarula Cream Liqueur 750ml,1800.00,1500.00,10,4,African cream liqueur
+Cognac & Brandy,Kahlúa Coffee Liqueur 750ml,1600.00,1300.00,12,5,Coffee liqueur
+Rum,Malibu Coconut Rum 750ml,1400.00,1150.00,15,5,Coconut rum
+Cognac & Brandy,Jägermeister 700ml,2000.00,1650.00,11,4,German herbal liqueur
+Cognac & Brandy,Campari 700ml,1700.00,1400.00,8,3,Italian bitter aperitif
+Cognac & Brandy,Martini Rosso 1L,900.00,750.00,20,8,Sweet vermouth
+Cognac & Brandy,Pimm's No.1 Cup 700ml,1500.00,1250.00,10,4,English fruit cup
+Cognac & Brandy,Aperol 700ml,1600.00,1300.00,12,5,Italian aperitif
+Tequila,Tequila Jose Cuervo 750ml,1800.00,1500.00,13,5,Mexican tequila
+Tequila,Patron Silver Tequila 750ml,4500.00,3750.00,5,2,Premium tequila
+Tequila,Don Julio Blanco 750ml,4000.00,3300.00,6,2,Premium tequila
+Whisky,Glenfiddich 12Y 700ml,3200.00,2650.00,7,3,Single malt Scotch
+Whisky,Glenlivet 12Y 700ml,3000.00,2500.00,8,3,Single malt Scotch
+Whisky,Macallan 12Y 700ml,4500.00,3750.00,5,2,Single malt Scotch
+Whisky,Lagavulin 16Y 700ml,5500.00,4600.00,4,2,Islay single malt Scotch

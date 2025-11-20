@@ -1,5 +1,5 @@
-﻿import { useState, useEffect } from "react";
-import { createFileRoute } from "@tanstack/react-router";
+import { useState, useEffect } from "react";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import {
   Container,
   Heading,
@@ -17,8 +17,8 @@ import {
 } from "@chakra-ui/react";
 import { useQuery, useQueryClient, useMutation } from "@tanstack/react-query";
 import { FiEdit, FiPackage, FiX, FiChevronLeft, FiChevronRight, FiUpload } from "react-icons/fi";
-import { Button } from "../../components/ui/button";
-import { Field } from "../../components/ui/field";
+import { Button } from "../../../components/ui/button";
+import { Field } from "../../../components/ui/field";
 import {
   DrawerBackdrop,
   DrawerBody,
@@ -27,15 +27,15 @@ import {
   DrawerHeader,
   DrawerRoot,
   DrawerTitle,
-} from "../../components/ui/drawer";
-import type { ProductPublic, StockEntryCreate } from "../../client";
-import { StockEntriesService, ProductsService } from "../../client";
-import useCustomToast from "../../hooks/useCustomToast";
-import { handleError } from "../../utils";
-import AddProduct from "../../components/Products/AddProduct";
-import useAuth from "../../hooks/useAuth";
+} from "../../../components/ui/drawer";
+import type { ProductPublic, StockEntryCreate } from "../../../client";
+import { StockEntriesService, ProductsService } from "../../../client";
+import useCustomToast from "../../../hooks/useCustomToast";
+import { handleError } from "../../../utils";
+import AddProduct from "../../../components/Products/AddProduct";
+import useAuth from "../../../hooks/useAuth";
 
-export const Route = createFileRoute("/_layout/stock-entry")({
+export const Route = createFileRoute("/_layout/stock-entry/")({
   component: StockEntry,
 });
 
@@ -472,6 +472,7 @@ function ProductCard({
 // Main Component
 function StockEntry() {
   const { user: currentUser } = useAuth()
+  const navigate = useNavigate()
   const [searchQuery, setSearchQuery] = useState("");
   const [debouncedSearchQuery, setDebouncedSearchQuery] = useState("");
   const [selectedProduct, setSelectedProduct] = useState<ProductPublic | null>(
@@ -584,9 +585,7 @@ function StockEntry() {
               <Button
                 variant="outline"
                 colorScheme="blue"
-                onClick={() => {
-                  window.location.href = "/stock-entry/bulk-import"
-                }}
+                onClick={() => navigate({ to: "/stock-entry/bulk-import" })}
               >
                 <FiUpload /> Bulk Import
               </Button>

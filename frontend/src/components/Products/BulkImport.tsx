@@ -166,7 +166,14 @@ export function BulkImportPage() {
         </Box>
 
         {/* Progress Indicator */}
-        <Box p={6} borderWidth="1px" borderRadius="lg" bg="bg.panel">
+        <Box 
+          p={6} 
+          borderWidth="1px" 
+          borderRadius="lg" 
+          bg={{ base: "gray.800", _light: "white" }}
+          borderColor={{ base: "gray.700", _light: "gray.200" }}
+          shadow="sm"
+        >
           <HStack gap={4} justify="space-between" mb={4}>
             {[1, 2, 3, 4, 5].map((stage) => (
               <Flex key={stage} direction="column" align="center" flex={1}>
@@ -176,17 +183,25 @@ export function BulkImportPage() {
                   borderRadius="full"
                   bg={
                     stage < importState.currentStage
-                      ? "green.500"
+                      ? "teal.500"
                       : stage === importState.currentStage
                       ? "blue.500"
                       : "gray.200"
                   }
+                  _dark={{
+                    bg: stage < importState.currentStage
+                      ? "teal.500"
+                      : stage === importState.currentStage
+                      ? "blue.500"
+                      : "gray.700"
+                  }}
                   color="white"
                   display="flex"
                   alignItems="center"
                   justifyContent="center"
                   fontWeight="bold"
                   mb={2}
+                  transition="all 0.2s"
                 >
                   {stage < importState.currentStage ? (
                     <Icon as={FiCheckCircle} />
@@ -196,27 +211,35 @@ export function BulkImportPage() {
                 </Box>
                 <Text
                   fontSize="sm"
-                  fontWeight={stage === importState.currentStage ? "bold" : "normal"}
-                  color={stage === importState.currentStage ? "fg.default" : "fg.muted"}
+                  fontWeight={stage === importState.currentStage ? "bold" : "medium"}
+                  color={stage === importState.currentStage ? "blue.500" : "fg.muted"}
                 >
                   {getStageLabel(stage)}
                 </Text>
               </Flex>
             ))}
           </HStack>
-          {/* Custom Progress Bar (Chakra v3 compatible) */}
-          <Box h="8px" w="full" bg="gray.200" borderRadius="full" overflow="hidden">
+          {/* Custom Progress Bar */}
+          <Box h="8px" w="full" bg="gray.100" _dark={{ bg: "gray.700" }} borderRadius="full" overflow="hidden">
             <Box
               h="full"
               w={`${(importState.currentStage / 5) * 100}%`}
               bg="blue.500"
-              transition="width 0.3s"
+              transition="width 0.3s ease-in-out"
             />
           </Box>
         </Box>
 
         {/* Stage Content */}
-        <Box p={8} borderWidth="1px" borderRadius="lg" minH="400px">
+        <Box 
+          p={8} 
+          borderWidth="1px" 
+          borderRadius="lg" 
+          minH="400px"
+          bg={{ base: "gray.800", _light: "white" }}
+          borderColor={{ base: "gray.700", _light: "gray.200" }}
+          shadow="sm"
+        >
           {importState.currentStage === ImportStage.INSTRUCTIONS && (
             <InstructionsStage
               onContinue={() =>
@@ -391,13 +414,13 @@ function InstructionsStage({ onContinue }: InstructionsStageProps) {
 
       <Box>
         <Heading size="md" mb={4}>
-          📋 Import Guidelines
+          Import Guidelines
         </Heading>
 
         <VStack gap={4} align="stretch">
           <Box>
             <Text fontWeight="bold" mb={2}>
-              ✓ Supported Formats
+              Supported Formats
             </Text>
             <List.Root pl={6}>
               <List.Item>CSV (Comma-Separated Values)</List.Item>
@@ -407,7 +430,7 @@ function InstructionsStage({ onContinue }: InstructionsStageProps) {
 
           <Box>
             <Text fontWeight="bold" mb={2}>
-              ✓ File Limits
+              File Limits
             </Text>
             <List.Root pl={6}>
               <List.Item>Maximum file size: 10MB</List.Item>
@@ -417,7 +440,7 @@ function InstructionsStage({ onContinue }: InstructionsStageProps) {
 
           <Box>
             <Text fontWeight="bold" mb={2}>
-              ✓ Required Fields
+              Required Fields
             </Text>
             <List.Root pl={6}>
               <List.Item>
@@ -437,7 +460,7 @@ function InstructionsStage({ onContinue }: InstructionsStageProps) {
 
           <Box>
             <Text fontWeight="bold" mb={2}>
-              ✓ Optional Fields
+              Optional Fields
             </Text>
             <List.Root pl={6}>
               <List.Item>Buying Price</List.Item>
@@ -461,7 +484,14 @@ function InstructionsStage({ onContinue }: InstructionsStageProps) {
         </VStack>
       </Box>
 
-      <Box p={6} borderWidth="2px" borderRadius="lg" borderStyle="dashed" bg="bg.muted">
+      <Box 
+        p={6} 
+        borderWidth="2px" 
+        borderRadius="lg" 
+        borderStyle="dashed" 
+        bg="gray.50" 
+        _dark={{ bg: "gray.700", borderColor: "gray.600" }}
+      >
         <VStack gap={4}>
           <Icon as={FiDownload} boxSize={12} color="blue.500" />
           <Heading size="md">Download Template</Heading>
@@ -481,18 +511,31 @@ function InstructionsStage({ onContinue }: InstructionsStageProps) {
         </VStack>
       </Box>
 
-      <Box p={4} bg="blue.50" borderRadius="lg">
-        <Heading size="sm" mb={2} color="blue.800">
-          📝 Example Data
+      <Box 
+        p={4} 
+        bg={{ base: "gray.800", _light: "white" }}
+        borderRadius="lg"
+        borderWidth="1px"
+        borderColor={{ base: "gray.700", _light: "gray.200" }}
+      >
+        <Heading
+          size="sm"
+          mb={2}
+          color={{ base: "white", _light: "gray.800" }}
+        >
+          Example Data
         </Heading>
         <Box
           as="pre"
           p={3}
-          bg="white"
+          bg={{ base: "gray.800", _light: "white" }}
           borderRadius="md"
           overflow="auto"
           fontSize="sm"
           fontFamily="mono"
+          borderWidth="1px"
+          borderColor="gray.200"
+          _dark={{ borderColor: "gray.700" }}
         >
           {`Product Name,Selling Price,Buying Price,Description
 2 Share Sweet Red 750ML,850.00,650.00,Sweet red wine
@@ -632,13 +675,23 @@ function UploadStage({ onFileUploaded }: UploadStageProps) {
         borderWidth="2px"
         borderRadius="lg"
         borderStyle="dashed"
-        borderColor={selectedFile ? "green.500" : "border.default"}
-        bg={selectedFile ? "green.50" : "bg.muted"}
+        borderColor={selectedFile ? "green.500" : "gray.200"}
+        _dark={{ borderColor: selectedFile ? "green.500" : "gray.600" }}
+        bg={selectedFile ? "green.50" : "gray.50"}
+        _dark={{ bg: selectedFile ? "green.900" : "gray.700" }}
         textAlign="center"
         cursor="pointer"
         onDragOver={handleDragOver}
         onDrop={handleDrop}
         onClick={() => document.getElementById("file-input")?.click()}
+        transition="all 0.2s"
+        _hover={{
+          borderColor: selectedFile ? "green.600" : "blue.400",
+          bg: selectedFile ? "green.100" : "gray.100",
+          _dark: {
+            bg: selectedFile ? "green.800" : "gray.600"
+          }
+        }}
       >
         <VStack gap={4}>
           <Icon
@@ -648,7 +701,7 @@ function UploadStage({ onFileUploaded }: UploadStageProps) {
           />
           {selectedFile ? (
             <>
-              <Heading size="md" color="green.700">
+              <Heading size="md" color="green.700" _dark={{ color: "green.200" }}>
                 {selectedFile.name}
               </Heading>
               <Text color="fg.muted">
@@ -691,7 +744,7 @@ function UploadStage({ onFileUploaded }: UploadStageProps) {
         <Box>
           <Text mb={2}>Uploading and processing: {uploadProgress}%</Text>
           {/* Custom Progress Bar */}
-          <Box h="8px" w="full" bg="gray.200" borderRadius="full" overflow="hidden">
+          <Box h="8px" w="full" bg="gray.100" _dark={{ bg: "gray.700" }} borderRadius="full" overflow="hidden">
             <Box h="full" w={`${uploadProgress}%`} bg="blue.500" transition="width 0.3s" />
           </Box>
           <Text fontSize="sm" color="fg.muted" mt={2}>
@@ -863,7 +916,7 @@ function MappingStage({
         </Alert.Indicator>
         <Alert.Content>
           <Alert.Description>
-            Columns with ✓ have been auto-matched. Review and adjust mappings as needed.
+            Columns with a checkmark have been auto-matched. Review and adjust mappings as needed.
           </Alert.Description>
         </Alert.Content>
       </Alert.Root>
@@ -884,24 +937,23 @@ function MappingStage({
                   <Text fontWeight="medium">{column}</Text>
                 </HStack>
                 <Field>
-                  <select
+                  <Box
+                    as="select"
                     value={columnMapping[column] || ""}
-                    onChange={(e) => {
+                    onChange={(e: any) => {
                       setColumnMapping({
                         ...columnMapping,
                         [column]: e.target.value,
                       })
                     }}
-                    style={{
-                      width: "100%",
-                      padding: "8px",
-                      borderRadius: "6px",
-                      borderWidth: "1px",
-                      borderStyle: "solid",
-                      backgroundColor: "var(--chakra-colors-input-bg)",
-                      borderColor: "var(--chakra-colors-input-border)",
-                      color: "var(--chakra-colors-text-primary)",
-                    }}
+                    w="full"
+                    p={2}
+                    borderRadius="md"
+                    borderWidth="1px"
+                    borderColor="gray.200"
+                    bg="white"
+                    _dark={{ borderColor: "gray.600", bg: "gray.700" }}
+                    _focus={{ borderColor: "blue.500", outline: "none" }}
                   >
                     <option value="">-- Select Field --</option>
                     {systemFields.map((field) => (
@@ -909,7 +961,7 @@ function MappingStage({
                         {field.label}
                       </option>
                     ))}
-                  </select>
+                  </Box>
                 </Field>
               </Grid>
             )
@@ -917,25 +969,31 @@ function MappingStage({
         </VStack>
       </Box>
 
-      <Box p={4} borderWidth="1px" borderRadius="lg" bg="blue.50">
-        <Heading size="sm" mb={4} color="blue.800">
+      <Box 
+        p={4} 
+        borderWidth="1px" 
+        borderRadius="lg" 
+        bg="blue.50" 
+        _dark={{ bg: "blue.900", borderColor: "blue.800" }}
+        borderColor="blue.100"
+      >
+        <Heading size="sm" mb={4} color="blue.800" _dark={{ color: "blue.200" }}>
           Required Fields for All Products
         </Heading>
         <VStack gap={4} align="stretch">
           <Field label="Category *" required>
-            <select
+            <Box
+              as="select"
               value={defaultCategoryId}
-              onChange={(e) => setDefaultCategoryId(e.target.value)}
-              style={{
-                width: "100%",
-                padding: "8px",
-                borderRadius: "6px",
-                borderWidth: "1px",
-                borderStyle: "solid",
-                backgroundColor: "var(--chakra-colors-input-bg)",
-                borderColor: "var(--chakra-colors-input-border)",
-                color: "var(--chakra-colors-text-primary)",
-              }}
+              onChange={(e: any) => setDefaultCategoryId(e.target.value)}
+              w="full"
+              p={2}
+              borderRadius="md"
+              borderWidth="1px"
+              borderColor="gray.200"
+              bg="white"
+              _dark={{ borderColor: "gray.600", bg: "gray.700" }}
+              _focus={{ borderColor: "blue.500", outline: "none" }}
             >
               <option value="">-- Select Category --</option>
               {categories?.data.map((category: any) => (
@@ -943,23 +1001,22 @@ function MappingStage({
                   {category.name}
                 </option>
               ))}
-            </select>
+            </Box>
           </Field>
 
           <Field label="Status *" required>
-            <select
+            <Box
+              as="select"
               value={defaultStatusId}
-              onChange={(e) => setDefaultStatusId(e.target.value)}
-              style={{
-                width: "100%",
-                padding: "8px",
-                borderRadius: "6px",
-                borderWidth: "1px",
-                borderStyle: "solid",
-                backgroundColor: "var(--chakra-colors-input-bg)",
-                borderColor: "var(--chakra-colors-input-border)",
-                color: "var(--chakra-colors-text-primary)",
-              }}
+              onChange={(e: any) => setDefaultStatusId(e.target.value)}
+              w="full"
+              p={2}
+              borderRadius="md"
+              borderWidth="1px"
+              borderColor="gray.200"
+              bg="white"
+              _dark={{ borderColor: "gray.600", bg: "gray.700" }}
+              _focus={{ borderColor: "blue.500", outline: "none" }}
             >
               <option value="">-- Select Status --</option>
               {statuses?.map((status: any) => (
@@ -967,7 +1024,7 @@ function MappingStage({
                   {status.name}
                 </option>
               ))}
-            </select>
+            </Box>
           </Field>
         </VStack>
       </Box>
@@ -1181,16 +1238,16 @@ function ValidationStage({
 
       <HStack gap={4} justify="center" p={4} borderWidth="1px" borderRadius="lg">
         <Badge colorScheme="gray" fontSize="lg" px={4} py={2}>
-          📊 Total: {validatedRows.length}
+          Total: {validatedRows.length}
         </Badge>
         <Badge colorScheme="green" fontSize="lg" px={4} py={2}>
-          ✓ Valid: {validRows}
+          Valid: {validRows}
         </Badge>
         <Badge colorScheme="red" fontSize="lg" px={4} py={2}>
-          ❌ Errors: {errorRows}
+          Errors: {errorRows}
         </Badge>
         <Badge colorScheme="orange" fontSize="lg" px={4} py={2}>
-          🔄 Duplicates: {duplicateRows}
+          Duplicates: {duplicateRows}
         </Badge>
       </HStack>
 
@@ -1218,29 +1275,35 @@ function ValidationStage({
       </HStack>
 
       {duplicateRows > 0 && (
-        <Box p={4} borderWidth="1px" borderRadius="lg" bg="orange.50">
-          <Heading size="sm" mb={3}>
+        <Box 
+          p={4} 
+          borderWidth="1px" 
+          borderRadius="lg" 
+          bg="orange.50" 
+          _dark={{ bg: "orange.900", borderColor: "orange.800" }}
+          borderColor="orange.100"
+        >
+          <Heading size="sm" mb={3} color="orange.800" _dark={{ color: "orange.200" }}>
             Duplicate Handling
           </Heading>
           <Field label="What should we do with duplicates?">
-            <select
+            <Box
+              as="select"
               value={duplicateAction}
-              onChange={(e) => onDuplicateActionChange(e.target.value as any)}
-              style={{
-                width: "100%",
-                padding: "8px",
-                borderRadius: "6px",
-                borderWidth: "1px",
-                borderStyle: "solid",
-                backgroundColor: "var(--chakra-colors-input-bg)",
-                borderColor: "var(--chakra-colors-input-border)",
-                color: "var(--chakra-colors-text-primary)",
-              }}
+              onChange={(e: any) => onDuplicateActionChange(e.target.value as any)}
+              w="full"
+              p={2}
+              borderRadius="md"
+              borderWidth="1px"
+              borderColor="gray.200"
+              bg="white"
+              _dark={{ borderColor: "gray.600", bg: "gray.700" }}
+              _focus={{ borderColor: "blue.500", outline: "none" }}
             >
               <option value="skip">Skip duplicates (keep existing products)</option>
               <option value="update">Update existing products with new data</option>
               <option value="create">Import as new products (create duplicates)</option>
-            </select>
+            </Box>
           </Field>
         </Box>
       )}
@@ -1306,7 +1369,7 @@ function ValidationStage({
                   {row.errors.length > 0 && (
                     <VStack align="start" gap={1}>
                       {row.errors.map((error: ValidationError, idx: number) => (
-                        <Text key={idx} fontSize="xs" color="red.600">
+                        <Text key={idx} fontSize="xs" color="red.600" _dark={{ color: "red.300" }}>
                           {error.field}: {error.message}
                         </Text>
                       ))}
@@ -1315,15 +1378,15 @@ function ValidationStage({
                   {row.warnings.length > 0 && (
                     <VStack align="start" gap={1}>
                       {row.warnings.map((warning: string, idx: number) => (
-                        <Text key={idx} fontSize="xs" color="orange.600">
-                          ⚠️ {warning}
+                        <Text key={idx} fontSize="xs" color="orange.600" _dark={{ color: "orange.300" }}>
+                          Warning: {warning}
                         </Text>
                       ))}
                     </VStack>
                   )}
                   {row.is_duplicate && (
-                    <Text fontSize="xs" color="blue.600">
-                      🔄 Duplicate product
+                    <Text fontSize="xs" color="blue.600" _dark={{ color: "blue.300" }}>
+                      Duplicate product
                     </Text>
                   )}
                 </Table.Cell>
@@ -1429,7 +1492,7 @@ function CompleteStage({
     <VStack gap={8} align="center" py={8}>
       <Icon as={FiCheckCircle} boxSize={24} color="green.500" />
       
-      <Heading size="2xl">Import Complete! ✓</Heading>
+      <Heading size="2xl">Import Complete!</Heading>
 
       <Box textAlign="center">
         <Text fontSize="lg" fontWeight="bold" mb={4}>
@@ -1438,20 +1501,29 @@ function CompleteStage({
         <VStack gap={3}>
           <HStack>
             <Badge colorScheme="green" px={4} py={2} fontSize="md">
-              ✓ {validRows} products imported successfully
+              <HStack gap={2}>
+                <Icon as={FiCheckCircle} />
+                <Text>{validRows} products imported successfully</Text>
+              </HStack>
             </Badge>
           </HStack>
           {errorRows > 0 && (
             <HStack>
               <Badge colorScheme="red" px={4} py={2} fontSize="md">
-                ❌ {errorRows} rows skipped due to errors
+                <HStack gap={2}>
+                  <Icon as={FiAlertCircle} />
+                  <Text>{errorRows} rows skipped due to errors</Text>
+                </HStack>
               </Badge>
             </HStack>
           )}
           {duplicateRows > 0 && (
             <HStack>
               <Badge colorScheme="orange" px={4} py={2} fontSize="md">
-                🔄 {duplicateRows} duplicates handled
+                <HStack gap={2}>
+                  <Icon as={FiRefreshCw} />
+                  <Text>{duplicateRows} duplicates handled</Text>
+                </HStack>
               </Badge>
             </HStack>
           )}

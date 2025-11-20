@@ -47,6 +47,24 @@ export const confirmPasswordRules = (
 export const handleError = (err: ApiError) => {
   const { showErrorToast } = useCustomToast()
   const errDetail = (err.body as any)?.detail
+  
+  // Handle specific error cases
+  if (err.status === 403) {
+    if (errDetail === "Not authenticated" || errDetail?.includes("authenticated")) {
+      showErrorToast("Your session has expired. Please log in again.")
+    } else {
+      const errorMessage = errDetail || "Access denied. You don't have permission to perform this action."
+      showErrorToast(errorMessage)
+    }
+    return
+  }
+  
+  if (err.status === 401) {
+    showErrorToast("Authentication required. Please log in.")
+    return
+  }
+  
+  // Handle other errors
   let errorMessage = errDetail || "Something went wrong."
   if (Array.isArray(errDetail) && errDetail.length > 0) {
     errorMessage = errDetail[0].msg

@@ -10,8 +10,7 @@ import {
   FiPackage,
   FiBarChart2,
   FiDollarSign,
-  FiTrendingUp,
-  FiList
+  FiTrendingUp
 } from "react-icons/fi"
 import { TbReceiptDollar } from "react-icons/tb"
 import type { IconType } from "react-icons/lib"
@@ -20,14 +19,13 @@ import type { UserPublic } from "@/client"
 
 const items = [
   { icon: FiHome, title: "Dashboard", path: "/", adminOnly: true }, // Admin only
-  { icon: FiShoppingCart, title: "Point of Sale", path: "/sales" }, // Available to all
-  { icon: FiList, title: "Sales History", path: "/sales-list" }, // Available to all
+  { icon: FiShoppingCart, title: "Sales", path: "/sales" }, // Available to all
   { icon: FiBox, title: "Stock Entry", path: "/stock-entry" }, // Available to all
   { icon: FiPackage, title: "Products", path: "/products", adminOnly: true },
-  { icon: FiBarChart2, title: "Reports", path: "/reports" }, // Available to all
-  { icon: TbReceiptDollar, title: "Shift Reconciliation", path: "/shift-reconciliation" }, // Available to all
+  { icon: FiBarChart2, title: "Reports", path: "/reports", adminOnly: true },
+  { icon: TbReceiptDollar, title: "Shift Reconciliation", path: "/shift-reconciliation" },
   { icon: FiDollarSign, title: "Expenses", path: "/expenses", adminOnly: true },
-  { icon: FiTrendingUp, title: "Debts", path: "/debts" }, // Available to all
+  { icon: FiTrendingUp, title: "Debts", path: "/debts", adminOnly: true },
   { icon: FiSettings, title: "User Settings", path: "/settings" }, // Available to all
 ]
 
@@ -58,10 +56,7 @@ const SidebarItems = ({ onClose }: SidebarItemsProps) => {
     : filteredItems
 
   const listItems = finalItems.map(({ icon, title, path }) => {
-    // Check if current path matches exactly or starts with the path (for nested routes)
-    const isActive = location.pathname === path || 
-                     (path !== "/" && location.pathname.startsWith(path + "/"))
-    const isSales = path === "/sales" || path === "/sales-list"
+    const isActive = location.pathname === path
     
     return (
       <RouterLink key={title} to={path as any} onClick={onClose}>
@@ -70,24 +65,20 @@ const SidebarItems = ({ onClose }: SidebarItemsProps) => {
           px={3}
           py={3}
           mx={2}
-          mb={isSales ? 2 : 1}
+          mb={1}
           borderRadius="lg"
           transition="all 0.2s"
           cursor="pointer"
           _hover={{
-            bg: isActive ? "rgba(59, 130, 246, 0.3)" : isSales ? "rgba(59, 130, 246, 0.15)" : "rgba(59, 130, 246, 0.1)",
-            transform: "translateX(4px)",
-            borderColor: isSales ? "rgba(59, 130, 246, 0.4)" : "rgba(59, 130, 246, 0.3)",
-            boxShadow: isSales ? "0 4px 12px rgba(59, 130, 246, 0.25)" : "none",
+            bg: isActive ? "teal.600" : { base: "gray.700", _light: "gray.100" },
+            transform: "translateX(2px)",
           }}
-          bg={isActive ? "rgba(59, 130, 246, 0.2)" : isSales ? "rgba(59, 130, 246, 0.08)" : "transparent"}
-          border="1px solid"
-          borderColor={isActive ? "rgba(59, 130, 246, 0.4)" : isSales ? "rgba(59, 130, 246, 0.25)" : "transparent"}
-          color={isActive ? "#60a5fa" : isSales ? "#60a5fa" : { base: "gray.300", _light: "gray.700" }}
+          bg={isActive ? "teal.500" : "transparent"}
+          color={isActive ? "white" : { base: "gray.300", _light: "gray.700" }}
           position="relative"
           alignItems="center"
           fontSize="sm"
-          fontWeight={isActive || isSales ? "600" : "500"}
+          fontWeight={isActive ? "600" : "500"}
           _before={isActive ? {
             content: '""',
             position: "absolute",
@@ -95,18 +86,17 @@ const SidebarItems = ({ onClose }: SidebarItemsProps) => {
             top: "50%",
             transform: "translateY(-50%)",
             width: "3px",
-            height: "24px",
-            bg: "linear-gradient(to bottom, #60a5fa, #3b82f6)",
+            height: "20px",
+            bg: "white",
             borderRadius: "0 2px 2px 0",
-            boxShadow: "0 0 10px rgba(59, 130, 246, 0.5)",
           } : undefined}
         >
           <Icon 
             as={icon} 
             fontSize="lg"
-            color={isActive ? "#60a5fa" : isSales ? "#60a5fa" : { base: "gray.400", _light: "gray.600" }}
+            color={isActive ? "white" : { base: "gray.400", _light: "gray.600" }}
           />
-          <Text fontWeight={isSales ? "600" : undefined}>{title}</Text>
+          <Text>{title}</Text>
         </Flex>
       </RouterLink>
     )
@@ -119,12 +109,10 @@ const SidebarItems = ({ onClose }: SidebarItemsProps) => {
         px={4} 
         py={3} 
         fontWeight="700"
-        color={{ base: "gray.400", _light: "gray.600" }}
+        color="gray.500"
         textTransform="uppercase"
         letterSpacing="wider"
         mb={2}
-        bgGradient="linear(to-r, #60a5fa, #3b82f6)"
-        bgClip="text"
       >
         Menu
       </Text>

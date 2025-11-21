@@ -4,7 +4,6 @@ import { useQueryClient } from "@tanstack/react-query"
 const AUTO_REFRESH_KEY = "autoRefreshEnabled"
 const AUTO_REFRESH_INTERVAL_KEY = "autoRefreshInterval"
 const PAGE_REFRESH_KEY = "pageAutoRefreshEnabled"
-const PAGE_REFRESH_INTERVAL_KEY = "pageAutoRefreshInterval"
 
 // Default intervals in milliseconds
 export const REFRESH_INTERVALS = {
@@ -17,7 +16,7 @@ export const REFRESH_INTERVALS = {
 
 // Global auto-refresh state
 let globalAutoRefreshEnabled = true
-let globalAutoRefreshInterval = REFRESH_INTERVALS.DEFAULT
+let globalAutoRefreshInterval: number = REFRESH_INTERVALS.DEFAULT
 
 // Initialize from localStorage (with error handling)
 if (typeof window !== "undefined") {

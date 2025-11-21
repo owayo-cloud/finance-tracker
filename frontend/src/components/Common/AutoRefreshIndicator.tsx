@@ -1,5 +1,4 @@
 import { Box, HStack, Icon, Text } from "@chakra-ui/react"
-import { useQueryClient } from "@tanstack/react-query"
 import { FiRefreshCw } from "react-icons/fi"
 import { usePageAutoRefresh, REFRESH_INTERVALS } from "@/hooks/useAutoRefresh"
 import { Tooltip } from "../ui/tooltip"
@@ -10,7 +9,6 @@ interface AutoRefreshIndicatorProps {
 }
 
 const AutoRefreshIndicator = ({ interval, onToggle }: AutoRefreshIndicatorProps) => {
-  const queryClient = useQueryClient()
   const { enabled, toggle } = usePageAutoRefresh(interval || REFRESH_INTERVALS.PAGE_REFRESH)
   
   const handleToggle = () => {

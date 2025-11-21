@@ -98,31 +98,45 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
-if settings.all_cors_origins:
-    app.add_middleware(
-        CORSMiddleware,
-        allow_origins=settings.all_cors_origins,
-        allow_credentials=True,
-        allow_methods=["*"],
-        allow_headers=["*"],
-    )
+# Always enable CORS - use configured origins or allow all in local development
+cors_origins = settings.all_cors_origins if settings.all_cors_origins else (["*"] if settings.ENVIRONMENT == "local" else [])
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=cors_origins if cors_origins else ["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 
 app.add_middleware(LoggingMiddleware)
 
-# # Add global exception handler to ensure CORS headers on errors
-# @app.exception_handler(Exception)
-# async def global_exception_handler(request: Request, exc: Exception):
-#     """Ensure CORS headers are included in error responses"""
-#     logger.error(f"Global exception handler: {exc}", exc_info=True)
-#     return JSONResponse(
-#         status_code=500,
-#         content={"detail": "Internal server error"},
-#         headers={
-#             "Access-Control-Allow-Origin": request.headers.get("origin", "*"),
-#             "Access-Control-Allow-Credentials": "true",
-#         }
-#     )
+# Add global exception handler to ensure CORS headers on errors
+@app.exception_handler(Exception)
+async def global_exception_handler(request: Request, exc: Exception):
+    """Ensure CORS headers are included in error responses"""
+    logger.error(f"Global exception handler: {exc}", exc_info=True)
+    origin = request.headers.get("origin")
+    cors_headers = {}
+    if origin and (origin in settings.all_cors_origins or settings.ENVIRONMENT == "local"):
+        cors_headers = {
+            "Access-Control-Allow-Origin": origin,
+            "Access-Control-Allow-Credentials": "true",
+            "Access-Control-Allow-Methods": "*",
+            "Access-Control-Allow-Headers": "*",
+        }
+    elif settings.ENVIRONMENT == "local":
+        cors_headers = {
+            "Access-Control-Allow-Origin": "*",
+            "Access-Control-Allow-Methods": "*",
+            "Access-Control-Allow-Headers": "*",
+        }
+    
+    return JSONResponse(
+        status_code=500,
+        content={"detail": "Internal server error"},
+        headers=cors_headers
+    )
 
 app.include_router(api_router, prefix=settings.API_V1_STR)
 logger.info(f"API router mounted at {settings.API_V1_STR}")

@@ -1,5 +1,4 @@
 import { Box, Button, Heading, Text, VStack } from "@chakra-ui/react"
-import { useNavigate } from "@tanstack/react-router"
 import { Component, type ReactNode } from "react"
 import { ApiError } from "@/client"
 
@@ -75,7 +74,6 @@ class ErrorBoundary extends Component<Props, State> {
  * Fallback UI displayed when an error is caught
  */
 function ErrorFallback({ error }: { error: Error | null }) {
-  const navigate = useNavigate()
 
   const handleGoHome = () => {
     window.location.href = "/"

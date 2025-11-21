@@ -44,6 +44,7 @@ const menuItems: MenuItem[] = [
   { icon: FiBarChart2, title: "Reports", path: "/reports", adminOnly: true },
   { icon: FiDollarSign, title: "Expenses", path: "/expenses", adminOnly: true },
   { icon: FiTrendingUp, title: "Debts", path: "/debts", adminOnly: true },
+  { icon: FiCreditCard, title: "Payment Methods", path: "/payment-methods", adminOnly: true },
   { icon: FiSettings, title: "User Settings", path: "/settings" },
 ]
 

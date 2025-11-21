@@ -103,8 +103,12 @@ def create_stock_entry(
     """
     Create new stock entry.
     """
-    # Validate product exists
-    product = session.get(Product, entry_in.product_id)
+    # Validate product exists and lock row to prevent race conditions
+    product = session.exec(
+        select(Product)
+        .where(Product.id == entry_in.product_id)
+        .with_for_update()
+    ).first()
     if not product:
         raise HTTPException(status_code=404, detail="Product not found")
     
@@ -112,9 +116,23 @@ def create_stock_entry(
     db_obj = StockEntry.model_validate(
         entry_in, update={"created_by_id": admin_user.id}
     )
+    
+    # Update product current_stock based on closing_stock (atomic operation)
+    product.current_stock = entry_in.closing_stock
+    
+    # Save both operations in single transaction
     session.add(db_obj)
-    session.commit()
-    session.refresh(db_obj)
+    session.add(product)
+    
+    try:
+        session.commit()
+        session.refresh(db_obj)
+    except Exception as e:
+        session.rollback()
+        raise HTTPException(
+            status_code=500,
+            detail=f"Failed to create stock entry: {str(e)}"
+        )
     
     # Load relationships for response
     statement = (
@@ -128,11 +146,6 @@ def create_stock_entry(
         )
     )
     refreshed_obj = session.exec(statement).one()
-    
-    # Update product current_stock based on closing_stock
-    product.current_stock = entry_in.closing_stock
-    session.add(product)
-    session.commit()
     
     return refreshed_obj
 
@@ -180,9 +193,29 @@ def update_stock_entry(
     # Update entry
     entry_data = entry_in.model_dump(exclude_unset=True)
     entry.sqlmodel_update(entry_data)
+    
+    # Update product current_stock if closing_stock was updated (atomic operation)
+    if entry_in.closing_stock is not None:
+        product = session.exec(
+            select(Product)
+            .where(Product.id == entry.product_id)
+            .with_for_update()
+        ).first()
+        if product:
+            product.current_stock = entry_in.closing_stock
+            session.add(product)
+    
     session.add(entry)
-    session.commit()
-    session.refresh(entry)
+    
+    try:
+        session.commit()
+        session.refresh(entry)
+    except Exception as e:
+        session.rollback()
+        raise HTTPException(
+            status_code=500,
+            detail=f"Failed to update stock entry: {str(e)}"
+        )
     
     # Load relationships for response
     statement = (
@@ -196,14 +229,6 @@ def update_stock_entry(
         )
     )
     refreshed_obj = session.exec(statement).one()
-    
-    # Update product current_stock if closing_stock was updated
-    if entry_in.closing_stock is not None:
-        product = session.get(Product, entry.product_id)
-        if product:
-            product.current_stock = entry_in.closing_stock
-            session.add(product)
-            session.commit()
     
     return refreshed_obj
 

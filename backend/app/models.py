@@ -2,7 +2,7 @@ import uuid
 from datetime import datetime, timezone
 from decimal import Decimal
 
-from pydantic import EmailStr
+from pydantic import EmailStr, field_validator, model_validator
 from sqlmodel import Field, Relationship, SQLModel, Column
 from sqlalchemy import JSON
 
@@ -198,6 +198,13 @@ class ProductBase(SQLModel):
     category_id: uuid.UUID = Field(foreign_key="product_category.id")
     status_id: uuid.UUID = Field(foreign_key="product_status.id")
     image_id: Optional[uuid.UUID] = Field(default=None, foreign_key="media.id")
+    
+    @model_validator(mode="after")
+    def validate_selling_price(self) -> "ProductBase":
+        """Ensure selling price is greater than buying price"""
+        if self.selling_price <= self.buying_price:
+            raise ValueError("Selling price must be greater than buying price")
+        return self
 
 class ProductCreate(ProductBase):
     pass
@@ -258,6 +265,27 @@ class StockEntryBase(SQLModel):
     variance: Optional[int] = Field(default=None)  # physical_count - closing_stock (can be negative)
     amount: Optional[Decimal] = Field(default=None, decimal_places=2)  # Total sales amount
     notes: Optional[str] = Field(default=None, max_length=1000)
+    
+    @model_validator(mode="after")
+    def validate_stock_calculations(self) -> "StockEntryBase":
+        """Ensure stock calculations are correct"""
+        expected_total = self.opening_stock + self.added_stock
+        if self.total_stock != expected_total:
+            raise ValueError(
+                f"Total stock ({self.total_stock}) must equal opening_stock ({self.opening_stock}) + added_stock ({self.added_stock}) = {expected_total}"
+            )
+        expected_closing = self.total_stock - self.sales
+        if self.closing_stock != expected_closing:
+            raise ValueError(
+                f"Closing stock ({self.closing_stock}) must equal total_stock ({self.total_stock}) - sales ({self.sales}) = {expected_closing}"
+            )
+        if self.physical_count is not None and self.variance is not None:
+            expected_variance = self.physical_count - self.closing_stock
+            if self.variance != expected_variance:
+                raise ValueError(
+                    f"Variance ({self.variance}) must equal physical_count ({self.physical_count}) - closing_stock ({self.closing_stock}) = {expected_variance}"
+                )
+        return self
 
 class StockEntryCreate(StockEntryBase):
     pass
@@ -388,6 +416,17 @@ class SaleBase(SQLModel):
     payment_method_id: uuid.UUID = Field(foreign_key="payment_method.id")
     customer_name: Optional[str] = Field(default=None, max_length=255)  # For credit sales
     notes: Optional[str] = Field(default=None, max_length=1000)
+    
+    @model_validator(mode="after")
+    def validate_total_amount(self) -> "SaleBase":
+        """Ensure total_amount matches quantity * unit_price (with small tolerance for rounding)"""
+        expected_total = self.quantity * self.unit_price
+        tolerance = Decimal("0.01")  # Allow 1 cent tolerance for rounding
+        if abs(self.total_amount - expected_total) > tolerance:
+            raise ValueError(
+                f"Total amount ({self.total_amount}) must equal quantity ({self.quantity}) × unit_price ({self.unit_price}) = {expected_total}"
+            )
+        return self
 
 
 class SaleCreate(SaleBase):
@@ -415,8 +454,9 @@ class Sale(SaleBase, table=True):
     
     # Relationships
     product: Product = Relationship(back_populates="sales")
-    payment_method: PaymentMethod = Relationship(back_populates="sales")
+    payment_method: PaymentMethod = Relationship(back_populates="sales")  # Primary payment method (for backward compatibility)
     created_by: User = Relationship(back_populates="sales")
+    payments: list["SalePayment"] = Relationship(back_populates="sale")  # Multiple payment methods
 
 
 class SalePublic(SaleBase):
@@ -430,6 +470,36 @@ class SalePublic(SaleBase):
 class SalesPublic(SQLModel):
     data: list[SalePublic]
     count: int
+
+
+# ==================== SALE PAYMENT MODELS (Multiple Payment Methods) ====================
+
+class SalePaymentBase(SQLModel):
+    sale_id: uuid.UUID = Field(foreign_key="sale.id")
+    payment_method_id: uuid.UUID = Field(foreign_key="payment_method.id")
+    amount: Decimal = Field(decimal_places=2, gt=0)
+    reference_number: Optional[str] = Field(default=None, max_length=255)  # For MPESA, PDQ, Bank transfers
+
+
+class SalePaymentCreate(SalePaymentBase):
+    pass
+
+
+class SalePayment(SalePaymentBase, table=True):
+    __tablename__ = "sale_payment"
+    id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    updated_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    
+    # Relationships
+    sale: "Sale" = Relationship(back_populates="payments")
+    payment_method: PaymentMethod = Relationship()
+
+
+class SalePaymentPublic(SalePaymentBase):
+    id: uuid.UUID
+    payment_method: PaymentMethodPublic
+    created_at: datetime
 
 
 # ==================== EXPENSE CATEGORY MODELS ====================
@@ -522,6 +592,18 @@ class DebtBase(SQLModel):
     due_date: Optional[datetime] = None
     status: str = Field(default="pending", max_length=50)  # pending, partial, paid, overdue
     notes: Optional[str] = Field(default=None, max_length=1000)
+    
+    @model_validator(mode="after")
+    def validate_debt_amounts(self) -> "DebtBase":
+        """Ensure amount_paid doesn't exceed amount and balance is correct"""
+        if self.amount_paid > self.amount:
+            raise ValueError("Amount paid cannot exceed total debt amount")
+        expected_balance = self.amount - self.amount_paid
+        if abs(self.balance - expected_balance) > Decimal("0.01"):
+            raise ValueError(
+                f"Balance ({self.balance}) must equal amount ({self.amount}) - amount_paid ({self.amount_paid}) = {expected_balance}"
+            )
+        return self
 
 
 class DebtCreate(DebtBase):

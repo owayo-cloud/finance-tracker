@@ -30,7 +30,7 @@ export function PendingDebtsTable({ isMounted }: PendingDebtsTableProps) {
         </Heading>
         
         <Box overflowX="auto">
-          <Table.Root variant="simple" size="sm">
+          <Table.Root variant="outline" size="sm">
             <Table.Header>
               <Table.Row>
                 <Table.ColumnHeader color={{ base: "#9ca3af", _light: "#6b7280" }} fontWeight="600" fontSize="xs" textTransform="uppercase" letterSpacing="0.5px">

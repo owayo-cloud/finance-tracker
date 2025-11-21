@@ -1,8 +1,10 @@
 import uuid
 from typing import Any, Optional
 from datetime import datetime, date
+from decimal import Decimal
 
 from fastapi import APIRouter, HTTPException, Query
+from pydantic import BaseModel
 from sqlmodel import func, select, and_, or_
 from sqlalchemy.orm import selectinload
 
@@ -10,6 +12,8 @@ from app.api.deps import AdminUser, CurrentUser, SessionDep
 from app.models import (
     Sale, SaleCreate, SaleUpdate, SalePublic, SalesPublic,
     Product, PaymentMethod, PaymentMethodPublic, PaymentMethodsPublic,
+    PaymentMethodCreate, PaymentMethodUpdate,
+    SalePayment, SalePaymentCreate, SalePaymentPublic,
     User, ProductPublic
 )
 
@@ -30,11 +34,12 @@ def read_payment_methods(
     Retrieve all available payment methods.
     Used for cashier to select payment method during sale.
     """
-    count_statement = select(func.count()).select_from(PaymentMethod)
+    count_statement = select(func.count()).select_from(PaymentMethod).where(PaymentMethod.is_active == True)
     count = session.exec(count_statement).one()
     
     statement = (
         select(PaymentMethod)
+        .where(PaymentMethod.is_active == True)
         .offset(skip)
         .limit(limit)
         .order_by(PaymentMethod.name)
@@ -43,6 +48,61 @@ def read_payment_methods(
     payment_methods = session.exec(statement).all()
     
     return PaymentMethodsPublic(data=payment_methods, count=count)
+
+
+@router.post("/payment-methods", response_model=PaymentMethodPublic)
+def create_payment_method(
+    *,
+    session: SessionDep,
+    admin_user: AdminUser,
+    payment_method_in: PaymentMethodCreate
+) -> Any:
+    """
+    Create a new payment method (admin only).
+    """
+    # Check if payment method with same name already exists
+    existing = session.exec(
+        select(PaymentMethod).where(PaymentMethod.name == payment_method_in.name)
+    ).first()
+    
+    if existing:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Payment method with name '{payment_method_in.name}' already exists"
+        )
+    
+    payment_method = PaymentMethod(**payment_method_in.model_dump())
+    session.add(payment_method)
+    session.commit()
+    session.refresh(payment_method)
+    
+    return payment_method
+
+
+@router.patch("/payment-methods/{payment_method_id}", response_model=PaymentMethodPublic)
+def update_payment_method(
+    *,
+    session: SessionDep,
+    admin_user: AdminUser,
+    payment_method_id: uuid.UUID,
+    payment_method_in: PaymentMethodUpdate
+) -> Any:
+    """
+    Update a payment method (admin only).
+    """
+    payment_method = session.get(PaymentMethod, payment_method_id)
+    if not payment_method:
+        raise HTTPException(status_code=404, detail="Payment method not found")
+    
+    update_data = payment_method_in.model_dump(exclude_unset=True)
+    for field, value in update_data.items():
+        setattr(payment_method, field, value)
+    
+    session.add(payment_method)
+    session.commit()
+    session.refresh(payment_method)
+    
+    return payment_method
 
 
 # ==================== QUICK PRODUCT SEARCH FOR SALES ====================
@@ -123,8 +183,12 @@ def create_sale(
     - Sale amount is calculated from product selling price × quantity
     - Each sale is tracked to the cashier who created it
     """
-    # Validate product exists
-    product = session.get(Product, sale_in.product_id)
+    # Validate product exists and lock row to prevent race conditions
+    product = session.exec(
+        select(Product)
+        .where(Product.id == sale_in.product_id)
+        .with_for_update()
+    ).first()
     if not product:
         raise HTTPException(status_code=404, detail="Product not found")
     
@@ -155,19 +219,23 @@ def create_sale(
     if not payment_method:
         raise HTTPException(status_code=404, detail="Payment method not found")
     
-    # Calculate amount from selling price
+    # Calculate total_amount from selling price and quantity
     if product.selling_price is None:
         raise HTTPException(
             status_code=400,
             detail=f"Product '{product.name}' has no selling price set"
         )
     
-    amount = float(product.selling_price) * sale_in.quantity
+    # Use the total_amount from sale_in if provided, otherwise calculate it
+    if sale_in.total_amount is None or sale_in.total_amount == 0:
+        calculated_total = float(product.selling_price) * sale_in.quantity
+    else:
+        calculated_total = float(sale_in.total_amount)
     
     # Create sale
     sale = Sale(
         **sale_in.model_dump(),
-        amount=amount,
+        total_amount=Decimal(str(calculated_total)),
         created_by_id=current_user.id
     )
     
@@ -189,6 +257,206 @@ def create_sale(
         )
     
     return sale
+
+
+# ==================== MULTIPLE PAYMENT METHODS SALE ====================
+
+class PaymentData(BaseModel):
+    """Individual payment data"""
+    payment_method_id: str
+    amount: float
+    reference_number: Optional[str] = None
+
+
+class MultiPaymentSaleCreate(BaseModel):
+    """Create a sale with multiple payment methods"""
+    product_id: str
+    quantity: int
+    unit_price: float
+    total_amount: float
+    customer_name: Optional[str] = None
+    notes: Optional[str] = None
+    payments: list[PaymentData]
+
+
+@router.post("/multi-payment", response_model=SalePublic)
+def create_sale_with_multiple_payments(
+    *,
+    session: SessionDep,
+    current_user: CurrentUser,
+    sale_in: MultiPaymentSaleCreate
+) -> Any:
+    """
+    Create a sale with multiple payment methods.
+    This allows splitting a single sale across multiple payment methods (e.g., cash + MPESA).
+    
+    Business Rules:
+    - Product must exist and be active
+    - Product must have sufficient stock
+    - Sum of all payment amounts must equal total_amount
+    - Each payment can have an optional reference number
+    """
+    # Validate product exists and lock row to prevent race conditions
+    product = session.exec(
+        select(Product)
+        .where(Product.id == sale_in.product_id)
+        .with_for_update()
+    ).first()
+    if not product:
+        raise HTTPException(status_code=404, detail="Product not found")
+    
+    # Check if product is active
+    from app.models import ProductStatus
+    status = session.get(ProductStatus, product.status_id)
+    if status and status.name != "Active":
+        raise HTTPException(
+            status_code=400,
+            detail=f"Product '{product.name}' is not active. Current status: {status.name}"
+        )
+    
+    # CRITICAL: Real-time stock validation (with row lock)
+    if product.current_stock is None:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Product '{product.name}' has no stock information"
+        )
+    
+    if product.current_stock < sale_in.quantity:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Insufficient stock for '{product.name}'. Available: {product.current_stock}, Requested: {sale_in.quantity}"
+        )
+    
+    # Validate payments
+    if not sale_in.payments or len(sale_in.payments) == 0:
+        raise HTTPException(status_code=400, detail="At least one payment method is required")
+    
+    total_payment_amount = Decimal(0)
+    primary_payment_method_id = None
+    
+    for payment_data in sale_in.payments:
+        try:
+            payment_method_id = uuid.UUID(payment_data.payment_method_id)
+        except (ValueError, AttributeError):
+            raise HTTPException(status_code=400, detail=f"Invalid payment method ID: {payment_data.payment_method_id}")
+        
+        amount = Decimal(str(payment_data.amount))
+        
+        # Validate payment method exists
+        payment_method = session.get(PaymentMethod, payment_method_id)
+        if not payment_method:
+            raise HTTPException(status_code=404, detail=f"Payment method {payment_method_id} not found")
+        
+        if not payment_method.is_active:
+            raise HTTPException(status_code=400, detail=f"Payment method '{payment_method.name}' is not active")
+        
+        if amount <= 0:
+            raise HTTPException(status_code=400, detail="Payment amount must be greater than 0")
+        
+        total_payment_amount += amount
+        
+        # Use first payment method as primary (for backward compatibility)
+        if primary_payment_method_id is None:
+            primary_payment_method_id = payment_method_id
+    
+    # Validate total payment amount (allow overpayment for change, but not underpayment)
+    payment_difference = total_payment_amount - sale_in.total_amount
+    if payment_difference < -Decimal("0.01"):  # Underpayment not allowed
+        raise HTTPException(
+            status_code=400,
+            detail=f"Total payment amount ({total_payment_amount}) is less than sale total ({sale_in.total_amount}). Underpayment: {abs(payment_difference)}"
+        )
+    # Overpayment is allowed (for change), so we don't error on that
+    
+    # Calculate total_amount from selling price if not provided
+    if sale_in.total_amount is None or sale_in.total_amount == 0:
+        if product.selling_price is None:
+            raise HTTPException(
+                status_code=400,
+                detail=f"Product '{product.name}' has no selling price set"
+            )
+        calculated_total = float(product.selling_price) * sale_in.quantity
+    else:
+        calculated_total = float(sale_in.total_amount)
+    
+    # Create sale with primary payment method (for backward compatibility)
+    sale = Sale(
+        product_id=sale_in.product_id,
+        quantity=sale_in.quantity,
+        unit_price=Decimal(str(sale_in.unit_price)),
+        total_amount=Decimal(str(calculated_total)),
+        payment_method_id=primary_payment_method_id,
+        customer_name=sale_in.customer_name,
+        notes=sale_in.notes,
+        created_by_id=current_user.id
+    )
+    
+    # ATOMIC OPERATION: Update product stock
+    product.current_stock -= sale_in.quantity
+    
+    # Save sale first
+    session.add(sale)
+    session.add(product)
+    
+    try:
+        session.flush()  # Flush to get sale.id without committing
+        session.refresh(sale)
+        
+        # Create payment records
+        for payment_data in sale_in.payments:
+            try:
+                payment_method_id = uuid.UUID(payment_data.payment_method_id)
+            except (ValueError, AttributeError):
+                raise HTTPException(status_code=400, detail=f"Invalid payment method ID: {payment_data.payment_method_id}")
+            
+            amount = Decimal(str(payment_data.amount))
+            reference_number = payment_data.reference_number
+            
+            sale_payment = SalePayment(
+                sale_id=sale.id,
+                payment_method_id=payment_method_id,
+                amount=amount,
+                reference_number=reference_number
+            )
+            session.add(sale_payment)
+        
+        session.commit()
+        session.refresh(sale)
+    except Exception as e:
+        session.rollback()
+        raise HTTPException(
+            status_code=500,
+            detail=f"Failed to complete sale: {str(e)}"
+        )
+    
+    return sale
+
+
+@router.get("/{sale_id}/payments", response_model=list[SalePaymentPublic])
+def read_sale_payments(
+    session: SessionDep,
+    current_user: CurrentUser,
+    sale_id: uuid.UUID
+) -> Any:
+    """
+    Get all payment methods used for a specific sale.
+    """
+    sale = session.get(Sale, sale_id)
+    if not sale:
+        raise HTTPException(status_code=404, detail="Sale not found")
+    
+    # Cashiers can only view their own sales
+    if not current_user.is_superuser and sale.created_by_id != current_user.id:
+        raise HTTPException(status_code=403, detail="Not authorized to view this sale")
+    
+    statement = (
+        select(SalePayment)
+        .where(SalePayment.sale_id == sale_id)
+        .options(selectinload(SalePayment.payment_method))
+    )
+    
+    payments = session.exec(statement).all()
+    return payments
 
 
 @router.get("", response_model=SalesPublic)
@@ -281,7 +549,7 @@ def get_today_sales_summary(
     total_statement = (
         select(
             func.count(Sale.id).label('total_sales'),
-            func.sum(Sale.amount).label('total_amount'),
+            func.sum(Sale.total_amount).label('total_amount'),
             func.sum(Sale.quantity).label('total_items')
         )
         .where(and_(*conditions))
@@ -294,7 +562,7 @@ def get_today_sales_summary(
         select(
             PaymentMethod.name,
             func.count(Sale.id).label('count'),
-            func.sum(Sale.amount).label('amount')
+            func.sum(Sale.total_amount).label('amount')
         )
         .join(PaymentMethod, Sale.payment_method_id == PaymentMethod.id)
         .where(and_(*conditions))
@@ -354,13 +622,26 @@ def delete_sale(
     if not sale:
         raise HTTPException(status_code=404, detail="Sale not found")
     
-    # Restore product stock
-    product = session.get(Product, sale.product_id)
+    # Restore product stock with row lock to prevent race conditions
+    product = session.exec(
+        select(Product)
+        .where(Product.id == sale.product_id)
+        .with_for_update()
+    ).first()
+    
     if product:
         product.current_stock = (product.current_stock or 0) + sale.quantity
         session.add(product)
     
     session.delete(sale)
-    session.commit()
+    
+    try:
+        session.commit()
+    except Exception as e:
+        session.rollback()
+        raise HTTPException(
+            status_code=500,
+            detail=f"Failed to delete sale: {str(e)}"
+        )
     
     return {"message": "Sale deleted successfully", "id": sale_id}

@@ -68,29 +68,37 @@ async def upload_image(
     upload_dir = get_upload_dir()
     file_path = upload_dir / unique_filename
     
-    # Save file
+    # Save file and create database record in atomic transaction
     try:
         with open(file_path, "wb") as f:
             f.write(content)
+        
+        # Create media record in database with relative path
+        relative_path = f"products/{unique_filename}"
+        media_in = MediaCreate(
+            file_path=relative_path,
+            file_name=unique_filename,
+            mime_type=file.content_type,
+            size=len(content)
+        )
+        
+        media = Media.model_validate(media_in)
+        session.add(media)
+        session.commit()
+        session.refresh(media)
     except Exception as e:
+        # Rollback database transaction if file save succeeded but DB failed
+        session.rollback()
+        # Try to clean up file if it was created
+        if file_path.exists():
+            try:
+                file_path.unlink()
+            except Exception:
+                pass  # Ignore cleanup errors
         raise HTTPException(
             status_code=500,
             detail=f"Failed to save file: {str(e)}"
         )
-    
-    # Create media record in database with relative path
-    relative_path = f"products/{unique_filename}"
-    media_in = MediaCreate(
-        file_path=relative_path,
-        file_name=unique_filename,
-        mime_type=file.content_type,
-        size=len(content)
-    )
-    
-    media = Media.model_validate(media_in)
-    session.add(media)
-    session.commit()
-    session.refresh(media)
     
     # Create response with URL
     media_public = MediaPublic.model_validate(media)

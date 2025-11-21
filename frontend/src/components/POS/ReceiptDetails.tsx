@@ -56,16 +56,17 @@ export function ReceiptDetails({
             type="text"
             value={pricelist}
             onChange={(e) => onPricelistChange(e.target.value)}
-            bg="#22d3ee"
-            color="white"
-            border="none"
+            bg={{ base: "#1a1d29", _light: "#ffffff" }}
+            borderColor={{ base: "rgba(255, 255, 255, 0.1)", _light: "#e5e7eb" }}
+            color={{ base: "#ffffff", _light: "#1a1d29" }}
+            border="1px solid"
             size="sm"
             w={{ base: "100px", md: "120px" }}
             borderRadius="md"
-            _focus={{ bg: "#22d3ee", border: "none" }}
+            _focus={{ borderColor: "#14b8a6", boxShadow: "0 0 0 1px #14b8a6" }}
           />
         </HStack>
-        <Button bg="#16a34a" color="white" _hover={{ bg: "#15803d" }} fontWeight="600" size="sm" onClick={onSearch}>
+        <Button bg="#3b82f6" color="white" _hover={{ bg: "#2563eb" }} fontWeight="600" size="sm" onClick={onSearch}>
           <Icon as={FiSearch} mr={2} />
           Search
         </Button>

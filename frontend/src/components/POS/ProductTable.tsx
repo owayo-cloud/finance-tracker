@@ -33,13 +33,13 @@ export function ProductTable({
         <Table.Root size="sm">
           <Table.Header>
             <Table.Row>
-              <Table.ColumnHeader>Product Name</Table.ColumnHeader>
-              <Table.ColumnHeader>Avl Qty</Table.ColumnHeader>
-              <Table.ColumnHeader>Qty</Table.ColumnHeader>
-              <Table.ColumnHeader>Price</Table.ColumnHeader>
-              <Table.ColumnHeader>Disc%</Table.ColumnHeader>
-              <Table.ColumnHeader>Total</Table.ColumnHeader>
-              <Table.ColumnHeader>-</Table.ColumnHeader>
+              <Table.ColumnHeader color={{ base: "#ffffff", _light: "#1a1d29" }}>Product Name</Table.ColumnHeader>
+              <Table.ColumnHeader color={{ base: "#ffffff", _light: "#1a1d29" }}>Avl Qty</Table.ColumnHeader>
+              <Table.ColumnHeader color={{ base: "#ffffff", _light: "#1a1d29" }}>Qty</Table.ColumnHeader>
+              <Table.ColumnHeader color={{ base: "#ffffff", _light: "#1a1d29" }}>Price</Table.ColumnHeader>
+              <Table.ColumnHeader color={{ base: "#ffffff", _light: "#1a1d29" }}>Disc%</Table.ColumnHeader>
+              <Table.ColumnHeader color={{ base: "#ffffff", _light: "#1a1d29" }}>Total</Table.ColumnHeader>
+              <Table.ColumnHeader color={{ base: "#ffffff", _light: "#1a1d29" }}>-</Table.ColumnHeader>
             </Table.Row>
           </Table.Header>
           <Table.Body>
@@ -49,10 +49,10 @@ export function ProductTable({
               const total = price * item.quantity - discountAmount
               return (
                 <Table.Row key={item.product.id}>
-                  <Table.Cell fontWeight="medium" maxW="200px" overflow="hidden" textOverflow="ellipsis" whiteSpace="nowrap">
+                  <Table.Cell fontWeight="medium" maxW="200px" overflow="hidden" textOverflow="ellipsis" whiteSpace="nowrap" color={{ base: "#ffffff", _light: "#1a1d29" }}>
                     {item.product.name}
                   </Table.Cell>
-                  <Table.Cell textAlign="center">{item.product.current_stock || 0}</Table.Cell>
+                  <Table.Cell textAlign="center" color={{ base: "#ffffff", _light: "#1a1d29" }}>{item.product.current_stock || 0}</Table.Cell>
                   <Table.Cell>
                     <HStack gap={1} justify="center">
                       <IconButton
@@ -60,10 +60,11 @@ export function ProductTable({
                         onClick={() => onUpdateQuantity(item.product.id, -1)}
                         aria-label="Decrease"
                         variant="ghost"
+                        color={{ base: "#ffffff", _light: "#1a1d29" }}
                       >
                         <FiMinus />
                       </IconButton>
-                      <Text minW="40px" textAlign="center" fontWeight="medium">
+                      <Text minW="40px" textAlign="center" fontWeight="medium" color={{ base: "#ffffff", _light: "#1a1d29" }}>
                         {item.quantity}
                       </Text>
                       <IconButton
@@ -71,12 +72,13 @@ export function ProductTable({
                         onClick={() => onUpdateQuantity(item.product.id, 1)}
                         aria-label="Increase"
                         variant="ghost"
+                        color={{ base: "#ffffff", _light: "#1a1d29" }}
                       >
                         <FiPlus />
                       </IconButton>
                     </HStack>
                   </Table.Cell>
-                  <Table.Cell textAlign="center">Ksh {formatCurrency(price)}</Table.Cell>
+                  <Table.Cell textAlign="center" color={{ base: "#ffffff", _light: "#1a1d29" }}>Ksh {formatCurrency(price)}</Table.Cell>
                   <Table.Cell>
                     <Input
                       type="number"
@@ -88,19 +90,23 @@ export function ProductTable({
                       max={100}
                       step="0.001"
                       textAlign="center"
+                      bg={{ base: "#1a1d29", _light: "#ffffff" }}
+                      borderColor={{ base: "rgba(255, 255, 255, 0.1)", _light: "#e5e7eb" }}
+                      color={{ base: "#ffffff", _light: "#1a1d29" }}
+                      _focus={{ borderColor: "#14b8a6", boxShadow: "0 0 0 1px #14b8a6" }}
                     />
                   </Table.Cell>
-                  <Table.Cell fontWeight="bold" textAlign="center">
+                  <Table.Cell fontWeight="bold" textAlign="center" color={{ base: "#ffffff", _light: "#1a1d29" }}>
                     Ksh {formatCurrency(total)}
                   </Table.Cell>
                   <Table.Cell textAlign="center">
                     <Text
                       as="button"
-                      color="#22c55e"
+                      color="#ef4444"
                       fontSize="sm"
                       fontWeight="500"
                       onClick={() => onRemoveFromCart(item.product.id)}
-                      _hover={{ textDecoration: "underline" }}
+                      _hover={{ textDecoration: "underline", color: "#dc2626" }}
                     >
                       Remove
                     </Text>
@@ -141,7 +147,6 @@ export function ProductTable({
                 <IconButton
                   size="sm"
                   variant="ghost"
-                  colorScheme="green"
                   onClick={() => {
                     if (searchQuery && searchResults && searchResults.length > 0) {
                       onAddToCart(searchResults[0])
@@ -150,8 +155,10 @@ export function ProductTable({
                   }}
                   aria-label="Add product"
                   border="2px solid"
-                  borderColor="#22c55e"
+                  borderColor="#14b8a6"
+                  color="#14b8a6"
                   borderRadius="md"
+                  _hover={{ bg: "rgba(20, 184, 166, 0.1)", borderColor: "#0d9488", color: "#0d9488" }}
                 >
                   <FiPlus />
                 </IconButton>
@@ -191,7 +198,7 @@ export function ProductTable({
                     <Text fontSize="sm" fontWeight="medium" color={{ base: "#ffffff", _light: "#1a1d29" }}>
                       {product.name}
                     </Text>
-                    <Text fontSize="sm" color="#22c55e" fontWeight="600">
+                    <Text fontSize="sm" color="#14b8a6" fontWeight="600">
                       Ksh {formatCurrency(Number(product.selling_price))}
                     </Text>
                   </HStack>
@@ -214,20 +221,20 @@ export function ProductTable({
       >
         <Flex justify="space-between" alignItems="center" gap={{ base: 4, md: 8 }} fontSize="sm" flexWrap="wrap">
           <HStack gap={2}>
-            <Text fontWeight="medium">TOTAL QTY:</Text>
-            <Text>{cart.reduce((sum, item) => sum + item.quantity, 0)}</Text>
+            <Text fontWeight="medium" color={{ base: "#ffffff", _light: "#1a1d29" }}>TOTAL QTY:</Text>
+            <Text color={{ base: "#ffffff", _light: "#1a1d29" }}>{cart.reduce((sum, item) => sum + item.quantity, 0)}</Text>
           </HStack>
           <HStack gap={2}>
-            <Text fontWeight="medium">SUBTOTAL:</Text>
-            <Text>{cartTotal.toFixed(3)}</Text>
+            <Text fontWeight="medium" color={{ base: "#ffffff", _light: "#1a1d29" }}>SUBTOTAL:</Text>
+            <Text color={{ base: "#ffffff", _light: "#1a1d29" }}>{cartTotal.toFixed(3)}</Text>
           </HStack>
           <HStack gap={2}>
-            <Text fontWeight="medium">VAT:</Text>
-            <Text>0.000</Text>
+            <Text fontWeight="medium" color={{ base: "#ffffff", _light: "#1a1d29" }}>VAT:</Text>
+            <Text color={{ base: "#ffffff", _light: "#1a1d29" }}>0.000</Text>
           </HStack>
           <HStack gap={2}>
-            <Text fontWeight="medium">TOTAL:</Text>
-            <Text fontSize="lg" fontWeight="bold">
+            <Text fontWeight="medium" color={{ base: "#ffffff", _light: "#1a1d29" }}>TOTAL:</Text>
+            <Text fontSize="lg" fontWeight="bold" color={{ base: "#ffffff", _light: "#1a1d29" }}>
               {cartTotal.toFixed(3)}
             </Text>
           </HStack>

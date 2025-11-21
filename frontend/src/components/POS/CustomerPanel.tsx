@@ -25,6 +25,8 @@ interface CustomerPanelProps {
   onSelectSale: (saleId: string) => void
   onResumeSale: (saleId: string) => void
   onViewReceipt?: () => void
+  selectedReceiptId?: string | null
+  onPreviewReceipt?: () => void
 }
 
 export function CustomerPanel({
@@ -48,6 +50,8 @@ export function CustomerPanel({
   onSelectSale,
   onResumeSale,
   onViewReceipt,
+  selectedReceiptId,
+  onPreviewReceipt,
 }: CustomerPanelProps) {
   return (
     <Box
@@ -67,12 +71,12 @@ export function CustomerPanel({
           onClick={() => onTabChange("customer")}
           flex={1}
           borderRadius={0}
-          bg={activeTab === "customer" ? "#22d3ee" : "transparent"}
+          bg={activeTab === "customer" ? "#14b8a6" : "transparent"}
           color={activeTab === "customer" ? "white" : { base: "#9ca3af", _light: "#6b7280" }}
           fontWeight="medium"
           size="sm"
           py={3}
-          _hover={{ bg: activeTab === "customer" ? "#06b6d4" : { base: "rgba(255, 255, 255, 0.05)", _light: "#f3f4f6" } }}
+          _hover={{ bg: activeTab === "customer" ? "#0d9488" : { base: "rgba(255, 255, 255, 0.05)", _light: "#f3f4f6" } }}
         >
           Attach Customer
         </Button>
@@ -80,12 +84,12 @@ export function CustomerPanel({
           onClick={() => onTabChange("suspended")}
           flex={1}
           borderRadius={0}
-          bg={activeTab === "suspended" ? "#22d3ee" : "transparent"}
+          bg={activeTab === "suspended" ? "#14b8a6" : "transparent"}
           color={activeTab === "suspended" ? "white" : { base: "#9ca3af", _light: "#6b7280" }}
           fontWeight="medium"
           size="sm"
           py={3}
-          _hover={{ bg: activeTab === "suspended" ? "#06b6d4" : { base: "rgba(255, 255, 255, 0.05)", _light: "#f3f4f6" } }}
+          _hover={{ bg: activeTab === "suspended" ? "#0d9488" : { base: "rgba(255, 255, 255, 0.05)", _light: "#f3f4f6" } }}
         >
           Suspended
         </Button>
@@ -97,10 +101,10 @@ export function CustomerPanel({
           {/* Customer Action Buttons */}
           <Grid templateColumns="repeat(3, 1fr)" gap={2} mb={4}>
             <Button
-              bg="#22d3ee"
+              bg="#3b82f6"
               color="white"
               size="sm"
-              _hover={{ bg: "#06b6d4" }}
+              _hover={{ bg: "#2563eb" }}
               fontWeight="600"
               fontSize="xs"
               whiteSpace="nowrap"
@@ -111,10 +115,10 @@ export function CustomerPanel({
               Select Customer
             </Button>
             <Button
-              bg="#22d3ee"
+              bg="#3b82f6"
               color="white"
               size="sm"
-              _hover={{ bg: "#06b6d4" }}
+              _hover={{ bg: "#2563eb" }}
               fontWeight="600"
               fontSize="xs"
               whiteSpace="nowrap"
@@ -132,11 +136,11 @@ export function CustomerPanel({
               </Text>
             </Button>
             <Button
-              bg="#22d3ee"
+              bg="#3b82f6"
               color="white"
               size="sm"
               onClick={onClearCustomer}
-              _hover={{ bg: "#06b6d4" }}
+              _hover={{ bg: "#2563eb" }}
               fontWeight="600"
               fontSize="xs"
               whiteSpace="nowrap"
@@ -252,15 +256,15 @@ export function CustomerPanel({
             <Text
               as="button"
               fontSize="0.875rem"
-              color="#22d3ee"
+              color="#14b8a6"
               cursor="pointer"
               onClick={onViewReceipt}
-              _hover={{ textDecoration: "underline" }}
+              _hover={{ textDecoration: "underline", color: "#0d9488" }}
             >
               View Receipt
             </Text>
             <Input
-              value="0"
+              value={selectedReceiptId ? selectedReceiptId.slice(-6) : "0"}
               readOnly
               w="60px"
               textAlign="center"
@@ -270,7 +274,15 @@ export function CustomerPanel({
               color={{ base: "#ffffff", _light: "#1a1d29" }}
               borderRadius="md"
             />
-            <Button bg="#22d3ee" color="white" size="sm" _hover={{ bg: "#06b6d4" }} fontWeight="600">
+            <Button 
+              bg="#14b8a6" 
+              color="white" 
+              size="sm" 
+              _hover={{ bg: "#0d9488" }} 
+              fontWeight="600"
+              onClick={onPreviewReceipt}
+              disabled={!selectedReceiptId}
+            >
               <Icon as={FiEye} mr={2} />
               Preview Receipt
             </Button>

@@ -20,7 +20,7 @@ import {
 } from "@/components/ui/dialog"
 import { useQuery } from "@tanstack/react-query"
 import { useState } from "react"
-import { FiSearch, FiCalendar, FiFilter, FiLink, FiChevronLeft, FiChevronRight } from "react-icons/fi"
+import { FiSearch, FiCalendar, FiFilter, FiLink, FiChevronLeft, FiChevronRight, FiEye } from "react-icons/fi"
 import { SalesService } from "@/client"
 import { formatCurrency } from "./utils"
 
@@ -28,6 +28,8 @@ interface RecentReceiptsModalProps {
   isOpen: boolean
   onClose: () => void
   onAttach?: (receiptId: string) => void
+  onPreviewReceipt?: (receiptId: string) => void
+  onSelectReceipt?: (receiptId: string | null) => void
 }
 
 function formatDate(dateString: string): string {
@@ -45,9 +47,12 @@ export function RecentReceiptsModal({
   isOpen,
   onClose,
   onAttach,
+  onPreviewReceipt,
+  onSelectReceipt,
 }: RecentReceiptsModalProps) {
   const [page, setPage] = useState(1)
   const [pageSize, setPageSize] = useState(50)
+  const [selectedReceiptId, setSelectedReceiptId] = useState<string | null>(null)
   const [dateFilter, setDateFilter] = useState<string>(() => {
     const today = new Date()
     const day = today.getDate().toString().padStart(2, '0')
@@ -113,7 +118,14 @@ export function RecentReceiptsModal({
       size="xl"
       placement="center"
       open={isOpen}
-      onOpenChange={({ open }) => !open && onClose()}
+      onOpenChange={({ open }) => {
+        if (!open) {
+          if (onSelectReceipt && selectedReceiptId) {
+            onSelectReceipt(selectedReceiptId)
+          }
+          onClose()
+        }
+      }}
     >
       <DialogContent maxW="90vw" maxH="90vh" overflow="hidden">
         <DialogCloseTrigger />
@@ -184,9 +196,9 @@ export function RecentReceiptsModal({
                     </IconButton>
                     <Button
                       size="sm"
-                      bg="#3b82f6"
+                      bg="#14b8a6"
                       color="white"
-                      _hover={{ bg: "#2563eb" }}
+                      _hover={{ bg: "#0d9488" }}
                     >
                       <Icon as={FiSearch} mr={2} />
                       Find
@@ -226,7 +238,14 @@ export function RecentReceiptsModal({
                       <Table.Row
                         key={receipt.id}
                         cursor="pointer"
-                        _hover={{ bg: "gray.50", _dark: { bg: "gray.800" } }}
+                        bg={selectedReceiptId === receipt.id ? "blue.50" : undefined}
+                        _hover={{ bg: selectedReceiptId === receipt.id ? "blue.100" : "gray.50", _dark: { bg: selectedReceiptId === receipt.id ? "blue.900" : "gray.800" } }}
+                        onClick={() => {
+                          setSelectedReceiptId(receipt.id)
+                          if (onSelectReceipt) {
+                            onSelectReceipt(receipt.id)
+                          }
+                        }}
                       >
                         <Table.Cell fontWeight="medium">{receipt.id.slice(-6)}</Table.Cell>
                         <Table.Cell>{formatDate(receipt.sale_date)}</Table.Cell>
@@ -307,18 +326,36 @@ export function RecentReceiptsModal({
                     </select>
                   </Box>
                 </HStack>
-                {filteredReceipts.length > 0 && (
-                  <Button
-                    size="sm"
-                    bg="#3b82f6"
-                    color="white"
-                    _hover={{ bg: "#2563eb" }}
-                    onClick={() => filteredReceipts[0] && handleAttach(filteredReceipts[0].id)}
-                  >
-                    <Icon as={FiLink} mr={2} />
-                    Attach
-                  </Button>
-                )}
+                <HStack gap={2}>
+                  {filteredReceipts.length > 0 && selectedReceiptId && (
+                    <Button
+                      size="sm"
+                      bg="#14b8a6"
+                      color="white"
+                      _hover={{ bg: "#0d9488" }}
+                      onClick={() => {
+                        if (onPreviewReceipt && selectedReceiptId) {
+                          onPreviewReceipt(selectedReceiptId)
+                        }
+                      }}
+                    >
+                      <Icon as={FiEye} mr={2} />
+                      Preview Receipt
+                    </Button>
+                  )}
+                  {filteredReceipts.length > 0 && selectedReceiptId && (
+                    <Button
+                      size="sm"
+                      bg="#3b82f6"
+                      color="white"
+                      _hover={{ bg: "#2563eb" }}
+                      onClick={() => selectedReceiptId && handleAttach(selectedReceiptId)}
+                    >
+                      <Icon as={FiLink} mr={2} />
+                      Attach
+                    </Button>
+                  )}
+                </HStack>
               </Flex>
             </Box>
           </VStack>

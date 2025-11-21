@@ -42,7 +42,7 @@ export function ActionButtons({
     >
       <Flex gap={2} flexWrap="wrap" alignItems="center">
         <Link to="/">
-          <Button bg="#6366f1" color="white" _hover={{ bg: "#4f46e5" }} size="sm">
+          <Button bg="#3b82f6" color="white" _hover={{ bg: "#2563eb" }} size="sm">
             <Icon as={FiHome} mr={2} />
             Dashboard
           </Button>
@@ -51,22 +51,22 @@ export function ActionButtons({
           <Icon as={FiLogOut} mr={2} />
           Logout
         </Button>
-        <Button bg="#f97316" color="white" _hover={{ bg: "#ea580c" }} size="sm" onClick={onReset}>
+        <Button bg="#f59e0b" color="white" _hover={{ bg: "#d97706" }} size="sm" onClick={onReset}>
           <Icon as={FiRefreshCw} mr={2} />
           Reset
         </Button>
-        <Button bg="#22d3ee" color="white" _hover={{ bg: "#06b6d4" }} size="sm">
+        <Button bg="#14b8a6" color="white" _hover={{ bg: "#0d9488" }} size="sm">
           <Icon as={FiFileText} mr={2} />
           Add Credit Note (F2)
         </Button>
-        <Button bg="#06b6d4" color="white" _hover={{ bg: "#0891b2" }} size="sm">
+        <Button bg="#14b8a6" color="white" _hover={{ bg: "#0d9488" }} size="sm">
           <Icon as={FiDollarSign} mr={2} />
           Cash Movement (F1)
         </Button>
         <Button
-          bg="#22d3ee"
+          bg="#14b8a6"
           color="white"
-          _hover={{ bg: "#06b6d4" }}
+          _hover={{ bg: "#0d9488" }}
           size="sm"
           onClick={onSuspendSale}
           disabled={cartLength === 0}
@@ -75,9 +75,9 @@ export function ActionButtons({
           Suspend Sale (F3)
         </Button>
         <Button
-          bg="#22d3ee"
+          bg="#14b8a6"
           color="white"
-          _hover={{ bg: "#06b6d4" }}
+          _hover={{ bg: "#0d9488" }}
           size="sm"
           onClick={onResumeSale}
           disabled={!selectedSaleId}

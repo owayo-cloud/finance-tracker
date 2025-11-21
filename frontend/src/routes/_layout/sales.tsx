@@ -3,7 +3,7 @@ import { Box } from "@chakra-ui/react"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { useState, useMemo } from "react"
 
-import { ProductsService, SalesService, type ProductPublic } from "../../client"
+import { ProductsService, SalesService, type ProductPublic, OpenAPI } from "../../client"
 import useCustomToast from "../../hooks/useCustomToast"
 import useAuth from "../../hooks/useAuth"
 import { ActionButtons } from "@/components/POS/ActionButtons"
@@ -12,6 +12,7 @@ import { ProductTable } from "@/components/POS/ProductTable"
 import { CustomerPanel } from "@/components/POS/CustomerPanel"
 import { PaymentModal } from "@/components/POS/PaymentModal"
 import { RecentReceiptsModal } from "@/components/POS/RecentReceiptsModal"
+import { ReceiptPreviewModal } from "@/components/POS/ReceiptPreviewModal"
 import { CartItem, SuspendedSale } from "@/components/POS/types"
 
 export const Route = createFileRoute("/_layout/sales")({
@@ -28,6 +29,8 @@ function Sales() {
   const [cart, setCart] = useState<CartItem[]>([])
   const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false)
   const [isRecentReceiptsModalOpen, setIsRecentReceiptsModalOpen] = useState(false)
+  const [isReceiptPreviewModalOpen, setIsReceiptPreviewModalOpen] = useState(false)
+  const [selectedReceiptId, setSelectedReceiptId] = useState<string | null>(null)
   const [receiptDateValue, setReceiptDateValue] = useState<string>(new Date().toISOString().split('T')[0])
   const [receiptDate, setReceiptDate] = useState<string>(() => {
     const today = new Date()
@@ -49,9 +52,9 @@ function Sales() {
   const [customerPin, setCustomerPin] = useState<string>("")
 
   // Fetch payment methods
-  const { data: paymentMethods } = useQuery({
+  const { data: paymentMethods, isLoading: isLoadingPaymentMethods, error: paymentMethodsError } = useQuery({
     queryKey: ["payment-methods"],
-    queryFn: () => SalesService.readPaymentMethods({}),
+    queryFn: () => SalesService.readPaymentMethods({ limit: 100 }),
   })
 
 
@@ -74,6 +77,8 @@ function Sales() {
       unitPrice: number
       totalAmount: number
       paymentMethodId: string
+      customerName?: string | null
+      notes?: string | null
     }) =>
       SalesService.createSale({
         requestBody: {
@@ -82,6 +87,8 @@ function Sales() {
           unit_price: data.unitPrice,
           total_amount: data.totalAmount,
           payment_method_id: data.paymentMethodId,
+          customer_name: data.customerName || null,
+          notes: data.notes || null,
         },
       }),
     onError: (error: any) => {
@@ -200,47 +207,128 @@ function Sales() {
     setIsPaymentModalOpen(true)
     }
 
-  // Process payment
+  // Process payment with multiple payment methods
   const processPayment = async (payments: Record<string, { amount: number; refNo?: string }>) => {
     try {
-      // Validate stock first
-      for (const item of cart) {
-        const currentProduct = await ProductsService.readProduct({ id: item.product.id })
-        
-        if (!currentProduct.current_stock || currentProduct.current_stock < item.quantity) {
-          showToast.showErrorToast(
-            `Insufficient stock for ${item.product.name}. Available: ${currentProduct.current_stock || 0}`
-          )
-          return
-        }
+      // Note: Stock validation is handled by the backend endpoint
+      // No need to validate here as it causes unnecessary API calls and potential CORS issues
+
+      // Convert payments to array format for API
+      const paymentArray = Object.entries(payments)
+        .filter(([_, payment]) => payment.amount > 0)
+        .map(([methodId, payment]) => ({
+          payment_method_id: methodId,
+          amount: payment.amount,
+          reference_number: payment.refNo || null,
+        }))
+
+      // Validate total payments (allow overpayment for change, but not underpayment)
+      const totalPaid = paymentArray.reduce((sum, p) => sum + p.amount, 0)
+      const difference = totalPaid - cartTotal
+      
+      // Check if payment is less than cart total (underpayment)
+      if (difference < -0.01) {
+        showToast.showErrorToast(
+          `Payment total (${totalPaid.toFixed(2)}) is less than cart total (${cartTotal.toFixed(2)}). Please add ${Math.abs(difference).toFixed(2)} more.`
+        )
+        return
       }
+      
+      // If there's a small underpayment (0.01-0.10), adjust the largest payment to match exactly
+      if (difference >= -0.10 && difference < -0.01 && paymentArray.length > 0) {
+        // Find the largest payment and adjust it to make totals match exactly
+        const largestPaymentIndex = paymentArray.reduce((maxIdx, p, idx) => 
+          p.amount > paymentArray[maxIdx].amount ? idx : maxIdx, 0
+        )
+        const adjustment = cartTotal - totalPaid
+        paymentArray[largestPaymentIndex].amount += adjustment
+      }
+      
+      // Overpayment is allowed (for change), so we don't need to adjust or error on that
 
-      // Process each payment method
-      for (const [methodId, payment] of Object.entries(payments)) {
-        if (payment.amount > 0) {
-          // Calculate how much of the total this payment covers
-          const paymentRatio = payment.amount / cartTotal
-          
-          for (const item of cart) {
+      // Process each cart item with all payment methods
+      for (let itemIndex = 0; itemIndex < cart.length; itemIndex++) {
+        const item = cart[itemIndex]
         const unitPrice = Number(item.product.selling_price)
-            const discountAmount = (unitPrice * item.quantity * (item.discount || 0)) / 100
-            const itemTotal = unitPrice * item.quantity - discountAmount
-            const paymentAmount = itemTotal * paymentRatio
-
-        await createSale.mutateAsync({
-          productId: item.product.id,
-          quantity: item.quantity,
-          unitPrice: unitPrice,
-              totalAmount: paymentAmount,
-              paymentMethodId: methodId,
-        })
+        const discountAmount = (unitPrice * item.quantity * (item.discount || 0)) / 100
+        const itemTotal = unitPrice * item.quantity - discountAmount
+        
+        // Calculate payment amounts proportionally for this item
+        const itemPaymentRatio = itemTotal / cartTotal
+        const isLastItem = itemIndex === cart.length - 1
+        
+        const itemPayments = paymentArray.map((payment, paymentIndex) => {
+          let amount = payment.amount * itemPaymentRatio
+          
+          // For the last item, ensure we use the remaining amount to avoid rounding errors
+          if (isLastItem) {
+            // Calculate what was already allocated to previous items
+            const previousItemsTotal = cart.slice(0, -1).reduce((sum, prevItem) => {
+              const prevUnitPrice = Number(prevItem.product.selling_price)
+              const prevDiscountAmount = (prevUnitPrice * prevItem.quantity * (prevItem.discount || 0)) / 100
+              return sum + (prevUnitPrice * prevItem.quantity - prevDiscountAmount)
+            }, 0)
+            const previousRatio = previousItemsTotal / cartTotal
+            const alreadyAllocated = payment.amount * previousRatio
+            amount = payment.amount - alreadyAllocated
           }
+          
+          // Round to 2 decimal places
+          return {
+            payment_method_id: payment.payment_method_id,
+            amount: Math.round(amount * 100) / 100,
+            reference_number: payment.reference_number,
+          }
+        })
+        
+        // Ensure item payment totals match item total exactly (adjust largest payment if needed)
+        const itemPaymentsTotal = itemPayments.reduce((sum, p) => sum + p.amount, 0)
+        const difference = itemTotal - itemPaymentsTotal
+        if (Math.abs(difference) > 0.001 && itemPayments.length > 0) {
+          // Adjust the largest payment to match exactly
+          const largestPaymentIndex = itemPayments.reduce((maxIdx, p, idx) => 
+            p.amount > itemPayments[maxIdx].amount ? idx : maxIdx, 0
+          )
+          itemPayments[largestPaymentIndex].amount = Math.round((itemPayments[largestPaymentIndex].amount + difference) * 100) / 100
+        }
+
+        // Use the new multi-payment endpoint
+        const token = await OpenAPI.TOKEN?.() || localStorage.getItem("access_token") || ""
+        const apiBase = OpenAPI.BASE || import.meta.env.VITE_API_URL || ""
+        
+        const response = await fetch(`${apiBase}/api/v1/sales/multi-payment`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({
+            product_id: item.product.id,
+            quantity: item.quantity,
+            unit_price: unitPrice,
+            total_amount: itemTotal,
+            customer_name: customerName || null,
+            notes: remarks || null,
+            payments: itemPayments,
+          }),
+        })
+
+        if (!response.ok) {
+          let errorMessage = "Failed to create sale"
+          try {
+            const error = await response.json()
+            errorMessage = error.detail || error.message || errorMessage
+          } catch (e) {
+            errorMessage = `HTTP ${response.status}: ${response.statusText}`
+          }
+          throw new Error(errorMessage)
         }
       }
 
       showToast.showSuccessToast(`Sale completed successfully`)
       queryClient.invalidateQueries({ queryKey: ["today-summary"] })
       queryClient.invalidateQueries({ queryKey: ["search-products"] })
+      queryClient.invalidateQueries({ queryKey: ["recent-receipts"] })
 
       setIsPaymentModalOpen(false)
       setCart([])
@@ -249,8 +337,10 @@ function Sales() {
       setCustomerTel("")
       setCustomerBalance(0)
       setRemarks("")
-    } catch (error) {
+    } catch (error: any) {
       console.error("Sale completion error:", error)
+      const errorMessage = error?.message || error?.detail || "Failed to complete sale. Please check your connection and try again."
+      showToast.showErrorToast(errorMessage)
       throw error
     }
   }
@@ -316,7 +406,7 @@ function Sales() {
         onClose={() => setIsPaymentModalOpen(false)}
         cart={cart}
         totalAmount={cartTotal}
-        paymentMethods={paymentMethods?.data?.map((m) => ({
+        paymentMethods={paymentMethods?.data ? paymentMethods.data.map((m) => ({
           id: m.id,
           name: m.name,
           type: m.name.toUpperCase().includes("CASH") ? "CASH" :
@@ -324,10 +414,12 @@ function Sales() {
                 m.name.toUpperCase().includes("PDQ") || m.name.toUpperCase().includes("KCB") ? "PDQ" :
                 m.name.toUpperCase().includes("BANK") || m.name.toUpperCase().includes("EQUITY") ? "BANK" :
                 m.name.toUpperCase().includes("CREDIT") ? "CREDIT_NOTE" : "OTHER",
-        }))}
+        })) : []}
         onSave={handleSave}
         onSaveAndPrint={handleSaveAndPrint}
         isProcessing={createSale.isPending}
+        isLoadingPaymentMethods={isLoadingPaymentMethods}
+        paymentMethodsError={paymentMethodsError}
       />
 
       {/* Main Content Area */}
@@ -379,6 +471,14 @@ function Sales() {
           onSelectSale={setSelectedSaleId}
           onResumeSale={resumeSale}
           onViewReceipt={() => setIsRecentReceiptsModalOpen(true)}
+          selectedReceiptId={selectedReceiptId}
+          onPreviewReceipt={() => {
+            if (selectedReceiptId) {
+              setIsReceiptPreviewModalOpen(true)
+            } else {
+              showToast.showErrorToast("Please select a receipt first")
+            }
+          }}
         />
       </Box>
                     
@@ -394,6 +494,23 @@ function Sales() {
           // TODO: Implement attach receipt functionality
           showToast.showSuccessToast(`Receipt ${receiptId.slice(-6)} attached`)
         }}
+        onPreviewReceipt={(receiptId) => {
+          setSelectedReceiptId(receiptId)
+          setIsReceiptPreviewModalOpen(true)
+          setIsRecentReceiptsModalOpen(false)
+        }}
+        onSelectReceipt={(receiptId) => {
+          setSelectedReceiptId(receiptId)
+        }}
+      />
+
+      <ReceiptPreviewModal
+        isOpen={isReceiptPreviewModalOpen}
+        onClose={() => {
+          setIsReceiptPreviewModalOpen(false)
+          setSelectedReceiptId(null)
+        }}
+        receiptId={selectedReceiptId}
       />
           </Box>
   )

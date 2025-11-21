@@ -108,7 +108,7 @@ function Layout() {
             msOverflowStyle: "none",
           }}
         >
-          <Breadcrumbs />
+          {!isPOSPage && <Breadcrumbs />}
           <Outlet />
         </Flex>
       </Flex>

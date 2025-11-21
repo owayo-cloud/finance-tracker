@@ -1,8 +1,9 @@
-import { Box, Flex, IconButton, Text } from "@chakra-ui/react"
+import { Box, Flex, IconButton, Text, HStack, VStack, Badge, Icon } from "@chakra-ui/react"
 import { useQueryClient } from "@tanstack/react-query"
+import { Link } from "@tanstack/react-router"
 import { useState } from "react"
 import { FaBars } from "react-icons/fa"
-import { FiLogOut } from "react-icons/fi"
+import { FiLogOut, FiMoreVertical } from "react-icons/fi"
 
 import type { UserPublic } from "@/client"
 import useAuth from "@/hooks/useAuth"
@@ -16,15 +17,31 @@ import {
 } from "../ui/drawer"
 import SidebarItems from "./SidebarItems"
 
-const Sidebar = () => {
+interface SidebarProps {
+  open?: boolean
+  onOpenChange?: (e: { open: boolean }) => void
+  isCollapsed?: boolean
+}
+
+const Sidebar = ({ open: controlledOpen, onOpenChange, isCollapsed = false }: SidebarProps) => {
   const queryClient = useQueryClient()
   const currentUser = queryClient.getQueryData<UserPublic>(["currentUser"])
   const { logout } = useAuth()
-  const [open, setOpen] = useState(false)
+  const [internalOpen, setInternalOpen] = useState(false)
+  
+  // Use controlled state if provided, otherwise use internal state
+  const open = controlledOpen !== undefined ? controlledOpen : internalOpen
+  const setOpen = (newOpen: boolean) => {
+    if (onOpenChange) {
+      onOpenChange({ open: newOpen })
+    } else {
+      setInternalOpen(newOpen)
+    }
+  }
 
   return (
     <>
-      {/* Mobile */}
+      {/* Mobile Drawer - Only for mobile screens */}
       <DrawerRoot
         placement="start"
         open={open}
@@ -32,52 +49,71 @@ const Sidebar = () => {
       >
         <DrawerBackdrop />
         <DrawerTrigger asChild>
-          <IconButton
-            variant="ghost"
-            color="inherit"
-            display={{ base: "flex", md: "none" }}
-            aria-label="Open Menu"
-            position="absolute"
-            zIndex="100"
-            m={4}
-          >
-            <FaBars />
-          </IconButton>
+          <Box display={{ base: "block", md: "none" }} />
         </DrawerTrigger>
-        <DrawerContent maxW="xs">
+        <DrawerContent maxW="xs" bg={{ base: "gray.900", _light: "white" }}>
           <DrawerCloseTrigger />
           <DrawerBody 
             p={0}
             css={{
               "&::-webkit-scrollbar": {
-                width: "8px",
+                width: "6px",
               },
               "&::-webkit-scrollbar-track": {
                 background: "transparent",
               },
               "&::-webkit-scrollbar-thumb": {
-                background: "var(--chakra-colors-gray-300)",
-                borderRadius: "4px",
+                background: { base: "rgba(255, 255, 255, 0.2)", _light: "rgba(0, 0, 0, 0.2)" },
+                borderRadius: "3px",
               },
               "&::-webkit-scrollbar-thumb:hover": {
-                background: "var(--chakra-colors-gray-400)",
+                background: { base: "rgba(255, 255, 255, 0.3)", _light: "rgba(0, 0, 0, 0.3)" },
               },
               scrollbarWidth: "thin",
-              scrollbarColor: "var(--chakra-colors-gray-300) transparent",
+              scrollbarColor: { base: "rgba(255, 255, 255, 0.2) transparent", _light: "rgba(0, 0, 0, 0.2) transparent" },
             }}
           >
             <Flex flexDir="column" h="full">
-              <Box flex="1" overflowY="auto" p={4}>
+
+              {/* Menu Items */}
+              <Box flex="1" overflowY="auto" py={4}>
                 <SidebarItems onClose={() => setOpen(false)} />
               </Box>
               
-              {/* Footer section - always visible */}
+              {/* User Profile Footer */}
               <Box 
                 borderTop="1px solid" 
-                borderColor="border.subtle"
-                bg="bg.subtle"
+                borderColor={{ base: "rgba(255, 255, 255, 0.1)", _light: "gray.200" }}
                 p={4}
+                bg={{ base: "rgba(0, 0, 0, 0.2)", _light: "gray.50" }}
               >
+                {currentUser && (
+                  <HStack mb={3} p={2} borderRadius="lg" _hover={{ bg: { base: "rgba(255, 255, 255, 0.05)", _light: "rgba(0, 0, 0, 0.05)" } }}>
+                    <Box
+                      w={8}
+                      h={8}
+                      borderRadius="full"
+                      bg="blue.500"
+                      display="flex"
+                      alignItems="center"
+                      justifyContent="center"
+                      color="white"
+                      fontSize="sm"
+                      fontWeight="bold"
+                      flexShrink={0}
+                    >
+                      {(currentUser.full_name || currentUser.email || "U")[0].toUpperCase()}
+                    </Box>
+                    <VStack align="start" flex={1} gap={0}>
+                      <Text fontSize="sm" fontWeight="600" color={{ base: "white", _light: "gray.800" }}>
+                        {currentUser.full_name || "User"}
+                      </Text>
+                      <Text fontSize="xs" color={{ base: "gray.400", _light: "gray.600" }} truncate maxW="150px">
+                        {currentUser.email}
+                      </Text>
+                    </VStack>
+                  </HStack>
+                )}
                 <Flex
                   as="button"
                   onClick={() => {
@@ -89,20 +125,16 @@ const Sidebar = () => {
                   py={2}
                   borderRadius="lg"
                   w="full"
+                  color={{ base: "gray.300", _light: "gray.700" }}
                   _hover={{
-                    bg: { base: "gray.700", _light: "gray.100" },
+                    bg: { base: "rgba(255, 255, 255, 0.1)", _light: "rgba(0, 0, 0, 0.05)" },
+                    color: { base: "white", _light: "gray.900" },
                   }}
                   transition="all 0.2s"
                 >
                   <FiLogOut />
-                  <Text>Log Out</Text>
+                  <Text fontSize="sm">Log Out</Text>
                 </Flex>
-                
-                {currentUser?.email && (
-                  <Text fontSize="xs" color={{ base: "gray.400", _light: "gray.600" }} mt={2} truncate>
-                    {currentUser.email}
-                  </Text>
-                )}
               </Box>
             </Flex>
           </DrawerBody>
@@ -114,80 +146,105 @@ const Sidebar = () => {
       <Box
         display={{ base: "none", md: "flex" }}
         position="sticky"
-        bg={{ base: "gray.800", _light: "white" }}
+        bg={{ base: "#1a1d29", _light: "#ffffff" }}
         borderRight="1px solid"
-        borderColor={{ base: "gray.700", _light: "gray.200" }}
+        borderColor={{ base: "rgba(255, 255, 255, 0.08)", _light: "#e5e7eb" }}
         top={0}
-        minW="xs"
+        w={isCollapsed ? "0px" : "260px"}
         h="100vh"
         flexDirection="column"
+        boxShadow={isCollapsed ? "none" : { base: "2px 0 8px rgba(0, 0, 0, 0.4)", _light: "2px 0 8px rgba(0, 0, 0, 0.08)" }}
+        transition="width 0.3s ease, box-shadow 0.3s ease"
+        overflow="hidden"
+        flexShrink={0}
+        opacity={isCollapsed ? 0 : 1}
+        visibility={isCollapsed ? "hidden" : "visible"}
       >
+        {/* User Profile Section at Top */}
+        {currentUser && !isCollapsed && (
+          <Box 
+            p={4}
+            bg={{ base: "#1a1d29", _light: "#ffffff" }}
+            minW="260px"
+          >
+            <HStack gap={3} justify="space-between" align="center">
+              <HStack gap={3} flex={1}>
+                <Box
+                  w={12}
+                  h={12}
+                  borderRadius="full"
+                  bg="linear-gradient(135deg, #667eea 0%, #764ba2 100%)"
+                  display="flex"
+                  alignItems="center"
+                  justifyContent="center"
+                  color="white"
+                  fontSize="sm"
+                  fontWeight="700"
+                  flexShrink={0}
+                  border="2px solid"
+                  borderColor={{ base: "rgba(255, 255, 255, 0.1)", _light: "rgba(0, 0, 0, 0.1)" }}
+                >
+                  {(currentUser.full_name || currentUser.email || "U")[0].toUpperCase()}
+                </Box>
+                <VStack align="start" gap={0} flex={1} minW={0}>
+                  <Text fontSize="sm" fontWeight="600" color={{ base: "#ffffff", _light: "#1a1d29" }} lineHeight="1.2">
+                    {currentUser.full_name || "User"}
+                  </Text>
+                  <Badge
+                    mt={1}
+                    px={2}
+                    py={0.5}
+                    bg="linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%)"
+                    color="white"
+                    fontSize="2xs"
+                    fontWeight="700"
+                    borderRadius="sm"
+                    textTransform="uppercase"
+                    letterSpacing="0.5px"
+                  >
+                    {currentUser.is_superuser ? "Gold Member" : "Member"}
+                  </Badge>
+                </VStack>
+              </HStack>
+              <IconButton
+                variant="ghost"
+                aria-label="More options"
+                size="sm"
+                color={{ base: "#9ca3af", _light: "#6b7280" }}
+                _hover={{ bg: { base: "rgba(255, 255, 255, 0.05)", _light: "rgba(0, 0, 0, 0.05)" } }}
+              >
+                <Icon as={FiMoreVertical} fontSize="16px" />
+              </IconButton>
+            </HStack>
+          </Box>
+        )}
+
         {/* Scrollable menu items */}
         <Box 
           flex="1"
           overflowY="auto"
-          p={4}
+          overflowX="hidden"
+          py={4}
+          minW={isCollapsed ? "0" : "260px"}
           css={{
             "&::-webkit-scrollbar": {
-              width: "8px",
+              width: "6px",
             },
             "&::-webkit-scrollbar-track": {
               background: "transparent",
-              borderRadius: "4px",
             },
             "&::-webkit-scrollbar-thumb": {
-              background: "var(--chakra-colors-gray-400)",
-              borderRadius: "4px",
-              border: "2px solid transparent",
-              backgroundClip: "content-box",
+              background: { base: "rgba(255, 255, 255, 0.2)", _light: "rgba(0, 0, 0, 0.2)" },
+              borderRadius: "3px",
             },
             "&::-webkit-scrollbar-thumb:hover": {
-              background: "var(--chakra-colors-gray-500)",
-              backgroundClip: "content-box",
+              background: { base: "rgba(255, 255, 255, 0.3)", _light: "rgba(0, 0, 0, 0.3)" },
             },
-            "&::-webkit-scrollbar-thumb:active": {
-              background: "var(--chakra-colors-gray-600)",
-              backgroundClip: "content-box",
-            },
-            // Firefox
             scrollbarWidth: "thin",
-            scrollbarColor: "var(--chakra-colors-gray-400) transparent",
+            scrollbarColor: { base: "rgba(255, 255, 255, 0.2) transparent", _light: "rgba(0, 0, 0, 0.2) transparent" },
           }}
         >
-          <SidebarItems />
-        </Box>
-
-        {/* Footer section - always visible */}
-        <Box 
-          borderTop="1px solid" 
-          borderColor={{ base: "gray.700", _light: "gray.200" }}
-          p={4}
-        >
-          <Flex
-            as="button"
-            onClick={() => {
-              logout()
-            }}
-            alignItems="center"
-            gap={3}
-            px={3}
-            py={2}
-            borderRadius="lg"
-            w="full"
-            _hover={{
-              bg: { base: "gray.700", _light: "gray.100" },
-            }}
-            transition="all 0.2s"
-          >
-            <FiLogOut />
-            <Text fontSize="sm">Log Out</Text>
-          </Flex>
-          
-          {currentUser?.email && (
-            <Text fontSize="xs" color={{ base: "gray.400", _light: "gray.600" }} mt={2} truncate>
-              {currentUser.email}
-            </Text>
-          )}
+          {!isCollapsed && <SidebarItems />}
         </Box>
       </Box>
     </>

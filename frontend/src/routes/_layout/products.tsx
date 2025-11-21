@@ -26,8 +26,6 @@ import PendingProducts from "@/components/Pending/PendingProducts"
 import useCustomToast from "@/hooks/useCustomToast"
 import { handleError } from "@/utils"
 import { Field } from "@/components/ui/field"
-import { REFRESH_INTERVALS } from "@/hooks/useAutoRefresh"
-import AutoRefreshIndicator from "@/components/Common/AutoRefreshIndicator"
 import {
   PaginationItems,
   PaginationNextTrigger,

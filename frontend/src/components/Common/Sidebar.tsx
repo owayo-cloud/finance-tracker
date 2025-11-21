@@ -1,8 +1,6 @@
 import { Box, Flex, IconButton, Text, HStack, VStack, Badge, Icon } from "@chakra-ui/react"
 import { useQueryClient } from "@tanstack/react-query"
-import { Link } from "@tanstack/react-router"
 import { useState } from "react"
-import { FaBars } from "react-icons/fa"
 import { FiLogOut, FiMoreVertical } from "react-icons/fi"
 
 import type { UserPublic } from "@/client"

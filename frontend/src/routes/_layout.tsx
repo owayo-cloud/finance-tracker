@@ -70,6 +70,9 @@ function Layout() {
   // Track page visits for Quick Access
   useTrackPageVisit(location.pathname)
 
+  // Hide sidebar on POS page, but keep navbar
+  const isPOSPage = location.pathname === "/sales"
+
   return (
     <Flex 
       direction="column" 
@@ -77,17 +80,23 @@ function Layout() {
       bg="bg.canvas"
       overflow="hidden"
     >
-      <Navbar onMenuClick={() => setSidebarCollapsed(!sidebarCollapsed)} sidebarCollapsed={sidebarCollapsed} />
+      <Navbar 
+        onMenuClick={() => setSidebarCollapsed(!sidebarCollapsed)} 
+        sidebarCollapsed={sidebarCollapsed}
+        isPOSMode={isPOSPage}
+      />
       <Flex flex="1" overflow="hidden">
-        <Sidebar 
-          open={sidebarOpen} 
-          onOpenChange={(e) => setSidebarOpen(e.open)} 
-          isCollapsed={sidebarCollapsed}
-        />
+        {!isPOSPage && (
+          <Sidebar 
+            open={sidebarOpen} 
+            onOpenChange={(e) => setSidebarOpen(e.open)} 
+            isCollapsed={sidebarCollapsed}
+          />
+        )}
         <Flex 
           flex="1" 
           direction="column" 
-          p={4} 
+          p={isPOSPage ? 0 : 4} 
           overflowY="auto"
           overflowX="hidden"
           bg="bg.canvas"

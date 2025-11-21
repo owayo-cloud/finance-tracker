@@ -1,0 +1,412 @@
+import { Box, Button, Flex, Input, Stack, Text, HStack, Table, Grid, Icon, IconButton } from "@chakra-ui/react"
+import { FiPlus, FiEye, FiChevronLeft, FiChevronRight } from "react-icons/fi"
+import { SuspendedSale } from "./types"
+import { ThemedSelect } from "./ThemedSelect"
+import { formatCurrency } from "./utils"
+
+interface CustomerPanelProps {
+  activeTab: "customer" | "suspended"
+  onTabChange: (tab: "customer" | "suspended") => void
+  customerName: string
+  customerTel: string
+  customerBalance: number
+  remarks: string
+  customerPin: string
+  onCustomerNameChange: (value: string) => void
+  onCustomerTelChange: (value: string) => void
+  onCustomerBalanceChange: (value: number) => void
+  onRemarksChange: (value: string) => void
+  onCustomerPinChange: (value: string) => void
+  onSelectCustomer: () => void
+  onNewCustomer: () => void
+  onClearCustomer: () => void
+  suspendedSales: SuspendedSale[]
+  selectedSaleId: string | null
+  onSelectSale: (saleId: string) => void
+  onResumeSale: (saleId: string) => void
+  onViewReceipt?: () => void
+}
+
+export function CustomerPanel({
+  activeTab,
+  onTabChange,
+  customerName,
+  customerTel,
+  customerBalance,
+  remarks,
+  customerPin,
+  onCustomerNameChange,
+  onCustomerTelChange,
+  onCustomerBalanceChange,
+  onRemarksChange,
+  onCustomerPinChange,
+  onSelectCustomer,
+  onNewCustomer,
+  onClearCustomer,
+  suspendedSales,
+  selectedSaleId: _selectedSaleId,
+  onSelectSale,
+  onResumeSale,
+  onViewReceipt,
+}: CustomerPanelProps) {
+  return (
+    <Box
+      w={{ base: "100%", lg: "400px" }}
+      flexShrink={0}
+      bg={{ base: "#1a1d29", _light: "#ffffff" }}
+      borderLeft={{ base: "none", lg: "1px solid" }}
+      borderTop={{ base: "1px solid", lg: "none" }}
+      borderColor={{ base: "rgba(255, 255, 255, 0.08)", _light: "#e5e7eb" }}
+      display="flex"
+      flexDirection="column"
+      overflow="hidden"
+    >
+      {/* Tabs */}
+      <Flex borderBottom="1px solid" borderColor={{ base: "rgba(255, 255, 255, 0.08)", _light: "#e5e7eb" }}>
+        <Button
+          onClick={() => onTabChange("customer")}
+          flex={1}
+          borderRadius={0}
+          bg={activeTab === "customer" ? "#22d3ee" : "transparent"}
+          color={activeTab === "customer" ? "white" : { base: "#9ca3af", _light: "#6b7280" }}
+          fontWeight="medium"
+          size="sm"
+          py={3}
+          _hover={{ bg: activeTab === "customer" ? "#06b6d4" : { base: "rgba(255, 255, 255, 0.05)", _light: "#f3f4f6" } }}
+        >
+          Attach Customer
+        </Button>
+        <Button
+          onClick={() => onTabChange("suspended")}
+          flex={1}
+          borderRadius={0}
+          bg={activeTab === "suspended" ? "#22d3ee" : "transparent"}
+          color={activeTab === "suspended" ? "white" : { base: "#9ca3af", _light: "#6b7280" }}
+          fontWeight="medium"
+          size="sm"
+          py={3}
+          _hover={{ bg: activeTab === "suspended" ? "#06b6d4" : { base: "rgba(255, 255, 255, 0.05)", _light: "#f3f4f6" } }}
+        >
+          Suspended
+        </Button>
+      </Flex>
+
+      {/* Tab Content */}
+      {activeTab === "customer" ? (
+        <Box p={{ base: 3, md: 4 }} flex={1} display="flex" flexDirection="column" overflowY="auto" minH={0}>
+          {/* Customer Action Buttons */}
+          <Grid templateColumns="repeat(3, 1fr)" gap={2} mb={4}>
+            <Button
+              bg="#22d3ee"
+              color="white"
+              size="sm"
+              _hover={{ bg: "#06b6d4" }}
+              fontWeight="600"
+              fontSize="xs"
+              whiteSpace="nowrap"
+              overflow="hidden"
+              textOverflow="ellipsis"
+              onClick={onSelectCustomer}
+            >
+              Select Customer
+            </Button>
+            <Button
+              bg="#22d3ee"
+              color="white"
+              size="sm"
+              _hover={{ bg: "#06b6d4" }}
+              fontWeight="600"
+              fontSize="xs"
+              whiteSpace="nowrap"
+              overflow="hidden"
+              textOverflow="ellipsis"
+              display="flex"
+              alignItems="center"
+              justifyContent="center"
+              minW={0}
+              onClick={onNewCustomer}
+            >
+              <Icon as={FiPlus} mr={1} fontSize="xs" flexShrink={0} />
+              <Text as="span" overflow="hidden" textOverflow="ellipsis" whiteSpace="nowrap">
+                New Customer
+              </Text>
+            </Button>
+            <Button
+              bg="#22d3ee"
+              color="white"
+              size="sm"
+              onClick={onClearCustomer}
+              _hover={{ bg: "#06b6d4" }}
+              fontWeight="600"
+              fontSize="xs"
+              whiteSpace="nowrap"
+              overflow="hidden"
+              textOverflow="ellipsis"
+            >
+              Clear Customer
+            </Button>
+          </Grid>
+
+          {/* Customer Details */}
+          <Stack gap={3} mb={4}>
+            <Box>
+              <Text fontSize="sm" mb={1} fontWeight="500" color={{ base: "#ffffff", _light: "#1a1d29" }}>
+                Name:
+              </Text>
+              <Input
+                value={customerName}
+                onChange={(e) => onCustomerNameChange(e.target.value)}
+                placeholder=""
+                bg="transparent"
+                border="none"
+                borderBottom="1px solid"
+                borderColor={{ base: "rgba(255, 255, 255, 0.2)", _light: "#d1d5db" }}
+                borderRadius={0}
+                color={{ base: "#ffffff", _light: "#1a1d29" }}
+                px={1}
+                _focus={{ borderBottomColor: "#22d3ee", boxShadow: "none" }}
+              />
+            </Box>
+            <Box>
+              <Text fontSize="sm" mb={1} fontWeight="500" color={{ base: "#ffffff", _light: "#1a1d29" }}>
+                Tel:
+              </Text>
+              <Input
+                value={customerTel}
+                onChange={(e) => onCustomerTelChange(e.target.value)}
+                placeholder=""
+                bg="transparent"
+                border="none"
+                borderBottom="1px solid"
+                borderColor={{ base: "rgba(255, 255, 255, 0.2)", _light: "#d1d5db" }}
+                borderRadius={0}
+                color={{ base: "#ffffff", _light: "#1a1d29" }}
+                px={1}
+                _focus={{ borderBottomColor: "#22d3ee", boxShadow: "none" }}
+              />
+            </Box>
+            <Box>
+              <Text fontSize="sm" mb={1} fontWeight="500" color={{ base: "#ffffff", _light: "#1a1d29" }}>
+                Balance:
+              </Text>
+              <Input
+                type="number"
+                value={customerBalance || ""}
+                onChange={(e) => onCustomerBalanceChange(parseFloat(e.target.value) || 0)}
+                placeholder=""
+                bg="transparent"
+                border="none"
+                borderBottom="1px solid"
+                borderColor={{ base: "rgba(255, 255, 255, 0.2)", _light: "#d1d5db" }}
+                borderRadius={0}
+                color={{ base: "#ffffff", _light: "#1a1d29" }}
+                px={1}
+                _focus={{ borderBottomColor: "#22d3ee", boxShadow: "none" }}
+              />
+            </Box>
+          </Stack>
+
+          {/* Remarks and Customer PIN */}
+          <Stack gap={3} mb={4}>
+            <Box>
+              <Text fontSize="sm" mb={1} fontWeight="500" color={{ base: "#ffffff", _light: "#1a1d29" }}>
+                REMARKS/CUSTOMER NAME:
+              </Text>
+              <Input
+                value={remarks}
+                onChange={(e) => onRemarksChange(e.target.value)}
+                placeholder=""
+                bg="transparent"
+                border="none"
+                borderBottom="1px solid"
+                borderColor={{ base: "rgba(255, 255, 255, 0.2)", _light: "#d1d5db" }}
+                borderRadius={0}
+                color={{ base: "#ffffff", _light: "#1a1d29" }}
+                px={1}
+                _focus={{ borderBottomColor: "#22d3ee", boxShadow: "none" }}
+              />
+            </Box>
+            <Box>
+              <Text fontSize="sm" mb={1} fontWeight="500" color={{ base: "#ffffff", _light: "#1a1d29" }}>
+                CUSTOMER PIN:
+              </Text>
+              <Input
+                type="password"
+                value={customerPin}
+                onChange={(e) => onCustomerPinChange(e.target.value)}
+                placeholder=""
+                bg="transparent"
+                border="none"
+                borderBottom="1px solid"
+                borderColor={{ base: "rgba(255, 255, 255, 0.2)", _light: "#d1d5db" }}
+                borderRadius={0}
+                color={{ base: "#ffffff", _light: "#1a1d29" }}
+                px={1}
+                _focus={{ borderBottomColor: "#22d3ee", boxShadow: "none" }}
+              />
+            </Box>
+          </Stack>
+
+          {/* View Receipt Section */}
+          <HStack gap={3} alignItems="center" flexWrap="wrap">
+            <Text
+              as="button"
+              fontSize="0.875rem"
+              color="#22d3ee"
+              cursor="pointer"
+              onClick={onViewReceipt}
+              _hover={{ textDecoration: "underline" }}
+            >
+              View Receipt
+            </Text>
+            <Input
+              value="0"
+              readOnly
+              w="60px"
+              textAlign="center"
+              size="sm"
+              bg={{ base: "#1a1d29", _light: "#ffffff" }}
+              borderColor={{ base: "rgba(255, 255, 255, 0.1)", _light: "#e5e7eb" }}
+              color={{ base: "#ffffff", _light: "#1a1d29" }}
+              borderRadius="md"
+            />
+            <Button bg="#22d3ee" color="white" size="sm" _hover={{ bg: "#06b6d4" }} fontWeight="600">
+              <Icon as={FiEye} mr={2} />
+              Preview Receipt
+            </Button>
+          </HStack>
+        </Box>
+      ) : (
+        /* Suspended Sales Tab */
+        <Box flex={1} display="flex" flexDirection="column" overflow="hidden" minH={0}>
+          {/* Suspended Sales Table */}
+          <Box flex={1} overflowY="auto" minH={0}>
+            <Table.Root size="sm">
+              <Table.Header>
+                <Table.Row>
+                  <Table.ColumnHeader>Cashier</Table.ColumnHeader>
+                  <Table.ColumnHeader>Items</Table.ColumnHeader>
+                  <Table.ColumnHeader>Total</Table.ColumnHeader>
+                  <Table.ColumnHeader>Name</Table.ColumnHeader>
+                  <Table.ColumnHeader>Rct No</Table.ColumnHeader>
+                </Table.Row>
+              </Table.Header>
+              <Table.Body>
+                {suspendedSales.length === 0 ? (
+                  <Table.Row>
+                    <Table.Cell colSpan={5} textAlign="center" py={8}>
+                      <Text color={{ base: "#9ca3af", _light: "#6b7280" }}>No records found.</Text>
+                    </Table.Cell>
+                  </Table.Row>
+                ) : (
+                  suspendedSales.map((sale) => {
+                    const total = sale.cart.reduce((sum, item) => {
+                      const price = Number(item.product.selling_price)
+                      const discountAmount = (price * item.quantity * (item.discount || 0)) / 100
+                      return sum + (price * item.quantity - discountAmount)
+                    }, 0)
+                    const itemsCount = sale.cart.reduce((sum, item) => sum + item.quantity, 0)
+                    return (
+                      <Table.Row
+                        key={sale.id}
+                        cursor="pointer"
+                        _hover={{ bg: { base: "rgba(255, 255, 255, 0.05)", _light: "#f9fafb" } }}
+                        onClick={() => {
+                          onSelectSale(sale.id)
+                          onResumeSale(sale.id)
+                          onTabChange("customer")
+                        }}
+                      >
+                        <Table.Cell>-</Table.Cell>
+                        <Table.Cell>{itemsCount}</Table.Cell>
+                        <Table.Cell fontWeight="medium">Ksh {formatCurrency(total)}</Table.Cell>
+                        <Table.Cell>{sale.customer?.name || "-"}</Table.Cell>
+                        <Table.Cell>{sale.id.slice(-6)}</Table.Cell>
+                      </Table.Row>
+                    )
+                  })
+                )}
+              </Table.Body>
+            </Table.Root>
+          </Box>
+
+          {/* Pagination */}
+          <Box
+            p={{ base: 3, md: 4 }}
+            borderTop="1px solid"
+            borderColor={{ base: "rgba(255, 255, 255, 0.08)", _light: "#e5e7eb" }}
+          >
+            <Flex justify="space-between" alignItems="center" mb={4} flexWrap="wrap" gap={2}>
+              <Text fontSize="sm" color={{ base: "#9ca3af", _light: "#6b7280" }}>
+                Showing {suspendedSales.length > 0 ? "0" : "0"} - {suspendedSales.length > 0 ? "0" : "0"} out of {suspendedSales.length}
+              </Text>
+              <HStack gap={2} flexWrap="wrap">
+                <IconButton size="sm" variant="ghost" aria-label="First page" disabled>
+                  <Icon as={FiChevronLeft} />
+                </IconButton>
+                <IconButton size="sm" variant="ghost" aria-label="Previous page" disabled>
+                  <Icon as={FiChevronLeft} />
+                </IconButton>
+                <IconButton size="sm" variant="ghost" aria-label="Next page" disabled>
+                  <Icon as={FiChevronRight} />
+                </IconButton>
+                <IconButton size="sm" variant="ghost" aria-label="Last page" disabled>
+                  <Icon as={FiChevronRight} />
+                </IconButton>
+                <Box w="70px">
+                  <ThemedSelect value="10" onChange={() => {}} aria-label="Items per page" title="Items per page">
+                    <option value="10">10</option>
+                    <option value="25">25</option>
+                    <option value="50">50</option>
+                  </ThemedSelect>
+                </Box>
+              </HStack>
+            </Flex>
+
+            {/* Remarks and PIN in Suspended Tab */}
+            <Stack gap={3}>
+              <Box>
+                <Text fontSize="sm" mb={1} fontWeight="500" color={{ base: "#ffffff", _light: "#1a1d29" }}>
+                  REMARKS/CUSTOMER NAME:
+                </Text>
+                <Input
+                  value={remarks}
+                  onChange={(e) => onRemarksChange(e.target.value)}
+                  placeholder=""
+                  bg="transparent"
+                  border="none"
+                  borderBottom="1px solid"
+                  borderColor={{ base: "rgba(255, 255, 255, 0.2)", _light: "#d1d5db" }}
+                  borderRadius={0}
+                  color={{ base: "#ffffff", _light: "#1a1d29" }}
+                  px={1}
+                  _focus={{ borderBottomColor: "#22d3ee", boxShadow: "none" }}
+                />
+              </Box>
+              <Box>
+                <Text fontSize="sm" mb={1} fontWeight="500" color={{ base: "#ffffff", _light: "#1a1d29" }}>
+                  CUSTOMER PIN:
+                </Text>
+                <Input
+                  type="password"
+                  value={customerPin}
+                  onChange={(e) => onCustomerPinChange(e.target.value)}
+                  placeholder=""
+                  bg="transparent"
+                  border="none"
+                  borderBottom="1px solid"
+                  borderColor={{ base: "rgba(255, 255, 255, 0.2)", _light: "#d1d5db" }}
+                  borderRadius={0}
+                  color={{ base: "#ffffff", _light: "#1a1d29" }}
+                  px={1}
+                  _focus={{ borderBottomColor: "#22d3ee", boxShadow: "none" }}
+                />
+              </Box>
+            </Stack>
+          </Box>
+        </Box>
+      )}
+    </Box>
+  )
+}
+

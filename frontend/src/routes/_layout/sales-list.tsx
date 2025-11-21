@@ -17,6 +17,8 @@ import { useState } from "react"
 import { FiSearch, FiCalendar, FiFilter } from "react-icons/fi"
 import { SalesService, type SalePublic } from "../../client"
 import { useColorMode } from "@/components/ui/color-mode"
+import { REFRESH_INTERVALS } from "@/hooks/useAutoRefresh"
+import AutoRefreshIndicator from "@/components/Common/AutoRefreshIndicator"
 import {
   PaginationItems,
   PaginationNextTrigger,
@@ -92,6 +94,7 @@ function SalesList() {
             </Text>
           </Box>
           <HStack gap={3}>
+            <AutoRefreshIndicator interval={REFRESH_INTERVALS.LIST} />
             <Box
               p={4}
               bg={{ base: "rgba(15, 20, 30, 0.7)", _light: "rgba(255, 255, 255, 0.8)" }}

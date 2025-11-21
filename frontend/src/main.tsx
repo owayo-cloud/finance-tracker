@@ -11,6 +11,7 @@ import { ApiError, OpenAPI } from "./client"
 import ErrorBoundary from "./components/Common/ErrorBoundary"
 import { CustomProvider } from "./components/ui/provider"
 import { routeTree } from "./routeTree.gen"
+import { REFRESH_INTERVALS } from "./hooks/useAutoRefresh"
 
 OpenAPI.BASE = import.meta.env.VITE_API_URL
 OpenAPI.TOKEN = async () => {
@@ -41,7 +42,13 @@ const handleApiError = (error: Error) => {
       let errorMessage = errDetail || "Access denied. You don't have permission to perform this action."
       
       // Check if it's an authentication issue disguised as 403
-      if (errDetail === "Not authenticated" || errDetail?.includes("authenticated")) {
+      // Backend returns 403 for "Could not validate credentials" which is actually an auth issue
+      if (
+        errDetail === "Not authenticated" || 
+        errDetail?.includes("authenticated") ||
+        errDetail === "Could not validate credentials" ||
+        errDetail?.includes("validate credentials")
+      ) {
         errorMessage = "Your session has expired. Please log in again."
         localStorage.removeItem("access_token")
         window.location.href = "/login"
@@ -58,6 +65,22 @@ const handleApiError = (error: Error) => {
     }
   }
 }
+// Initialize auto-refresh interval from localStorage
+const getInitialRefreshInterval = () => {
+  try {
+    if (typeof window === "undefined") return REFRESH_INTERVALS.DEFAULT
+    
+    const storedEnabled = localStorage.getItem("autoRefreshEnabled")
+    const storedInterval = localStorage.getItem("autoRefreshInterval")
+    
+    if (storedEnabled === "false") return false
+    return storedInterval ? parseInt(storedInterval, 10) : REFRESH_INTERVALS.DEFAULT
+  } catch (error) {
+    // If localStorage is not available, use default
+    return REFRESH_INTERVALS.DEFAULT
+  }
+}
+
 const queryClient = new QueryClient({
   queryCache: new QueryCache({
     onError: handleApiError,
@@ -65,6 +88,16 @@ const queryClient = new QueryClient({
   mutationCache: new MutationCache({
     onError: handleApiError,
   }),
+  defaultOptions: {
+    queries: {
+      refetchOnWindowFocus: true,
+      refetchOnMount: true,
+      refetchOnReconnect: true,
+      staleTime: 0, // Consider data stale immediately for auto-refresh
+      gcTime: 5 * 60 * 1000, // Keep unused data for 5 minutes
+      refetchInterval: getInitialRefreshInterval(), // Global auto-refresh
+    },
+  },
 })
 
 const router = createRouter({ routeTree })

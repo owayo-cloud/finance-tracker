@@ -39,17 +39,32 @@ function ThemedSelect({
   value,
   onChange,
   children,
+  "aria-label": ariaLabel = "Select an option",
+  title = "Select an option",
+  id,
   ...props
 }: {
   value: string
   onChange: (value: string) => void
   children: React.ReactNode
+  "aria-label"?: string
+  title?: string
+  id?: string
   [key: string]: any
 }) {
+  // Ensure title and aria-label are always set and not overridden by props
+  const { title: propsTitle, "aria-label": propsAriaLabel, id: propsId, ...restProps } = props
+  const finalTitle = title || propsTitle || "Select an option"
+  const finalAriaLabel = ariaLabel || propsAriaLabel || "Select an option"
+  const finalId = id || propsId
+  
   return (
     <select
+      id={finalId}
       value={value}
       onChange={(e) => onChange(e.target.value)}
+      aria-label={finalAriaLabel}
+      title={finalTitle}
       onFocus={(e) => {
         e.target.style.borderColor = "var(--chakra-colors-border-focused)"
         e.target.style.boxShadow = "0 0 0 1px var(--chakra-colors-border-focused)"
@@ -70,7 +85,7 @@ function ThemedSelect({
         outline: "none",
         cursor: "pointer",
       }}
-      {...props}
+      {...restProps}
     >
       {children}
     </select>
@@ -535,12 +550,24 @@ function Sales() {
               {/* Payment Method Selection */}
               {cart.length > 0 && (
                 <Box>
-                  <Text fontWeight="bold" mb={2} fontSize="sm">
+                  <label
+                    htmlFor="payment-method-select"
+                    style={{
+                      fontWeight: "bold",
+                      marginBottom: "0.5rem",
+                      fontSize: "0.875rem",
+                      display: "block",
+                      color: "var(--chakra-colors-text-primary)",
+                    }}
+                  >
                     Payment Method *
-                  </Text>
+                  </label>
                   <ThemedSelect
+                    id="payment-method-select"
                     value={selectedPaymentMethod}
                     onChange={setSelectedPaymentMethod}
+                    aria-label="Payment Method"
+                    title="Payment Method"
                   >
                     <option value="">Select payment method...</option>
                     {paymentMethods?.data?.map((method) => (

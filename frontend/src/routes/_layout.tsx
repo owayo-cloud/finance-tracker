@@ -1,11 +1,13 @@
 import { Flex } from "@chakra-ui/react"
-import { createFileRoute, Outlet, redirect } from "@tanstack/react-router"
+import { createFileRoute, Outlet, redirect, useLocation } from "@tanstack/react-router"
+import { useState } from "react"
 
 import Navbar from "@/components/Common/Navbar"
 import Sidebar from "@/components/Common/Sidebar"
 import Breadcrumbs from "@/components/Common/Breadcrumbs"
 import { isLoggedIn } from "@/hooks/useAuth"
-import { UsersService } from "@/client"
+import { UsersService, ApiError } from "@/client"
+import { useTrackPageVisit } from "@/hooks/usePageVisits"
 
 export const Route = createFileRoute("/_layout")({
   component: Layout,
@@ -39,8 +41,17 @@ export const Route = createFileRoute("/_layout")({
         }
       }
     } catch (error) {
-      // If user fetch fails, redirect to login
+      // If user fetch fails due to authentication/authorization, redirect to login
+      if (error instanceof ApiError && (error.status === 401 || error.status === 403)) {
+        // Clear invalid token
+        localStorage.removeItem("access_token")
+        throw redirect({
+          to: "/login",
+        })
+      }
+      // Re-throw redirect errors
       if (error instanceof Response && error.status === 401) {
+        localStorage.removeItem("access_token")
         throw redirect({
           to: "/login",
         })
@@ -52,6 +63,13 @@ export const Route = createFileRoute("/_layout")({
 })
 
 function Layout() {
+  const location = useLocation()
+  const [sidebarOpen, setSidebarOpen] = useState(false) // For mobile drawer only
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false) // For desktop collapse
+  
+  // Track page visits for Quick Access
+  useTrackPageVisit(location.pathname)
+
   return (
     <Flex 
       direction="column" 
@@ -59,9 +77,13 @@ function Layout() {
       bg="bg.canvas"
       overflow="hidden"
     >
-      <Navbar />
+      <Navbar onMenuClick={() => setSidebarCollapsed(!sidebarCollapsed)} sidebarCollapsed={sidebarCollapsed} />
       <Flex flex="1" overflow="hidden">
-        <Sidebar />
+        <Sidebar 
+          open={sidebarOpen} 
+          onOpenChange={(e) => setSidebarOpen(e.open)} 
+          isCollapsed={sidebarCollapsed}
+        />
         <Flex 
           flex="1" 
           direction="column" 

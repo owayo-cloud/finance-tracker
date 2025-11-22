@@ -24,9 +24,30 @@ export const Route = createFileRoute("/_layout")({
       
       // Define role-specific allowed paths
       const cashierAllowedPaths = ['/sales', '/settings', '/stock-entry', '/shift-reconciliation', '/debts', '/reports']
+      const auditorAllowedPaths = ['/products', '/sales', '/stock-entry', '/expenses', '/debts', '/reports', '/shift-reconciliation', '/settings']
       
       if (user.is_superuser) {
         // ADMIN: Can access all routes including sales
+      } else if (user.is_auditor) {
+        // AUDITOR: Can access read-only routes (reports, products, etc.)
+        // Cannot access admin routes
+        const isAdminRoute = location.pathname === '/admin' || location.pathname.startsWith('/admin/')
+        if (isAdminRoute) {
+          throw redirect({
+            to: "/reports",
+          })
+        }
+        
+        const isAllowedPath = auditorAllowedPaths.some(path => 
+          location.pathname === path || location.pathname.startsWith(path + '/')
+        )
+        
+        if (!isAllowedPath) {
+          // Auditor trying to access unauthorized routes, redirect to reports
+          throw redirect({
+            to: "/reports",
+          })
+        }
       } else {
         // CASHIER: Can only access specific paths
         const isAllowedPath = cashierAllowedPaths.some(path => 
@@ -81,11 +102,20 @@ function Layout() {
       overflow="hidden"
     >
       <Navbar 
-        onMenuClick={() => setSidebarCollapsed(!sidebarCollapsed)} 
+        onMenuClick={() => {
+          // On mobile, toggle the drawer
+          // On desktop, toggle collapse
+          const isMobile = window.innerWidth < 768
+          if (isMobile) {
+            setSidebarOpen(!sidebarOpen)
+          } else {
+            setSidebarCollapsed(!sidebarCollapsed)
+          }
+        }}
         sidebarCollapsed={sidebarCollapsed}
         isPOSMode={isPOSPage}
       />
-      <Flex flex="1" overflow="hidden">
+      <Flex flex="1" overflow="hidden" minH="0">
         {!isPOSPage && (
           <Sidebar 
             open={sidebarOpen} 

@@ -40,8 +40,22 @@ const menuItems: MenuItem[] = [
       { title: "Shift Reconciliation", path: "/shift-reconciliation" }
     ]
   },
-  { icon: FiBox, title: "Stock Entry", path: "/stock-entry" },
-  { icon: FiPackage, title: "Products", path: "/products", adminOnly: true },
+  { 
+    icon: FiBox, 
+    title: "Purchases",
+    submenu: [
+      { title: "Goods Receipt Note", path: "/stock-entry" }
+    ]
+  },
+  { 
+    icon: FiPackage, 
+    title: "Products", 
+    adminOnly: true,
+    submenu: [
+      { title: "Products", path: "/products" },
+      { title: "Stock Adjustment", path: "/stock-adjustment" }
+    ]
+  },
   { icon: FiBarChart2, title: "Reports", path: "/reports", adminOnly: true },
   { 
     icon: FiDollarSign, 
@@ -73,7 +87,7 @@ const getIconColor = (title: string, isActive: boolean): string => {
   const colorMap: Record<string, string> = {
     "Dashboard": "#3b82f6",      // Blue
     "Sales": "#ef4444",           // Red
-    "Stock Entry": "#f59e0b",     // Amber
+    "Purchases": "#f59e0b",     // Amber
     "Products": "#8b5cf6",        // Purple
     "Reports": "#10b981",         // Green
     "Expenses": "#f97316",        // Orange
@@ -92,7 +106,10 @@ const SidebarItems = ({ onClose, isCollapsed = false }: SidebarItemsProps) => {
   const currentUser = queryClient.getQueryData<UserPublic>(["currentUser"])
   const [openSubmenus, setOpenSubmenus] = useState<Record<string, boolean>>({
     Sales: location.pathname === "/sales" || location.pathname === "/shift-reconciliation",
-    Expenses: location.pathname === "/expenses" || location.pathname === "/expense-categories"
+    Expenses: location.pathname === "/expenses" || location.pathname === "/expense-categories",
+    Purchases: location.pathname === "/stock-entry",
+    Products: location.pathname === "/products" || location.pathname === "/stock-adjustment",
+    Purchases: location.pathname === "/stock-entry"
   })
 
   // Filter items based on user role

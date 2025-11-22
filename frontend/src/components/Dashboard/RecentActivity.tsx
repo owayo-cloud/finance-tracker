@@ -1,5 +1,5 @@
 import { Box, Heading, VStack, HStack, Text, Icon, Badge, Link } from "@chakra-ui/react"
-import { FiShoppingCart, FiDollarSign, FiArrowRight } from "react-icons/fi"
+import { FiShoppingCart, FiArrowRight } from "react-icons/fi"
 import { formatCurrency, formatDate } from "./utils"
 import type { SalePublic } from "@/client"
 

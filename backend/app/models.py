@@ -130,7 +130,7 @@ class ProductCategory(ProductCategoryBase, table=True):
     __tablename__ = "product_category"
     """
     Categories: Bottles, Cans, Wines, Others
-    (Or more specific: Whisky, Vodka, Wine, Champagne, Cognac & Brandy, 
+    (Or more specific: Whisky, Vodka, Wine, Champagne, Cognac, Brandy, Liqueur
     Beers, Ciders, Beers-infusions, Tequila, Rum, Gin, Soft-Drinks, Smokes)
     """
     id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
@@ -742,6 +742,8 @@ class BulkImportSessionPublic(BulkImportSessionBase):
     id: uuid.UUID
     created_at: datetime
     completed_at: Optional[datetime] = None
+    columns: Optional[list[str]] = None  # CSV column headers
+    auto_mapping: Optional[dict] = None  # Auto-detected column mappings
     
     model_config = {"from_attributes": True}
 

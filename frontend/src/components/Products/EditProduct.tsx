@@ -387,7 +387,7 @@ const EditProduct = ({ product, children, isOpen: controlledIsOpen, onOpenChange
                     </Field>
 
                     {/* Product Image Upload */}
-                    <Field
+                    {/* <Field
                       label="Product Image"
                       helperText="Upload a JPG or PNG image (max 5MB)"
                     >
@@ -493,7 +493,7 @@ const EditProduct = ({ product, children, isOpen: controlledIsOpen, onOpenChange
                           </Flex>
                         </Box>
                       )}
-                    </Field>
+                    </Field> */}
                   </VStack>
                 </form>
               </Box>

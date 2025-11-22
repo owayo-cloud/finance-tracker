@@ -3,7 +3,175 @@
 import type { CancelablePromise } from './core/CancelablePromise';
 import { OpenAPI } from './core/OpenAPI';
 import { request as __request } from './core/request';
-import type { LoginLoginAccessTokenData, LoginLoginAccessTokenResponse, LoginTestTokenResponse, LoginRecoverPasswordData, LoginRecoverPasswordResponse, LoginResetPasswordData, LoginResetPasswordResponse, LoginRecoverPasswordHtmlContentData, LoginRecoverPasswordHtmlContentResponse, MediaUploadImageData, MediaUploadImageResponse, MediaServeImageData, MediaServeImageResponse, MediaDeleteMediaData, MediaDeleteMediaResponse, MediaListMediaData, MediaListMediaResponse, PrivateCreateUserData, PrivateCreateUserResponse, ProductsReadCategoriesResponse, ProductsReadStatusesResponse, ProductsReadProductsData, ProductsReadProductsResponse, ProductsCreateProductData, ProductsCreateProductResponse, ProductsReadProductData, ProductsReadProductResponse, ProductsUpdateProductData, ProductsUpdateProductResponse, ProductsDeleteProductData, ProductsDeleteProductResponse, SalesReadPaymentMethodsData, SalesReadPaymentMethodsResponse, SalesSearchProductsForSaleData, SalesSearchProductsForSaleResponse, SalesCreateSaleData, SalesCreateSaleResponse, SalesReadSalesData, SalesReadSalesResponse, SalesGetTodaySalesSummaryResponse, SalesReadSaleData, SalesReadSaleResponse, SalesDeleteSaleData, SalesDeleteSaleResponse, StockEntriesSearchProductsForStockEntryData, StockEntriesSearchProductsForStockEntryResponse, StockEntriesReadStockEntriesData, StockEntriesReadStockEntriesResponse, StockEntriesCreateStockEntryData, StockEntriesCreateStockEntryResponse, StockEntriesReadStockEntryData, StockEntriesReadStockEntryResponse, StockEntriesUpdateStockEntryData, StockEntriesUpdateStockEntryResponse, StockEntriesDeleteStockEntryData, StockEntriesDeleteStockEntryResponse, UsersReadUsersData, UsersReadUsersResponse, UsersCreateUserData, UsersCreateUserResponse, UsersReadUserMeResponse, UsersDeleteUserMeResponse, UsersUpdateUserMeData, UsersUpdateUserMeResponse, UsersUpdatePasswordMeData, UsersUpdatePasswordMeResponse, UsersRegisterUserData, UsersRegisterUserResponse, UsersReadUserByIdData, UsersReadUserByIdResponse, UsersUpdateUserData, UsersUpdateUserResponse, UsersDeleteUserData, UsersDeleteUserResponse, UtilsTestEmailData, UtilsTestEmailResponse, UtilsHealthCheckResponse } from './types.gen';
+import type { BulkImportDownloadTemplateResponse, BulkImportUploadFileData, BulkImportUploadFileResponse, BulkImportMapColumnsData, BulkImportMapColumnsResponse, BulkImportGetValidationResultsData, BulkImportGetValidationResultsResponse, BulkImportFixRowData, BulkImportFixRowResponse, BulkImportImportProductsData, BulkImportImportProductsResponse, BulkImportGetImportStatusData, BulkImportGetImportStatusResponse, LoginLoginAccessTokenData, LoginLoginAccessTokenResponse, LoginTestTokenResponse, LoginRecoverPasswordData, LoginRecoverPasswordResponse, LoginResetPasswordData, LoginResetPasswordResponse, LoginRecoverPasswordHtmlContentData, LoginRecoverPasswordHtmlContentResponse, MediaUploadImageData, MediaUploadImageResponse, MediaServeImageData, MediaServeImageResponse, MediaDeleteMediaData, MediaDeleteMediaResponse, MediaListMediaData, MediaListMediaResponse, PrivateCreateUserData, PrivateCreateUserResponse, ProductsReadCategoriesResponse, ProductsReadStatusesResponse, ProductsReadProductsData, ProductsReadProductsResponse, ProductsCreateProductData, ProductsCreateProductResponse, ProductsReadProductData, ProductsReadProductResponse, ProductsUpdateProductData, ProductsUpdateProductResponse, ProductsDeleteProductData, ProductsDeleteProductResponse, SalesReadPaymentMethodsData, SalesReadPaymentMethodsResponse, SalesSearchProductsForSaleData, SalesSearchProductsForSaleResponse, SalesCreateSaleData, SalesCreateSaleResponse, SalesReadSalesData, SalesReadSalesResponse, SalesGetTodaySalesSummaryResponse, SalesReadSaleData, SalesReadSaleResponse, SalesDeleteSaleData, SalesDeleteSaleResponse, StockEntriesSearchProductsForStockEntryData, StockEntriesSearchProductsForStockEntryResponse, StockEntriesReadStockEntriesData, StockEntriesReadStockEntriesResponse, StockEntriesCreateStockEntryData, StockEntriesCreateStockEntryResponse, StockEntriesReadStockEntryData, StockEntriesReadStockEntryResponse, StockEntriesUpdateStockEntryData, StockEntriesUpdateStockEntryResponse, StockEntriesDeleteStockEntryData, StockEntriesDeleteStockEntryResponse, UsersReadUsersData, UsersReadUsersResponse, UsersCreateUserData, UsersCreateUserResponse, UsersReadUserMeResponse, UsersDeleteUserMeResponse, UsersUpdateUserMeData, UsersUpdateUserMeResponse, UsersUpdatePasswordMeData, UsersUpdatePasswordMeResponse, UsersRegisterUserData, UsersRegisterUserResponse, UsersReadUserByIdData, UsersReadUserByIdResponse, UsersUpdateUserData, UsersUpdateUserResponse, UsersDeleteUserData, UsersDeleteUserResponse, UtilsTestEmailData, UtilsTestEmailResponse, UtilsHealthCheckResponse } from './types.gen';
+
+export class BulkImportService {
+    /**
+     * Download Template
+     * Download CSV template for bulk product import.
+     *
+     * Returns a CSV file with sample data showing the expected format.
+     * @returns unknown Successful Response
+     * @throws ApiError
+     */
+    public static downloadTemplate(): CancelablePromise<BulkImportDownloadTemplateResponse> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/v1/products/bulk/template'
+        });
+    }
+    
+    /**
+     * Upload File
+     * Upload CSV/Excel file for bulk import.
+     *
+     * Validates file format and size, parses the file, and creates an import session.
+     *
+     * Returns session ID and basic file information.
+     * @param data The data for the request.
+     * @param data.formData
+     * @returns BulkImportSessionPublic Successful Response
+     * @throws ApiError
+     */
+    public static uploadFile(data: BulkImportUploadFileData): CancelablePromise<BulkImportUploadFileResponse> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/api/v1/products/bulk/upload',
+            formData: data.formData,
+            mediaType: 'multipart/form-data',
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+    
+    /**
+     * Map Columns
+     * Submit column mapping and validate data.
+     *
+     * Maps uploaded columns to system fields and performs initial validation.
+     * Returns preview of first 5 rows with validation results.
+     * @param data The data for the request.
+     * @param data.requestBody
+     * @returns ColumnMappingResponse Successful Response
+     * @throws ApiError
+     */
+    public static mapColumns(data: BulkImportMapColumnsData): CancelablePromise<BulkImportMapColumnsResponse> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/api/v1/products/bulk/map-columns',
+            body: data.requestBody,
+            mediaType: 'application/json',
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+    
+    /**
+     * Get Validation Results
+     * Get validation results for all rows.
+     *
+     * Supports filtering by status and pagination.
+     * @param data The data for the request.
+     * @param data.sessionId
+     * @param data.skip
+     * @param data.limit
+     * @param data.filter
+     * @returns BulkImportValidationResponse Successful Response
+     * @throws ApiError
+     */
+    public static getValidationResults(data: BulkImportGetValidationResultsData): CancelablePromise<BulkImportGetValidationResultsResponse> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/v1/products/bulk/validate/{session_id}',
+            path: {
+                session_id: data.sessionId
+            },
+            query: {
+                skip: data.skip,
+                limit: data.limit,
+                filter: data.filter
+            },
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+    
+    /**
+     * Fix Row
+     * Fix data for a specific row.
+     *
+     * Re-validates the row after applying fixes.
+     * @param data The data for the request.
+     * @param data.sessionId
+     * @param data.requestBody
+     * @returns unknown Successful Response
+     * @throws ApiError
+     */
+    public static fixRow(data: BulkImportFixRowData): CancelablePromise<BulkImportFixRowResponse> {
+        return __request(OpenAPI, {
+            method: 'PATCH',
+            url: '/api/v1/products/bulk/fix-row/{session_id}',
+            path: {
+                session_id: data.sessionId
+            },
+            body: data.requestBody,
+            mediaType: 'application/json',
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+    
+    /**
+     * Import Products
+     * Execute final import of validated products.
+     *
+     * Imports all valid rows, handles duplicates according to specified action.
+     * @param data The data for the request.
+     * @param data.sessionId
+     * @param data.requestBody
+     * @returns BulkImportResult Successful Response
+     * @throws ApiError
+     */
+    public static importProducts(data: BulkImportImportProductsData): CancelablePromise<BulkImportImportProductsResponse> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/api/v1/products/bulk/import/{session_id}',
+            path: {
+                session_id: data.sessionId
+            },
+            body: data.requestBody,
+            mediaType: 'application/json',
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+    
+    /**
+     * Get Import Status
+     * Get current status of an import session.
+     * @param data The data for the request.
+     * @param data.sessionId
+     * @returns BulkImportSessionPublic Successful Response
+     * @throws ApiError
+     */
+    public static getImportStatus(data: BulkImportGetImportStatusData): CancelablePromise<BulkImportGetImportStatusResponse> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/v1/products/bulk/status/{session_id}',
+            path: {
+                session_id: data.sessionId
+            },
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+}
 
 export class LoginService {
     /**
@@ -424,7 +592,7 @@ export class SalesService {
      * - Product must exist and be active
      * - Product must have sufficient stock (real-time check)
      * - Stock is automatically decremented
-     * - Sale amount is calculated from product selling price ├ù quantity
+     * - Sale amount is calculated from product selling price × quantity
      * - Each sale is tracked to the cashier who created it
      * @param data The data for the request.
      * @param data.requestBody

@@ -19,6 +19,7 @@ import time
 import uuid
 from datetime import datetime, timezone
 from decimal import Decimal, InvalidOperation
+from pathlib import Path
 from typing import Any, Optional
 import openpyxl  # For Excel file parsing
 
@@ -147,6 +148,7 @@ def auto_map_columns(uploaded_columns: list[str]) -> dict[str, str]:
         "current_stock": ["stock", "current stock", "inventory", "quantity", "qty"],
         "reorder_level": ["reorder level", "reorder", "min stock", "minimum stock"],
         "category": ["category", "product category", "type", "group"],
+        "tags": ["tags", "product tags", "labels", "keywords"],
     }
     
     auto_mapping = {}
@@ -309,14 +311,37 @@ def validate_row_data(
             mapped_data["description"] = description
     
     # Required: category_id
-    if not default_category_id:
+    # If category name is provided in CSV, look it up; otherwise use default
+    category_id_to_use = None
+    
+    if row_data.get("category"):
+        # Category name provided in CSV - look it up
+        category_name = str(row_data["category"]).strip()
+        existing_category = session.exec(
+            select(ProductCategory).where(ProductCategory.name == category_name)
+        ).first()
+        
+        if existing_category:
+            category_id_to_use = existing_category.id
+        else:
+            errors.append(ValidationError(
+                field="category",
+                message=f"Category '{category_name}' not found in system",
+                severity="error"
+            ))
+    elif default_category_id:
+        # Use default category
+        category_id_to_use = default_category_id
+    else:
+        # No category provided at all
         errors.append(ValidationError(
             field="category_id",
-            message="Category must be selected",
+            message="Category must be selected or provided in CSV",
             severity="error"
         ))
-    else:
-        mapped_data["category_id"] = str(default_category_id)
+    
+    if category_id_to_use:
+        mapped_data["category_id"] = str(category_id_to_use)
     
     # Required: status_id
     if not default_status_id:
@@ -412,9 +437,11 @@ async def upload_file(
     Upload CSV/Excel file for bulk import.
     
     Validates file format and size, parses the file, and creates an import session.
+    Saves the file to uploads/bulk-imports directory.
     
     Returns session ID and basic file information.
     """
+    
     # Validate file size
     file_content = await file.read()
     file_size = len(file_content)
@@ -461,6 +488,19 @@ async def upload_file(
     if len(rows) == 0:
         raise HTTPException(status_code=400, detail="File contains no data rows")
     
+    # Save uploaded file to uploads/bulk-imports directory
+    upload_dir = Path("uploads/bulk-imports")
+    upload_dir.mkdir(parents=True, exist_ok=True)
+    
+    # Generate unique filename with timestamp
+    timestamp = datetime.now(timezone.utc).strftime("%Y%m%d_%H%M%S")
+    safe_filename = f"{timestamp}_{file.filename}"
+    file_path = upload_dir / safe_filename
+    
+    # Write file to disk
+    with open(file_path, "wb") as f:
+        f.write(file_content)
+    
     # Create import session
     session_create = BulkImportSessionCreate(
         filename=file.filename,
@@ -481,9 +521,15 @@ async def upload_file(
         "rows": rows,
         "validated_rows": [],
         "auto_mapping": auto_map_columns(columns),
+        "file_path": str(file_path),  # Store file path for reference
     }
     
-    return db_session
+    # Return session with columns and auto_mapping for frontend
+    response = BulkImportSessionPublic.model_validate(db_session)
+    response.columns = columns
+    response.auto_mapping = auto_map_columns(columns)
+    
+    return response
 
 
 @router.post("/map-columns", response_model=ColumnMappingResponse)

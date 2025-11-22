@@ -8,6 +8,7 @@ import {
   Text,
   createContext,
   usePaginationContext,
+  Box,
 } from "@chakra-ui/react"
 import * as React from "react"
 import {
@@ -61,6 +62,12 @@ export const PaginationRoot = React.forwardRef<
         ref={ref}
         type={getHref ? "link" : "button"}
         {...rest}
+        // Add flex container styles for horizontal layout
+        display="flex"
+        flexDirection="row"
+        alignItems="center"
+        gap={2}
+        flexWrap="wrap"
       />
     </RootPropsProvider>
   )
@@ -73,7 +80,7 @@ export const PaginationEllipsis = React.forwardRef<
   const { size, variantMap } = useRootProps()
   return (
     <ChakraPagination.Ellipsis ref={ref} {...props} asChild>
-      <Button as="span" variant={variantMap.ellipsis} size={size}>
+      <Button as="span" variant={variantMap.ellipsis} size={size} flexShrink={0}>
         <HiMiniEllipsisHorizontal />
       </Button>
     </ChakraPagination.Ellipsis>
@@ -92,7 +99,7 @@ export const PaginationItem = React.forwardRef<
 
   if (getHref) {
     return (
-      <LinkButton href={getHref(props.value)} variant={variant} size={size}>
+      <LinkButton href={getHref(props.value)} variant={variant} size={size} flexShrink={0}>
         {props.value}
       </LinkButton>
     )
@@ -100,7 +107,7 @@ export const PaginationItem = React.forwardRef<
 
   return (
     <ChakraPagination.Item ref={ref} {...props} asChild>
-      <Button variant={variant} size={size}>
+      <Button variant={variant} size={size} flexShrink={0}>
         {props.value}
       </Button>
     </ChakraPagination.Item>
@@ -120,6 +127,7 @@ export const PaginationPrevTrigger = React.forwardRef<
         href={previousPage != null ? getHref(previousPage) : undefined}
         variant={variantMap.default}
         size={size}
+        flexShrink={0}
       >
         <HiChevronLeft />
       </LinkButton>
@@ -128,7 +136,7 @@ export const PaginationPrevTrigger = React.forwardRef<
 
   return (
     <ChakraPagination.PrevTrigger ref={ref} asChild {...props}>
-      <IconButton variant={variantMap.default} size={size}>
+      <IconButton variant={variantMap.default} size={size} flexShrink={0}>
         <HiChevronLeft />
       </IconButton>
     </ChakraPagination.PrevTrigger>
@@ -148,6 +156,7 @@ export const PaginationNextTrigger = React.forwardRef<
         href={nextPage != null ? getHref(nextPage) : undefined}
         variant={variantMap.default}
         size={size}
+        flexShrink={0}
       >
         <HiChevronRight />
       </LinkButton>
@@ -156,7 +165,7 @@ export const PaginationNextTrigger = React.forwardRef<
 
   return (
     <ChakraPagination.NextTrigger ref={ref} asChild {...props}>
-      <IconButton variant={variantMap.default} size={size}>
+      <IconButton variant={variantMap.default} size={size} flexShrink={0}>
         <HiChevronRight />
       </IconButton>
     </ChakraPagination.NextTrigger>
@@ -165,22 +174,24 @@ export const PaginationNextTrigger = React.forwardRef<
 
 export const PaginationItems = (props: React.HTMLAttributes<HTMLElement>) => {
   return (
-    <ChakraPagination.Context>
-      {({ pages }) =>
-        pages.map((page, index) => {
-          return page.type === "ellipsis" ? (
-            <PaginationEllipsis key={index} index={index} {...props} />
-          ) : (
-            <PaginationItem
-              key={index}
-              type="page"
-              value={page.value}
-              {...props}
-            />
-          )
-        })
-      }
-    </ChakraPagination.Context>
+    <Box display="flex" flexDirection="row" gap={1} alignItems="center" flexWrap="nowrap">
+      <ChakraPagination.Context>
+        {({ pages }) =>
+          pages.map((page, index) => {
+            return page.type === "ellipsis" ? (
+              <PaginationEllipsis key={index} index={index} {...props} />
+            ) : (
+              <PaginationItem
+                key={index}
+                type="page"
+                value={page.value}
+                {...props}
+              />
+            )
+          })
+        }
+      </ChakraPagination.Context>
+    </Box>
   )
 }
 
@@ -204,7 +215,7 @@ export const PaginationPageText = React.forwardRef<
   }, [format, page, totalPages, pageRange, count])
 
   return (
-    <Text fontWeight="medium" ref={ref} {...rest}>
+    <Text fontWeight="medium" ref={ref} whiteSpace="nowrap" flexShrink={0} {...rest}>
       {content}
     </Text>
   )

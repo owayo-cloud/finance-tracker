@@ -3,6 +3,7 @@ from typing import Any, Generic, TypeVar
 
 from sqlmodel import Session, select
 from sqlalchemy.orm import selectinload
+from sqlalchemy import func
 
 from app.core.security import get_password_hash, verify_password
 from app.models import User, UserCreate, UserUpdate, Product, ProductCreate, ProductUpdate
@@ -38,8 +39,26 @@ def get_user_by_email(*, session: Session, email: str) -> User | None:
     return session_user
 
 
+def get_user_by_username(*, session: Session, username: str) -> User | None:
+    """Get user by username (case insensitive)"""
+    statement = select(User).where(func.lower(User.username) == func.lower(username))
+    session_user = session.exec(statement).first()
+    return session_user
+
+
+def get_user_by_email_or_username(*, session: Session, identifier: str) -> User | None:
+    """Get user by email or username (case insensitive for username)"""
+    # Try email first (case sensitive)
+    user = get_user_by_email(session=session, email=identifier)
+    if user:
+        return user
+    # Try username (case insensitive)
+    return get_user_by_username(session=session, username=identifier)
+
+
 def authenticate(*, session: Session, email: str, password: str) -> User | None:
-    db_user = get_user_by_email(session=session, email=email)
+    """Authenticate user by email or username (case insensitive for username)"""
+    db_user = get_user_by_email_or_username(session=session, identifier=email)
     if not db_user:
         return None
     if not verify_password(password, db_user.hashed_password):

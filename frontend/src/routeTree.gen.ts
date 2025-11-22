@@ -23,6 +23,7 @@ import { Route as LayoutReportsRouteImport } from './routes/_layout/reports'
 import { Route as LayoutProductsRouteImport } from './routes/_layout/products'
 import { Route as LayoutPaymentMethodsRouteImport } from './routes/_layout/payment-methods'
 import { Route as LayoutExpensesRouteImport } from './routes/_layout/expenses'
+import { Route as LayoutExpenseCategoriesRouteImport } from './routes/_layout/expense-categories'
 import { Route as LayoutDebtsRouteImport } from './routes/_layout/debts'
 import { Route as LayoutAdminRouteImport } from './routes/_layout/admin'
 import { Route as LayoutStockEntryIndexRouteImport } from './routes/_layout/stock-entry/index'
@@ -99,6 +100,11 @@ const LayoutExpensesRoute = LayoutExpensesRouteImport.update({
   path: '/expenses',
   getParentRoute: () => LayoutRoute,
 } as any)
+const LayoutExpenseCategoriesRoute = LayoutExpenseCategoriesRouteImport.update({
+  id: '/expense-categories',
+  path: '/expense-categories',
+  getParentRoute: () => LayoutRoute,
+} as any)
 const LayoutDebtsRoute = LayoutDebtsRouteImport.update({
   id: '/debts',
   path: '/debts',
@@ -134,6 +140,7 @@ export interface FileRoutesByFullPath {
   '/signup': typeof SignupRoute
   '/admin': typeof LayoutAdminRoute
   '/debts': typeof LayoutDebtsRoute
+  '/expense-categories': typeof LayoutExpenseCategoriesRoute
   '/expenses': typeof LayoutExpensesRoute
 <<<<<<< HEAD
   '/products': typeof LayoutProductsRouteWithChildren
@@ -158,6 +165,7 @@ export interface FileRoutesByTo {
   '/signup': typeof SignupRoute
   '/admin': typeof LayoutAdminRoute
   '/debts': typeof LayoutDebtsRoute
+  '/expense-categories': typeof LayoutExpenseCategoriesRoute
   '/expenses': typeof LayoutExpensesRoute
 <<<<<<< HEAD
   '/products': typeof LayoutProductsRouteWithChildren
@@ -184,6 +192,7 @@ export interface FileRoutesById {
   '/signup': typeof SignupRoute
   '/_layout/admin': typeof LayoutAdminRoute
   '/_layout/debts': typeof LayoutDebtsRoute
+  '/_layout/expense-categories': typeof LayoutExpenseCategoriesRoute
   '/_layout/expenses': typeof LayoutExpensesRoute
 <<<<<<< HEAD
   '/_layout/products': typeof LayoutProductsRouteWithChildren
@@ -210,6 +219,7 @@ export interface FileRouteTypes {
     | '/signup'
     | '/admin'
     | '/debts'
+    | '/expense-categories'
     | '/expenses'
     | '/payment-methods'
     | '/products'
@@ -230,6 +240,7 @@ export interface FileRouteTypes {
     | '/signup'
     | '/admin'
     | '/debts'
+    | '/expense-categories'
     | '/expenses'
     | '/payment-methods'
     | '/products'
@@ -251,6 +262,7 @@ export interface FileRouteTypes {
     | '/signup'
     | '/_layout/admin'
     | '/_layout/debts'
+    | '/_layout/expense-categories'
     | '/_layout/expenses'
     | '/_layout/payment-methods'
     | '/_layout/products'
@@ -373,6 +385,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LayoutExpensesRouteImport
       parentRoute: typeof LayoutRoute
     }
+    '/_layout/expense-categories': {
+      id: '/_layout/expense-categories'
+      path: '/expense-categories'
+      fullPath: '/expense-categories'
+      preLoaderRoute: typeof LayoutExpenseCategoriesRouteImport
+      parentRoute: typeof LayoutRoute
+    }
     '/_layout/debts': {
       id: '/_layout/debts'
       path: '/debts'
@@ -426,6 +445,7 @@ const LayoutProductsRouteWithChildren = LayoutProductsRoute._addFileChildren(
 interface LayoutRouteChildren {
   LayoutAdminRoute: typeof LayoutAdminRoute
   LayoutDebtsRoute: typeof LayoutDebtsRoute
+  LayoutExpenseCategoriesRoute: typeof LayoutExpenseCategoriesRoute
   LayoutExpensesRoute: typeof LayoutExpensesRoute
 <<<<<<< HEAD
   LayoutProductsRoute: typeof LayoutProductsRouteWithChildren
@@ -446,6 +466,7 @@ interface LayoutRouteChildren {
 const LayoutRouteChildren: LayoutRouteChildren = {
   LayoutAdminRoute: LayoutAdminRoute,
   LayoutDebtsRoute: LayoutDebtsRoute,
+  LayoutExpenseCategoriesRoute: LayoutExpenseCategoriesRoute,
   LayoutExpensesRoute: LayoutExpensesRoute,
 <<<<<<< HEAD
   LayoutProductsRoute: LayoutProductsRouteWithChildren,

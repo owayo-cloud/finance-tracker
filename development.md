@@ -48,6 +48,18 @@ To check the logs of a specific service, add the name of the service, e.g.:
 docker compose logs backend
 ```
 
+To watch logs from both backend and frontend services simultaneously:
+
+```bash
+docker compose logs -f backend frontend
+```
+
+Or use the provided helper script:
+
+```bash
+./watch-logs.sh
+```
+
 ## Local Development
 
 The Docker Compose files are configured so that each of the services is available in a different port in `localhost`.

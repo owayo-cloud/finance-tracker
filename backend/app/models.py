@@ -15,8 +15,10 @@ if TYPE_CHECKING:
 # Shared properties
 class UserBase(SQLModel):
     email: EmailStr = Field(unique=True, index=True, max_length=255)
+    username: Optional[str] = Field(default=None, unique=True, index=True, max_length=100)
     is_active: bool = True
     is_superuser: bool = False
+    is_auditor: bool = False
     full_name: Optional[str] = Field(default=None, max_length=255)
 
 
@@ -27,19 +29,26 @@ class UserCreate(UserBase):
 
 class UserRegister(SQLModel):
     email: EmailStr = Field(max_length=255)
+    username: Optional[str] = Field(default=None, max_length=100)
     password: str = Field(min_length=8, max_length=40)
     full_name: Optional[str] = Field(default=None, max_length=255)
 
 
 # Properties to receive via API on update, all are optional
-class UserUpdate(UserBase):
+class UserUpdate(SQLModel):
     email: Optional[EmailStr] = Field(default=None, max_length=255)  # type: ignore
+    username: Optional[str] = Field(default=None, max_length=100)
+    is_active: Optional[bool] = None
+    is_superuser: Optional[bool] = None
+    is_auditor: Optional[bool] = None
+    full_name: Optional[str] = Field(default=None, max_length=255)
     password: Optional[str] = Field(default=None, min_length=8, max_length=40)
 
 
 class UserUpdateMe(SQLModel):
     full_name: Optional[str] = Field(default=None, max_length=255)
     email: Optional[EmailStr] = Field(default=None, max_length=255)
+    username: Optional[str] = Field(default=None, max_length=100)
 
 
 class UpdatePassword(SQLModel):
@@ -464,6 +473,7 @@ class SalePublic(SaleBase):
     sale_date: datetime
     product: ProductPublic
     payment_method: PaymentMethodPublic
+    created_by: UserPublic
     voided: bool
 
 
@@ -535,6 +545,11 @@ class ExpenseCategoryPublic(ExpenseCategoryBase):
     id: uuid.UUID
 
 
+class ExpenseCategoriesPublic(SQLModel):
+    data: list[ExpenseCategoryPublic]
+    count: int
+
+
 # ==================== EXPENSE MODELS ====================
 
 class ExpenseBase(SQLModel):
@@ -572,6 +587,9 @@ class Expense(ExpenseBase, table=True):
 class ExpensePublic(ExpenseBase):
     id: uuid.UUID
     category: ExpenseCategoryPublic
+    created_by: UserPublic
+    created_at: datetime
+    updated_at: datetime
 
 
 class ExpensesPublic(SQLModel):
@@ -678,6 +696,11 @@ class DebtPayment(DebtPaymentBase, table=True):
 class DebtPaymentPublic(DebtPaymentBase):
     id: uuid.UUID
     payment_method: PaymentMethodPublic
+
+
+class DebtPaymentsPublic(SQLModel):
+    data: list[DebtPaymentPublic]
+    count: int
 
 
 # ==================== SHIFT RECONCILIATION MODELS ====================

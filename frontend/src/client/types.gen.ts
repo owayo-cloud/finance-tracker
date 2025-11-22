@@ -152,9 +152,37 @@ export type Message = {
     message: string;
 };
 
+/**
+ * Create a sale with multiple payment methods
+ */
+export type MultiPaymentSaleCreate = {
+    product_id: string;
+    quantity: number;
+    unit_price: number;
+    total_amount: number;
+    customer_name?: (string | null);
+    notes?: (string | null);
+    payments: Array<PaymentData>;
+};
+
 export type NewPassword = {
     token: string;
     new_password: string;
+};
+
+/**
+ * Individual payment data
+ */
+export type PaymentData = {
+    payment_method_id: string;
+    amount: number;
+    reference_number?: (string | null);
+};
+
+export type PaymentMethodCreate = {
+    name: string;
+    description?: (string | null);
+    is_active?: boolean;
 };
 
 export type PaymentMethodPublic = {
@@ -167,6 +195,12 @@ export type PaymentMethodPublic = {
 export type PaymentMethodsPublic = {
     data: Array<PaymentMethodPublic>;
     count: number;
+};
+
+export type PaymentMethodUpdate = {
+    name?: (string | null);
+    description?: (string | null);
+    is_active?: (boolean | null);
 };
 
 export type PrivateUserCreate = {
@@ -250,6 +284,16 @@ export type SaleCreate = {
     notes?: (string | null);
 };
 
+export type SalePaymentPublic = {
+    sale_id: string;
+    payment_method_id: string;
+    amount: string;
+    reference_number?: (string | null);
+    id: string;
+    payment_method: PaymentMethodPublic;
+    created_at: string;
+};
+
 export type SalePublic = {
     product_id: string;
     quantity: number;
@@ -268,6 +312,64 @@ export type SalePublic = {
 export type SalesPublic = {
     data: Array<SalePublic>;
     count: number;
+};
+
+export type ShiftReconciliationCreate = {
+    shift_date?: string;
+    opening_cash_float?: (number | string);
+    closing_cash_float?: (number | string);
+    total_bottles_sold?: number;
+    total_cans_sold?: number;
+    total_wines_sold?: number;
+    total_others_sold?: number;
+    total_cash?: (number | string);
+    total_mpesa?: (number | string);
+    total_other_payments?: (number | string);
+    total_credit?: (number | string);
+    total_sales_amount?: (number | string);
+    total_transactions?: number;
+    expected_cash?: (number | string);
+    actual_cash?: (number | string);
+    cash_variance?: (number | string);
+    items_with_variance?: number;
+    notes?: (string | null);
+    status?: string;
+};
+
+export type ShiftReconciliationPublic = {
+    shift_date?: string;
+    opening_cash_float?: string;
+    closing_cash_float?: string;
+    total_bottles_sold?: number;
+    total_cans_sold?: number;
+    total_wines_sold?: number;
+    total_others_sold?: number;
+    total_cash?: string;
+    total_mpesa?: string;
+    total_other_payments?: string;
+    total_credit?: string;
+    total_sales_amount?: string;
+    total_transactions?: number;
+    expected_cash?: string;
+    actual_cash?: string;
+    cash_variance?: string;
+    items_with_variance?: number;
+    notes?: (string | null);
+    status?: string;
+    id: string;
+    created_at: string;
+};
+
+export type ShiftReconciliationsPublic = {
+    data: Array<ShiftReconciliationPublic>;
+    count: number;
+};
+
+export type ShiftReconciliationUpdate = {
+    closing_cash_float?: (number | string | null);
+    actual_cash?: (number | string | null);
+    notes?: (string | null);
+    status?: (string | null);
 };
 
 export type StockEntriesPublic = {
@@ -328,22 +430,27 @@ export type UpdatePassword = {
 
 export type UserCreate = {
     email: string;
+    username?: (string | null);
     is_active?: boolean;
     is_superuser?: boolean;
+    is_auditor?: boolean;
     full_name?: (string | null);
     password: string;
 };
 
 export type UserPublic = {
     email: string;
+    username?: (string | null);
     is_active?: boolean;
     is_superuser?: boolean;
+    is_auditor?: boolean;
     full_name?: (string | null);
     id: string;
 };
 
 export type UserRegister = {
     email: string;
+    username?: (string | null);
     password: string;
     full_name?: (string | null);
 };
@@ -355,8 +462,10 @@ export type UsersPublic = {
 
 export type UserUpdate = {
     email?: (string | null);
-    is_active?: boolean;
-    is_superuser?: boolean;
+    username?: (string | null);
+    is_active?: (boolean | null);
+    is_superuser?: (boolean | null);
+    is_auditor?: (boolean | null);
     full_name?: (string | null);
     password?: (string | null);
 };
@@ -364,6 +473,7 @@ export type UserUpdate = {
 export type UserUpdateMe = {
     full_name?: (string | null);
     email?: (string | null);
+    username?: (string | null);
 };
 
 export type ValidationError = {
@@ -522,6 +632,19 @@ export type SalesReadPaymentMethodsData = {
 
 export type SalesReadPaymentMethodsResponse = (PaymentMethodsPublic);
 
+export type SalesCreatePaymentMethodData = {
+    requestBody: PaymentMethodCreate;
+};
+
+export type SalesCreatePaymentMethodResponse = (PaymentMethodPublic);
+
+export type SalesUpdatePaymentMethodData = {
+    paymentMethodId: string;
+    requestBody: PaymentMethodUpdate;
+};
+
+export type SalesUpdatePaymentMethodResponse = (PaymentMethodPublic);
+
 export type SalesSearchProductsForSaleData = {
     /**
      * Filter by category ID
@@ -572,6 +695,18 @@ export type SalesReadSalesData = {
 
 export type SalesReadSalesResponse = (SalesPublic);
 
+export type SalesCreateSaleWithMultiplePaymentsData = {
+    requestBody: MultiPaymentSaleCreate;
+};
+
+export type SalesCreateSaleWithMultiplePaymentsResponse = (SalePublic);
+
+export type SalesReadSalePaymentsData = {
+    saleId: string;
+};
+
+export type SalesReadSalePaymentsResponse = (Array<SalePaymentPublic>);
+
 export type SalesGetTodaySalesSummaryResponse = ({
     [key: string]: unknown;
 });
@@ -587,6 +722,55 @@ export type SalesDeleteSaleData = {
 };
 
 export type SalesDeleteSaleResponse = (unknown);
+
+export type ShiftReconciliationCreateShiftReconciliationData = {
+    requestBody: ShiftReconciliationCreate;
+};
+
+export type ShiftReconciliationCreateShiftReconciliationResponse = (ShiftReconciliationPublic);
+
+export type ShiftReconciliationReadShiftReconciliationsData = {
+    /**
+     * Filter until this date
+     */
+    endDate?: (string | null);
+    limit?: number;
+    skip?: number;
+    /**
+     * Filter from this date
+     */
+    startDate?: (string | null);
+};
+
+export type ShiftReconciliationReadShiftReconciliationsResponse = (ShiftReconciliationsPublic);
+
+export type ShiftReconciliationReadShiftReconciliationData = {
+    shiftId: string;
+};
+
+export type ShiftReconciliationReadShiftReconciliationResponse = (ShiftReconciliationPublic);
+
+export type ShiftReconciliationUpdateShiftReconciliationData = {
+    requestBody: ShiftReconciliationUpdate;
+    shiftId: string;
+};
+
+export type ShiftReconciliationUpdateShiftReconciliationResponse = (ShiftReconciliationPublic);
+
+export type ShiftReconciliationGetCurrentCashSummaryData = {
+    /**
+     * End date (defaults to today)
+     */
+    endDate?: (string | null);
+    /**
+     * Start date (defaults to today)
+     */
+    startDate?: (string | null);
+};
+
+export type ShiftReconciliationGetCurrentCashSummaryResponse = ({
+    [key: string]: unknown;
+});
 
 export type StockEntriesSearchProductsForStockEntryData = {
     /**

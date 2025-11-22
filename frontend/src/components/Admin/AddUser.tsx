@@ -47,10 +47,12 @@ const AddUser = () => {
     criteriaMode: "all",
     defaultValues: {
       email: "",
+      username: "",
       full_name: "",
       password: "",
       confirm_password: "",
       is_superuser: false,
+      is_auditor: false,
       is_active: false,
     },
   })
@@ -115,6 +117,27 @@ const AddUser = () => {
               </Field>
 
               <Field
+                invalid={!!errors.username}
+                errorText={errors.username?.message}
+                label="Username (optional)"
+              >
+                <Input
+                  {...register("username", {
+                    minLength: {
+                      value: 3,
+                      message: "Username must be at least 3 characters",
+                    },
+                    maxLength: {
+                      value: 100,
+                      message: "Username must be less than 100 characters",
+                    },
+                  })}
+                  placeholder="Username"
+                  type="text"
+                />
+              </Field>
+
+              <Field
                 invalid={!!errors.full_name}
                 errorText={errors.full_name?.message}
                 label="Full Name"
@@ -174,7 +197,21 @@ const AddUser = () => {
                       checked={field.value}
                       onCheckedChange={({ checked }) => field.onChange(checked)}
                     >
-                      Is superuser?
+                      Admin (Full access)
+                    </Checkbox>
+                  </Field>
+                )}
+              />
+              <Controller
+                control={control}
+                name="is_auditor"
+                render={({ field }) => (
+                  <Field disabled={field.disabled} colorPalette="teal">
+                    <Checkbox
+                      checked={field.value}
+                      onCheckedChange={({ checked }) => field.onChange(checked)}
+                    >
+                      Auditor (Read-only access)
                     </Checkbox>
                   </Field>
                 )}

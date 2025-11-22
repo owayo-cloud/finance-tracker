@@ -181,8 +181,11 @@ def create_sale(
     - Product must have sufficient stock (real-time check)
     - Stock is automatically decremented
     - Sale amount is calculated from product selling price × quantity
-    - Each sale is tracked to the cashier who created it
+    - Each sale is tracked to the cashier who created it (current_user)
     """
+    # Verify current_user is valid and active
+    if not current_user or not current_user.is_active:
+        raise HTTPException(status_code=403, detail="User is not active or not authenticated")
     # Validate product exists and lock row to prevent race conditions
     product = session.exec(
         select(Product)
@@ -233,10 +236,12 @@ def create_sale(
         calculated_total = float(sale_in.total_amount)
     
     # Create sale
+    # IMPORTANT: created_by_id must be the currently authenticated user (from JWT token)
+    # This ensures the sale is correctly attributed to the person who made it
     sale = Sale(
         **sale_in.model_dump(),
         total_amount=Decimal(str(calculated_total)),
-        created_by_id=current_user.id
+        created_by_id=current_user.id  # This is the authenticated user from the JWT token
     )
     
     # ATOMIC OPERATION: Update product stock
@@ -295,7 +300,11 @@ def create_sale_with_multiple_payments(
     - Product must have sufficient stock
     - Sum of all payment amounts must equal total_amount
     - Each payment can have an optional reference number
+    - Sale is attributed to the currently authenticated user (current_user)
     """
+    # Verify current_user is valid and active
+    if not current_user or not current_user.is_active:
+        raise HTTPException(status_code=403, detail="User is not active or not authenticated")
     # Validate product exists and lock row to prevent race conditions
     product = session.exec(
         select(Product)
@@ -359,13 +368,27 @@ def create_sale_with_multiple_payments(
         if primary_payment_method_id is None:
             primary_payment_method_id = payment_method_id
     
-    # Validate total payment amount (allow overpayment for change, but not underpayment)
-    payment_difference = total_payment_amount - sale_in.total_amount
-    if payment_difference < -Decimal("0.01"):  # Underpayment not allowed
-        raise HTTPException(
-            status_code=400,
-            detail=f"Total payment amount ({total_payment_amount}) is less than sale total ({sale_in.total_amount}). Underpayment: {abs(payment_difference)}"
-        )
+    # Validate total payment amount
+    # Convert sale_in.total_amount to Decimal for comparison
+    sale_total_amount = Decimal(str(sale_in.total_amount))
+    payment_difference = total_payment_amount - sale_total_amount
+    
+    # If customer is provided, allow partial payment (debt will be created)
+    # Otherwise, require full payment
+    if sale_in.customer_name:
+        # Customer provided: allow partial payment (minimum 0.01)
+        if total_payment_amount < Decimal("0.01"):
+            raise HTTPException(
+                status_code=400,
+                detail="At least 0.01 must be paid. Remaining amount will be recorded as debt."
+            )
+    else:
+        # No customer: require full payment
+        if payment_difference < -Decimal("0.01"):  # Underpayment not allowed
+            raise HTTPException(
+                status_code=400,
+                detail=f"Total payment amount ({total_payment_amount}) is less than sale total ({sale_total_amount}). Underpayment: {abs(payment_difference)}"
+            )
     # Overpayment is allowed (for change), so we don't error on that
     
     # Calculate total_amount from selling price if not provided
@@ -375,20 +398,22 @@ def create_sale_with_multiple_payments(
                 status_code=400,
                 detail=f"Product '{product.name}' has no selling price set"
             )
-        calculated_total = float(product.selling_price) * sale_in.quantity
+        calculated_total = Decimal(str(product.selling_price)) * Decimal(str(sale_in.quantity))
     else:
-        calculated_total = float(sale_in.total_amount)
+        calculated_total = sale_total_amount
     
     # Create sale with primary payment method (for backward compatibility)
+    # IMPORTANT: created_by_id must be the currently authenticated user (from JWT token)
+    # This ensures the sale is correctly attributed to the person who made it
     sale = Sale(
         product_id=sale_in.product_id,
         quantity=sale_in.quantity,
         unit_price=Decimal(str(sale_in.unit_price)),
-        total_amount=Decimal(str(calculated_total)),
+        total_amount=calculated_total,
         payment_method_id=primary_payment_method_id,
         customer_name=sale_in.customer_name,
         notes=sale_in.notes,
-        created_by_id=current_user.id
+        created_by_id=current_user.id  # This is the authenticated user from the JWT token
     )
     
     # ATOMIC OPERATION: Update product stock
@@ -597,13 +622,26 @@ def read_sale(
     Get sale by ID.
     Cashiers can only view their own sales.
     """
-    sale = session.get(Sale, sale_id)
+    statement = (
+        select(Sale)
+        .where(Sale.id == sale_id)
+        .options(
+            selectinload(Sale.product),
+            selectinload(Sale.payment_method),
+            selectinload(Sale.created_by)  # Load the user who created the sale
+        )
+    )
+    sale = session.exec(statement).first()
     if not sale:
         raise HTTPException(status_code=404, detail="Sale not found")
     
     # Cashiers can only view their own sales
     if not current_user.is_superuser and sale.created_by_id != current_user.id:
         raise HTTPException(status_code=403, detail="Not authorized to view this sale")
+    
+    # Refresh the created_by user to ensure we have the latest data
+    if sale.created_by:
+        session.refresh(sale.created_by)
     
     return sale
 

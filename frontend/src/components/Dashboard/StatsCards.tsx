@@ -1,5 +1,6 @@
 import { Box, Grid, HStack, VStack, Text, Icon } from "@chakra-ui/react"
 import { FiArrowUp, FiArrowDown } from "react-icons/fi"
+import { useQuery } from "@tanstack/react-query"
 import { formatCurrency } from "./utils"
 
 interface StatsCardsProps {
@@ -7,7 +8,35 @@ interface StatsCardsProps {
   isMounted: boolean
 }
 
-export function StatsCards({ totalRevenue, isMounted }: StatsCardsProps) {
+export function StatsCards({ isMounted }: StatsCardsProps) {
+  // Fetch dashboard statistics from backend
+  const { data: dashboardStats } = useQuery({
+    queryKey: ["dashboard-stats"],
+    queryFn: async () => {
+      const token = localStorage.getItem("access_token") || ""
+      const apiBase = import.meta.env.VITE_API_URL || ""
+      const response = await fetch(`${apiBase}/api/v1/analytics/dashboard-stats`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      })
+      if (!response.ok) {
+        throw new Error("Failed to fetch dashboard statistics")
+      }
+      return response.json()
+    },
+  })
+
+  // Use backend-calculated values
+  const currentMonthRevenue = dashboardStats?.current_month_revenue || 0
+  const todayRevenue = dashboardStats?.today_revenue || 0
+  const totalExpenses = dashboardStats?.current_month_expenses || 0
+  const revenueChange = dashboardStats?.revenue_change_percent || 0
+  const dailyIncomeChange = dashboardStats?.daily_income_change_percent || 0
+  const expenseChange = dashboardStats?.expense_change_percent || 0
+  const currentNetProfit = dashboardStats?.net_profit || 0
+  const potentialGrowthChange = dashboardStats?.net_profit_change_percent || 0
+
   return (
     <Box 
       mb={8}
@@ -23,7 +52,7 @@ export function StatsCards({ totalRevenue, isMounted }: StatsCardsProps) {
         }}
         gap={4}
       >
-        {/* Potential Growth Card */}
+        {/* Net Profit Card */}
         <Box 
           p={5} 
           bg={{ base: "#1a1d29", _light: "#ffffff" }}
@@ -42,7 +71,7 @@ export function StatsCards({ totalRevenue, isMounted }: StatsCardsProps) {
           <HStack justify="space-between" mb={2} align="start">
             <VStack align="start" gap={0}>
               <Text fontSize="xs" color={{ base: "#9ca3af", _light: "#6b7280" }} fontWeight="500" textTransform="uppercase" letterSpacing="0.5px">
-                Potential growth
+                Net profit
               </Text>
               <Text 
                 fontSize="2xl" 
@@ -50,13 +79,26 @@ export function StatsCards({ totalRevenue, isMounted }: StatsCardsProps) {
                 color={{ base: "#ffffff", _light: "#1a1d29" }}
                 mt={1}
               >
-                {formatCurrency(0)}
+                {formatCurrency(currentNetProfit)}
               </Text>
             </VStack>
-            <Icon as={FiArrowUp} color="#22c55e" fontSize="lg" />
+            <Icon 
+              as={currentNetProfit >= 0 ? FiArrowUp : FiArrowDown} 
+              color={currentNetProfit >= 0 ? "#22c55e" : "#ef4444"} 
+              fontSize="lg" 
+            />
           </HStack>
           <HStack gap={1}>
-            <Text fontSize="xs" color="#22c55e" fontWeight="600">+3.5%</Text>
+            <Text 
+              fontSize="xs" 
+              color={potentialGrowthChange >= 0 ? "#22c55e" : "#ef4444"} 
+              fontWeight="600"
+            >
+              {potentialGrowthChange >= 0 ? "+" : ""}{potentialGrowthChange.toFixed(1)}%
+            </Text>
+            <Text fontSize="xs" color={{ base: "#9ca3af", _light: "#6b7280" }}>
+              vs last month
+            </Text>
           </HStack>
         </Box>
 
@@ -87,13 +129,26 @@ export function StatsCards({ totalRevenue, isMounted }: StatsCardsProps) {
                 color={{ base: "#ffffff", _light: "#1a1d29" }}
                 mt={1}
               >
-                {formatCurrency(totalRevenue)}
+                {formatCurrency(currentMonthRevenue)}
               </Text>
             </VStack>
-            <Icon as={FiArrowUp} color="#22c55e" fontSize="lg" />
+            <Icon 
+              as={revenueChange >= 0 ? FiArrowUp : FiArrowDown} 
+              color={revenueChange >= 0 ? "#22c55e" : "#ef4444"} 
+              fontSize="lg" 
+            />
           </HStack>
           <HStack gap={1}>
-            <Text fontSize="xs" color="#22c55e" fontWeight="600">+11%</Text>
+            <Text 
+              fontSize="xs" 
+              color={revenueChange >= 0 ? "#22c55e" : "#ef4444"} 
+              fontWeight="600"
+            >
+              {revenueChange >= 0 ? "+" : ""}{revenueChange.toFixed(1)}%
+            </Text>
+            <Text fontSize="xs" color={{ base: "#9ca3af", _light: "#6b7280" }}>
+              vs last month
+            </Text>
           </HStack>
         </Box>
 
@@ -124,13 +179,26 @@ export function StatsCards({ totalRevenue, isMounted }: StatsCardsProps) {
                 color={{ base: "#ffffff", _light: "#1a1d29" }}
                 mt={1}
               >
-                {formatCurrency(0)}
+                {formatCurrency(todayRevenue)}
               </Text>
             </VStack>
-            <Icon as={FiArrowDown} color="#ef4444" fontSize="lg" />
+            <Icon 
+              as={dailyIncomeChange >= 0 ? FiArrowUp : FiArrowDown} 
+              color={dailyIncomeChange >= 0 ? "#22c55e" : "#ef4444"} 
+              fontSize="lg" 
+            />
           </HStack>
           <HStack gap={1}>
-            <Text fontSize="xs" color="#ef4444" fontWeight="600">-2.4%</Text>
+            <Text 
+              fontSize="xs" 
+              color={dailyIncomeChange >= 0 ? "#22c55e" : "#ef4444"} 
+              fontWeight="600"
+            >
+              {dailyIncomeChange >= 0 ? "+" : ""}{dailyIncomeChange.toFixed(1)}%
+            </Text>
+            <Text fontSize="xs" color={{ base: "#9ca3af", _light: "#6b7280" }}>
+              vs yesterday
+            </Text>
           </HStack>
         </Box>
 
@@ -161,17 +229,29 @@ export function StatsCards({ totalRevenue, isMounted }: StatsCardsProps) {
                 color={{ base: "#ffffff", _light: "#1a1d29" }}
                 mt={1}
               >
-                {formatCurrency(0)}
+                {formatCurrency(totalExpenses)}
               </Text>
             </VStack>
-            <Icon as={FiArrowUp} color="#22c55e" fontSize="lg" />
+            <Icon 
+              as={expenseChange >= 0 ? FiArrowUp : FiArrowDown} 
+              color={expenseChange >= 0 ? "#ef4444" : "#22c55e"} 
+              fontSize="lg" 
+            />
           </HStack>
           <HStack gap={1}>
-            <Text fontSize="xs" color="#22c55e" fontWeight="600">+3.5%</Text>
+            <Text 
+              fontSize="xs" 
+              color={expenseChange >= 0 ? "#ef4444" : "#22c55e"} 
+              fontWeight="600"
+            >
+              {expenseChange >= 0 ? "+" : ""}{expenseChange.toFixed(1)}%
+            </Text>
+            <Text fontSize="xs" color={{ base: "#9ca3af", _light: "#6b7280" }}>
+              vs last month
+            </Text>
           </HStack>
         </Box>
       </Grid>
     </Box>
   )
 }
-

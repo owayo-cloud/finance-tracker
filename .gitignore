@@ -1,17 +1,101 @@
-__pycache__
-app.egg-info
-*.pyc
-.mypy_cache
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+app.egg-info/
+dist/
+build/
+*.egg-info/
+*.egg
+.mypy_cache/
+.pytest_cache/
+.ruff_cache/
 .coverage
-htmlcov
+htmlcov/
+.tox/
 .cache
 .venv
-.github/copilot-instructions.md
-frontend/node_modules/*
-frontend/.env
+venv/
+ENV/
+env/
+
+# Environment variables
 .env
+.env.local
+.env.*.local
+frontend/.env
+backend/.env
+
+# IDE and Editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.project
+.classpath
+.settings/
+*.sublime-project
+*.sublime-workspace
+
+# OS files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+desktop.ini
+
+# GitHub
+.github/copilot-instructions.md
+
+# Frontend - Dependencies
+frontend/node_modules/
+frontend/.pnpm-store/
+
+# Frontend - Build outputs
+frontend/dist/
+frontend/build/
+frontend/.tanstack/
+frontend/.vite/
+
+# Frontend - Test results
+frontend/test-results/
+frontend/blob-report/
+frontend/coverage/
+frontend/.nyc_output/
+
+# Frontend - Logs and reports
+frontend/*.log
+frontend/openapi-ts-error-*.log
+frontend/bundle-analysis.html
+frontend/*.tsbuildinfo
+
+# Backend - Build artifacts
+backend/dist/
+backend/build/
+backend/htmlcov/
+backend/.pytest_cache/
+
+# Backend - Node modules (if any)
+backend/node_modules/
 
 # Uploaded files
 backend/uploads/**/*
-backend/node_modules/*
 !backend/uploads/**/.gitkeep
+
+# Database
+*.db
+*.sqlite
+*.sqlite3
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+*.bak
+*.backup

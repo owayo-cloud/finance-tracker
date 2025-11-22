@@ -60,4 +60,17 @@ def get_current_active_superuser(
 AdminUser = Annotated[User, Depends(get_current_active_superuser)]
 
 
+def get_current_auditor_or_superuser(
+    current_user: CurrentUser,
+) -> User:
+    """Allow access to auditors or superusers (admins)"""
+    if not (current_user.is_auditor or current_user.is_superuser):
+        raise HTTPException(
+            status_code=403, detail="The user doesn't have enough privileges"
+        )
+    return current_user
+
+AuditorOrAdminUser = Annotated[User, Depends(get_current_auditor_or_superuser)]
+
+
 

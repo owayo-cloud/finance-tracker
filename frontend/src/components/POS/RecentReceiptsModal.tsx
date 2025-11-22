@@ -84,9 +84,15 @@ export function RecentReceiptsModal({
     if (!searchQuery) return true
     const query = searchQuery.toLowerCase()
     const receiptNo = receipt.id.slice(-6).toLowerCase()
-    const customerName = receipt.customer_name?.toLowerCase() || ""
-    // Note: We don't have tel or mpesa ref in the SalePublic type, so we'll just search by receipt no and customer name
-    return receiptNo.includes(query) || customerName.includes(query)
+    const remarks = receipt.notes?.toLowerCase() || ""
+    // Search by receipt no and remarks
+    return receiptNo.includes(query) || remarks.includes(query)
+  }).filter((receipt) => {
+    // Filter by sales rep (cashier) if specified
+    if (!salesRepFilter) return true
+    const filter = salesRepFilter.toLowerCase()
+    const cashierName = (receipt as any).created_by?.full_name?.toLowerCase() || (receipt as any).created_by?.username?.toLowerCase() || ""
+    return cashierName.includes(filter)
   })
 
   const handleDateFocus = (e: React.FocusEvent<HTMLInputElement>) => {
@@ -165,11 +171,11 @@ export function RecentReceiptsModal({
                   </HStack>
                 </Box>
                 <Box>
-                  <Text fontSize="xs" fontWeight="medium" mb={1}>Sales Rep:</Text>
+                  <Text fontSize="xs" fontWeight="medium" mb={1}>Cashier:</Text>
                   <Input
                     value={salesRepFilter}
                     onChange={(e) => setSalesRepFilter(e.target.value)}
-                    placeholder=""
+                    placeholder="Filter by cashier"
                     size="sm"
                     w="150px"
                     bg="white"
@@ -177,7 +183,7 @@ export function RecentReceiptsModal({
                   />
                 </Box>
                 <Box flex={1}>
-                  <Text fontSize="xs" fontWeight="medium" mb={1}>Search By: Rct No/Name/Tel/Mpesa ref</Text>
+                  <Text fontSize="xs" fontWeight="medium" mb={1}>Search By: Receipt No / Remarks</Text>
                   <HStack gap={1}>
                     <Input
                       value={searchQuery}
@@ -217,7 +223,7 @@ export function RecentReceiptsModal({
                     <Table.ColumnHeader>Date</Table.ColumnHeader>
                     <Table.ColumnHeader>Receipt Amount</Table.ColumnHeader>
                     <Table.ColumnHeader>Cashier</Table.ColumnHeader>
-                    <Table.ColumnHeader>Cust Name</Table.ColumnHeader>
+                    <Table.ColumnHeader>Remarks</Table.ColumnHeader>
                   </Table.Row>
                 </Table.Header>
                 <Table.Body>
@@ -250,8 +256,8 @@ export function RecentReceiptsModal({
                         <Table.Cell fontWeight="medium">{receipt.id.slice(-6)}</Table.Cell>
                         <Table.Cell>{formatDate(receipt.sale_date)}</Table.Cell>
                         <Table.Cell fontWeight="medium">Ksh {formatCurrency(parseFloat(receipt.total_amount))}</Table.Cell>
-                        <Table.Cell>-</Table.Cell>
-                        <Table.Cell>{receipt.customer_name || "-"}</Table.Cell>
+                        <Table.Cell>{(receipt as any).created_by?.full_name || (receipt as any).created_by?.username || "-"}</Table.Cell>
+                        <Table.Cell>{receipt.notes || "-"}</Table.Cell>
                       </Table.Row>
                     ))
                   )}

@@ -176,7 +176,8 @@ export class BulkImportService {
 export class LoginService {
     /**
      * Login Access Token
-     * OAuth2 compatible token login, get an access token for future requests
+     * OAuth2 compatible token login, get an access token for future requests.
+     * Supports login with email or username (case insensitive for username).
      * @param data The data for the request.
      * @param data.formData
      * @returns Token Successful Response
@@ -557,6 +558,50 @@ export class SalesService {
     }
     
     /**
+     * Create Payment Method
+     * Create a new payment method (admin only).
+     * @param data The data for the request.
+     * @param data.requestBody
+     * @returns PaymentMethodPublic Successful Response
+     * @throws ApiError
+     */
+    public static createPaymentMethod(data: SalesCreatePaymentMethodData): CancelablePromise<SalesCreatePaymentMethodResponse> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/api/v1/sales/payment-methods',
+            body: data.requestBody,
+            mediaType: 'application/json',
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+    
+    /**
+     * Update Payment Method
+     * Update a payment method (admin only).
+     * @param data The data for the request.
+     * @param data.paymentMethodId
+     * @param data.requestBody
+     * @returns PaymentMethodPublic Successful Response
+     * @throws ApiError
+     */
+    public static updatePaymentMethod(data: SalesUpdatePaymentMethodData): CancelablePromise<SalesUpdatePaymentMethodResponse> {
+        return __request(OpenAPI, {
+            method: 'PATCH',
+            url: '/api/v1/sales/payment-methods/{payment_method_id}',
+            path: {
+                payment_method_id: data.paymentMethodId
+            },
+            body: data.requestBody,
+            mediaType: 'application/json',
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+    
+    /**
      * Search Products For Sale
      * Fast product search for sales cart.
      * Searches by name or category.
@@ -646,6 +691,54 @@ export class SalesService {
     }
     
     /**
+     * Create Sale With Multiple Payments
+     * Create a sale with multiple payment methods.
+     * This allows splitting a single sale across multiple payment methods (e.g., cash + MPESA).
+     *
+     * Business Rules:
+     * - Product must exist and be active
+     * - Product must have sufficient stock
+     * - Sum of all payment amounts must equal total_amount
+     * - Each payment can have an optional reference number
+     * @param data The data for the request.
+     * @param data.requestBody
+     * @returns SalePublic Successful Response
+     * @throws ApiError
+     */
+    public static createSaleWithMultiplePayments(data: SalesCreateSaleWithMultiplePaymentsData): CancelablePromise<SalesCreateSaleWithMultiplePaymentsResponse> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/api/v1/sales/multi-payment',
+            body: data.requestBody,
+            mediaType: 'application/json',
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+    
+    /**
+     * Read Sale Payments
+     * Get all payment methods used for a specific sale.
+     * @param data The data for the request.
+     * @param data.saleId
+     * @returns SalePaymentPublic Successful Response
+     * @throws ApiError
+     */
+    public static readSalePayments(data: SalesReadSalePaymentsData): CancelablePromise<SalesReadSalePaymentsResponse> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/v1/sales/{sale_id}/payments',
+            path: {
+                sale_id: data.saleId
+            },
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+    
+    /**
      * Get Today Sales Summary
      * Get today's sales summary for the current cashier.
      * Returns total sales, total amount, and breakdown by payment method.
@@ -696,6 +789,128 @@ export class SalesService {
             url: '/api/v1/sales/{sale_id}',
             path: {
                 sale_id: data.saleId
+            },
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+}
+
+export class ShiftReconciliationService {
+    /**
+     * Create Shift Reconciliation
+     * Create a new shift reconciliation.
+     * Cashiers can create their own shift reconciliations.
+     * @param data The data for the request.
+     * @param data.requestBody
+     * @returns ShiftReconciliationPublic Successful Response
+     * @throws ApiError
+     */
+    public static createShiftReconciliation(data: ShiftReconciliationCreateShiftReconciliationData): CancelablePromise<ShiftReconciliationCreateShiftReconciliationResponse> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/api/v1/shift-reconciliation',
+            body: data.requestBody,
+            mediaType: 'application/json',
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+    
+    /**
+     * Read Shift Reconciliations
+     * Retrieve shift reconciliations.
+     * Admins see all, cashiers see only their own.
+     * @param data The data for the request.
+     * @param data.skip
+     * @param data.limit
+     * @param data.startDate Filter from this date
+     * @param data.endDate Filter until this date
+     * @returns ShiftReconciliationsPublic Successful Response
+     * @throws ApiError
+     */
+    public static readShiftReconciliations(data: ShiftReconciliationReadShiftReconciliationsData = {}): CancelablePromise<ShiftReconciliationReadShiftReconciliationsResponse> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/v1/shift-reconciliation',
+            query: {
+                skip: data.skip,
+                limit: data.limit,
+                start_date: data.startDate,
+                end_date: data.endDate
+            },
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+    
+    /**
+     * Read Shift Reconciliation
+     * Get shift reconciliation by ID.
+     * Cashiers can only view their own.
+     * @param data The data for the request.
+     * @param data.shiftId
+     * @returns ShiftReconciliationPublic Successful Response
+     * @throws ApiError
+     */
+    public static readShiftReconciliation(data: ShiftReconciliationReadShiftReconciliationData): CancelablePromise<ShiftReconciliationReadShiftReconciliationResponse> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/v1/shift-reconciliation/{shift_id}',
+            path: {
+                shift_id: data.shiftId
+            },
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+    
+    /**
+     * Update Shift Reconciliation
+     * Update a shift reconciliation.
+     * Cashiers can only update their own.
+     * @param data The data for the request.
+     * @param data.shiftId
+     * @param data.requestBody
+     * @returns ShiftReconciliationPublic Successful Response
+     * @throws ApiError
+     */
+    public static updateShiftReconciliation(data: ShiftReconciliationUpdateShiftReconciliationData): CancelablePromise<ShiftReconciliationUpdateShiftReconciliationResponse> {
+        return __request(OpenAPI, {
+            method: 'PATCH',
+            url: '/api/v1/shift-reconciliation/{shift_id}',
+            path: {
+                shift_id: data.shiftId
+            },
+            body: data.requestBody,
+            mediaType: 'application/json',
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+    
+    /**
+     * Get Current Cash Summary
+     * Get cash sales summary for shift reconciliation.
+     * Returns cash totals for the specified date range.
+     * @param data The data for the request.
+     * @param data.startDate Start date (defaults to today)
+     * @param data.endDate End date (defaults to today)
+     * @returns unknown Successful Response
+     * @throws ApiError
+     */
+    public static getCurrentCashSummary(data: ShiftReconciliationGetCurrentCashSummaryData = {}): CancelablePromise<ShiftReconciliationGetCurrentCashSummaryResponse> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/v1/shift-reconciliation/current/cash-summary',
+            query: {
+                start_date: data.startDate,
+                end_date: data.endDate
             },
             errors: {
                 422: 'Validation Error'

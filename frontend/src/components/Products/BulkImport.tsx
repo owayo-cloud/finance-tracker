@@ -47,7 +47,7 @@ import {
   FiArrowRight,
   FiArrowLeft,
   FiAlertTriangle,
-  FiEdit2,
+  FiEdit,
   FiRefreshCw,
   FiChevronRight,
   FiTrash2,
@@ -1838,7 +1838,7 @@ function ValidationStage({
                               variant="outline"
                               onClick={() => handleEdit(row)}
                             >
-                              <Icon as={FiEdit2} />
+                              <Icon as={FiEdit} />
                             </Button>
                           </Tooltip>
                         )}

@@ -14,7 +14,8 @@ import {
   FiTrendingUp,
   FiChevronDown,
   FiChevronRight,
-  FiCreditCard
+  FiCreditCard,
+  FiTag
 } from "react-icons/fi"
 import { TbReceiptDollar } from "react-icons/tb"
 import type { IconType } from "react-icons/lib"
@@ -42,7 +43,15 @@ const menuItems: MenuItem[] = [
   { icon: FiBox, title: "Stock Entry", path: "/stock-entry" },
   { icon: FiPackage, title: "Products", path: "/products", adminOnly: true },
   { icon: FiBarChart2, title: "Reports", path: "/reports", adminOnly: true },
-  { icon: FiDollarSign, title: "Expenses", path: "/expenses", adminOnly: true },
+  { 
+    icon: FiDollarSign, 
+    title: "Expenses", 
+    adminOnly: true,
+    submenu: [
+      { title: "Expenses", path: "/expenses" },
+      { title: "Categories", path: "/expense-categories" }
+    ]
+  },
   { icon: FiTrendingUp, title: "Debts", path: "/debts", adminOnly: true },
   { icon: FiCreditCard, title: "Payment Methods", path: "/payment-methods", adminOnly: true },
   { icon: FiUsers, title: "Users", path: "/admin", adminOnly: true },
@@ -58,7 +67,8 @@ const SidebarItems = ({ onClose }: SidebarItemsProps) => {
   const location = useLocation()
   const currentUser = queryClient.getQueryData<UserPublic>(["currentUser"])
   const [openSubmenus, setOpenSubmenus] = useState<Record<string, boolean>>({
-    Sales: location.pathname === "/sales" || location.pathname === "/shift-reconciliation"
+    Sales: location.pathname === "/sales" || location.pathname === "/shift-reconciliation",
+    Expenses: location.pathname === "/expenses" || location.pathname === "/expense-categories"
   })
 
   // Filter items based on user role
@@ -182,7 +192,13 @@ const SidebarItems = ({ onClose }: SidebarItemsProps) => {
                         } : undefined}
                       >
                         <Icon 
-                          as={subItem.title === "POS" ? FiCreditCard : TbReceiptDollar}
+                          as={
+                            subItem.title === "POS" 
+                              ? FiCreditCard 
+                              : subItem.title === "Categories"
+                              ? FiTag
+                              : TbReceiptDollar
+                          }
                           fontSize="16px"
                           color={isSubActive ? { base: "#ffffff", _light: "#581c87" } : { base: "#9ca3af", _light: "#6b7280" }}
                         />

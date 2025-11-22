@@ -11,7 +11,7 @@ import {
 import { useMutation, useQueryClient } from "@tanstack/react-query"
 import { useState } from "react"
 import { Controller, type SubmitHandler, useForm } from "react-hook-form"
-import { FaExchangeAlt } from "react-icons/fa"
+import { FiEdit } from "react-icons/fi"
 
 import { type UserPublic, UsersService, type UserUpdate } from "@/client"
 import type { ApiError } from "@/client/core/ApiError"
@@ -85,7 +85,7 @@ const EditUser = ({ user }: EditUserProps) => {
     >
       <DialogTrigger asChild>
         <Button variant="ghost" size="sm">
-          <FaExchangeAlt fontSize="16px" />
+          <FiEdit fontSize="16px" />
           Edit User
         </Button>
       </DialogTrigger>

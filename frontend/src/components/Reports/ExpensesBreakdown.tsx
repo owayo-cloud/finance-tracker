@@ -38,7 +38,12 @@ export function ExpensesBreakdown({
   }
 
   return (
-    <Card.Root>
+    <Card.Root
+      variant="outline"
+      bg="bg.surface"
+      borderColor="border.card"
+      borderWidth="1px"
+    >
       <Card.Body>
         <VStack align="stretch" gap={4}>
           <HStack justify="space-between">

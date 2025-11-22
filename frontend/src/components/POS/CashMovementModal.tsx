@@ -1,11 +1,9 @@
 import {
-  Box,
   Button,
   Flex,
   Input,
   Text,
   VStack,
-  HStack,
 } from "@chakra-ui/react"
 import {
   DialogRoot,

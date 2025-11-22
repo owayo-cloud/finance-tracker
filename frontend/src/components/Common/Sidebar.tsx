@@ -11,7 +11,6 @@ import {
   DrawerCloseTrigger,
   DrawerContent,
   DrawerRoot,
-  DrawerTrigger,
 } from "../ui/drawer"
 import SidebarItems from "./SidebarItems"
 

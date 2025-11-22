@@ -119,11 +119,11 @@ const SidebarItems = ({ onClose, isCollapsed = false }: SidebarItemsProps) => {
     return submenu.some(item => location.pathname === item.path)
   }
 
-  const listItems = finalItems.map((item) => {
+    const listItems = finalItems.map((item) => {
     const hasSubmenu = item.submenu && item.submenu.length > 0
     const isSubmenuOpen = openSubmenus[item.title] || false
     const isActive = isPathActive(item.path) || isSubmenuItemActive(item.submenu)
-    const isParentActive = hasSubmenu && isSubmenuItemActive(item.submenu)
+    const isParentActive = Boolean(hasSubmenu && isSubmenuItemActive(item.submenu))
 
     return (
       <Box key={item.title} mb={1}>

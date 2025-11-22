@@ -1,13 +1,13 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router"
 import { Box, Container, Heading, Text, Flex, HStack, VStack, Input, Button, Icon } from "@chakra-ui/react"
 import { Checkbox } from "@/components/ui/checkbox"
-import { useState, useEffect, useMemo } from "react"
+import { useState, useEffect } from "react"
 import { ThemedSelect } from "@/components/POS/ThemedSelect"
 import { formatCurrency } from "@/components/POS/utils"
 import { FiRefreshCw, FiSave, FiFolder, FiHome } from "react-icons/fi"
 import useAuth from "@/hooks/useAuth"
 import { useQuery } from "@tanstack/react-query"
-import { UsersService, SalesService } from "@/client"
+import { UsersService } from "@/client"
 import useCustomToast from "@/hooks/useCustomToast"
 
 export const Route = createFileRoute("/_layout/shift-reconciliation")({
@@ -34,53 +34,31 @@ function ShiftReconciliation() {
     queryFn: () => UsersService.readUsers({ limit: 100 }),
   })
 
-  // Fetch payment methods to find cash
-  const { data: paymentMethodsData } = useQuery({
-    queryKey: ["payment-methods"],
-    queryFn: () => SalesService.readPaymentMethods({ limit: 100 }),
-  })
-
-  // Find cash payment method
-  const cashPaymentMethod = useMemo(() => {
-    if (!paymentMethodsData?.data) return null
-    return paymentMethodsData.data.find(
-      (pm) => pm.name.toUpperCase().includes("CASH") || pm.name.toUpperCase() === "CASH"
-    )
-  }, [paymentMethodsData])
-
-  // Get today's date range for sales
+  // Get today's date for cash summary
   const today = new Date()
-  const startOfDayDate = new Date(today)
-  startOfDayDate.setHours(0, 0, 0, 0)
-  const endOfDayDate = new Date(today)
-  endOfDayDate.setHours(23, 59, 59, 999)
-  const startOfDay = startOfDayDate.toISOString()
-  const endOfDay = endOfDayDate.toISOString()
+  const todayDateStr = today.toISOString().split("T")[0]
 
-  // Fetch cash sales for today
-  const { data: cashSalesData } = useQuery({
-    queryKey: ["cash-sales", cashPaymentMethod?.id, startOfDay, endOfDay],
-    queryFn: () =>
-      SalesService.readSales({
-        paymentMethodId: cashPaymentMethod?.id || null,
-        startDate: startOfDay,
-        endDate: endOfDay,
-        limit: 1000,
-      }),
-    enabled: !!cashPaymentMethod,
+  // Fetch cash summary from backend
+  const { data: cashSummary } = useQuery({
+    queryKey: ["cash-summary", todayDateStr],
+    queryFn: async () => {
+      const token = localStorage.getItem("access_token") || ""
+      const apiBase = import.meta.env.VITE_API_URL || ""
+      const response = await fetch(`${apiBase}/api/v1/shift-reconciliation/current/cash-summary?start_date=${todayDateStr}&end_date=${todayDateStr}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      })
+      if (!response.ok) {
+        throw new Error("Failed to fetch cash summary")
+      }
+      return response.json()
+    },
   })
 
-  // Calculate physical cash from cash sales
-  const physicalCash = useMemo(() => {
-    if (!cashSalesData?.data) return 0
-    return cashSalesData.data.reduce((sum, sale) => sum + parseFloat(sale.total_amount || "0"), 0)
-  }, [cashSalesData])
-
-  // Calculate other totals
-  const grandTotalSales = useMemo(() => {
-    if (!cashSalesData?.data) return 0
-    return cashSalesData.data.reduce((sum, sale) => sum + parseFloat(sale.total_amount || "0"), 0)
-  }, [cashSalesData])
+  // Use backend-calculated values
+  const physicalCash = cashSummary?.cash_sales || 0
+  const grandTotalSales = cashSummary?.total_sales || 0
 
   // Auto-fill cashier and supervisor
   useEffect(() => {
@@ -140,7 +118,7 @@ function ShiftReconciliation() {
 
   const handleList = () => {
     // TODO: Navigate to list of shift reconciliations
-    showToast.showInfoToast("List view coming soon")
+    showToast.showSuccessToast("List view coming soon")
   }
 
   const handleClose = () => {
@@ -466,8 +444,8 @@ function ShiftReconciliation() {
             color="white"
             _hover={{ bg: "#0d9488" }}
             onClick={handleReset}
-            leftIcon={<Icon as={FiRefreshCw} />}
           >
+            <Icon as={FiRefreshCw} style={{ marginRight: "8px" }} />
             Reset
           </Button>
           <HStack gap={2}>
@@ -476,8 +454,8 @@ function ShiftReconciliation() {
               color="white"
               _hover={{ bg: "#0d9488" }}
               onClick={handleSave}
-              leftIcon={<Icon as={FiSave} />}
             >
+              <Icon as={FiSave} style={{ marginRight: "8px" }} />
               Save
             </Button>
             <Button
@@ -485,8 +463,8 @@ function ShiftReconciliation() {
               color="white"
               _hover={{ bg: "#0d9488" }}
               onClick={handleList}
-              leftIcon={<Icon as={FiFolder} />}
             >
+              <Icon as={FiFolder} style={{ marginRight: "8px" }} />
               List
             </Button>
             <Button
@@ -494,8 +472,8 @@ function ShiftReconciliation() {
               color="white"
               _hover={{ bg: "#0d9488" }}
               onClick={handleClose}
-              leftIcon={<Icon as={FiHome} />}
             >
+              <Icon as={FiHome} style={{ marginRight: "8px" }} />
               Close
             </Button>
           </HStack>

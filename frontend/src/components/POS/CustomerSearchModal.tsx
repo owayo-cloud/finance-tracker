@@ -6,7 +6,7 @@ import {
   Text,
   VStack,
   HStack,
-  Table,
+  Grid,
 } from "@chakra-ui/react"
 import {
   DialogRoot,
@@ -15,12 +15,10 @@ import {
   DialogTitle,
   DialogBody,
   DialogFooter,
-  DialogCloseTrigger,
 } from "@/components/ui/dialog"
-import { useState, useMemo } from "react"
+import { useState, useMemo, useEffect } from "react"
 import { useQuery } from "@tanstack/react-query"
-import { SalesService } from "@/client"
-import { FiSearch } from "react-icons/fi"
+import { FiSearch, FiHome } from "react-icons/fi"
 
 interface Customer {
   name: string
@@ -33,83 +31,70 @@ interface CustomerSearchModalProps {
   isOpen: boolean
   onClose: () => void
   onSelectCustomer: (customer: Customer) => void
-  onNewCustomer: () => void
 }
 
 export function CustomerSearchModal({
   isOpen,
   onClose,
   onSelectCustomer,
-  onNewCustomer,
 }: CustomerSearchModalProps) {
   const [searchQuery, setSearchQuery] = useState("")
-
-  // Fetch recent sales to extract customer data
-  const { data: salesData } = useQuery({
-    queryKey: ["recent-sales-for-customers"],
-    queryFn: () => SalesService.readSales({ skip: 0, limit: 1000 }),
+  
+  // Fetch customers from backend (handles all aggregation logic)
+  const { data: customersData, refetch: refetchCustomers } = useQuery({
+    queryKey: ["customers", searchQuery],
+    queryFn: async () => {
+      const token = localStorage.getItem("access_token") || ""
+      const apiBase = import.meta.env.VITE_API_URL || ""
+      const searchParam = searchQuery.trim() ? `&search=${encodeURIComponent(searchQuery.trim())}` : ""
+      const response = await fetch(`${apiBase}/api/v1/customers/?limit=1000${searchParam}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      })
+      if (!response.ok) {
+        console.error("Failed to fetch customers:", response.statusText)
+        return null
+      }
+      return response.json()
+    },
     enabled: isOpen,
   })
 
-  // Extract unique customers from sales
-  const customers = useMemo(() => {
-    if (!salesData?.data) return []
-    
-    const customerMap = new Map<string, Customer>()
-    
-    salesData.data.forEach((sale) => {
-      if (sale.customer_name) {
-        const key = sale.customer_name.toLowerCase().trim()
-        if (!customerMap.has(key)) {
-          customerMap.set(key, {
-            name: sale.customer_name,
-            tel: "", // Phone not stored in sale model currently
-            balance: 0, // Balance not tracked in sale model currently
-            lastSaleDate: sale.sale_date,
-          })
-        } else {
-          // Update last sale date if this sale is more recent
-          const existing = customerMap.get(key)!
-          if (sale.sale_date > (existing.lastSaleDate || "")) {
-            existing.lastSaleDate = sale.sale_date
-          }
-        }
-      }
-    })
-    
-    // Also load from localStorage (for manually added customers)
-    try {
-      const savedCustomers = JSON.parse(localStorage.getItem("pos_customers") || "[]")
-      savedCustomers.forEach((customer: Customer) => {
-        const key = customer.name.toLowerCase().trim()
-        if (!customerMap.has(key)) {
-          customerMap.set(key, customer)
-        }
-      })
-    } catch (error) {
-      console.error("Failed to load customers from localStorage:", error)
+  // Refresh when modal opens
+  useEffect(() => {
+    if (isOpen) {
+      refetchCustomers()
     }
-    
-    return Array.from(customerMap.values()).sort((a, b) => {
-      // Sort by last sale date (most recent first)
-      const dateA = a.lastSaleDate || ""
-      const dateB = b.lastSaleDate || ""
-      return dateB.localeCompare(dateA)
-    })
-  }, [salesData])
+  }, [isOpen, refetchCustomers])
 
-  // Filter customers based on search query
-  const filteredCustomers = useMemo(() => {
-    if (!searchQuery.trim()) return customers.slice(0, 50) // Limit to 50 for performance
+  // Listen for customer created event
+  useEffect(() => {
+    if (isOpen) {
+      const handleCustomerCreated = () => {
+        refetchCustomers()
+      }
+      window.addEventListener("customerCreated", handleCustomerCreated)
+      return () => {
+        window.removeEventListener("customerCreated", handleCustomerCreated)
+      }
+    }
+  }, [isOpen, refetchCustomers])
+
+  // Map backend customer data to frontend format
+  const customers = useMemo(() => {
+    if (!customersData?.data) return []
     
-    const query = searchQuery.toLowerCase().trim()
-    return customers
-      .filter((customer) => 
-        customer.name.toLowerCase().includes(query) ||
-        customer.tel.toLowerCase().includes(query)
-      )
-      .slice(0, 50)
-  }, [customers, searchQuery])
+    return customersData.data.map((customer: any) => ({
+      name: customer.name,
+      tel: customer.tel || "",
+      balance: customer.balance || 0,
+      lastSaleDate: customer.last_sale_date || undefined,
+    }))
+  }, [customersData])
+
+  // Filtered customers (already filtered by backend if search query provided)
+  const filteredCustomers = customers
 
   const handleSelectCustomer = (customer: Customer) => {
     onSelectCustomer(customer)
@@ -117,22 +102,23 @@ export function CustomerSearchModal({
     setSearchQuery("")
   }
 
-  const handleNewCustomer = () => {
-    onNewCustomer()
-    onClose()
-    setSearchQuery("")
+  const handleFind = () => {
+    // If there's a search query and results, select the first one
+    if (searchQuery.trim() && filteredCustomers.length > 0) {
+      handleSelectCustomer(filteredCustomers[0])
+    }
   }
 
   return (
     <DialogRoot
-      size={{ base: "xs", md: "lg" }}
+      size={{ base: "xs", md: "xl" }}
       placement="center"
       open={isOpen}
       onOpenChange={({ open }) => !open && onClose()}
     >
-      <DialogContent maxW="700px">
+      <DialogContent maxW="900px" maxH="90vh">
         <DialogHeader>
-          <DialogTitle>Search Customer</DialogTitle>
+          <DialogTitle>Select Customer</DialogTitle>
         </DialogHeader>
         <DialogBody>
           <VStack gap={4} align="stretch">
@@ -140,7 +126,7 @@ export function CustomerSearchModal({
             <Box>
               <HStack gap={2}>
                 <Input
-                  placeholder="Search by name or phone..."
+                  placeholder="Customer/Tel"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   bg={{ base: "#1a1d29", _light: "#ffffff" }}
@@ -148,101 +134,110 @@ export function CustomerSearchModal({
                   color={{ base: "#ffffff", _light: "#1a1d29" }}
                   _focus={{ borderColor: "#14b8a6", boxShadow: "0 0 0 1px #14b8a6" }}
                   onKeyDown={(e) => {
-                    if (e.key === "Enter" && filteredCustomers.length > 0) {
-                      handleSelectCustomer(filteredCustomers[0])
+                    if (e.key === "Enter") {
+                      handleFind()
                     }
                   }}
+                  flex={1}
                 />
                 <Button
                   bg="#14b8a6"
                   color="white"
                   _hover={{ bg: "#0d9488" }}
-                  onClick={handleNewCustomer}
+                  onClick={handleFind}
+                  flexShrink={0}
                 >
                   <FiSearch style={{ marginRight: "8px" }} />
-                  New Customer
+                  Find
                 </Button>
               </HStack>
             </Box>
 
-            {/* Customer List */}
+            {/* Customer Grid */}
             <Box
-              maxH="400px"
+              maxH="500px"
               overflowY="auto"
+              overflowX="auto"
               border="1px solid"
               borderColor={{ base: "rgba(255, 255, 255, 0.1)", _light: "#e5e7eb" }}
               borderRadius="md"
+              p={4}
             >
               {filteredCustomers.length === 0 ? (
                 <Box p={8} textAlign="center">
                   <Text color={{ base: "#9ca3af", _light: "#6b7280" }}>
-                    {searchQuery ? "No customers found" : "Start typing to search customers"}
+                    {searchQuery ? "No customers found" : "No customers available"}
                   </Text>
                 </Box>
               ) : (
-                <Table.Root size="sm">
-                  <Table.Header>
-                    <Table.Row>
-                      <Table.ColumnHeader color={{ base: "#ffffff", _light: "#1a1d29" }}>Name</Table.ColumnHeader>
-                      <Table.ColumnHeader color={{ base: "#ffffff", _light: "#1a1d29" }}>Phone</Table.ColumnHeader>
-                      <Table.ColumnHeader color={{ base: "#ffffff", _light: "#1a1d29" }}>Balance</Table.ColumnHeader>
-                      <Table.ColumnHeader color={{ base: "#ffffff", _light: "#1a1d29" }}>Last Sale</Table.ColumnHeader>
-                      <Table.ColumnHeader color={{ base: "#ffffff", _light: "#1a1d29" }}>Action</Table.ColumnHeader>
-                    </Table.Row>
-                  </Table.Header>
-                  <Table.Body>
-                    {filteredCustomers.map((customer, index) => (
-                      <Table.Row
+                <Grid
+                  templateColumns="repeat(auto-fill, minmax(200px, 1fr))"
+                  gap={3}
+                  minW="600px"
+                >
+                  {filteredCustomers.map((customer: Customer, index: number) => {
+                    const balance = customer.balance
+                    const isNegative = balance < 0
+                    const displayBalance = Math.abs(balance)
+                    
+                    return (
+                      <Button
                         key={`${customer.name}-${index}`}
-                        cursor="pointer"
-                        _hover={{ bg: { base: "rgba(255, 255, 255, 0.05)", _light: "#f9fafb" } }}
                         onClick={() => handleSelectCustomer(customer)}
+                        bg={isNegative ? "#dc2626" : "#b8860b"}
+                        color="white"
+                        _hover={{ 
+                          bg: isNegative ? "#b91c1c" : "#9a7209",
+                          transform: "scale(1.02)",
+                        }}
+                        h="auto"
+                        p={3}
+                        flexDirection="column"
+                        alignItems="flex-start"
+                        textAlign="left"
+                        whiteSpace="normal"
+                        wordBreak="break-word"
+                        transition="all 0.2s"
                       >
-                        <Table.Cell fontWeight="medium" color={{ base: "#ffffff", _light: "#1a1d29" }}>
+                        <Text
+                          fontSize="sm"
+                          fontWeight="medium"
+                          mb={1}
+                          style={{
+                            display: "-webkit-box",
+                            WebkitLineClamp: 2,
+                            WebkitBoxOrient: "vertical",
+                            overflow: "hidden",
+                            textOverflow: "ellipsis",
+                          }}
+                        >
                           {customer.name}
-                        </Table.Cell>
-                        <Table.Cell color={{ base: "#9ca3af", _light: "#6b7280" }}>
-                          {customer.tel || "—"}
-                        </Table.Cell>
-                        <Table.Cell color={{ base: "#9ca3af", _light: "#6b7280" }}>
-                          Ksh {customer.balance.toFixed(2)}
-                        </Table.Cell>
-                        <Table.Cell color={{ base: "#9ca3af", _light: "#6b7280" }}>
-                          {customer.lastSaleDate
-                            ? new Date(customer.lastSaleDate).toLocaleDateString()
-                            : "—"}
-                        </Table.Cell>
-                        <Table.Cell>
-                          <Button
-                            size="xs"
-                            bg="#14b8a6"
-                            color="white"
-                            _hover={{ bg: "#0d9488" }}
-                            onClick={(e) => {
-                              e.stopPropagation()
-                              handleSelectCustomer(customer)
-                            }}
-                          >
-                            Select
-                          </Button>
-                        </Table.Cell>
-                      </Table.Row>
-                    ))}
-                  </Table.Body>
-                </Table.Root>
+                        </Text>
+                        <Text fontSize="xs" opacity={0.9}>
+                          ({displayBalance.toFixed(2)})
+                        </Text>
+                      </Button>
+                    )
+                  })}
+                </Grid>
               )}
             </Box>
           </VStack>
         </DialogBody>
         <DialogFooter>
           <Flex gap={2} w="full" justify="flex-end">
-            <DialogCloseTrigger asChild>
-              <Button variant="outline" onClick={onClose}>Cancel</Button>
-            </DialogCloseTrigger>
+            <Button
+              bg="#14b8a6"
+              color="white"
+              _hover={{ bg: "#0d9488" }}
+              onClick={onClose}
+            >
+              <FiHome style={{ marginRight: "8px" }} />
+              Close
+            </Button>
           </Flex>
         </DialogFooter>
       </DialogContent>
     </DialogRoot>
   )
 }
-

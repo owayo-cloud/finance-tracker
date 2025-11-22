@@ -1,5 +1,4 @@
 import {
-  Box,
   Button,
   Flex,
   Input,
@@ -19,7 +18,9 @@ import {
 import { Field } from "@/components/ui/field"
 import { useState } from "react"
 import { type SubmitHandler, useForm } from "react-hook-form"
+import { useQueryClient } from "@tanstack/react-query"
 import useCustomToast from "@/hooks/useCustomToast"
+import useAuth from "@/hooks/useAuth"
 
 interface Customer {
   name: string
@@ -44,8 +45,13 @@ export function NewCustomerModal({
   onClose,
   onSave,
 }: NewCustomerModalProps) {
-  const { showSuccessToast } = useCustomToast()
+  const { showSuccessToast, showErrorToast } = useCustomToast()
+  const queryClient = useQueryClient()
+  const { user: currentUser } = useAuth()
   const [isSubmitting, setIsSubmitting] = useState(false)
+  
+  // Check if user is admin
+  const isAdmin = currentUser?.is_superuser || false
   const {
     register,
     handleSubmit,
@@ -64,16 +70,55 @@ export function NewCustomerModal({
     try {
       setIsSubmitting(true)
       
-      const customer: Customer = {
-        name: data.name.trim(),
-        tel: data.tel.trim(),
-        balance: data.balance || 0,
+      const customerName = data.name.trim()
+      const customerTel = data.tel.trim()
+      const initialBalance = data.balance || 0
+      
+      // Create debt entry via API (this creates the customer account)
+      const token = localStorage.getItem("access_token") || ""
+      const apiBase = import.meta.env.VITE_API_URL || ""
+      
+      // Create debt entry to establish customer account
+      // If balance is 0, create a minimal paid debt to establish the account
+      // If balance > 0, create an actual debt
+      const debtData = {
+        customer_name: customerName,
+        customer_contact: customerTel || undefined,
+        amount: initialBalance > 0 ? initialBalance : 0.01, // Minimum amount of 0.01 (required by API)
+        amount_paid: initialBalance > 0 ? 0 : 0.01, // If balance is 0, mark as paid
+        balance: initialBalance, // This will be 0 if initialBalance is 0
+        notes: initialBalance > 0 
+          ? `Initial customer account with balance of ${initialBalance}` 
+          : "Initial customer account creation (zero balance)",
       }
       
-      // Save to localStorage
-      const customers = JSON.parse(localStorage.getItem("pos_customers") || "[]")
-      customers.push(customer)
-      localStorage.setItem("pos_customers", JSON.stringify(customers))
+      const response = await fetch(`${apiBase}/api/v1/debts/`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(debtData),
+      })
+      
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({ detail: "Failed to create customer" }))
+        throw new Error(errorData.detail || "Failed to create customer")
+      }
+      
+      const createdDebt = await response.json()
+      
+      const customer: Customer = {
+        name: customerName,
+        tel: customerTel,
+        balance: parseFloat(createdDebt.balance?.toString() || "0"),
+      }
+      
+      // Invalidate debts query to refresh customer list
+      queryClient.invalidateQueries({ queryKey: ["debts-for-customers"] })
+      
+      // Trigger custom event to update customer search modal in same window
+      window.dispatchEvent(new CustomEvent("customerCreated"))
       
       showSuccessToast("Customer created successfully")
       onSave(customer)
@@ -81,6 +126,7 @@ export function NewCustomerModal({
       onClose()
     } catch (error: any) {
       console.error("New customer error:", error)
+      showErrorToast(error.message || "Failed to create customer")
     } finally {
       setIsSubmitting(false)
     }
@@ -91,21 +137,28 @@ export function NewCustomerModal({
     onClose()
   }
 
+  // Don't show modal if not admin
+  if (!isAdmin && isOpen) {
+    showErrorToast("Only administrators can create new customers")
+    onClose()
+    return null
+  }
+
   return (
     <DialogRoot
       size={{ base: "xs", md: "md" }}
       placement="center"
-      open={isOpen}
+      open={isOpen && isAdmin}
       onOpenChange={({ open }) => !open && handleClose()}
     >
       <DialogContent>
         <form onSubmit={handleSubmit(onSubmit)}>
           <DialogHeader>
-            <DialogTitle>New Customer</DialogTitle>
+            <DialogTitle>New Customer (Credit Account)</DialogTitle>
           </DialogHeader>
           <DialogBody>
             <Text mb={4} color={{ base: "#9ca3af", _light: "#6b7280" }} fontSize="sm">
-              Create a new customer profile.
+              Create a new credit customer account. This customer will be able to make purchases on credit.
             </Text>
             <VStack gap={4}>
               <Field

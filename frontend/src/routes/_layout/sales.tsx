@@ -3,7 +3,7 @@ import { Box } from "@chakra-ui/react"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { useState, useMemo, useEffect } from "react"
 
-import { ProductsService, SalesService, type ProductPublic, OpenAPI } from "../../client"
+import { SalesService, type ProductPublic, OpenAPI } from "../../client"
 import useCustomToast from "../../hooks/useCustomToast"
 import useAuth from "../../hooks/useAuth"
 import { ActionButtons } from "@/components/POS/ActionButtons"
@@ -310,31 +310,46 @@ function Sales() {
           reference_number: payment.refNo || null,
         }))
 
-      // Validate total payments (allow overpayment for change, but not underpayment)
+      // Validate total payments
       const totalPaid = paymentArray.reduce((sum, p) => sum + p.amount, 0)
       const difference = totalPaid - cartTotal
       
-      // Check if payment is less than cart total (underpayment)
-      if (difference < -0.01) {
-        showToast.showErrorToast(
-          `Payment total (${totalPaid.toFixed(2)}) is less than cart total (${cartTotal.toFixed(2)}). Please add ${Math.abs(difference).toFixed(2)} more.`
-        )
-        return
-      }
-      
-      // If there's a small underpayment (0.01-0.10), adjust the largest payment to match exactly
-      if (difference >= -0.10 && difference < -0.01 && paymentArray.length > 0) {
-        // Find the largest payment and adjust it to make totals match exactly
-        const largestPaymentIndex = paymentArray.reduce((maxIdx, p, idx) => 
-          p.amount > paymentArray[maxIdx].amount ? idx : maxIdx, 0
-        )
-        const adjustment = cartTotal - totalPaid
-        paymentArray[largestPaymentIndex].amount += adjustment
+      // If customer is selected, allow partial payment (will create debt)
+      // Otherwise, require full payment
+      if (!customerName) {
+        // No customer: require full payment
+        if (difference < -0.01) {
+          showToast.showErrorToast(
+            `Payment total (${totalPaid.toFixed(2)}) is less than cart total (${cartTotal.toFixed(2)}). Please add ${Math.abs(difference).toFixed(2)} more.`
+          )
+          return
+        }
+        
+        // If there's a small underpayment (0.01-0.10), adjust the largest payment to match exactly
+        if (difference >= -0.10 && difference < -0.01 && paymentArray.length > 0) {
+          const largestPaymentIndex = paymentArray.reduce((maxIdx, p, idx) => 
+            p.amount > paymentArray[maxIdx].amount ? idx : maxIdx, 0
+          )
+          const adjustment = cartTotal - totalPaid
+          paymentArray[largestPaymentIndex].amount += adjustment
+        }
+      } else {
+        // Customer selected: allow partial payment (debt will be created)
+        if (totalPaid <= 0) {
+          showToast.showErrorToast("Please enter at least one payment amount")
+          return
+        }
+        // If payment exceeds total, that's fine (change will be given)
       }
       
       // Overpayment is allowed (for change), so we don't need to adjust or error on that
 
       // Process each cart item with all payment methods
+      const createdSaleIds: string[] = []
+      const token = localStorage.getItem("access_token") || ""
+      const apiBase = OpenAPI.BASE || import.meta.env.VITE_API_URL || ""
+      let firstSaleId: string | null = null
+      
       for (let itemIndex = 0; itemIndex < cart.length; itemIndex++) {
         const item = cart[itemIndex]
         const unitPrice = Number(item.product.selling_price)
@@ -345,7 +360,7 @@ function Sales() {
         const itemPaymentRatio = itemTotal / cartTotal
         const isLastItem = itemIndex === cart.length - 1
         
-        const itemPayments = paymentArray.map((payment, paymentIndex) => {
+        const itemPayments = paymentArray.map((payment) => {
           let amount = payment.amount * itemPaymentRatio
           
           // For the last item, ensure we use the remaining amount to avoid rounding errors
@@ -370,20 +385,20 @@ function Sales() {
         })
         
         // Ensure item payment totals match item total exactly (adjust largest payment if needed)
+        // But if customer is selected and partial payment, allow it
         const itemPaymentsTotal = itemPayments.reduce((sum, p) => sum + p.amount, 0)
-        const difference = itemTotal - itemPaymentsTotal
-        if (Math.abs(difference) > 0.001 && itemPayments.length > 0) {
+        const itemDifference = itemTotal - itemPaymentsTotal
+        
+        // Only adjust if no customer (full payment required) or if overpayment
+        if (!customerName && Math.abs(itemDifference) > 0.001 && itemPayments.length > 0) {
           // Adjust the largest payment to match exactly
           const largestPaymentIndex = itemPayments.reduce((maxIdx, p, idx) => 
             p.amount > itemPayments[maxIdx].amount ? idx : maxIdx, 0
           )
-          itemPayments[largestPaymentIndex].amount = Math.round((itemPayments[largestPaymentIndex].amount + difference) * 100) / 100
+          itemPayments[largestPaymentIndex].amount = Math.round((itemPayments[largestPaymentIndex].amount + itemDifference) * 100) / 100
         }
 
         // Use the new multi-payment endpoint
-        const token = await OpenAPI.TOKEN?.() || localStorage.getItem("access_token") || ""
-        const apiBase = OpenAPI.BASE || import.meta.env.VITE_API_URL || ""
-        
         const response = await fetch(`${apiBase}/api/v1/sales/multi-payment`, {
           method: "POST",
           headers: {
@@ -411,6 +426,56 @@ function Sales() {
           }
           throw new Error(errorMessage)
         }
+        
+        // Get sale ID from response
+        const saleData = await response.json()
+        if (saleData.id) {
+          createdSaleIds.push(saleData.id)
+          if (!firstSaleId) {
+            firstSaleId = saleData.id
+          }
+        }
+      }
+      
+      // Create debt if customer is selected and payment is less than total
+      if (customerName && totalPaid < cartTotal) {
+        const debtAmount = cartTotal - totalPaid
+        
+        try {
+          // Create one debt for the entire cart (linked to first sale)
+          const debtResponse = await fetch(`${apiBase}/api/v1/debts/`, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
+            },
+            body: JSON.stringify({
+              customer_name: customerName,
+              customer_contact: customerTel || null,
+              sale_id: firstSaleId || null,
+              amount: debtAmount,
+              amount_paid: 0,
+              balance: debtAmount,
+              debt_date: new Date().toISOString(),
+              due_date: null,
+              status: "pending",
+              notes: remarks || `Credit sale - ${cart.length} item(s), Balance: ${debtAmount.toFixed(2)}`,
+            }),
+          })
+          
+          if (!debtResponse.ok) {
+            const errorText = await debtResponse.text()
+            console.error("Failed to create debt:", errorText)
+            // Don't throw - sale was successful, debt creation is secondary
+            showToast.showErrorToast(`Sale completed but failed to record debt: ${errorText}`)
+          } else {
+            showToast.showSuccessToast(`Sale completed. Debt of ${debtAmount.toFixed(2)} recorded for ${customerName}`)
+          }
+        } catch (error: any) {
+          console.error("Error creating debt:", error)
+          // Don't throw - sale was successful
+          showToast.showErrorToast(`Sale completed but failed to record debt: ${error.message || "Unknown error"}`)
+        }
       }
 
       // Store the last sale ID for receipt printing (we'll get it from the response)
@@ -421,6 +486,8 @@ function Sales() {
       queryClient.invalidateQueries({ queryKey: ["today-summary"] })
       queryClient.invalidateQueries({ queryKey: ["search-products"] })
       queryClient.invalidateQueries({ queryKey: ["recent-receipts"] })
+      queryClient.invalidateQueries({ queryKey: ["debts-for-customers"] })
+      queryClient.invalidateQueries({ queryKey: ["recent-sales-for-customers"] })
 
       setIsPaymentModalOpen(false)
       setCart([])
@@ -445,7 +512,7 @@ function Sales() {
     try {
       await processPayment(payments)
       // Get the most recent sale for printing
-      const token = await OpenAPI.TOKEN?.() || localStorage.getItem("access_token") || ""
+      const token = localStorage.getItem("access_token") || ""
       const apiBase = OpenAPI.BASE || import.meta.env.VITE_API_URL || ""
       const lastSaleResponse = await fetch(`${apiBase}/api/v1/sales?limit=1`, {
         headers: {
@@ -485,10 +552,33 @@ function Sales() {
     setCustomerBalance(0)
   }
 
-  const handleSelectCustomer = (customer: { name: string; tel: string; balance: number }) => {
+  const handleSelectCustomer = async (customer: { name: string; tel: string; balance: number }) => {
     setCustomerName(customer.name)
     setCustomerTel(customer.tel)
     setCustomerBalance(customer.balance)
+    
+    // Fetch latest balance from API
+    try {
+      const token = localStorage.getItem("access_token") || ""
+      const apiBase = OpenAPI.BASE || import.meta.env.VITE_API_URL || ""
+      // URL encode the customer name properly
+      const encodedName = encodeURIComponent(customer.name)
+      const response = await fetch(`${apiBase}/api/v1/debts/customers/${encodedName}/balance`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      })
+      if (response.ok) {
+        const balanceData = await response.json()
+        setCustomerBalance(balanceData.total_balance || 0)
+      } else if (response.status === 404) {
+        // Customer has no debts yet, balance is 0
+        setCustomerBalance(0)
+      }
+    } catch (error) {
+      console.error("Failed to fetch customer balance:", error)
+      // Use the balance from customer object as fallback
+    }
   }
 
   const handleNewCustomerSave = (customer: { name: string; tel: string; balance: number }) => {
@@ -551,6 +641,8 @@ function Sales() {
         isProcessing={createSale.isPending}
         isLoadingPaymentMethods={isLoadingPaymentMethods}
         paymentMethodsError={paymentMethodsError}
+        customerName={customerName || undefined}
+        customerBalance={customerBalance}
       />
 
       {/* Main Content Area */}
@@ -665,10 +757,6 @@ function Sales() {
         isOpen={isCustomerSearchModalOpen}
         onClose={() => setIsCustomerSearchModalOpen(false)}
         onSelectCustomer={handleSelectCustomer}
-        onNewCustomer={() => {
-          setIsCustomerSearchModalOpen(false)
-          setIsNewCustomerModalOpen(true)
-        }}
       />
 
       <NewCustomerModal

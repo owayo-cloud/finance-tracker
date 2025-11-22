@@ -1,11 +1,9 @@
 import {
-  Box,
   Button,
   Flex,
   Input,
   Text,
   VStack,
-  HStack,
 } from "@chakra-ui/react"
 import {
   DialogRoot,
@@ -78,7 +76,7 @@ export function CreditNoteModal({
 
       // Create a sale with Credit Note payment method
       // Note: This creates a negative sale or refund entry
-      const token = await OpenAPI.TOKEN?.() || localStorage.getItem("access_token") || ""
+      const token = localStorage.getItem("access_token") || ""
       const apiBase = OpenAPI.BASE || import.meta.env.VITE_API_URL || ""
       
       // For credit notes, we'll create a special sale entry

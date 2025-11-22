@@ -91,7 +91,7 @@ export function RecentReceiptsModal({
     // Filter by sales rep (cashier) if specified
     if (!salesRepFilter) return true
     const filter = salesRepFilter.toLowerCase()
-    const cashierName = receipt.created_by?.full_name?.toLowerCase() || receipt.created_by?.username?.toLowerCase() || ""
+    const cashierName = (receipt as any).created_by?.full_name?.toLowerCase() || (receipt as any).created_by?.username?.toLowerCase() || ""
     return cashierName.includes(filter)
   })
 
@@ -256,7 +256,7 @@ export function RecentReceiptsModal({
                         <Table.Cell fontWeight="medium">{receipt.id.slice(-6)}</Table.Cell>
                         <Table.Cell>{formatDate(receipt.sale_date)}</Table.Cell>
                         <Table.Cell fontWeight="medium">Ksh {formatCurrency(parseFloat(receipt.total_amount))}</Table.Cell>
-                        <Table.Cell>{receipt.created_by?.full_name || receipt.created_by?.username || "-"}</Table.Cell>
+                        <Table.Cell>{(receipt as any).created_by?.full_name || (receipt as any).created_by?.username || "-"}</Table.Cell>
                         <Table.Cell>{receipt.notes || "-"}</Table.Cell>
                       </Table.Row>
                     ))

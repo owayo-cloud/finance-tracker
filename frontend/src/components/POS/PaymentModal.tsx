@@ -20,6 +20,7 @@ import {
 } from "@/components/ui/dialog"
 import { CartItem } from "./types"
 import { useMemo, useState } from "react"
+import { formatCurrency } from "./utils"
 
 interface PaymentMethod {
   id: string
@@ -38,6 +39,8 @@ interface PaymentModalProps {
   isProcessing?: boolean
   isLoadingPaymentMethods?: boolean
   paymentMethodsError?: Error | null
+  customerName?: string
+  customerBalance?: number
 }
 
 export function PaymentModal({
@@ -51,6 +54,8 @@ export function PaymentModal({
   isProcessing = false,
   isLoadingPaymentMethods = false,
   paymentMethodsError = null,
+  customerName,
+  customerBalance = 0,
 }: PaymentModalProps) {
   const [paymentAmounts, setPaymentAmounts] = useState<Record<string, number>>({})
   const [paymentRefs, setPaymentRefs] = useState<Record<string, string>>({})
@@ -157,8 +162,13 @@ export function PaymentModal({
         <DialogCloseTrigger />
         <DialogHeader bg="#3b82f6" color="white" py={3} px={6}>
           <DialogTitle color="white" fontSize="md" fontWeight="600">
-            Payment Details :: {totalAmount.toFixed(1)}
+            Payment Details :: {formatCurrency(totalAmount)}
           </DialogTitle>
+          {customerName && (
+            <Text fontSize="sm" color="white" opacity={0.9} mt={1}>
+              Customer: {customerName} {customerBalance > 0 && `(Balance: ${formatCurrency(customerBalance)})`}
+            </Text>
+          )}
         </DialogHeader>
         <DialogBody p={0} overflow="hidden">
           <Flex h="calc(90vh - 120px)" overflow="hidden">
@@ -446,7 +456,7 @@ export function PaymentModal({
                     color="white"
                     _hover={{ bg: "#16a34a" }}
                     onClick={handleSaveAndPrint}
-                    disabled={totalPaid < totalAmount || isProcessing}
+                    disabled={totalPaid <= 0 || isProcessing}
                     loading={isProcessing}
                     flex={1}
                   >
@@ -458,13 +468,18 @@ export function PaymentModal({
                     color="white"
                     _hover={{ bg: "#2563eb" }}
                     onClick={handleSave}
-                    disabled={totalPaid < totalAmount || isProcessing}
+                    disabled={totalPaid <= 0 || isProcessing}
                     loading={isProcessing}
                     flex={1}
                   >
                     Save Only
                   </Button>
                 </HStack>
+                {totalPaid < totalAmount && totalPaid > 0 && (
+                  <Text fontSize="xs" color="orange.500" textAlign="center" mt={2}>
+                    Partial payment: {formatCurrency(totalAmount - totalPaid)} will be recorded as debt
+                  </Text>
+                )}
               </VStack>
             </Box>
           </Flex>

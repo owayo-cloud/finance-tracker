@@ -1,4 +1,4 @@
-import { Badge, Container, Flex, Heading, Table, Text } from "@chakra-ui/react"
+import { Container, Flex, Heading, Table, Text } from "@chakra-ui/react"
 import { useQuery } from "@tanstack/react-query"
 import { createFileRoute, redirect } from "@tanstack/react-router"
 import type { ExpenseCategoryPublic } from "@/client"

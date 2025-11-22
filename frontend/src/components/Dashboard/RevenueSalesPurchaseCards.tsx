@@ -15,7 +15,7 @@ function calculatePercentageChange(current: number, previous: number): number {
   return ((current - previous) / previous) * 100
 }
 
-export function RevenueSalesPurchaseCards({ totalRevenue, isMounted }: RevenueSalesPurchaseCardsProps) {
+export function RevenueSalesPurchaseCards({ isMounted }: RevenueSalesPurchaseCardsProps) {
   const today = new Date()
   const firstDayOfMonth = new Date(today.getFullYear(), today.getMonth(), 1)
   const lastDayOfLastMonth = new Date(today.getFullYear(), today.getMonth(), 0)
@@ -82,8 +82,8 @@ export function RevenueSalesPurchaseCards({ totalRevenue, isMounted }: RevenueSa
   const inventoryValue = useMemo(() => {
     if (!productsData?.data) return 0
     return productsData.data.reduce((sum, product) => {
-      const stock = product.stock_quantity || 0
-      const costPrice = parseFloat(product.cost_price || "0")
+      const stock = product.current_stock || 0
+      const costPrice = parseFloat(product.buying_price?.toString() || "0")
       return sum + (stock * costPrice)
     }, 0)
   }, [productsData])

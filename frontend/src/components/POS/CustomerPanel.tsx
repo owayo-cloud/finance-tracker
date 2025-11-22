@@ -3,6 +3,7 @@ import { FiPlus, FiEye, FiChevronLeft, FiChevronRight, FiPlay } from "react-icon
 import { SuspendedSale } from "./types"
 import { ThemedSelect } from "./ThemedSelect"
 import { formatCurrency } from "./utils"
+import useAuth from "@/hooks/useAuth"
 
 interface CustomerPanelProps {
   activeTab: "customer" | "suspended"
@@ -53,6 +54,9 @@ export function CustomerPanel({
   selectedReceiptId,
   onPreviewReceipt,
 }: CustomerPanelProps) {
+  const { user: currentUser } = useAuth()
+  const isAdmin = currentUser?.is_superuser || false
+  
   return (
     <Box
       w={{ base: "100%", lg: "400px" }}
@@ -99,7 +103,7 @@ export function CustomerPanel({
       {activeTab === "customer" ? (
         <Box p={{ base: 3, md: 4 }} flex={1} display="flex" flexDirection="column" overflowY="auto" minH={0}>
           {/* Customer Action Buttons */}
-          <Grid templateColumns="repeat(3, 1fr)" gap={2} mb={4}>
+          <Grid templateColumns={isAdmin ? "repeat(3, 1fr)" : "repeat(2, 1fr)"} gap={2} mb={4}>
             <Button
               bg="#3b82f6"
               color="white"
@@ -114,27 +118,29 @@ export function CustomerPanel({
             >
               Select Customer
             </Button>
-            <Button
-              bg="#3b82f6"
-              color="white"
-              size="sm"
-              _hover={{ bg: "#2563eb" }}
-              fontWeight="600"
-              fontSize="xs"
-              whiteSpace="nowrap"
-              overflow="hidden"
-              textOverflow="ellipsis"
-              display="flex"
-              alignItems="center"
-              justifyContent="center"
-              minW={0}
-              onClick={onNewCustomer}
-            >
-              <Icon as={FiPlus} mr={1} fontSize="xs" flexShrink={0} />
-              <Text as="span" overflow="hidden" textOverflow="ellipsis" whiteSpace="nowrap">
-                New Customer
-              </Text>
-            </Button>
+            {isAdmin && (
+              <Button
+                bg="#3b82f6"
+                color="white"
+                size="sm"
+                _hover={{ bg: "#2563eb" }}
+                fontWeight="600"
+                fontSize="xs"
+                whiteSpace="nowrap"
+                overflow="hidden"
+                textOverflow="ellipsis"
+                display="flex"
+                alignItems="center"
+                justifyContent="center"
+                minW={0}
+                onClick={onNewCustomer}
+              >
+                <Icon as={FiPlus} mr={1} fontSize="xs" flexShrink={0} />
+                <Text as="span" overflow="hidden" textOverflow="ellipsis" whiteSpace="nowrap">
+                  New Customer
+                </Text>
+              </Button>
+            )}
             <Button
               bg="#3b82f6"
               color="white"

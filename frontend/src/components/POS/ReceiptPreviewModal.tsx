@@ -1,7 +1,6 @@
 import {
   Box,
   Button,
-  Flex,
   Text,
   HStack,
   Table,
@@ -52,7 +51,7 @@ export function ReceiptPreviewModal({
     queryKey: ["sale-payments", receiptId],
     queryFn: async () => {
       if (!receiptId) return []
-      const token = await OpenAPI.TOKEN?.() || localStorage.getItem("access_token") || ""
+      const token = localStorage.getItem("access_token") || ""
       const apiBase = OpenAPI.BASE || import.meta.env.VITE_API_URL || ""
       const response = await fetch(
         `${apiBase}/api/v1/sales/${receiptId}/payments`,
@@ -110,8 +109,8 @@ export function ReceiptPreviewModal({
                       <VStack gap={1.5} align="center" fontSize="xs" color={{ base: "#9ca3af", _light: "#6b7280" }}>
                         <Text fontWeight="medium">Receipt No: <Text as="span" fontWeight="bold" color={{ base: "#ffffff", _light: "#1a1d29" }}>{receipt.id.slice(-6)}</Text></Text>
                         <Text>Date: {formatDate(receipt.sale_date)}</Text>
-                        {receipt.created_by && (
-                          <Text>Cashier: <Text as="span" fontWeight="medium" color={{ base: "#ffffff", _light: "#1a1d29" }}>{receipt.created_by.full_name || receipt.created_by.username || "Unknown"}</Text></Text>
+                        {(receipt as any).created_by && (
+                          <Text>Cashier: <Text as="span" fontWeight="medium" color={{ base: "#ffffff", _light: "#1a1d29" }}>{(receipt as any).created_by.full_name || (receipt as any).created_by.username || "Unknown"}</Text></Text>
                         )}
                         {receipt.notes && (
                           <Text mt={1} pt={2} borderTop="1px solid" borderColor={{ base: "rgba(255, 255, 255, 0.1)", _light: "#e5e7eb" }} w="full" textAlign="center">
@@ -280,7 +279,7 @@ export function ReceiptPreviewModal({
                                 <div class="receipt-info">
                                   <p><strong>Receipt No:</strong> ${receipt.id.slice(-6)}</p>
                                   <p><strong>Date:</strong> ${formatDate(receipt.sale_date)}</p>
-                                  ${receipt.created_by ? `<p><strong>Cashier:</strong> ${receipt.created_by.full_name || receipt.created_by.username || "Unknown"}</p>` : ""}
+                                  ${(receipt as any).created_by ? `<p><strong>Cashier:</strong> ${(receipt as any).created_by.full_name || (receipt as any).created_by.username || "Unknown"}</p>` : ""}
                                   ${receipt.notes ? `<p style="margin-top: 8px; padding-top: 8px; border-top: 1px solid #ddd;"><strong>Remarks:</strong> ${receipt.notes}</p>` : ""}
                                 </div>
                                 <table>

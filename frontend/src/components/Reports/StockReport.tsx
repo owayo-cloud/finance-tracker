@@ -9,7 +9,7 @@ import {
   Text,
   VStack,
 } from "@chakra-ui/react"
-import { FiDownload, FiLayers } from "react-icons/fi"
+import { FiDownload } from "react-icons/fi"
 import { formatCurrency, downloadCSV } from "./utils"
 
 interface StockReportProps {

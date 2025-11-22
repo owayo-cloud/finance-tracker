@@ -8,7 +8,7 @@ interface SalesChartProps {
   totalRevenue: number
 }
 
-export function SalesChart({ totalRevenue }: SalesChartProps) {
+export function SalesChart({}: SalesChartProps) {
   // Get last 7 days of sales (including today)
   const today = new Date()
   today.setHours(23, 59, 59, 999) // End of today
@@ -67,9 +67,7 @@ export function SalesChart({ totalRevenue }: SalesChartProps) {
 
   const maxAmount = Math.max(...dailySales.map((d) => d.amount), 1)
   const chartHeight = 200
-  const chartWidth = 100
   const barWidth = 30
-  const spacing = 10
 
   return (
     <Card.Root
@@ -128,7 +126,7 @@ export function SalesChart({ totalRevenue }: SalesChartProps) {
                     px={2}
                     pb={2}
                   >
-                    {dailySales.map((day, index) => {
+                    {dailySales.map((day) => {
                       const calculatedHeight = maxAmount > 0 ? (day.amount / maxAmount) * (chartHeight - 40) : 0
                       // Ensure minimum height for visibility (at least 4px if there's any amount)
                       const barHeight = day.amount > 0 && calculatedHeight < 4 ? 4 : calculatedHeight

@@ -3,7 +3,7 @@ import { createFileRoute } from "@tanstack/react-router"
 import { useState, useMemo } from "react"
 import { useQuery } from "@tanstack/react-query"
 import { FiBarChart2, FiFileText, FiLayers, FiAlertCircle } from "react-icons/fi"
-import { SalesService, ExpensesService, ProductsService } from "@/client"
+import { SalesService, ExpensesService } from "@/client"
 import { DateFilters } from "@/components/Reports/DateFilters"
 import { SummaryCards } from "@/components/Reports/SummaryCards"
 import { SalesBreakdown } from "@/components/Reports/SalesBreakdown"
@@ -25,11 +25,34 @@ function Reports() {
   const [endDate, setEndDate] = useState<string>(today.toISOString().split("T")[0])
   const [activeTab, setActiveTab] = useState<string>("overview")
 
-  // Fetch sales data
+  // Fetch sales summary from backend
   const {
-    data: salesData,
+    data: salesSummary,
     isLoading: salesLoading,
     refetch: refetchSales,
+  } = useQuery({
+    queryKey: ["sales-summary", startDate, endDate],
+    queryFn: async () => {
+      const token = localStorage.getItem("access_token") || ""
+      const apiBase = import.meta.env.VITE_API_URL || ""
+      const startParam = startDate ? `&start_date=${startDate}` : ""
+      const endParam = endDate ? `&end_date=${endDate}` : ""
+      const response = await fetch(`${apiBase}/api/v1/analytics/sales-summary?${startParam}${endParam}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      })
+      if (!response.ok) {
+        throw new Error("Failed to fetch sales summary")
+      }
+      return response.json()
+    },
+  })
+
+  // Fetch sales data for breakdown components (still needed for detailed views)
+  const {
+    data: salesData,
+    isLoading: salesDataLoading,
   } = useQuery({
     queryKey: ["sales-report", startDate, endDate],
     queryFn: () =>
@@ -67,146 +90,47 @@ function Reports() {
       }),
   })
 
-  // Fetch products for stock report
+  // Fetch stock summary from backend
   const {
-    data: productsData,
+    data: stockSummary,
     isLoading: productsLoading,
     refetch: refetchProducts,
   } = useQuery({
-    queryKey: ["products-stock"],
-    queryFn: () => ProductsService.readProducts({ skip: 0, limit: 1000 }),
+    queryKey: ["stock-summary"],
+    queryFn: async () => {
+      const token = localStorage.getItem("access_token") || ""
+      const apiBase = import.meta.env.VITE_API_URL || ""
+      const response = await fetch(`${apiBase}/api/v1/analytics/stock-summary`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      })
+      if (!response.ok) {
+        throw new Error("Failed to fetch stock summary")
+      }
+      return response.json()
+    },
   })
 
-  // Calculate sales summary
-  const salesSummary = useMemo(() => {
-    if (!salesData?.data) return null
-
-    const sales = salesData.data
-    const totalSales = sales.length
-    const totalAmount = sales.reduce(
-      (sum, sale) => sum + parseFloat(sale.total_amount || "0"),
-      0
-    )
-    const totalItems = sales.reduce((sum, sale) => sum + sale.quantity, 0)
-
-    // Group by payment method
-    const paymentMethodBreakdown: Record<
-      string,
-      { count: number; amount: number }
-    > = {}
-    sales.forEach((sale) => {
-      const methodName = sale.payment_method?.name || "Unknown"
-      if (!paymentMethodBreakdown[methodName]) {
-        paymentMethodBreakdown[methodName] = { count: 0, amount: 0 }
+  // Fetch balance sheet from backend
+  const { data: balanceSheet } = useQuery({
+    queryKey: ["balance-sheet", startDate, endDate],
+    queryFn: async () => {
+      const token = localStorage.getItem("access_token") || ""
+      const apiBase = import.meta.env.VITE_API_URL || ""
+      const startParam = startDate ? `&start_date=${startDate}` : ""
+      const endParam = endDate ? `&end_date=${endDate}` : ""
+      const response = await fetch(`${apiBase}/api/v1/analytics/balance-sheet?${startParam}${endParam}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      })
+      if (!response.ok) {
+        throw new Error("Failed to fetch balance sheet")
       }
-      paymentMethodBreakdown[methodName].count++
-      paymentMethodBreakdown[methodName].amount += parseFloat(
-        sale.total_amount || "0"
-      )
-    })
-
-    // Group by cashier
-    const cashierBreakdown: Record<string, { count: number; amount: number }> =
-      {}
-    sales.forEach((sale: any) => {
-      const cashierName =
-        sale.created_by?.full_name || sale.created_by?.username || "Unknown"
-      if (!cashierBreakdown[cashierName]) {
-        cashierBreakdown[cashierName] = { count: 0, amount: 0 }
-      }
-      cashierBreakdown[cashierName].count++
-      cashierBreakdown[cashierName].amount += parseFloat(
-        sale.total_amount || "0"
-      )
-    })
-
-    return {
-      totalSales,
-      totalAmount,
-      totalItems,
-      averageSale: totalSales > 0 ? totalAmount / totalSales : 0,
-      paymentMethodBreakdown,
-      cashierBreakdown,
-    }
-  }, [salesData])
-
-  // Calculate stock inventory value
-  const stockSummary = useMemo(() => {
-    if (!productsData?.data) return null
-
-    const products = productsData.data
-    let totalInventoryValue = 0
-    let totalProducts = 0
-    let lowStockCount = 0
-    let outOfStockCount = 0
-
-    products.forEach((product) => {
-      const stock = product.current_stock || 0
-      const buyingPrice = parseFloat(product.buying_price?.toString() || "0")
-      totalInventoryValue += stock * buyingPrice
-      totalProducts++
-      if (stock === 0) {
-        outOfStockCount++
-      } else if (
-        product.reorder_level &&
-        stock <= product.reorder_level
-      ) {
-        lowStockCount++
-      }
-    })
-
-    return {
-      totalProducts,
-      totalInventoryValue,
-      lowStockCount,
-      outOfStockCount,
-      products: products.map((p) => ({
-        id: p.id,
-        name: p.name,
-        category: p.category?.name || "Uncategorized",
-        currentStock: p.current_stock || 0,
-        buyingPrice: parseFloat(p.buying_price?.toString() || "0"),
-        sellingPrice: parseFloat(p.selling_price?.toString() || "0"),
-        inventoryValue:
-          (p.current_stock || 0) * parseFloat(p.buying_price?.toString() || "0"),
-        reorderLevel: p.reorder_level || 0,
-        status: p.status?.name || "Unknown",
-      })),
-    }
-  }, [productsData])
-
-  // Calculate balance sheet
-  const balanceSheet = useMemo(() => {
-    if (!salesSummary || !expenseSummary || !stockSummary) return null
-
-    // Assets
-    const inventoryValue = stockSummary.totalInventoryValue
-    const cashAndReceivables = salesSummary.totalAmount // Simplified: assume all sales are cash/receivables
-    const totalAssets = inventoryValue + cashAndReceivables
-
-    // Liabilities
-    const expenseTotal = typeof expenseSummary === 'object' && expenseSummary !== null && 'total_amount' in expenseSummary
-      ? (expenseSummary as any).total_amount
-      : 0
-    const totalExpenses = parseFloat(expenseTotal?.toString() || "0")
-    const totalLiabilities = totalExpenses
-
-    // Equity
-    const equity = totalAssets - totalLiabilities
-
-    return {
-      assets: {
-        inventory: inventoryValue,
-        cashAndReceivables: cashAndReceivables,
-        total: totalAssets,
-      },
-      liabilities: {
-        expenses: totalExpenses,
-        total: totalLiabilities,
-      },
-      equity: equity,
-    }
-  }, [salesSummary, expenseSummary, stockSummary])
+      return response.json()
+    },
+  })
 
   // Calculate net profit
   const netProfit = useMemo(() => {
@@ -214,10 +138,10 @@ function Reports() {
     const expenseTotal = typeof expenseSummary === 'object' && expenseSummary !== null && 'total_amount' in expenseSummary
       ? parseFloat((expenseSummary as any).total_amount?.toString() || "0")
       : 0
-    return salesSummary.totalAmount - expenseTotal
+    return salesSummary.total_amount - expenseTotal
   }, [salesSummary, expenseSummary])
 
-  const isLoading = salesLoading || expensesLoading || productsLoading
+  const isLoading = salesLoading || salesDataLoading || expensesLoading || productsLoading
 
   const handleRefresh = () => {
     refetchSales()
@@ -287,7 +211,21 @@ function Reports() {
                 <VStack gap={6} align="stretch">
                   {salesSummary && salesData?.data && (
                     <SalesBreakdown
-                      salesSummary={salesSummary}
+                      salesSummary={{
+                        totalAmount: salesSummary.total_amount,
+                        paymentMethodBreakdown: Object.fromEntries(
+                          salesSummary.payment_method_breakdown.map((pm: any) => [
+                            pm.payment_method,
+                            { count: pm.count, amount: pm.amount }
+                          ])
+                        ),
+                        cashierBreakdown: Object.fromEntries(
+                          salesSummary.cashier_breakdown.map((c: any) => [
+                            c.cashier_name,
+                            { count: c.count, amount: c.amount }
+                          ])
+                        ),
+                      }}
                       salesData={salesData.data}
                       startDate={startDate}
                       endDate={endDate}
@@ -314,7 +252,18 @@ function Reports() {
               <Tabs.Content value="balance">
                 {balanceSheet ? (
                   <BalanceSheet
-                    balanceSheet={balanceSheet}
+                    balanceSheet={{
+                      assets: {
+                        inventory: balanceSheet.assets.inventory,
+                        cashAndReceivables: balanceSheet.assets.cash_and_receivables,
+                        total: balanceSheet.assets.total,
+                      },
+                      liabilities: {
+                        expenses: balanceSheet.liabilities.expenses,
+                        total: balanceSheet.liabilities.total,
+                      },
+                      equity: balanceSheet.equity,
+                    }}
                     startDate={startDate}
                     endDate={endDate}
                   />
@@ -333,7 +282,23 @@ function Reports() {
               {/* Stock Report Tab */}
               <Tabs.Content value="stock">
                 {stockSummary ? (
-                  <StockReport stockSummary={stockSummary} />
+                  <StockReport stockSummary={{
+                    totalProducts: stockSummary.total_products,
+                    totalInventoryValue: stockSummary.total_inventory_value,
+                    lowStockCount: stockSummary.low_stock_count,
+                    outOfStockCount: stockSummary.out_of_stock_count,
+                    products: stockSummary.products.map((p: any) => ({
+                      id: p.id,
+                      name: p.name,
+                      category: p.category,
+                      currentStock: p.current_stock,
+                      buyingPrice: p.buying_price,
+                      sellingPrice: p.selling_price,
+                      inventoryValue: p.inventory_value,
+                      reorderLevel: p.reorder_level,
+                      status: p.status,
+                    })),
+                  }} />
                 ) : (
                   <Alert.Root status="info">
                     <Alert.Indicator>

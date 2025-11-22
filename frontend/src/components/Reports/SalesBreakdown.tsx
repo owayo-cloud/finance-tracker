@@ -1,5 +1,5 @@
 import { Badge, Button, Card, Grid, HStack, Heading, Table, VStack } from "@chakra-ui/react"
-import { FiDownload, FiPrinter, FiShoppingCart, FiBarChart2 } from "react-icons/fi"
+import { FiDownload, FiPrinter } from "react-icons/fi"
 import { formatCurrency, downloadCSV, formatDate } from "./utils"
 
 interface SalesBreakdownProps {

@@ -1,8 +1,6 @@
 import { Box, Grid, HStack, VStack, Text, Icon } from "@chakra-ui/react"
 import { FiArrowUp, FiArrowDown } from "react-icons/fi"
 import { useQuery } from "@tanstack/react-query"
-import { useMemo } from "react"
-import { ExpensesService, SalesService } from "@/client"
 import { formatCurrency } from "./utils"
 
 interface StatsCardsProps {
@@ -10,144 +8,34 @@ interface StatsCardsProps {
   isMounted: boolean
 }
 
-function calculatePercentageChange(current: number, previous: number): number {
-  if (previous === 0) return current > 0 ? 100 : 0
-  return ((current - previous) / previous) * 100
-}
-
-export function StatsCards({ totalRevenue, isMounted }: StatsCardsProps) {
-  const today = new Date()
-  const firstDayOfMonth = new Date(today.getFullYear(), today.getMonth(), 1)
-  const lastDayOfLastMonth = new Date(today.getFullYear(), today.getMonth(), 0)
-  const firstDayOfLastMonth = new Date(today.getFullYear(), today.getMonth() - 1, 1)
-  
-  const yesterday = new Date(today)
-  yesterday.setDate(yesterday.getDate() - 1)
-  const lastWeekStart = new Date(today)
-  lastWeekStart.setDate(lastWeekStart.getDate() - 7)
-  const lastWeekEnd = new Date(today)
-  lastWeekEnd.setDate(lastWeekEnd.getDate() - 1)
-
-  // Fetch current month expenses
-  const { data: currentMonthExpenses } = useQuery({
-    queryKey: ["expenseSummary", firstDayOfMonth.toISOString().split("T")[0], today.toISOString().split("T")[0]],
-    queryFn: () =>
-      ExpensesService.getExpenseSummary({
-        startDate: firstDayOfMonth.toISOString().split("T")[0],
-        endDate: today.toISOString().split("T")[0],
-      }),
+export function StatsCards({ isMounted }: StatsCardsProps) {
+  // Fetch dashboard statistics from backend
+  const { data: dashboardStats } = useQuery({
+    queryKey: ["dashboard-stats"],
+    queryFn: async () => {
+      const token = localStorage.getItem("access_token") || ""
+      const apiBase = import.meta.env.VITE_API_URL || ""
+      const response = await fetch(`${apiBase}/api/v1/analytics/dashboard-stats`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      })
+      if (!response.ok) {
+        throw new Error("Failed to fetch dashboard statistics")
+      }
+      return response.json()
+    },
   })
 
-  // Fetch previous month expenses
-  const { data: previousMonthExpenses } = useQuery({
-    queryKey: ["expenseSummary", firstDayOfLastMonth.toISOString().split("T")[0], lastDayOfLastMonth.toISOString().split("T")[0]],
-    queryFn: () =>
-      ExpensesService.getExpenseSummary({
-        startDate: firstDayOfLastMonth.toISOString().split("T")[0],
-        endDate: lastDayOfLastMonth.toISOString().split("T")[0],
-      }),
-  })
-
-  // Fetch current month sales
-  const { data: currentMonthSales } = useQuery({
-    queryKey: ["sales-current-month", firstDayOfMonth.toISOString().split("T")[0], today.toISOString().split("T")[0]],
-    queryFn: () =>
-      SalesService.readSales({
-        skip: 0,
-        limit: 1000,
-        startDate: firstDayOfMonth.toISOString().split("T")[0],
-        endDate: today.toISOString().split("T")[0],
-      }),
-  })
-
-  // Fetch previous month sales
-  const { data: previousMonthSales } = useQuery({
-    queryKey: ["sales-previous-month", firstDayOfLastMonth.toISOString().split("T")[0], lastDayOfLastMonth.toISOString().split("T")[0]],
-    queryFn: () =>
-      SalesService.readSales({
-        skip: 0,
-        limit: 1000,
-        startDate: firstDayOfLastMonth.toISOString().split("T")[0],
-        endDate: lastDayOfLastMonth.toISOString().split("T")[0],
-      }),
-  })
-
-  // Fetch today's sales
-  const { data: todaySales } = useQuery({
-    queryKey: ["sales-today", today.toISOString().split("T")[0]],
-    queryFn: () =>
-      SalesService.readSales({
-        skip: 0,
-        limit: 1000,
-        startDate: today.toISOString().split("T")[0],
-        endDate: today.toISOString().split("T")[0],
-      }),
-  })
-
-  // Fetch yesterday's sales
-  const { data: yesterdaySales } = useQuery({
-    queryKey: ["sales-yesterday", yesterday.toISOString().split("T")[0]],
-    queryFn: () =>
-      SalesService.readSales({
-        skip: 0,
-        limit: 1000,
-        startDate: yesterday.toISOString().split("T")[0],
-        endDate: yesterday.toISOString().split("T")[0],
-      }),
-  })
-
-  // Calculate values
-  const currentMonthRevenue = useMemo(() => {
-    if (!currentMonthSales?.data) return 0
-    return currentMonthSales.data.reduce(
-      (sum, sale) => sum + parseFloat(sale.total_amount || "0"),
-      0
-    )
-  }, [currentMonthSales])
-
-  const previousMonthRevenue = useMemo(() => {
-    if (!previousMonthSales?.data) return 0
-    return previousMonthSales.data.reduce(
-      (sum, sale) => sum + parseFloat(sale.total_amount || "0"),
-      0
-    )
-  }, [previousMonthSales])
-
-  const todayRevenue = useMemo(() => {
-    if (!todaySales?.data) return 0
-    return todaySales.data.reduce(
-      (sum, sale) => sum + parseFloat(sale.total_amount || "0"),
-      0
-    )
-  }, [todaySales])
-
-  const yesterdayRevenue = useMemo(() => {
-    if (!yesterdaySales?.data) return 0
-    return yesterdaySales.data.reduce(
-      (sum, sale) => sum + parseFloat(sale.total_amount || "0"),
-      0
-    )
-  }, [yesterdaySales])
-
-  const totalExpenses = useMemo(() => {
-    if (!currentMonthExpenses || typeof currentMonthExpenses !== 'object' || !('total_amount' in currentMonthExpenses)) return 0
-    return Number((currentMonthExpenses as any).total_amount) || 0
-  }, [currentMonthExpenses])
-
-  const previousMonthExpensesValue = useMemo(() => {
-    if (!previousMonthExpenses || typeof previousMonthExpenses !== 'object' || !('total_amount' in previousMonthExpenses)) return 0
-    return Number((previousMonthExpenses as any).total_amount) || 0
-  }, [previousMonthExpenses])
-
-  // Calculate percentages
-  const revenueChange = calculatePercentageChange(currentMonthRevenue, previousMonthRevenue)
-  const dailyIncomeChange = calculatePercentageChange(todayRevenue, yesterdayRevenue)
-  const expenseChange = calculatePercentageChange(totalExpenses, previousMonthExpensesValue)
-  
-  // Potential growth = Net profit (Revenue - Expenses)
-  const currentNetProfit = currentMonthRevenue - totalExpenses
-  const previousNetProfit = previousMonthRevenue - previousMonthExpensesValue
-  const potentialGrowthChange = calculatePercentageChange(currentNetProfit, previousNetProfit)
+  // Use backend-calculated values
+  const currentMonthRevenue = dashboardStats?.current_month_revenue || 0
+  const todayRevenue = dashboardStats?.today_revenue || 0
+  const totalExpenses = dashboardStats?.current_month_expenses || 0
+  const revenueChange = dashboardStats?.revenue_change_percent || 0
+  const dailyIncomeChange = dashboardStats?.daily_income_change_percent || 0
+  const expenseChange = dashboardStats?.expense_change_percent || 0
+  const currentNetProfit = dashboardStats?.net_profit || 0
+  const potentialGrowthChange = dashboardStats?.net_profit_change_percent || 0
 
   return (
     <Box 

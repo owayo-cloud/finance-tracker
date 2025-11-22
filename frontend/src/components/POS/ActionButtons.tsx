@@ -17,6 +17,8 @@ interface ActionButtonsProps {
   onSuspendSale: () => void
   onResumeSale: () => void
   onCompleteSale: () => void
+  onCreditNote?: () => void
+  onCashMovement?: () => void
   cartLength: number
   selectedSaleId: string | null
   isPending?: boolean
@@ -28,6 +30,8 @@ export function ActionButtons({
   onSuspendSale,
   onResumeSale,
   onCompleteSale,
+  onCreditNote,
+  onCashMovement,
   cartLength,
   selectedSaleId,
   isPending = false,
@@ -55,11 +59,23 @@ export function ActionButtons({
           <Icon as={FiRefreshCw} mr={2} />
           Reset
         </Button>
-        <Button bg="#14b8a6" color="white" _hover={{ bg: "#0d9488" }} size="sm">
+        <Button 
+          bg="#14b8a6" 
+          color="white" 
+          _hover={{ bg: "#0d9488" }} 
+          size="sm"
+          onClick={onCreditNote}
+        >
           <Icon as={FiFileText} mr={2} />
           Add Credit Note (F2)
         </Button>
-        <Button bg="#14b8a6" color="white" _hover={{ bg: "#0d9488" }} size="sm">
+        <Button 
+          bg="#14b8a6" 
+          color="white" 
+          _hover={{ bg: "#0d9488" }} 
+          size="sm"
+          onClick={onCashMovement}
+        >
           <Icon as={FiDollarSign} mr={2} />
           Cash Movement (F1)
         </Button>

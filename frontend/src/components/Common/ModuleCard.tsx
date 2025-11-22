@@ -24,13 +24,14 @@ const ModuleCard = ({
   const content = (
     <Card.Root
       variant="outline"
-      bg={{ base: "gray.800", _light: "white" }}
-      borderColor={{ base: "gray.700", _light: "gray.200" }}
+      bg="bg.surface"
+      borderColor="border.card"
+      borderWidth="1px"
       _hover={{
         shadow: disabled ? "none" : "md",
         transform: disabled ? "none" : "translateY(-2px)",
-        borderColor: disabled ? undefined : "blue.500",
-        bg: disabled ? undefined : { base: "gray.750", _light: "gray.50" },
+        borderColor: disabled ? "border.card" : { base: "rgba(59, 130, 246, 0.4)", _light: "#3b82f6" },
+        bg: disabled ? undefined : "bg.elevated",
       }}
       transition="all 0.2s"
       cursor={disabled ? "not-allowed" : "pointer"}

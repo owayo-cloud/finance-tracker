@@ -14,11 +14,8 @@ import {
 import { useMutation, useQueryClient } from "@tanstack/react-query"
 import { useState } from "react"
 import { type SubmitHandler, useForm } from "react-hook-form"
-import { FiUser, FiMail, FiAtSign } from "react-icons/fi"
-
 import {
   type ApiError,
-  type UserPublic,
   UsersService,
   type UserUpdateMe,
 } from "@/client"

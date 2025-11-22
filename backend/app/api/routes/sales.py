@@ -368,15 +368,27 @@ def create_sale_with_multiple_payments(
         if primary_payment_method_id is None:
             primary_payment_method_id = payment_method_id
     
-    # Validate total payment amount (allow overpayment for change, but not underpayment)
+    # Validate total payment amount
     # Convert sale_in.total_amount to Decimal for comparison
     sale_total_amount = Decimal(str(sale_in.total_amount))
     payment_difference = total_payment_amount - sale_total_amount
-    if payment_difference < -Decimal("0.01"):  # Underpayment not allowed
-        raise HTTPException(
-            status_code=400,
-            detail=f"Total payment amount ({total_payment_amount}) is less than sale total ({sale_total_amount}). Underpayment: {abs(payment_difference)}"
-        )
+    
+    # If customer is provided, allow partial payment (debt will be created)
+    # Otherwise, require full payment
+    if sale_in.customer_name:
+        # Customer provided: allow partial payment (minimum 0.01)
+        if total_payment_amount < Decimal("0.01"):
+            raise HTTPException(
+                status_code=400,
+                detail="At least 0.01 must be paid. Remaining amount will be recorded as debt."
+            )
+    else:
+        # No customer: require full payment
+        if payment_difference < -Decimal("0.01"):  # Underpayment not allowed
+            raise HTTPException(
+                status_code=400,
+                detail=f"Total payment amount ({total_payment_amount}) is less than sale total ({sale_total_amount}). Underpayment: {abs(payment_difference)}"
+            )
     # Overpayment is allowed (for change), so we don't error on that
     
     # Calculate total_amount from selling price if not provided

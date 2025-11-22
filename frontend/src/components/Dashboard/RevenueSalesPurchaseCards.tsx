@@ -1,8 +1,8 @@
 import { Box, Grid, HStack, VStack, Text, Icon } from "@chakra-ui/react"
-import { FiBox, FiShoppingCart, FiPackage } from "react-icons/fi"
+import { FiBox, FiShoppingCart, FiTrendingUp } from "react-icons/fi"
 import { useQuery } from "@tanstack/react-query"
 import { useMemo } from "react"
-import { SalesService, ProductsService } from "@/client"
+import { SalesService } from "@/client"
 import { formatCurrency } from "./utils"
 
 interface RevenueSalesPurchaseCardsProps {
@@ -45,12 +45,6 @@ export function RevenueSalesPurchaseCards({ isMounted }: RevenueSalesPurchaseCar
       }),
   })
 
-  // Fetch products for inventory value
-  const { data: productsData } = useQuery({
-    queryKey: ["products-inventory"],
-    queryFn: () => ProductsService.readProducts({ skip: 0, limit: 1000 }),
-  })
-
   // Calculate current month revenue
   const currentMonthRevenue = useMemo(() => {
     if (!currentMonthSales?.data) return 0
@@ -78,24 +72,21 @@ export function RevenueSalesPurchaseCards({ isMounted }: RevenueSalesPurchaseCar
     return previousMonthSales?.data?.length || 0
   }, [previousMonthSales])
 
-  // Calculate inventory value (stock quantity × cost price)
-  const inventoryValue = useMemo(() => {
-    if (!productsData?.data) return 0
-    return productsData.data.reduce((sum, product) => {
-      const stock = product.current_stock || 0
-      const costPrice = parseFloat(product.buying_price?.toString() || "0")
-      return sum + (stock * costPrice)
-    }, 0)
-  }, [productsData])
+  // Calculate average sale value (revenue ÷ transactions)
+  const currentMonthAvgSaleValue = useMemo(() => {
+    if (currentMonthSalesCount === 0) return 0
+    return currentMonthRevenue / currentMonthSalesCount
+  }, [currentMonthRevenue, currentMonthSalesCount])
 
-  // Calculate total products count
-  const totalProductsCount = useMemo(() => {
-    return productsData?.data?.length || 0
-  }, [productsData])
+  const previousMonthAvgSaleValue = useMemo(() => {
+    if (previousMonthSalesCount === 0) return 0
+    return previousMonthRevenue / previousMonthSalesCount
+  }, [previousMonthRevenue, previousMonthSalesCount])
 
   // Calculate percentages
   const revenueChange = calculatePercentageChange(currentMonthRevenue, previousMonthRevenue)
   const salesCountChange = calculatePercentageChange(currentMonthSalesCount, previousMonthSalesCount)
+  const avgSaleValueChange = calculatePercentageChange(currentMonthAvgSaleValue, previousMonthAvgSaleValue)
 
   return (
     <Box 
@@ -225,7 +216,7 @@ export function RevenueSalesPurchaseCards({ isMounted }: RevenueSalesPurchaseCar
           </HStack>
         </Box>
 
-        {/* Inventory Value Card */}
+        {/* Average Sale Value Card */}
         <Box 
           p={6} 
           bg={{ base: "#1a1d29", _light: "#ffffff" }}
@@ -244,7 +235,7 @@ export function RevenueSalesPurchaseCards({ isMounted }: RevenueSalesPurchaseCar
           <HStack justify="space-between" align="start" mb={3}>
             <VStack align="start" gap={0} flex={1}>
               <Text fontSize="xs" color={{ base: "#9ca3af", _light: "#6b7280" }} fontWeight="500" textTransform="uppercase" letterSpacing="0.5px" mb={2}>
-                Inventory Value
+                Avg Sale Value
               </Text>
               <Text 
                 fontSize="3xl" 
@@ -252,11 +243,18 @@ export function RevenueSalesPurchaseCards({ isMounted }: RevenueSalesPurchaseCar
                 color={{ base: "#ffffff", _light: "#1a1d29" }}
                 mb={1}
               >
-                {formatCurrency(inventoryValue)}
+                {formatCurrency(currentMonthAvgSaleValue)}
               </Text>
               <HStack gap={2} mt={1}>
-                <Text fontSize="xs" color={{ base: "#6b7280", _light: "#9ca3af" }} fontWeight="500">
-                  {totalProductsCount} products
+                <Text 
+                  fontSize="xs" 
+                  color={avgSaleValueChange >= 0 ? "#22c55e" : "#ef4444"} 
+                  fontWeight="600"
+                >
+                  {avgSaleValueChange >= 0 ? "+" : ""}{avgSaleValueChange.toFixed(1)}%
+                </Text>
+                <Text fontSize="xs" color={{ base: "#6b7280", _light: "#9ca3af" }}>
+                  vs last month
                 </Text>
               </HStack>
             </VStack>
@@ -264,13 +262,13 @@ export function RevenueSalesPurchaseCards({ isMounted }: RevenueSalesPurchaseCar
               w={12}
               h={12}
               borderRadius="full"
-              bg="rgba(34, 197, 94, 0.15)"
+              bg="rgba(139, 92, 246, 0.15)"
               display="flex"
               alignItems="center"
               justifyContent="center"
               flexShrink={0}
             >
-              <Icon as={FiPackage} fontSize="xl" color="#22c55e" />
+              <Icon as={FiTrendingUp} fontSize="xl" color="#8b5cf6" />
             </Box>
           </HStack>
         </Box>

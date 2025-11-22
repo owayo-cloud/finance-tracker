@@ -1,7 +1,8 @@
 import { Box, Grid, HStack, VStack, Text, Icon } from "@chakra-ui/react"
 import { FiArrowUp, FiArrowDown } from "react-icons/fi"
 import { useQuery } from "@tanstack/react-query"
-import { ExpensesService } from "@/client"
+import { useMemo } from "react"
+import { ExpensesService, SalesService } from "@/client"
 import { formatCurrency } from "./utils"
 
 interface StatsCardsProps {
@@ -9,16 +10,145 @@ interface StatsCardsProps {
   isMounted: boolean
 }
 
+function calculatePercentageChange(current: number, previous: number): number {
+  if (previous === 0) return current > 0 ? 100 : 0
+  return ((current - previous) / previous) * 100
+}
+
 export function StatsCards({ totalRevenue, isMounted }: StatsCardsProps) {
-  // Fetch expense summary for dashboard
-  const { data: expenseSummary } = useQuery({
-    queryKey: ["expenseSummary"],
-    queryFn: () => ExpensesService.getExpenseSummary(),
+  const today = new Date()
+  const firstDayOfMonth = new Date(today.getFullYear(), today.getMonth(), 1)
+  const lastDayOfLastMonth = new Date(today.getFullYear(), today.getMonth(), 0)
+  const firstDayOfLastMonth = new Date(today.getFullYear(), today.getMonth() - 1, 1)
+  
+  const yesterday = new Date(today)
+  yesterday.setDate(yesterday.getDate() - 1)
+  const lastWeekStart = new Date(today)
+  lastWeekStart.setDate(lastWeekStart.getDate() - 7)
+  const lastWeekEnd = new Date(today)
+  lastWeekEnd.setDate(lastWeekEnd.getDate() - 1)
+
+  // Fetch current month expenses
+  const { data: currentMonthExpenses } = useQuery({
+    queryKey: ["expenseSummary", firstDayOfMonth.toISOString().split("T")[0], today.toISOString().split("T")[0]],
+    queryFn: () =>
+      ExpensesService.getExpenseSummary({
+        startDate: firstDayOfMonth.toISOString().split("T")[0],
+        endDate: today.toISOString().split("T")[0],
+      }),
   })
 
-  const totalExpenses = expenseSummary && typeof expenseSummary === 'object' && 'total_amount' in expenseSummary 
-    ? Number(expenseSummary.total_amount) 
-    : 0
+  // Fetch previous month expenses
+  const { data: previousMonthExpenses } = useQuery({
+    queryKey: ["expenseSummary", firstDayOfLastMonth.toISOString().split("T")[0], lastDayOfLastMonth.toISOString().split("T")[0]],
+    queryFn: () =>
+      ExpensesService.getExpenseSummary({
+        startDate: firstDayOfLastMonth.toISOString().split("T")[0],
+        endDate: lastDayOfLastMonth.toISOString().split("T")[0],
+      }),
+  })
+
+  // Fetch current month sales
+  const { data: currentMonthSales } = useQuery({
+    queryKey: ["sales-current-month", firstDayOfMonth.toISOString().split("T")[0], today.toISOString().split("T")[0]],
+    queryFn: () =>
+      SalesService.readSales({
+        skip: 0,
+        limit: 1000,
+        startDate: firstDayOfMonth.toISOString().split("T")[0],
+        endDate: today.toISOString().split("T")[0],
+      }),
+  })
+
+  // Fetch previous month sales
+  const { data: previousMonthSales } = useQuery({
+    queryKey: ["sales-previous-month", firstDayOfLastMonth.toISOString().split("T")[0], lastDayOfLastMonth.toISOString().split("T")[0]],
+    queryFn: () =>
+      SalesService.readSales({
+        skip: 0,
+        limit: 1000,
+        startDate: firstDayOfLastMonth.toISOString().split("T")[0],
+        endDate: lastDayOfLastMonth.toISOString().split("T")[0],
+      }),
+  })
+
+  // Fetch today's sales
+  const { data: todaySales } = useQuery({
+    queryKey: ["sales-today", today.toISOString().split("T")[0]],
+    queryFn: () =>
+      SalesService.readSales({
+        skip: 0,
+        limit: 1000,
+        startDate: today.toISOString().split("T")[0],
+        endDate: today.toISOString().split("T")[0],
+      }),
+  })
+
+  // Fetch yesterday's sales
+  const { data: yesterdaySales } = useQuery({
+    queryKey: ["sales-yesterday", yesterday.toISOString().split("T")[0]],
+    queryFn: () =>
+      SalesService.readSales({
+        skip: 0,
+        limit: 1000,
+        startDate: yesterday.toISOString().split("T")[0],
+        endDate: yesterday.toISOString().split("T")[0],
+      }),
+  })
+
+  // Calculate values
+  const currentMonthRevenue = useMemo(() => {
+    if (!currentMonthSales?.data) return 0
+    return currentMonthSales.data.reduce(
+      (sum, sale) => sum + parseFloat(sale.total_amount || "0"),
+      0
+    )
+  }, [currentMonthSales])
+
+  const previousMonthRevenue = useMemo(() => {
+    if (!previousMonthSales?.data) return 0
+    return previousMonthSales.data.reduce(
+      (sum, sale) => sum + parseFloat(sale.total_amount || "0"),
+      0
+    )
+  }, [previousMonthSales])
+
+  const todayRevenue = useMemo(() => {
+    if (!todaySales?.data) return 0
+    return todaySales.data.reduce(
+      (sum, sale) => sum + parseFloat(sale.total_amount || "0"),
+      0
+    )
+  }, [todaySales])
+
+  const yesterdayRevenue = useMemo(() => {
+    if (!yesterdaySales?.data) return 0
+    return yesterdaySales.data.reduce(
+      (sum, sale) => sum + parseFloat(sale.total_amount || "0"),
+      0
+    )
+  }, [yesterdaySales])
+
+  const totalExpenses = useMemo(() => {
+    if (!currentMonthExpenses || typeof currentMonthExpenses !== 'object' || !('total_amount' in currentMonthExpenses)) return 0
+    return Number((currentMonthExpenses as any).total_amount) || 0
+  }, [currentMonthExpenses])
+
+  const previousMonthExpensesValue = useMemo(() => {
+    if (!previousMonthExpenses || typeof previousMonthExpenses !== 'object' || !('total_amount' in previousMonthExpenses)) return 0
+    return Number((previousMonthExpenses as any).total_amount) || 0
+  }, [previousMonthExpenses])
+
+  // Calculate percentages
+  const revenueChange = calculatePercentageChange(currentMonthRevenue, previousMonthRevenue)
+  const dailyIncomeChange = calculatePercentageChange(todayRevenue, yesterdayRevenue)
+  const expenseChange = calculatePercentageChange(totalExpenses, previousMonthExpensesValue)
+  
+  // Potential growth = Net profit (Revenue - Expenses)
+  const currentNetProfit = currentMonthRevenue - totalExpenses
+  const previousNetProfit = previousMonthRevenue - previousMonthExpensesValue
+  const potentialGrowthChange = calculatePercentageChange(currentNetProfit, previousNetProfit)
+
   return (
     <Box 
       mb={8}
@@ -34,7 +164,7 @@ export function StatsCards({ totalRevenue, isMounted }: StatsCardsProps) {
         }}
         gap={4}
       >
-        {/* Potential Growth Card */}
+        {/* Net Profit Card */}
         <Box 
           p={5} 
           bg={{ base: "#1a1d29", _light: "#ffffff" }}
@@ -53,7 +183,7 @@ export function StatsCards({ totalRevenue, isMounted }: StatsCardsProps) {
           <HStack justify="space-between" mb={2} align="start">
             <VStack align="start" gap={0}>
               <Text fontSize="xs" color={{ base: "#9ca3af", _light: "#6b7280" }} fontWeight="500" textTransform="uppercase" letterSpacing="0.5px">
-                Potential growth
+                Net profit
               </Text>
               <Text 
                 fontSize="2xl" 
@@ -61,13 +191,26 @@ export function StatsCards({ totalRevenue, isMounted }: StatsCardsProps) {
                 color={{ base: "#ffffff", _light: "#1a1d29" }}
                 mt={1}
               >
-                {formatCurrency(0)}
+                {formatCurrency(currentNetProfit)}
               </Text>
             </VStack>
-            <Icon as={FiArrowUp} color="#22c55e" fontSize="lg" />
+            <Icon 
+              as={currentNetProfit >= 0 ? FiArrowUp : FiArrowDown} 
+              color={currentNetProfit >= 0 ? "#22c55e" : "#ef4444"} 
+              fontSize="lg" 
+            />
           </HStack>
           <HStack gap={1}>
-            <Text fontSize="xs" color="#22c55e" fontWeight="600">+3.5%</Text>
+            <Text 
+              fontSize="xs" 
+              color={potentialGrowthChange >= 0 ? "#22c55e" : "#ef4444"} 
+              fontWeight="600"
+            >
+              {potentialGrowthChange >= 0 ? "+" : ""}{potentialGrowthChange.toFixed(1)}%
+            </Text>
+            <Text fontSize="xs" color={{ base: "#9ca3af", _light: "#6b7280" }}>
+              vs last month
+            </Text>
           </HStack>
         </Box>
 
@@ -98,13 +241,26 @@ export function StatsCards({ totalRevenue, isMounted }: StatsCardsProps) {
                 color={{ base: "#ffffff", _light: "#1a1d29" }}
                 mt={1}
               >
-                {formatCurrency(totalRevenue)}
+                {formatCurrency(currentMonthRevenue)}
               </Text>
             </VStack>
-            <Icon as={FiArrowUp} color="#22c55e" fontSize="lg" />
+            <Icon 
+              as={revenueChange >= 0 ? FiArrowUp : FiArrowDown} 
+              color={revenueChange >= 0 ? "#22c55e" : "#ef4444"} 
+              fontSize="lg" 
+            />
           </HStack>
           <HStack gap={1}>
-            <Text fontSize="xs" color="#22c55e" fontWeight="600">+11%</Text>
+            <Text 
+              fontSize="xs" 
+              color={revenueChange >= 0 ? "#22c55e" : "#ef4444"} 
+              fontWeight="600"
+            >
+              {revenueChange >= 0 ? "+" : ""}{revenueChange.toFixed(1)}%
+            </Text>
+            <Text fontSize="xs" color={{ base: "#9ca3af", _light: "#6b7280" }}>
+              vs last month
+            </Text>
           </HStack>
         </Box>
 
@@ -135,13 +291,26 @@ export function StatsCards({ totalRevenue, isMounted }: StatsCardsProps) {
                 color={{ base: "#ffffff", _light: "#1a1d29" }}
                 mt={1}
               >
-                {formatCurrency(0)}
+                {formatCurrency(todayRevenue)}
               </Text>
             </VStack>
-            <Icon as={FiArrowDown} color="#ef4444" fontSize="lg" />
+            <Icon 
+              as={dailyIncomeChange >= 0 ? FiArrowUp : FiArrowDown} 
+              color={dailyIncomeChange >= 0 ? "#22c55e" : "#ef4444"} 
+              fontSize="lg" 
+            />
           </HStack>
           <HStack gap={1}>
-            <Text fontSize="xs" color="#ef4444" fontWeight="600">-2.4%</Text>
+            <Text 
+              fontSize="xs" 
+              color={dailyIncomeChange >= 0 ? "#22c55e" : "#ef4444"} 
+              fontWeight="600"
+            >
+              {dailyIncomeChange >= 0 ? "+" : ""}{dailyIncomeChange.toFixed(1)}%
+            </Text>
+            <Text fontSize="xs" color={{ base: "#9ca3af", _light: "#6b7280" }}>
+              vs yesterday
+            </Text>
           </HStack>
         </Box>
 
@@ -175,14 +344,26 @@ export function StatsCards({ totalRevenue, isMounted }: StatsCardsProps) {
                 {formatCurrency(totalExpenses)}
               </Text>
             </VStack>
-            <Icon as={FiArrowUp} color="#22c55e" fontSize="lg" />
+            <Icon 
+              as={expenseChange >= 0 ? FiArrowUp : FiArrowDown} 
+              color={expenseChange >= 0 ? "#ef4444" : "#22c55e"} 
+              fontSize="lg" 
+            />
           </HStack>
           <HStack gap={1}>
-            <Text fontSize="xs" color="#22c55e" fontWeight="600">Total Expenses</Text>
+            <Text 
+              fontSize="xs" 
+              color={expenseChange >= 0 ? "#ef4444" : "#22c55e"} 
+              fontWeight="600"
+            >
+              {expenseChange >= 0 ? "+" : ""}{expenseChange.toFixed(1)}%
+            </Text>
+            <Text fontSize="xs" color={{ base: "#9ca3af", _light: "#6b7280" }}>
+              vs last month
+            </Text>
           </HStack>
         </Box>
       </Grid>
     </Box>
   )
 }
-

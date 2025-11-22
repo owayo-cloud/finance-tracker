@@ -14,10 +14,10 @@ export function RecentActivity({ recentSales }: RecentActivityProps) {
   return (
     <Box 
       p={6} 
-      bg={{ base: "#1a1d29", _light: "#ffffff" }}
+      bg="bg.surface"
       borderRadius="lg" 
       border="1px solid"
-      borderColor={{ base: "rgba(255, 255, 255, 0.08)", _light: "#e5e7eb" }}
+      borderColor="border.card"
       boxShadow={{ base: "0 2px 4px rgba(0, 0, 0, 0.2)", _light: "0 1px 3px rgba(0, 0, 0, 0.1)" }}
     >
       <HStack justify="space-between" mb={4}>
@@ -50,9 +50,9 @@ export function RecentActivity({ recentSales }: RecentActivityProps) {
               key={sale.id}
               p={3}
               borderRadius="md"
-              bg={{ base: "rgba(255, 255, 255, 0.05)", _light: "#f9fafb" }}
+              bg={{ base: "rgba(255, 255, 255, 0.08)", _light: "#f9fafb" }}
               border="1px solid"
-              borderColor={{ base: "rgba(255, 255, 255, 0.08)", _light: "#e5e7eb" }}
+              borderColor="border.card"
               _hover={{
                 bg: { base: "rgba(255, 255, 255, 0.08)", _light: "#f3f4f6" },
                 transform: "translateX(4px)",

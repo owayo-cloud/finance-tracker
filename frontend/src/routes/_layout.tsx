@@ -88,7 +88,7 @@ function Layout() {
   const [sidebarOpen, setSidebarOpen] = useState(false) // For mobile drawer only
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false) // For desktop collapse
   
-  // Track page visits for Quick Access
+  // Track page visits (for analytics)
   useTrackPageVisit(location.pathname)
 
   // Hide sidebar on POS page, but keep navbar

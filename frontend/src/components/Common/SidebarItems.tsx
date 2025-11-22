@@ -45,6 +45,7 @@ const menuItems: MenuItem[] = [
   { icon: FiDollarSign, title: "Expenses", path: "/expenses", adminOnly: true },
   { icon: FiTrendingUp, title: "Debts", path: "/debts", adminOnly: true },
   { icon: FiCreditCard, title: "Payment Methods", path: "/payment-methods", adminOnly: true },
+  { icon: FiUsers, title: "Users", path: "/admin", adminOnly: true },
   { icon: FiSettings, title: "User Settings", path: "/settings" },
 ]
 
@@ -65,10 +66,7 @@ const SidebarItems = ({ onClose }: SidebarItemsProps) => {
     (item) => !item.adminOnly || currentUser?.is_superuser
   )
 
-  // Add Admin menu item for superusers
-  const finalItems: MenuItem[] = currentUser?.is_superuser
-    ? [...filteredItems, { icon: FiUsers, title: "Admin", path: "/admin" }]
-    : filteredItems
+  const finalItems: MenuItem[] = filteredItems
 
   const toggleSubmenu = (title: string) => {
     setOpenSubmenus(prev => ({

@@ -8,7 +8,7 @@ import { UsersService, SalesService } from "@/client"
 import { usePageVisits } from "@/hooks/usePageVisits"
 import { DashboardHeader } from "@/components/Dashboard/DashboardHeader"
 import { StatsCards } from "@/components/Dashboard/StatsCards"
-import { TransactionHistory } from "@/components/Dashboard/TransactionHistory"
+import { SalesChart } from "@/components/Dashboard/SalesChart"
 import { QuickAccess } from "@/components/Dashboard/QuickAccess"
 import { RevenueSalesPurchaseCards } from "@/components/Dashboard/RevenueSalesPurchaseCards"
 import { PendingDebtsTable } from "@/components/Dashboard/PendingDebtsTable"
@@ -56,15 +56,15 @@ function Dashboard() {
     .map((visit) => availableModules.find((module) => module.path === visit.path))
     .filter((module): module is typeof modules[0] => module !== undefined)
 
-  // Fetch recent sales for Transaction History
+  // Fetch recent sales for RevenueSalesPurchaseCards
   const { data: recentSalesData } = useQuery({
     queryKey: ["recentSales"],
-    queryFn: () => SalesService.readSales({ skip: 0, limit: 5 }),
+    queryFn: () => SalesService.readSales({ skip: 0, limit: 100 }),
   })
 
   const recentSales = recentSalesData?.data || []
 
-  // Calculate totals
+  // Calculate totals for RevenueSalesPurchaseCards
   const totalRevenue = recentSales.reduce((sum, sale) => sum + parseFloat(sale.total_amount || "0"), 0)
 
   return (
@@ -92,7 +92,7 @@ function Dashboard() {
             transform={isMounted ? "translateY(0)" : "translateY(20px)"}
             transition="all 0.5s ease 0.3s"
           >
-            <TransactionHistory recentSales={recentSales} totalRevenue={totalRevenue} />
+            <SalesChart totalRevenue={totalRevenue} />
             <QuickAccess quickAccessModules={quickAccessModules} mostVisitedPages={mostVisitedPages} />
           </Grid>
 

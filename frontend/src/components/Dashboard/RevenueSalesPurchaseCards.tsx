@@ -105,15 +105,16 @@ export function RevenueSalesPurchaseCards({ isMounted }: RevenueSalesPurchaseCar
         {/* Revenue Card */}
         <Box 
           p={6} 
-          bg={{ base: "#1a1d29", _light: "#ffffff" }}
+          bg="bg.surface"
           borderRadius="lg" 
           border="1px solid"
-          borderColor={{ base: "rgba(255, 255, 255, 0.08)", _light: "#e5e7eb" }}
+          borderColor="border.card"
           boxShadow={{ base: "0 2px 4px rgba(0, 0, 0, 0.2)", _light: "0 1px 3px rgba(0, 0, 0, 0.1)" }}
           transition="all 0.3s ease"
           _hover={{ 
             shadow: { base: "0 4px 12px rgba(0, 0, 0, 0.3)", _light: "0 4px 12px rgba(0, 0, 0, 0.15)" },
             transform: "translateY(-2px)",
+            borderColor: { base: "rgba(59, 130, 246, 0.4)", _light: "#3b82f6" },
           }}
           position="relative"
           overflow="hidden"
@@ -162,15 +163,16 @@ export function RevenueSalesPurchaseCards({ isMounted }: RevenueSalesPurchaseCar
         {/* Sales Count Card */}
         <Box 
           p={6} 
-          bg={{ base: "#1a1d29", _light: "#ffffff" }}
+          bg="bg.surface"
           borderRadius="lg" 
           border="1px solid"
-          borderColor={{ base: "rgba(255, 255, 255, 0.08)", _light: "#e5e7eb" }}
+          borderColor="border.card"
           boxShadow={{ base: "0 2px 4px rgba(0, 0, 0, 0.2)", _light: "0 1px 3px rgba(0, 0, 0, 0.1)" }}
           transition="all 0.3s ease"
           _hover={{ 
             shadow: { base: "0 4px 12px rgba(0, 0, 0, 0.3)", _light: "0 4px 12px rgba(0, 0, 0, 0.15)" },
             transform: "translateY(-2px)",
+            borderColor: { base: "rgba(59, 130, 246, 0.4)", _light: "#3b82f6" },
           }}
           position="relative"
           overflow="hidden"
@@ -219,15 +221,16 @@ export function RevenueSalesPurchaseCards({ isMounted }: RevenueSalesPurchaseCar
         {/* Average Sale Value Card */}
         <Box 
           p={6} 
-          bg={{ base: "#1a1d29", _light: "#ffffff" }}
+          bg="bg.surface"
           borderRadius="lg" 
           border="1px solid"
-          borderColor={{ base: "rgba(255, 255, 255, 0.08)", _light: "#e5e7eb" }}
+          borderColor="border.card"
           boxShadow={{ base: "0 2px 4px rgba(0, 0, 0, 0.2)", _light: "0 1px 3px rgba(0, 0, 0, 0.1)" }}
           transition="all 0.3s ease"
           _hover={{ 
             shadow: { base: "0 4px 12px rgba(0, 0, 0, 0.3)", _light: "0 4px 12px rgba(0, 0, 0, 0.15)" },
             transform: "translateY(-2px)",
+            borderColor: { base: "rgba(59, 130, 246, 0.4)", _light: "#3b82f6" },
           }}
           position="relative"
           overflow="hidden"

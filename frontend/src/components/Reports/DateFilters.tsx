@@ -45,7 +45,12 @@ export function DateFilters({
   }
 
   return (
-    <Card.Root>
+    <Card.Root
+      variant="outline"
+      bg="bg.surface"
+      borderColor="border.card"
+      borderWidth="1px"
+    >
       <Card.Body>
         <VStack gap={4} align="stretch">
           <HStack gap={4} flexWrap="wrap" align="end">

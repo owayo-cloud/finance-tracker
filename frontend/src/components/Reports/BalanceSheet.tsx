@@ -52,7 +52,12 @@ export function BalanceSheet({
   endDate,
 }: BalanceSheetProps) {
   return (
-    <Card.Root>
+    <Card.Root
+      variant="outline"
+      bg="bg.surface"
+      borderColor="border.card"
+      borderWidth="1px"
+    >
       <Card.Body>
         <VStack align="stretch" gap={6}>
           <HStack justify="space-between">
@@ -83,8 +88,10 @@ export function BalanceSheet({
                 <HStack
                   justify="space-between"
                   p={3}
-                  bg="bg.subtle"
+                  bg={{ base: "rgba(255, 255, 255, 0.05)", _light: "#f9fafb" }}
                   borderRadius="md"
+                  border="1px solid"
+                  borderColor="border.card"
                 >
                   <Text fontWeight="medium" color="fg.muted">
                     Inventory
@@ -96,8 +103,10 @@ export function BalanceSheet({
                 <HStack
                   justify="space-between"
                   p={3}
-                  bg="bg.subtle"
+                  bg={{ base: "rgba(255, 255, 255, 0.05)", _light: "#f9fafb" }}
                   borderRadius="md"
+                  border="1px solid"
+                  borderColor="border.card"
                 >
                   <Text fontWeight="medium" color="fg.muted">
                     Cash & Receivables
@@ -127,8 +136,10 @@ export function BalanceSheet({
                 <HStack
                   justify="space-between"
                   p={3}
-                  bg="bg.subtle"
+                  bg={{ base: "rgba(255, 255, 255, 0.05)", _light: "#f9fafb" }}
                   borderRadius="md"
+                  border="1px solid"
+                  borderColor="border.card"
                 >
                   <Text fontWeight="medium" color="fg.muted">
                     Expenses (Liabilities)

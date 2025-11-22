@@ -55,10 +55,10 @@ export function StatsCards({ isMounted }: StatsCardsProps) {
         {/* Net Profit Card */}
         <Box 
           p={5} 
-          bg={{ base: "#1a1d29", _light: "#ffffff" }}
+          bg="bg.surface"
           borderRadius="lg" 
           border="1px solid"
-          borderColor={{ base: "rgba(255, 255, 255, 0.08)", _light: "#e5e7eb" }}
+          borderColor="border.card"
           boxShadow={{ base: "0 2px 4px rgba(0, 0, 0, 0.2)", _light: "0 1px 3px rgba(0, 0, 0, 0.1)" }}
           transition="all 0.3s ease"
           _hover={{ 
@@ -105,10 +105,10 @@ export function StatsCards({ isMounted }: StatsCardsProps) {
         {/* Revenue Current Card */}
         <Box 
           p={5} 
-          bg={{ base: "#1a1d29", _light: "#ffffff" }}
+          bg="bg.surface"
           borderRadius="lg" 
           border="1px solid"
-          borderColor={{ base: "rgba(255, 255, 255, 0.08)", _light: "#e5e7eb" }}
+          borderColor="border.card"
           boxShadow={{ base: "0 2px 4px rgba(0, 0, 0, 0.2)", _light: "0 1px 3px rgba(0, 0, 0, 0.1)" }}
           transition="all 0.3s ease"
           _hover={{ 
@@ -155,10 +155,10 @@ export function StatsCards({ isMounted }: StatsCardsProps) {
         {/* Daily Income Card */}
         <Box 
           p={5} 
-          bg={{ base: "#1a1d29", _light: "#ffffff" }}
+          bg="bg.surface"
           borderRadius="lg" 
           border="1px solid"
-          borderColor={{ base: "rgba(255, 255, 255, 0.08)", _light: "#e5e7eb" }}
+          borderColor="border.card"
           boxShadow={{ base: "0 2px 4px rgba(0, 0, 0, 0.2)", _light: "0 1px 3px rgba(0, 0, 0, 0.1)" }}
           transition="all 0.3s ease"
           _hover={{ 
@@ -205,10 +205,10 @@ export function StatsCards({ isMounted }: StatsCardsProps) {
         {/* Expense Current Card */}
         <Box 
           p={5} 
-          bg={{ base: "#1a1d29", _light: "#ffffff" }}
+          bg="bg.surface"
           borderRadius="lg" 
           border="1px solid"
-          borderColor={{ base: "rgba(255, 255, 255, 0.08)", _light: "#e5e7eb" }}
+          borderColor="border.card"
           boxShadow={{ base: "0 2px 4px rgba(0, 0, 0, 0.2)", _light: "0 1px 3px rgba(0, 0, 0, 0.1)" }}
           transition="all 0.3s ease"
           _hover={{ 

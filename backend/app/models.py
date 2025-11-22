@@ -473,6 +473,7 @@ class SalePublic(SaleBase):
     sale_date: datetime
     product: ProductPublic
     payment_method: PaymentMethodPublic
+    created_by: UserPublic
     voided: bool
 
 

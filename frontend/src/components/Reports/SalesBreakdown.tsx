@@ -52,7 +52,12 @@ export function SalesBreakdown({
   return (
     <Grid templateColumns={{ base: "1fr", lg: "repeat(2, 1fr)" }} gap={4}>
       {/* Payment Method Breakdown */}
-      <Card.Root>
+      <Card.Root
+        variant="outline"
+        bg="bg.surface"
+        borderColor="border.card"
+        borderWidth="1px"
+      >
         <Card.Body>
           <VStack align="stretch" gap={4}>
             <HStack justify="space-between">
@@ -105,7 +110,12 @@ export function SalesBreakdown({
       </Card.Root>
 
       {/* Cashier Breakdown */}
-      <Card.Root>
+      <Card.Root
+        variant="outline"
+        bg="bg.surface"
+        borderColor="border.card"
+        borderWidth="1px"
+      >
         <Card.Body>
           <VStack align="stretch" gap={4}>
             <HStack justify="space-between">

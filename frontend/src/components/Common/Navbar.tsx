@@ -4,6 +4,7 @@ import { FaBars } from "react-icons/fa"
 import { FiGrid, FiMail, FiBell, FiChevronDown } from "react-icons/fi"
 
 import useAuth from "@/hooks/useAuth"
+import { getUserInitials } from "@/utils"
 import { MenuContent, MenuItem, MenuRoot, MenuTrigger } from "../ui/menu"
 import { FiLogOut, FiUser } from "react-icons/fi"
 import { ColorModeButton } from "../ui/color-mode"
@@ -69,7 +70,7 @@ function Navbar({ onMenuClick, sidebarCollapsed = false, isPOSMode = false }: Na
               border="2px solid"
               borderColor={{ base: "rgba(255, 255, 255, 0.1)", _light: "rgba(0, 0, 0, 0.1)" }}
             >
-              {(user?.full_name || user?.email || "U")[0].toUpperCase()}
+              {getUserInitials(user?.full_name, user?.email)}
             </IconButton>
           </MenuTrigger>
           <MenuContent>
@@ -367,7 +368,7 @@ function Navbar({ onMenuClick, sidebarCollapsed = false, isPOSMode = false }: Na
                   border="2px solid"
                   borderColor={{ base: "rgba(255, 255, 255, 0.1)", _light: "rgba(0, 0, 0, 0.1)" }}
                 >
-                  {(user?.full_name || user?.email || "U")[0].toUpperCase()}
+                  {getUserInitials(user?.full_name, user?.email)}
                 </Box>
                 <Text fontSize="sm" fontWeight="600" color={{ base: "#ffffff", _light: "#1a1d29" }} display={{ base: "none", lg: "block" }}>
                   {user?.full_name || "User"}

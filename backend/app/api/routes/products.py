@@ -170,6 +170,24 @@ def update_product(
     if not product:
         raise HTTPException(status_code=404, detail="Product not found")
     
+    # Validate selling_price > buying_price when updating prices
+    # Check if we're updating prices and validate against existing or new values
+    update_data = product_in.model_dump(exclude_unset=True)
+    selling_price = update_data.get("selling_price")
+    buying_price = update_data.get("buying_price")
+    
+    # Use existing values if not being updated
+    final_selling_price = selling_price if selling_price is not None else product.selling_price
+    final_buying_price = buying_price if buying_price is not None else product.buying_price
+    
+    # Validate if both prices are present (either from update or existing)
+    if final_selling_price is not None and final_buying_price is not None:
+        if final_selling_price <= final_buying_price:
+            raise HTTPException(
+                status_code=400,
+                detail="Selling price must be greater than buying price"
+            )
+    
     product = product_crud.update(db=session, db_obj=product, obj_in=product_in)
     return product
 

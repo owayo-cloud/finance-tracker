@@ -5,14 +5,12 @@ import { useQuery } from "@tanstack/react-query"
 
 import useAuth from "@/hooks/useAuth"
 import { UsersService, SalesService } from "@/client"
-import { usePageVisits } from "@/hooks/usePageVisits"
 import { DashboardHeader } from "@/components/Dashboard/DashboardHeader"
 import { StatsCards } from "@/components/Dashboard/StatsCards"
 import { SalesChart } from "@/components/Dashboard/SalesChart"
-import { QuickAccess } from "@/components/Dashboard/QuickAccess"
+import { RecentActivity } from "@/components/Dashboard/RecentActivity"
 import { RevenueSalesPurchaseCards } from "@/components/Dashboard/RevenueSalesPurchaseCards"
 import { PendingDebtsTable } from "@/components/Dashboard/PendingDebtsTable"
-import { modules } from "@/components/Dashboard/constants"
 
 export const Route = createFileRoute("/_layout/")({
   component: Dashboard,
@@ -42,19 +40,6 @@ function Dashboard() {
     setIsMounted(true)
   }, [])
 
-  // Filter modules based on user role
-  const availableModules = modules.filter(
-    (module) => !module.adminOnly || currentUser?.is_superuser
-  )
-
-  // Get page visits for Quick Access
-  const { getMostVisitedPages } = usePageVisits()
-  const mostVisitedPages = getMostVisitedPages(6)
-  
-  // Map most visited paths to modules - only show modules that have been visited
-  const quickAccessModules = mostVisitedPages
-    .map((visit) => availableModules.find((module) => module.path === visit.path))
-    .filter((module): module is typeof modules[0] => module !== undefined)
 
   // Fetch recent sales for RevenueSalesPurchaseCards
   const { data: recentSalesData } = useQuery({
@@ -93,7 +78,7 @@ function Dashboard() {
             transition="all 0.5s ease 0.3s"
           >
             <SalesChart totalRevenue={totalRevenue} />
-            <QuickAccess quickAccessModules={quickAccessModules} mostVisitedPages={mostVisitedPages} />
+            <RecentActivity recentSales={recentSales} />
           </Grid>
 
           {currentUser?.is_superuser && (

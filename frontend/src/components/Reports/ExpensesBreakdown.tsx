@@ -38,7 +38,12 @@ export function ExpensesBreakdown({
   }
 
   return (
-    <Card.Root>
+    <Card.Root
+      variant="outline"
+      bg="bg.surface"
+      borderColor="border.card"
+      borderWidth="1px"
+    >
       <Card.Body>
         <VStack align="stretch" gap={4}>
           <HStack justify="space-between">
@@ -52,9 +57,12 @@ export function ExpensesBreakdown({
               Export CSV
             </Button>
           </HStack>
-          <Table.Root size="sm">
+          <Table.Root 
+            size="sm"
+            variant="outline"
+          >
             <Table.Header>
-              <Table.Row>
+              <Table.Row bg="table.header.bg">
                 <Table.ColumnHeader>Category</Table.ColumnHeader>
                 <Table.ColumnHeader textAlign="right">Amount</Table.ColumnHeader>
                 <Table.ColumnHeader textAlign="right">%</Table.ColumnHeader>
@@ -64,7 +72,11 @@ export function ExpensesBreakdown({
               {Object.entries(expenseSummary.category_totals)
                 .sort((a, b) => b[1] - a[1])
                 .map(([category, amount]) => (
-                  <Table.Row key={category}>
+                  <Table.Row 
+                    key={category}
+                    bg="table.row.bg"
+                    _hover={{ bg: "table.row.hover" }}
+                  >
                     <Table.Cell fontWeight="medium">{category}</Table.Cell>
                     <Table.Cell textAlign="right">
                       Ksh {formatCurrency(amount)}

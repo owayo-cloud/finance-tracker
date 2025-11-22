@@ -310,7 +310,7 @@ def get_dashboard_stats(
         last_day_of_last_month = date(today.year - 1, 12, 31)
     else:
         first_day_of_last_month = date(today.year, today.month - 1, 1)
-        last_day_of_last_month = date(today.year, today.month, 1) - datetime.timedelta(days=1)
+        last_day_of_last_month = date(today.year, today.month, 1) - timedelta(days=1)
     
     yesterday = date.today() - timedelta(days=1)
     

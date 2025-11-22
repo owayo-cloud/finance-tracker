@@ -88,7 +88,7 @@ function Layout() {
   const [sidebarOpen, setSidebarOpen] = useState(false) // For mobile drawer only
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false) // For desktop collapse
   
-  // Track page visits for Quick Access
+  // Track page visits (for analytics)
   useTrackPageVisit(location.pathname)
 
   // Hide sidebar on POS page, but keep navbar
@@ -126,7 +126,9 @@ function Layout() {
         <Flex 
           flex="1" 
           direction="column" 
-          p={isPOSPage ? 0 : 4} 
+          px={isPOSPage ? 0 : 4}
+          pt={isPOSPage ? 0 : 4}
+          pb={isPOSPage ? 0 : 8}
           overflowY="auto"
           overflowX="hidden"
           bg="bg.canvas"

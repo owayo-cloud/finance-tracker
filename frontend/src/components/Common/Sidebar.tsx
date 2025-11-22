@@ -1,10 +1,13 @@
 import { Box, Flex, IconButton, Text, HStack, VStack, Badge, Icon } from "@chakra-ui/react"
+import { Link } from "@tanstack/react-router"
 import { useQueryClient } from "@tanstack/react-query"
 import { useState } from "react"
-import { FiLogOut, FiMoreVertical, FiX } from "react-icons/fi"
+import { FiLogOut, FiMoreVertical, FiX, FiUser } from "react-icons/fi"
 
 import type { UserPublic } from "@/client"
 import useAuth from "@/hooks/useAuth"
+import { MenuContent, MenuItem, MenuRoot, MenuTrigger } from "../ui/menu"
+import { getUserInitials } from "@/utils"
 import {
   DrawerBackdrop,
   DrawerBody,
@@ -25,6 +28,10 @@ const Sidebar = ({ open: controlledOpen, onOpenChange, isCollapsed = false }: Si
   const currentUser = queryClient.getQueryData<UserPublic>(["currentUser"])
   const { logout } = useAuth()
   const [internalOpen, setInternalOpen] = useState(false)
+  
+  const handleLogout = async () => {
+    await logout()
+  }
   
   // Use controlled state if provided, otherwise use internal state
   const open = controlledOpen !== undefined ? controlledOpen : internalOpen
@@ -151,7 +158,7 @@ const Sidebar = ({ open: controlledOpen, onOpenChange, isCollapsed = false }: Si
                       fontWeight="bold"
                       flexShrink={0}
                     >
-                      {(currentUser.full_name || currentUser.email || "U")[0].toUpperCase()}
+                      {getUserInitials(currentUser.full_name, currentUser.email)}
                     </Box>
                     <VStack align="start" flex={1} gap={0}>
                       <Text fontSize="sm" fontWeight="600" color={{ base: "white", _light: "gray.800" }}>
@@ -232,7 +239,7 @@ const Sidebar = ({ open: controlledOpen, onOpenChange, isCollapsed = false }: Si
                   border="2px solid"
                   borderColor={{ base: "rgba(255, 255, 255, 0.1)", _light: "rgba(0, 0, 0, 0.1)" }}
                 >
-                  {(currentUser.full_name || currentUser.email || "U")[0].toUpperCase()}
+                  {getUserInitials(currentUser.full_name, currentUser.email)}
                 </Box>
                 <VStack align="start" gap={0} flex={1} minW={0}>
                   <Text fontSize="sm" fontWeight="600" color={{ base: "#ffffff", _light: "#1a1d29" }} lineHeight="1.2">
@@ -242,7 +249,13 @@ const Sidebar = ({ open: controlledOpen, onOpenChange, isCollapsed = false }: Si
                     mt={1}
                     px={2}
                     py={0.5}
-                    bg="linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%)"
+                    bg={
+                      currentUser.is_superuser
+                        ? "linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%)" // Purple for Admin
+                        : currentUser.is_auditor
+                        ? "linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)" // Blue for Auditor
+                        : "linear-gradient(135deg, #22c55e 0%, #16a34a 100%)" // Green for Cashier
+                    }
                     color="white"
                     fontSize="2xs"
                     fontWeight="700"
@@ -250,19 +263,47 @@ const Sidebar = ({ open: controlledOpen, onOpenChange, isCollapsed = false }: Si
                     textTransform="uppercase"
                     letterSpacing="0.5px"
                   >
-                    {currentUser.is_superuser ? "Gold Member" : "Member"}
+                    {currentUser.is_superuser ? "Admin" : currentUser.is_auditor ? "Auditor" : "Cashier"}
                   </Badge>
                 </VStack>
               </HStack>
-              <IconButton
-                variant="ghost"
-                aria-label="More options"
-                size="sm"
-                color={{ base: "#9ca3af", _light: "#6b7280" }}
-                _hover={{ bg: { base: "rgba(255, 255, 255, 0.05)", _light: "rgba(0, 0, 0, 0.05)" } }}
-              >
-                <Icon as={FiMoreVertical} fontSize="16px" />
-              </IconButton>
+              <MenuRoot>
+                <MenuTrigger asChild>
+                  <IconButton
+                    variant="ghost"
+                    aria-label="More options"
+                    size="sm"
+                    color={{ base: "#9ca3af", _light: "#6b7280" }}
+                    _hover={{ bg: { base: "rgba(255, 255, 255, 0.05)", _light: "rgba(0, 0, 0, 0.05)" } }}
+                  >
+                    <Icon as={FiMoreVertical} fontSize="16px" />
+                  </IconButton>
+                </MenuTrigger>
+                <MenuContent>
+                  <Link to="/settings">
+                    <MenuItem
+                      closeOnSelect
+                      value="user-settings"
+                      gap={2}
+                      py={2}
+                      style={{ cursor: "pointer" }}
+                    >
+                      <FiUser fontSize="18px" />
+                      <Box flex="1">My Profile</Box>
+                    </MenuItem>
+                  </Link>
+                  <MenuItem
+                    value="logout"
+                    gap={2}
+                    py={2}
+                    onClick={handleLogout}
+                    style={{ cursor: "pointer" }}
+                  >
+                    <FiLogOut />
+                    Log Out
+                  </MenuItem>
+                </MenuContent>
+              </MenuRoot>
             </HStack>
           </Box>
         )}

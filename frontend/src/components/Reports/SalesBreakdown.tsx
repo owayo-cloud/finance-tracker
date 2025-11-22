@@ -52,7 +52,12 @@ export function SalesBreakdown({
   return (
     <Grid templateColumns={{ base: "1fr", lg: "repeat(2, 1fr)" }} gap={4}>
       {/* Payment Method Breakdown */}
-      <Card.Root>
+      <Card.Root
+        variant="outline"
+        bg="bg.surface"
+        borderColor="border.card"
+        borderWidth="1px"
+      >
         <Card.Body>
           <VStack align="stretch" gap={4}>
             <HStack justify="space-between">
@@ -72,9 +77,12 @@ export function SalesBreakdown({
                 </Button>
               </HStack>
             </HStack>
-            <Table.Root size="sm">
+            <Table.Root 
+              size="sm"
+              variant="outline"
+            >
               <Table.Header>
-                <Table.Row>
+                <Table.Row bg="table.header.bg">
                   <Table.ColumnHeader>Method</Table.ColumnHeader>
                   <Table.ColumnHeader textAlign="right">Count</Table.ColumnHeader>
                   <Table.ColumnHeader textAlign="right">Amount</Table.ColumnHeader>
@@ -85,7 +93,11 @@ export function SalesBreakdown({
                 {Object.entries(salesSummary.paymentMethodBreakdown)
                   .sort((a, b) => b[1].amount - a[1].amount)
                   .map(([method, data]) => (
-                    <Table.Row key={method}>
+                    <Table.Row 
+                      key={method}
+                      bg="table.row.bg"
+                      _hover={{ bg: "table.row.hover" }}
+                    >
                       <Table.Cell fontWeight="medium">{method}</Table.Cell>
                       <Table.Cell textAlign="right">{data.count}</Table.Cell>
                       <Table.Cell textAlign="right">
@@ -105,7 +117,12 @@ export function SalesBreakdown({
       </Card.Root>
 
       {/* Cashier Breakdown */}
-      <Card.Root>
+      <Card.Root
+        variant="outline"
+        bg="bg.surface"
+        borderColor="border.card"
+        borderWidth="1px"
+      >
         <Card.Body>
           <VStack align="stretch" gap={4}>
             <HStack justify="space-between">
@@ -119,9 +136,12 @@ export function SalesBreakdown({
                 CSV
               </Button>
             </HStack>
-            <Table.Root size="sm">
+            <Table.Root 
+              size="sm"
+              variant="outline"
+            >
               <Table.Header>
-                <Table.Row>
+                <Table.Row bg="table.header.bg">
                   <Table.ColumnHeader>Cashier</Table.ColumnHeader>
                   <Table.ColumnHeader textAlign="right">Count</Table.ColumnHeader>
                   <Table.ColumnHeader textAlign="right">Amount</Table.ColumnHeader>
@@ -132,7 +152,11 @@ export function SalesBreakdown({
                 {Object.entries(salesSummary.cashierBreakdown)
                   .sort((a, b) => b[1].amount - a[1].amount)
                   .map(([cashier, data]) => (
-                    <Table.Row key={cashier}>
+                    <Table.Row 
+                      key={cashier}
+                      bg="table.row.bg"
+                      _hover={{ bg: "table.row.hover" }}
+                    >
                       <Table.Cell fontWeight="medium">{cashier}</Table.Cell>
                       <Table.Cell textAlign="right">{data.count}</Table.Cell>
                       <Table.Cell textAlign="right">

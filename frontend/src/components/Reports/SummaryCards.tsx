@@ -55,7 +55,15 @@ export function SummaryCards({
     >
       {salesSummary && (
         <Card.Root
-          _hover={{ transform: "translateY(-4px)", shadow: "lg" }}
+          variant="outline"
+          bg="bg.surface"
+          borderColor="border.card"
+          borderWidth="1px"
+          _hover={{ 
+            transform: "translateY(-4px)", 
+            shadow: "lg",
+            borderColor: { base: "rgba(59, 130, 246, 0.4)", _light: "#3b82f6" },
+          }}
           transition="all 0.3s"
         >
           <Card.Body>
@@ -81,7 +89,15 @@ export function SummaryCards({
 
       {expenseSummary && (
         <Card.Root
-          _hover={{ transform: "translateY(-4px)", shadow: "lg" }}
+          variant="outline"
+          bg="bg.surface"
+          borderColor="border.card"
+          borderWidth="1px"
+          _hover={{ 
+            transform: "translateY(-4px)", 
+            shadow: "lg",
+            borderColor: { base: "rgba(59, 130, 246, 0.4)", _light: "#3b82f6" },
+          }}
           transition="all 0.3s"
         >
           <Card.Body>
@@ -108,7 +124,15 @@ export function SummaryCards({
 
       {netProfit !== null && (
         <Card.Root
-          _hover={{ transform: "translateY(-4px)", shadow: "lg" }}
+          variant="outline"
+          bg="bg.surface"
+          borderColor="border.card"
+          borderWidth="1px"
+          _hover={{ 
+            transform: "translateY(-4px)", 
+            shadow: "lg",
+            borderColor: { base: "rgba(59, 130, 246, 0.4)", _light: "#3b82f6" },
+          }}
           transition="all 0.3s"
         >
           <Card.Body>
@@ -146,7 +170,15 @@ export function SummaryCards({
 
       {stockSummary && (
         <Card.Root
-          _hover={{ transform: "translateY(-4px)", shadow: "lg" }}
+          variant="outline"
+          bg="bg.surface"
+          borderColor="border.card"
+          borderWidth="1px"
+          _hover={{ 
+            transform: "translateY(-4px)", 
+            shadow: "lg",
+            borderColor: { base: "rgba(59, 130, 246, 0.4)", _light: "#3b82f6" },
+          }}
           transition="all 0.3s"
         >
           <Card.Body>

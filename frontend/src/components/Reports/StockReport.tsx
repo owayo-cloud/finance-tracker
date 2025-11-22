@@ -67,7 +67,12 @@ export function StockReport({ stockSummary }: StockReportProps) {
         }}
         gap={4}
       >
-        <Card.Root>
+        <Card.Root
+          variant="outline"
+          bg="bg.surface"
+          borderColor="border.card"
+          borderWidth="1px"
+        >
           <Card.Body>
             <VStack align="start" gap={2}>
               <Text fontSize="sm" color="fg.muted">
@@ -79,7 +84,12 @@ export function StockReport({ stockSummary }: StockReportProps) {
             </VStack>
           </Card.Body>
         </Card.Root>
-        <Card.Root>
+        <Card.Root
+          variant="outline"
+          bg="bg.surface"
+          borderColor="border.card"
+          borderWidth="1px"
+        >
           <Card.Body>
             <VStack align="start" gap={2}>
               <Text fontSize="sm" color="fg.muted">
@@ -91,7 +101,12 @@ export function StockReport({ stockSummary }: StockReportProps) {
             </VStack>
           </Card.Body>
         </Card.Root>
-        <Card.Root>
+        <Card.Root
+          variant="outline"
+          bg="bg.surface"
+          borderColor="border.card"
+          borderWidth="1px"
+        >
           <Card.Body>
             <VStack align="start" gap={2}>
               <Text fontSize="sm" color="fg.muted">
@@ -106,7 +121,12 @@ export function StockReport({ stockSummary }: StockReportProps) {
       </Grid>
 
       {/* Stock Table */}
-      <Card.Root>
+      <Card.Root
+        variant="outline"
+        bg="bg.surface"
+        borderColor="border.card"
+        borderWidth="1px"
+      >
         <Card.Body>
           <VStack align="stretch" gap={4}>
             <HStack justify="space-between">

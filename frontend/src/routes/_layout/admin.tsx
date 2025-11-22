@@ -62,7 +62,7 @@ function UsersTable() {
     <>
       <Table.Root size={{ base: "sm", md: "md" }} variant="outline">
         <Table.Header>
-          <Table.Row>
+          <Table.Row bg="table.header.bg">
             <Table.ColumnHeader w="sm">Full name</Table.ColumnHeader>
             <Table.ColumnHeader w="sm">Username</Table.ColumnHeader>
             <Table.ColumnHeader w="sm">Email</Table.ColumnHeader>
@@ -76,6 +76,8 @@ function UsersTable() {
             <Table.Row 
               key={user.id} 
               opacity={isPlaceholderData ? 0.5 : 1}
+              bg="table.row.bg"
+              _hover={{ bg: "table.row.hover" }}
             >
               <Table.Cell color={!user.full_name ? "gray.500" : undefined}>
                 {user.full_name || "N/A"}

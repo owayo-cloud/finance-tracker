@@ -130,10 +130,10 @@ const UserInformation = () => {
         {/* Profile Header */}
         <Box
           p={6}
-          bg={{ base: "#1a1d29", _light: "#ffffff" }}
+          bg="bg.surface"
           borderRadius="lg"
           border="1px solid"
-          borderColor={{ base: "rgba(255, 255, 255, 0.08)", _light: "#e5e7eb" }}
+          borderColor="border.card"
           boxShadow={{ base: "0 2px 4px rgba(0, 0, 0, 0.2)", _light: "0 1px 3px rgba(0, 0, 0, 0.1)" }}
         >
           <HStack gap={4} align="start">
@@ -192,10 +192,10 @@ const UserInformation = () => {
         {/* Edit Form */}
         <Box
           p={6}
-          bg={{ base: "#1a1d29", _light: "#ffffff" }}
+          bg="bg.surface"
           borderRadius="lg"
           border="1px solid"
-          borderColor={{ base: "rgba(255, 255, 255, 0.08)", _light: "#e5e7eb" }}
+          borderColor="border.card"
           boxShadow={{ base: "0 2px 4px rgba(0, 0, 0, 0.2)", _light: "0 1px 3px rgba(0, 0, 0, 0.1)" }}
         >
           <Heading size="sm" mb={4} color={{ base: "#ffffff", _light: "#1a1d29" }}>

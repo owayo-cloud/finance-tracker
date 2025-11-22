@@ -137,7 +137,7 @@ function ShiftReconciliation() {
 
       <Flex gap={6} flexDirection={{ base: "column", lg: "row" }}>
         {/* Left Panel */}
-        <Box flex={1} bg={{ base: "#1a1d29", _light: "#ffffff" }} borderRadius="lg" p={6} border="1px solid" borderColor={{ base: "rgba(255, 255, 255, 0.08)", _light: "#e5e7eb" }}>
+        <Box flex={1} bg="bg.surface" borderRadius="lg" p={6} border="1px solid" borderColor="border.card">
           <VStack gap={4} align="stretch">
             {/* Task Selection */}
             <Box>
@@ -163,8 +163,8 @@ function ShiftReconciliation() {
               <Input
                 value={attach}
                 onChange={(e) => setAttach(e.target.value)}
-                bg={{ base: "#1a1d29", _light: "#ffffff" }}
-                borderColor={{ base: "rgba(255, 255, 255, 0.1)", _light: "#e5e7eb" }}
+                bg="bg.surface"
+                borderColor="input.border"
                 color={{ base: "#ffffff", _light: "#1a1d29" }}
                 _focus={{ borderColor: "#14b8a6", boxShadow: "0 0 0 1px #14b8a6" }}
               />
@@ -177,8 +177,8 @@ function ShiftReconciliation() {
               <Input
                 value={tillCashier}
                 readOnly
-                bg={{ base: "#1a1d29", _light: "#ffffff" }}
-                borderColor={{ base: "rgba(255, 255, 255, 0.1)", _light: "#e5e7eb" }}
+                bg="bg.surface"
+                borderColor="input.border"
                 color={{ base: "#ffffff", _light: "#1a1d29" }}
                 cursor="not-allowed"
                 opacity={0.7}
@@ -192,8 +192,8 @@ function ShiftReconciliation() {
               <Input
                 value={tillSupervisor}
                 readOnly
-                bg={{ base: "#1a1d29", _light: "#ffffff" }}
-                borderColor={{ base: "rgba(255, 255, 255, 0.1)", _light: "#e5e7eb" }}
+                bg="bg.surface"
+                borderColor="input.border"
                 color={{ base: "#ffffff", _light: "#1a1d29" }}
                 cursor="not-allowed"
                 opacity={0.7}
@@ -207,8 +207,8 @@ function ShiftReconciliation() {
               <Input
                 value={supervisorDesc}
                 onChange={(e) => setSupervisorDesc(e.target.value)}
-                bg={{ base: "#1a1d29", _light: "#ffffff" }}
-                borderColor={{ base: "rgba(255, 255, 255, 0.1)", _light: "#e5e7eb" }}
+                bg="bg.surface"
+                borderColor="input.border"
                 color={{ base: "#ffffff", _light: "#1a1d29" }}
                 _focus={{ borderColor: "#14b8a6", boxShadow: "0 0 0 1px #14b8a6" }}
               />
@@ -221,8 +221,8 @@ function ShiftReconciliation() {
               <Input
                 value={supervisorAcc}
                 onChange={(e) => setSupervisorAcc(e.target.value)}
-                bg={{ base: "#1a1d29", _light: "#ffffff" }}
-                borderColor={{ base: "rgba(255, 255, 255, 0.1)", _light: "#e5e7eb" }}
+                bg="bg.surface"
+                borderColor="input.border"
                 color={{ base: "#ffffff", _light: "#1a1d29" }}
                 _focus={{ borderColor: "#14b8a6", boxShadow: "0 0 0 1px #14b8a6" }}
               />
@@ -253,8 +253,8 @@ function ShiftReconciliation() {
               <Input
                 value={transactionDate}
                 readOnly
-                bg={{ base: "#1a1d29", _light: "#ffffff" }}
-                borderColor={{ base: "rgba(255, 255, 255, 0.1)", _light: "#e5e7eb" }}
+                bg="bg.surface"
+                borderColor="input.border"
                 color={{ base: "#ffffff", _light: "#1a1d29" }}
               />
             </Box>
@@ -266,14 +266,14 @@ function ShiftReconciliation() {
               <Input
                 value={transactionDate}
                 readOnly
-                bg={{ base: "#1a1d29", _light: "#ffffff" }}
-                borderColor={{ base: "rgba(255, 255, 255, 0.1)", _light: "#e5e7eb" }}
+                bg="bg.surface"
+                borderColor="input.border"
                 color={{ base: "#ffffff", _light: "#1a1d29" }}
               />
             </Box>
 
             {/* GRAND TOTAL Section */}
-            <Box mt={4} p={4} bg={{ base: "rgba(255, 255, 255, 0.02)", _light: "#f9fafb" }} borderRadius="md" border="1px solid" borderColor={{ base: "rgba(255, 255, 255, 0.1)", _light: "#e5e7eb" }}>
+            <Box mt={4} p={4} bg={{ base: "rgba(255, 255, 255, 0.05)", _light: "#f9fafb" }} borderRadius="md" border="1px solid" borderColor="border.card">
               <Text fontSize="sm" fontWeight="bold" mb={3} color={{ base: "#ffffff", _light: "#1a1d29" }}>
                 GRAND TOTAL
               </Text>
@@ -294,7 +294,7 @@ function ShiftReconciliation() {
             </Box>
 
             {/* OTHER PAYMENT DETAILS Section */}
-            <Box p={4} bg={{ base: "rgba(255, 255, 255, 0.02)", _light: "#f9fafb" }} borderRadius="md" border="1px solid" borderColor={{ base: "rgba(255, 255, 255, 0.1)", _light: "#e5e7eb" }}>
+            <Box p={4} bg={{ base: "rgba(255, 255, 255, 0.05)", _light: "#f9fafb" }} borderRadius="md" border="1px solid" borderColor="border.card">
               <Text fontSize="sm" fontWeight="bold" mb={3} color={{ base: "#ffffff", _light: "#1a1d29" }}>
                 OTHER PAYMENT DETAILS
               </Text>
@@ -320,7 +320,7 @@ function ShiftReconciliation() {
         <Box w={{ base: "100%", lg: "400px" }} flexShrink={0}>
           <VStack gap={4} align="stretch">
             {/* TILL MANAGEMENT Section */}
-            <Box bg={{ base: "#1a1d29", _light: "#ffffff" }} borderRadius="lg" p={6} border="1px solid" borderColor={{ base: "rgba(255, 255, 255, 0.08)", _light: "#e5e7eb" }}>
+            <Box bg="bg.surface" borderRadius="lg" p={6} border="1px solid" borderColor="border.card">
               <Text fontSize="md" fontWeight="bold" mb={4} color={{ base: "#ffffff", _light: "#1a1d29" }}>
                 TILL MANAGEMENT
               </Text>
@@ -385,7 +385,7 @@ function ShiftReconciliation() {
             </Box>
 
             {/* MPESA SUMMARY Section */}
-            <Box bg={{ base: "#1a1d29", _light: "#ffffff" }} borderRadius="lg" p={6} border="1px solid" borderColor={{ base: "rgba(255, 255, 255, 0.08)", _light: "#e5e7eb" }}>
+            <Box bg="bg.surface" borderRadius="lg" p={6} border="1px solid" borderColor="border.card">
               <Text fontSize="md" fontWeight="bold" mb={4} color={{ base: "#ffffff", _light: "#1a1d29" }}>
                 MPESA SUMMARY
       </Text>
@@ -437,7 +437,7 @@ function ShiftReconciliation() {
       </Flex>
 
       {/* Action Buttons */}
-      <Box mt={6} p={4} bg={{ base: "#1a1d29", _light: "#ffffff" }} borderRadius="lg" border="1px solid" borderColor={{ base: "rgba(255, 255, 255, 0.08)", _light: "#e5e7eb" }}>
+      <Box mt={6} p={4} bg="bg.surface" borderRadius="lg" border="1px solid" borderColor="border.card">
         <Flex justify="space-between" align="center" gap={4} flexWrap="wrap">
           <Button
             bg="#14b8a6"

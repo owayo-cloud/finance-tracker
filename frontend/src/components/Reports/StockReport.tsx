@@ -67,7 +67,12 @@ export function StockReport({ stockSummary }: StockReportProps) {
         }}
         gap={4}
       >
-        <Card.Root>
+        <Card.Root
+          variant="outline"
+          bg="bg.surface"
+          borderColor="border.card"
+          borderWidth="1px"
+        >
           <Card.Body>
             <VStack align="start" gap={2}>
               <Text fontSize="sm" color="fg.muted">
@@ -79,7 +84,12 @@ export function StockReport({ stockSummary }: StockReportProps) {
             </VStack>
           </Card.Body>
         </Card.Root>
-        <Card.Root>
+        <Card.Root
+          variant="outline"
+          bg="bg.surface"
+          borderColor="border.card"
+          borderWidth="1px"
+        >
           <Card.Body>
             <VStack align="start" gap={2}>
               <Text fontSize="sm" color="fg.muted">
@@ -91,7 +101,12 @@ export function StockReport({ stockSummary }: StockReportProps) {
             </VStack>
           </Card.Body>
         </Card.Root>
-        <Card.Root>
+        <Card.Root
+          variant="outline"
+          bg="bg.surface"
+          borderColor="border.card"
+          borderWidth="1px"
+        >
           <Card.Body>
             <VStack align="start" gap={2}>
               <Text fontSize="sm" color="fg.muted">
@@ -106,7 +121,12 @@ export function StockReport({ stockSummary }: StockReportProps) {
       </Grid>
 
       {/* Stock Table */}
-      <Card.Root>
+      <Card.Root
+        variant="outline"
+        bg="bg.surface"
+        borderColor="border.card"
+        borderWidth="1px"
+      >
         <Card.Body>
           <VStack align="stretch" gap={4}>
             <HStack justify="space-between">
@@ -122,9 +142,12 @@ export function StockReport({ stockSummary }: StockReportProps) {
                 </Button>
               </HStack>
             </HStack>
-            <Table.Root size="sm">
+            <Table.Root 
+              size="sm"
+              variant="outline"
+            >
               <Table.Header>
-                <Table.Row>
+                <Table.Row bg="table.header.bg">
                   <Table.ColumnHeader>Product</Table.ColumnHeader>
                   <Table.ColumnHeader>Category</Table.ColumnHeader>
                   <Table.ColumnHeader textAlign="right">Stock</Table.ColumnHeader>
@@ -137,7 +160,11 @@ export function StockReport({ stockSummary }: StockReportProps) {
                 {stockSummary.products
                   .sort((a, b) => b.inventoryValue - a.inventoryValue)
                   .map((product) => (
-                    <Table.Row key={product.id}>
+                    <Table.Row 
+                      key={product.id}
+                      bg="table.row.bg"
+                      _hover={{ bg: "table.row.hover" }}
+                    >
                       <Table.Cell fontWeight="medium">{product.name}</Table.Cell>
                       <Table.Cell>
                         <Badge colorPalette="purple">{product.category}</Badge>

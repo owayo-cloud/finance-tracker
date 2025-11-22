@@ -5,7 +5,7 @@ from sqlmodel import Session, create_engine, select
 from app import crud
 from app.core.config import settings
 from app.core.logging_config import get_logger
-from app.models import User, UserCreate, ProductCategory, ProductStatus
+from app.models import User, UserCreate, ProductCategory, ProductStatus, PaymentMethod
 
 logger = get_logger(__name__)
 
@@ -47,6 +47,7 @@ def init_db(session: Session) -> None:
 
     _seed_product_categories(session)
     _seed_product_statuses(session)
+    _seed_payment_methods(session)
     logger.info("Database initialization complete")
 
 def _seed_product_categories(session: Session) -> None:
@@ -119,3 +120,28 @@ def _seed_product_statuses(session: Session) -> None:
 
     session.commit()
     logger.info("Product statuses seeded successfully")
+
+
+def _seed_payment_methods(session: Session) -> None:
+    """Seed initial payment methods if they don't exist"""
+    payment_methods = [
+        {"name": "POS Cash Acc", "description": "Cash payments at point of sale", "is_active": True},
+        {"name": "POS Mpesa", "description": "M-Pesa mobile money payments", "is_active": True},
+        {"name": "POS KCB PAYBILL", "description": "KCB Bank paybill payments", "is_active": True},
+        {"name": "POS Equity PAYBILL", "description": "Equity Bank paybill payments", "is_active": True},
+        {"name": "Credit Note", "description": "Credit note payments", "is_active": True},
+    ]
+    
+    for pm_data in payment_methods:
+        statement = select(PaymentMethod).where(
+            PaymentMethod.name == pm_data["name"]
+        )
+        existing_pm = session.exec(statement).first()
+        
+        if not existing_pm:
+            payment_method = PaymentMethod(**pm_data)
+            session.add(payment_method)
+            logger.info(f"Created payment method: {pm_data['name']}")
+    
+    session.commit()
+    logger.info("Payment methods seeded successfully")

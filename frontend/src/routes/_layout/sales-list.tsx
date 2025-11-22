@@ -10,11 +10,12 @@ import {
   Input,
   Flex,
   Button,
+  Icon,
 } from "@chakra-ui/react"
 import { useQuery } from "@tanstack/react-query"
 import { createFileRoute } from "@tanstack/react-router"
 import { useState } from "react"
-import { FiSearch, FiCalendar, FiFilter } from "react-icons/fi"
+import { FiSearch, FiCalendar } from "react-icons/fi"
 import { SalesService, type SalePublic } from "../../client"
 import { useColorMode } from "@/components/ui/color-mode"
 import { REFRESH_INTERVALS } from "@/hooks/useAutoRefresh"
@@ -159,8 +160,8 @@ function SalesList() {
             <Button
               variant="outline"
               colorScheme="blue"
-              leftIcon={<FiCalendar />}
             >
+              <Icon as={FiCalendar} mr={2} />
               Filter
             </Button>
           </HStack>

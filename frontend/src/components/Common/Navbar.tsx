@@ -11,9 +11,10 @@ import { ColorModeButton } from "../ui/color-mode"
 interface NavbarProps {
   onMenuClick?: () => void
   sidebarCollapsed?: boolean
+  isPOSMode?: boolean
 }
 
-function Navbar({ onMenuClick, sidebarCollapsed = false }: NavbarProps) {
+function Navbar({ onMenuClick, sidebarCollapsed = false, isPOSMode = false }: NavbarProps) {
   const display = useBreakpointValue({ base: "none", md: "flex" })
   const { user, logout } = useAuth()
 
@@ -26,7 +27,7 @@ function Navbar({ onMenuClick, sidebarCollapsed = false }: NavbarProps) {
       bg={{ base: "#1a1d29", _light: "#ffffff" }}
       w="100%"
       top={0}
-      px={6}
+      px={isPOSMode ? 4 : 6}
       py={3}
       zIndex={10}
       boxShadow={{ base: "0 1px 3px rgba(0, 0, 0, 0.2)", _light: "0 1px 2px rgba(0, 0, 0, 0.05)" }}
@@ -53,7 +54,7 @@ function Navbar({ onMenuClick, sidebarCollapsed = false }: NavbarProps) {
             >
               <HStack gap={0.5} alignItems="center" justifyContent="center">
                 <Text 
-                  fontSize={sidebarCollapsed ? "xs" : "sm"}
+                  fontSize={isPOSMode ? "sm" : (sidebarCollapsed ? "xs" : "sm")}
                   fontWeight="800" 
                   color={{ base: "#14b8a6", _light: "#0d9488" }}
                   letterSpacing="0px"
@@ -62,7 +63,7 @@ function Navbar({ onMenuClick, sidebarCollapsed = false }: NavbarProps) {
                   W
                 </Text>
                 <Text 
-                  fontSize={sidebarCollapsed ? "xs" : "sm"}
+                  fontSize={isPOSMode ? "sm" : (sidebarCollapsed ? "xs" : "sm")}
                   fontWeight="800" 
                   color={{ base: "#60a5fa", _light: "#3b82f6" }}
                   letterSpacing="0px"
@@ -71,7 +72,7 @@ function Navbar({ onMenuClick, sidebarCollapsed = false }: NavbarProps) {
                   M
                 </Text>
                 <Text 
-                  fontSize={sidebarCollapsed ? "xs" : "sm"}
+                  fontSize={isPOSMode ? "sm" : (sidebarCollapsed ? "xs" : "sm")}
                   fontWeight="800" 
                   color={{ base: "#a855f7", _light: "#9333ea" }}
                   letterSpacing="0px"
@@ -86,234 +87,240 @@ function Navbar({ onMenuClick, sidebarCollapsed = false }: NavbarProps) {
             <VStack 
               align="start" 
               gap={0} 
-              display={sidebarCollapsed ? "none" : "flex"}
+              display={isPOSMode ? "flex" : (sidebarCollapsed ? "none" : "flex")}
               transition="all 0.3s ease"
-              opacity={sidebarCollapsed ? 0 : 1}
-              maxW={sidebarCollapsed ? "0" : "200px"}
+              opacity={isPOSMode ? 1 : (sidebarCollapsed ? 0 : 1)}
+              maxW={isPOSMode ? "200px" : (sidebarCollapsed ? "0" : "200px")}
               overflow="hidden"
             >
-              <HStack gap={0} alignItems="baseline" lineHeight="1.2">
-                <Text 
-                  fontSize="lg" 
-                  fontWeight="700" 
-                  color={{ base: "#14b8a6", _light: "#0d9488" }}
-                  letterSpacing="0.5px"
-                >
-                  W
-                </Text>
-                <Text 
-                  fontSize="lg" 
-                  fontWeight="700" 
-                  color={{ base: "#ffffff", _light: "#1a1d29" }}
-                  letterSpacing="0.5px"
-                >
-                  ise
-                </Text>
-                <Text 
-                  fontSize="lg" 
-                  fontWeight="700" 
-                  color={{ base: "#60a5fa", _light: "#3b82f6" }}
-                  letterSpacing="0.5px"
-                >
-                  M
-                </Text>
-                <Text 
-                  fontSize="lg" 
-                  fontWeight="700" 
-                  color={{ base: "#ffffff", _light: "#1a1d29" }}
-                  letterSpacing="0.5px"
-                >
-                  an
-                </Text>
-                <Text 
-                  fontSize="lg" 
-                  fontWeight="700" 
-                  color={{ base: "#a855f7", _light: "#9333ea" }}
-                  letterSpacing="0.5px"
-                >
-                  P
-                </Text>
-                <Text 
-                  fontSize="lg" 
-                  fontWeight="700" 
-                  color={{ base: "#ffffff", _light: "#1a1d29" }}
-                  letterSpacing="0.5px"
-                >
-                  alace
-                </Text>
-              </HStack>
-              <Text 
-                fontSize="xs" 
-                fontWeight="500" 
-                color={{ base: "#9ca3af", _light: "#6b7280" }} 
-                letterSpacing="0.3px"
-                textTransform="uppercase"
-              >
-                Club Management
-              </Text>
-            </VStack>
+                <HStack gap={0} alignItems="baseline" lineHeight="1.2">
+                  <Text 
+                    fontSize="lg" 
+                    fontWeight="700" 
+                    color={{ base: "#14b8a6", _light: "#0d9488" }}
+                    letterSpacing="0.5px"
+                  >
+                    W
+                  </Text>
+                  <Text 
+                    fontSize="lg" 
+                    fontWeight="700" 
+                    color={{ base: "#ffffff", _light: "#1a1d29" }}
+                    letterSpacing="0.5px"
+                  >
+                    ise
+                  </Text>
+                  <Text 
+                    fontSize="lg" 
+                    fontWeight="700" 
+                    color={{ base: "#60a5fa", _light: "#3b82f6" }}
+                    letterSpacing="0.5px"
+                  >
+                    M
+                  </Text>
+                  <Text 
+                    fontSize="lg" 
+                    fontWeight="700" 
+                    color={{ base: "#ffffff", _light: "#1a1d29" }}
+                    letterSpacing="0.5px"
+                  >
+                    an
+                  </Text>
+                  <Text 
+                    fontSize="lg" 
+                    fontWeight="700" 
+                    color={{ base: "#a855f7", _light: "#9333ea" }}
+                    letterSpacing="0.5px"
+                  >
+                    P
+                  </Text>
+                  <Text 
+                    fontSize="lg" 
+                    fontWeight="700" 
+                    color={{ base: "#ffffff", _light: "#1a1d29" }}
+                    letterSpacing="0.5px"
+                  >
+                    alace
+                  </Text>
+                </HStack>
+                  <Text 
+                    fontSize="xs" 
+                    fontWeight="500" 
+                    color={{ base: "#9ca3af", _light: "#6b7280" }} 
+                    letterSpacing="0.3px"
+                    textTransform="uppercase"
+                  >
+                    Club Management
+                  </Text>
+                </VStack>
           </HStack>
         </Link>
-        <IconButton
-          variant="ghost"
-          aria-label="Menu"
-          color={{ base: "#9ca3af", _light: "#6b7280" }}
-          _hover={{ bg: { base: "rgba(255, 255, 255, 0.05)", _light: "rgba(0, 0, 0, 0.05)" } }}
-          size="sm"
-          onClick={onMenuClick}
-          display="flex"
-        >
-          <FaBars fontSize="18px" />
-        </IconButton>
+        {!isPOSMode && (
+          <IconButton
+            variant="ghost"
+            aria-label="Menu"
+            color={{ base: "#9ca3af", _light: "#6b7280" }}
+            _hover={{ bg: { base: "rgba(255, 255, 255, 0.05)", _light: "rgba(0, 0, 0, 0.05)" } }}
+            size="sm"
+            onClick={onMenuClick}
+            display="flex"
+          >
+            <FaBars fontSize="18px" />
+          </IconButton>
+        )}
       </HStack>
 
-      {/* Center Section: Search Bar */}
-      <Box flex="1" maxW="400px" mx={4} display={{ base: "none", md: "block" }}>
-        <Input
-          placeholder="Search products"
-          bg={{ base: "rgba(255, 255, 255, 0.05)", _light: "#f3f4f6" }}
-          border="1px solid"
-          borderColor={{ base: "rgba(255, 255, 255, 0.1)", _light: "#e5e7eb" }}
-          borderRadius="md"
-          color={{ base: "#ffffff", _light: "#1a1d29" }}
-          _placeholder={{ color: { base: "#6b7280", _light: "#9ca3af" } }}
-          _focus={{
-            borderColor: { base: "rgba(255, 255, 255, 0.2)", _light: "#14b8a6" },
-            boxShadow: "none",
-          }}
-          px={4}
-          py={2}
-        />
-      </Box>
+      {/* Center Section: Search Bar - Hidden in POS mode */}
+      {!isPOSMode && (
+        <Box flex="1" maxW="400px" mx={4} display={{ base: "none", md: "block" }}>
+          <Input
+            placeholder="Search products"
+            bg={{ base: "rgba(255, 255, 255, 0.05)", _light: "#f3f4f6" }}
+            border="1px solid"
+            borderColor={{ base: "rgba(255, 255, 255, 0.1)", _light: "#e5e7eb" }}
+            borderRadius="md"
+            color={{ base: "#ffffff", _light: "#1a1d29" }}
+            _placeholder={{ color: { base: "#6b7280", _light: "#9ca3af" } }}
+            _focus={{
+              borderColor: { base: "rgba(255, 255, 255, 0.2)", _light: "#14b8a6" },
+              boxShadow: "none",
+            }}
+            px={4}
+            py={2}
+          />
+        </Box>
+      )}
 
-      {/* Right Section: Icons and User */}
-      <HStack gap={3} alignItems="center" flexShrink={0}>
-        {/* Grid Icon */}
-        <IconButton
-          variant="ghost"
-          aria-label="Grid"
-          color={{ base: "#ffffff", _light: "#1a1d29" }}
-          _hover={{ bg: { base: "rgba(255, 255, 255, 0.05)", _light: "rgba(0, 0, 0, 0.05)" } }}
-          size="sm"
-        >
-          <FiGrid fontSize="18px" />
-        </IconButton>
-
-        {/* Theme Toggle */}
-        <ColorModeButton />
-
-        {/* Mail Icon with Notification */}
-        <Box position="relative" display="inline-flex" alignItems="center" justifyContent="center">
+      {/* Right Section: Icons and User - Hidden in POS mode */}
+      {!isPOSMode && (
+        <HStack gap={3} alignItems="center" flexShrink={0}>
+          {/* Grid Icon */}
           <IconButton
             variant="ghost"
-            aria-label="Messages"
+            aria-label="Grid"
             color={{ base: "#ffffff", _light: "#1a1d29" }}
             _hover={{ bg: { base: "rgba(255, 255, 255, 0.05)", _light: "rgba(0, 0, 0, 0.05)" } }}
             size="sm"
           >
-            <FiMail fontSize="18px" />
+            <FiGrid fontSize="18px" />
           </IconButton>
-          <Box
-            position="absolute"
-            top="4px"
-            right="4px"
-            w="8px"
-            h="8px"
-            borderRadius="full"
-            bg="#22c55e"
-            border="none"
-            zIndex={1}
-          />
-        </Box>
 
-        {/* Bell Icon with Notification */}
-        <Box position="relative" display="inline-flex" alignItems="center" justifyContent="center">
-          <IconButton
-            variant="ghost"
-            aria-label="Notifications"
-            color={{ base: "#ffffff", _light: "#1a1d29" }}
-            _hover={{ bg: { base: "rgba(255, 255, 255, 0.05)", _light: "rgba(0, 0, 0, 0.05)" } }}
-            size="sm"
-          >
-            <FiBell fontSize="18px" />
-          </IconButton>
-          <Box
-            position="absolute"
-            top="4px"
-            right="4px"
-            w="8px"
-            h="8px"
-            borderRadius="full"
-            bg="#ef4444"
-            border="none"
-            zIndex={1}
-          />
-        </Box>
+          {/* Theme Toggle */}
+          <ColorModeButton />
 
-        {/* User Profile */}
-        <MenuRoot>
-          <MenuTrigger asChild>
-            <HStack
-              as="button"
-              gap={2}
-              alignItems="center"
-              px={2}
-              py={1}
-              borderRadius="md"
-              _hover={{
-                bg: { base: "rgba(255, 255, 255, 0.05)", _light: "rgba(0, 0, 0, 0.05)" },
-              }}
-              transition="all 0.2s"
+          {/* Mail Icon with Notification */}
+          <Box position="relative" display="inline-flex" alignItems="center" justifyContent="center">
+            <IconButton
+              variant="ghost"
+              aria-label="Messages"
+              color={{ base: "#ffffff", _light: "#1a1d29" }}
+              _hover={{ bg: { base: "rgba(255, 255, 255, 0.05)", _light: "rgba(0, 0, 0, 0.05)" } }}
+              size="sm"
             >
-              <Box
-                w={10}
-                h={10}
-                borderRadius="full"
-                bg="linear-gradient(135deg, #667eea 0%, #764ba2 100%)"
-                display="flex"
+              <FiMail fontSize="18px" />
+            </IconButton>
+            <Box
+              position="absolute"
+              top="4px"
+              right="4px"
+              w="8px"
+              h="8px"
+              borderRadius="full"
+              bg="#22c55e"
+              border="none"
+              zIndex={1}
+            />
+          </Box>
+
+          {/* Bell Icon with Notification */}
+          <Box position="relative" display="inline-flex" alignItems="center" justifyContent="center">
+            <IconButton
+              variant="ghost"
+              aria-label="Notifications"
+              color={{ base: "#ffffff", _light: "#1a1d29" }}
+              _hover={{ bg: { base: "rgba(255, 255, 255, 0.05)", _light: "rgba(0, 0, 0, 0.05)" } }}
+              size="sm"
+            >
+              <FiBell fontSize="18px" />
+            </IconButton>
+            <Box
+              position="absolute"
+              top="4px"
+              right="4px"
+              w="8px"
+              h="8px"
+              borderRadius="full"
+              bg="#ef4444"
+              border="none"
+              zIndex={1}
+            />
+          </Box>
+
+          {/* User Profile */}
+          <MenuRoot>
+            <MenuTrigger asChild>
+              <HStack
+                as="button"
+                gap={2}
                 alignItems="center"
-                justifyContent="center"
-                color="white"
-                fontSize="xs"
-                fontWeight="700"
-                flexShrink={0}
-                border="2px solid"
-                borderColor={{ base: "rgba(255, 255, 255, 0.1)", _light: "rgba(0, 0, 0, 0.1)" }}
+                px={2}
+                py={1}
+                borderRadius="md"
+                _hover={{
+                  bg: { base: "rgba(255, 255, 255, 0.05)", _light: "rgba(0, 0, 0, 0.05)" },
+                }}
+                transition="all 0.2s"
               >
-                {(user?.full_name || user?.email || "U")[0].toUpperCase()}
-              </Box>
-              <Text fontSize="sm" fontWeight="600" color={{ base: "#ffffff", _light: "#1a1d29" }} display={{ base: "none", lg: "block" }}>
-                {user?.full_name || "User"}
-              </Text>
-              <Icon as={FiChevronDown} fontSize="14px" color={{ base: "#9ca3af", _light: "#6b7280" }} display={{ base: "none", lg: "block" }} />
-            </HStack>
-          </MenuTrigger>
-          <MenuContent>
-            <Link to="/settings">
+                <Box
+                  w={10}
+                  h={10}
+                  borderRadius="full"
+                  bg="linear-gradient(135deg, #667eea 0%, #764ba2 100%)"
+                  display="flex"
+                  alignItems="center"
+                  justifyContent="center"
+                  color="white"
+                  fontSize="xs"
+                  fontWeight="700"
+                  flexShrink={0}
+                  border="2px solid"
+                  borderColor={{ base: "rgba(255, 255, 255, 0.1)", _light: "rgba(0, 0, 0, 0.1)" }}
+                >
+                  {(user?.full_name || user?.email || "U")[0].toUpperCase()}
+                </Box>
+                <Text fontSize="sm" fontWeight="600" color={{ base: "#ffffff", _light: "#1a1d29" }} display={{ base: "none", lg: "block" }}>
+                  {user?.full_name || "User"}
+                </Text>
+                <Icon as={FiChevronDown} fontSize="14px" color={{ base: "#9ca3af", _light: "#6b7280" }} display={{ base: "none", lg: "block" }} />
+              </HStack>
+            </MenuTrigger>
+            <MenuContent>
+              <Link to="/settings">
+                <MenuItem
+                  closeOnSelect
+                  value="user-settings"
+                  gap={2}
+                  py={2}
+                  style={{ cursor: "pointer" }}
+                >
+                  <FiUser fontSize="18px" />
+                  <Box flex="1">My Profile</Box>
+                </MenuItem>
+              </Link>
               <MenuItem
-                closeOnSelect
-                value="user-settings"
+                value="logout"
                 gap={2}
                 py={2}
+                onClick={logout}
                 style={{ cursor: "pointer" }}
               >
-                <FiUser fontSize="18px" />
-                <Box flex="1">My Profile</Box>
+                <FiLogOut />
+                Log Out
               </MenuItem>
-            </Link>
-            <MenuItem
-              value="logout"
-              gap={2}
-              py={2}
-              onClick={logout}
-              style={{ cursor: "pointer" }}
-            >
-              <FiLogOut />
-              Log Out
-            </MenuItem>
-          </MenuContent>
-        </MenuRoot>
-      </HStack>
+            </MenuContent>
+          </MenuRoot>
+        </HStack>
+      )}
     </Flex>
   )
 }

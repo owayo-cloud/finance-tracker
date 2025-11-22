@@ -1,7 +1,6 @@
-import { Box, HStack, Text, Link as RouterLink } from "@chakra-ui/react"
+import { Box, HStack, Text } from "@chakra-ui/react"
 import { useLocation, Link } from "@tanstack/react-router"
 import { FiChevronRight, FiHome } from "react-icons/fi"
-import { useColorMode } from "@/components/ui/color-mode"
 
 interface BreadcrumbItem {
   label: string
@@ -24,7 +23,6 @@ const routeLabels: Record<string, string> = {
 
 function Breadcrumbs() {
   const location = useLocation()
-  const { colorMode } = useColorMode()
   const pathname = location.pathname
 
   // Build breadcrumb items from pathname
@@ -77,7 +75,7 @@ function Breadcrumbs() {
         return (
           <HStack key={index} gap={2}>
             {index === 0 ? (
-              <RouterLink to={item.path || "/"}>
+                  <Link to={item.path || "/"}>
                 <Box
                   as="span"
                   display="inline-flex"
@@ -90,7 +88,7 @@ function Breadcrumbs() {
                 >
                   <FiHome size={14} />
                 </Box>
-              </RouterLink>
+              </Link>
             ) : (
               <>
                 <FiChevronRight size={14} />
@@ -102,7 +100,7 @@ function Breadcrumbs() {
                     {item.label}
                   </Text>
                 ) : (
-                  <RouterLink to={item.path || "/"}>
+                  <Link to={item.path || "/"}>
                     <Text
                       as="span"
                       color={{ base: "#60a5fa", _light: "#2563eb" }}
@@ -114,7 +112,7 @@ function Breadcrumbs() {
                     >
                       {item.label}
                     </Text>
-                  </RouterLink>
+                  </Link>
                 )}
               </>
             )}

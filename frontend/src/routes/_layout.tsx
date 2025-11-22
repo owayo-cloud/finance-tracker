@@ -126,7 +126,9 @@ function Layout() {
         <Flex 
           flex="1" 
           direction="column" 
-          p={isPOSPage ? 0 : 4} 
+          px={isPOSPage ? 0 : 4}
+          pt={isPOSPage ? 0 : 4}
+          pb={isPOSPage ? 0 : 8}
           overflowY="auto"
           overflowX="hidden"
           bg="bg.canvas"

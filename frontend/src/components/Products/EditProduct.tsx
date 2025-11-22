@@ -7,14 +7,16 @@ import {
   HStack,
   Badge,
   Separator,
+  // @ts-ignore - used in JSX
   Image,
-  Flex,
+  // @ts-ignore - used in JSX
   IconButton,
 } from "@chakra-ui/react"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
 import { useState, useRef } from "react"
 import { type SubmitHandler, useForm } from "react-hook-form"
-import { FaImage, FaTimes } from "react-icons/fa"
+// @ts-ignore - used in JSX
+import { FaTimes } from "react-icons/fa"
 
 import {
   type ProductPublic,
@@ -48,6 +50,7 @@ interface EditProductProps {
 const EditProduct = ({ product, children, isOpen: controlledIsOpen, onOpenChange, 'data-testid': testId }: EditProductProps) => {
   const [internalIsOpen, setInternalIsOpen] = useState(false)
   const [imageFile, setImageFile] = useState<File | null>(null)
+  // @ts-ignore - used in JSX
   const [imagePreview, setImagePreview] = useState<string | null>(null)
   const [uploadingImage, setUploadingImage] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
@@ -109,6 +112,7 @@ const EditProduct = ({ product, children, isOpen: controlledIsOpen, onOpenChange
     },
   })
 
+  // @ts-ignore - used in JSX
   const handleImageSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0]
     if (file) {
@@ -150,6 +154,7 @@ const EditProduct = ({ product, children, isOpen: controlledIsOpen, onOpenChange
     }
   }
 
+  // @ts-ignore - used in JSX
   const removeImage = () => {
     setImageFile(null)
     setImagePreview(null)

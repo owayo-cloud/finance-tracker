@@ -108,8 +108,7 @@ const SidebarItems = ({ onClose, isCollapsed = false }: SidebarItemsProps) => {
     Sales: location.pathname === "/sales" || location.pathname === "/shift-reconciliation",
     Expenses: location.pathname === "/expenses" || location.pathname === "/expense-categories",
     Purchases: location.pathname === "/stock-entry",
-    Products: location.pathname === "/products" || location.pathname === "/stock-adjustment",
-    Purchases: location.pathname === "/stock-entry"
+    Products: location.pathname === "/products" || location.pathname === "/stock-adjustment"
   })
 
   // Filter items based on user role

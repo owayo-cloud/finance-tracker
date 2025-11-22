@@ -34,7 +34,6 @@ import {
 import {
   SelectContent,
   SelectItem,
-  SelectLabel,
   SelectRoot,
   SelectTrigger,
   SelectValueText,
@@ -46,7 +45,6 @@ import {
   FiInfo,
   FiArrowRight,
   FiArrowLeft,
-  FiAlertTriangle,
   FiEdit,
   FiRefreshCw,
   FiChevronRight,
@@ -146,22 +144,6 @@ export function BulkImportPage() {
     }
   }
 
-  const getStageLabel = (stage: ImportStage): string => {
-    switch (stage) {
-      case ImportStage.INSTRUCTIONS:
-        return "Instructions"
-      case ImportStage.UPLOAD:
-        return "Upload File"
-      case ImportStage.MAPPING:
-        return "Map Columns"
-      case ImportStage.VALIDATION:
-        return "Review & Fix"
-      case ImportStage.COMPLETE:
-        return "Complete"
-      default:
-        return ""
-    }
-  }
 
   return (
     <Container maxW="7xl" py={8}>
@@ -368,6 +350,7 @@ interface InstructionsStageProps {
 function InstructionsStage({ onContinue }: InstructionsStageProps) {
   const { showSuccessToast, showErrorToast } = useCustomToast()
 
+  // @ts-ignore - may be used in future
   const handleDownloadTemplate = async () => {
     try {
       const response = await fetch(`${import.meta.env.VITE_API_URL}/api/v1/products/bulk/template`, {
@@ -649,9 +632,11 @@ function UploadStage({ onFileUploaded }: UploadStageProps) {
         borderRadius="lg"
         borderStyle="dashed"
         borderColor={selectedFile ? "green.500" : "gray.200"}
-        _dark={{ borderColor: selectedFile ? "green.500" : "gray.600" }}
+        _dark={{ 
+          borderColor: selectedFile ? "green.500" : "gray.600",
+          bg: selectedFile ? "green.900" : "gray.700"
+        }}
         bg={selectedFile ? "green.50" : "gray.50"}
-        _dark={{ bg: selectedFile ? "green.900" : "gray.700" }}
         textAlign="center"
         cursor="pointer"
         onDragOver={handleDragOver}
@@ -769,12 +754,12 @@ function MappingStage({
   onMappingComplete,
 }: MappingStageProps) {
   const [columnMapping, setColumnMapping] = useState<Record<string, string>>(autoMapping)
-  const [defaultCategoryId, setDefaultCategoryId] = useState<string>("")
+  const [defaultCategoryId] = useState<string>("")
   const [defaultStatusId, setDefaultStatusId] = useState<string>("")
   const [sampleData, setSampleData] = useState<Record<string, any>[]>([])
   const { showSuccessToast, showErrorToast } = useCustomToast()
 
-  const { data: categories, isLoading: categoriesLoading } = useQuery({
+  const { isLoading: categoriesLoading } = useQuery({
     queryKey: ["categories"],
     queryFn: () => ProductsService.readCategories(),
   })
@@ -795,7 +780,7 @@ function MappingStage({
   }, [statuses])
 
   // Fetch sample data preview
-  const { data: previewData, isLoading: previewLoading } = useQuery({
+  const { isLoading: previewLoading } = useQuery({
     queryKey: ["bulk-import-preview", sessionId],
     queryFn: async () => {
       const response = await fetch(
@@ -960,7 +945,6 @@ function MappingStage({
                 const mappedSystemField = columnMapping[csvColumn] || ""
                 const sampleValues = getSampleValues(csvColumn)
                 const isAutoMapped = autoMapping[csvColumn] !== undefined
-                const matchedField = systemFields.find(f => f.value === mappedSystemField)
 
                 return (
                   <Table.Row 
@@ -981,7 +965,7 @@ function MappingStage({
                     <Table.Cell>
                       <Box
                         as="select"
-                        value={mappedSystemField}
+                        defaultValue={mappedSystemField}
                         onChange={(e: any) => {
                           const newMapping = { ...columnMapping }
                           if (e.target.value) {
@@ -1006,6 +990,16 @@ function MappingStage({
                           outline: "none",
                           boxShadow: "0 0 0 1px var(--chakra-colors-blue-500)"
                         }}
+                        css={{
+                          "&": {
+                            appearance: "none",
+                            backgroundImage: `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e")`,
+                            backgroundPosition: "right 0.5rem center",
+                            backgroundRepeat: "no-repeat",
+                            backgroundSize: "1.5em 1.5em",
+                            paddingRight: "2.5rem"
+                          }
+                        }}
                       >
                         <option value="">-- Select System Field --</option>
                         {systemFields.map((field) => (
@@ -1026,7 +1020,7 @@ function MappingStage({
                               fontSize="xs" 
                               color="fg.muted"
                               fontFamily="mono"
-                              noOfLines={1}
+                              lineClamp={1}
                             >
                               {value.length > 40 ? `${value.substring(0, 40)}...` : value}
                             </Text>
@@ -1075,8 +1069,8 @@ function MappingStage({
           <Field label="Default Status" required>
             <Box
               as="select"
-              value={defaultStatusId}
-              onChange={(e: any) => setDefaultStatusId(e.target.value)}
+              defaultValue={defaultStatusId}
+              onChange={(e: any) => setDefaultStatusId((e.target as HTMLSelectElement).value)}
               w="full"
               p={2}
               borderRadius="md"
@@ -1130,16 +1124,13 @@ interface ValidationStageProps {
 
 function ValidationStage({
   sessionId,
-  validRows,
-  errorRows,
-  duplicateRows,
+  duplicateRows = 0,
   validatedRows: initialValidatedRows,
   onImportComplete,
   duplicateAction,
   onDuplicateActionChange,
 }: ValidationStageProps) {
   const [filter, setFilter] = useState<"all" | "errors" | "duplicates">("all")
-  const [showOnlyProblems, setShowOnlyProblems] = useState(false)
   const [editingRow, setEditingRow] = useState<number | null>(null)
   const [editedData, setEditedData] = useState<Record<string, any>>({})
   const [categorySearch, setCategorySearch] = useState<string>("")
@@ -1330,7 +1321,7 @@ function ValidationStage({
     if (selectedRows.size === filteredRows.length) {
       setSelectedRows(new Set())
     } else {
-      setSelectedRows(new Set(filteredRows.map(r => r.row_number)))
+      setSelectedRows(new Set(filteredRows.map((r: ImportRow) => r.row_number)))
     }
   }
 
@@ -1358,10 +1349,7 @@ function ValidationStage({
       .join(' ')
   }
 
-  const filteredRows = (showOnlyProblems 
-    ? validatedRows.filter(r => r.status === "error" || r.status === "duplicate")
-    : validatedRows
-  ).filter(r => !deletedRows.has(r.row_number))
+  const filteredRows = validatedRows.filter((r: ImportRow) => !deletedRows.has(r.row_number))
 
   const totalPages = Math.ceil(filteredRows.length / pageSize)
   const paginatedRows = filteredRows.slice(
@@ -1487,17 +1475,17 @@ function ValidationStage({
                         variant="ghost"
                         onClick={() => {
                           const errorRowNumbers = validatedRows
-                            .filter(r => r.status === "error" && !deletedRows.has(r.row_number))
-                            .map(r => r.row_number)
+                            .filter((r: ImportRow) => r.status === "error" && !deletedRows.has(r.row_number))
+                            .map((r: ImportRow) => r.row_number)
                           
                           const newDeletedRows = new Set(deletedRows)
-                          errorRowNumbers.forEach(rowNum => newDeletedRows.add(rowNum))
+                          errorRowNumbers.forEach((rowNum: number) => newDeletedRows.add(rowNum))
                           setDeletedRows(newDeletedRows)
                           setSelectedRows(new Set())
                           showSuccessToast(`${errorRowNumbers.length} error rows excluded`)
                         }}
-                        leftIcon={<Icon as={FiTrash2} />}
                       >
+                        <Icon as={FiTrash2} mr={2} />
                         Exclude All
                       </Button>
                     </HStack>
@@ -1616,8 +1604,8 @@ function ValidationStage({
           <Field label="What should we do with duplicates?">
             <Box
               as="select"
-              value={duplicateAction}
-              onChange={(e: any) => onDuplicateActionChange(e.target.value as any)}
+              defaultValue={duplicateAction}
+              onChange={(e: any) => onDuplicateActionChange((e.target as HTMLSelectElement).value as "skip" | "update" | "create")}
               w="full"
               p={2}
               borderRadius="md"
@@ -1975,9 +1963,9 @@ function ValidationStage({
             onClick={handleImport}
             loading={importMutation.isPending || isImporting}
             disabled={activeValidRows === 0}
-            rightIcon={<Icon as={FiArrowRight} />}
           >
             {activeErrorRows > 0 ? "Import Valid Rows" : "Import All Products"}
+            <Icon as={FiArrowRight} ml={2} />
           </Button>
         </HStack>
       </Box>

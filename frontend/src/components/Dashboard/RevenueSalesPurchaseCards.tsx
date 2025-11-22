@@ -1,5 +1,8 @@
 import { Box, Grid, HStack, VStack, Text, Icon } from "@chakra-ui/react"
 import { FiBox, FiShoppingCart, FiPackage } from "react-icons/fi"
+import { useQuery } from "@tanstack/react-query"
+import { useMemo } from "react"
+import { SalesService, ProductsService } from "@/client"
 import { formatCurrency } from "./utils"
 
 interface RevenueSalesPurchaseCardsProps {
@@ -7,7 +10,93 @@ interface RevenueSalesPurchaseCardsProps {
   isMounted: boolean
 }
 
+function calculatePercentageChange(current: number, previous: number): number {
+  if (previous === 0) return current > 0 ? 100 : 0
+  return ((current - previous) / previous) * 100
+}
+
 export function RevenueSalesPurchaseCards({ totalRevenue, isMounted }: RevenueSalesPurchaseCardsProps) {
+  const today = new Date()
+  const firstDayOfMonth = new Date(today.getFullYear(), today.getMonth(), 1)
+  const lastDayOfLastMonth = new Date(today.getFullYear(), today.getMonth(), 0)
+  const firstDayOfLastMonth = new Date(today.getFullYear(), today.getMonth() - 1, 1)
+
+  // Fetch current month sales
+  const { data: currentMonthSales } = useQuery({
+    queryKey: ["sales-revenue-cards-current", firstDayOfMonth.toISOString().split("T")[0], today.toISOString().split("T")[0]],
+    queryFn: () =>
+      SalesService.readSales({
+        skip: 0,
+        limit: 1000,
+        startDate: firstDayOfMonth.toISOString().split("T")[0],
+        endDate: today.toISOString().split("T")[0],
+      }),
+  })
+
+  // Fetch previous month sales
+  const { data: previousMonthSales } = useQuery({
+    queryKey: ["sales-revenue-cards-previous", firstDayOfLastMonth.toISOString().split("T")[0], lastDayOfLastMonth.toISOString().split("T")[0]],
+    queryFn: () =>
+      SalesService.readSales({
+        skip: 0,
+        limit: 1000,
+        startDate: firstDayOfLastMonth.toISOString().split("T")[0],
+        endDate: lastDayOfLastMonth.toISOString().split("T")[0],
+      }),
+  })
+
+  // Fetch products for inventory value
+  const { data: productsData } = useQuery({
+    queryKey: ["products-inventory"],
+    queryFn: () => ProductsService.readProducts({ skip: 0, limit: 1000 }),
+  })
+
+  // Calculate current month revenue
+  const currentMonthRevenue = useMemo(() => {
+    if (!currentMonthSales?.data) return 0
+    return currentMonthSales.data.reduce(
+      (sum, sale) => sum + parseFloat(sale.total_amount || "0"),
+      0
+    )
+  }, [currentMonthSales])
+
+  // Calculate previous month revenue
+  const previousMonthRevenue = useMemo(() => {
+    if (!previousMonthSales?.data) return 0
+    return previousMonthSales.data.reduce(
+      (sum, sale) => sum + parseFloat(sale.total_amount || "0"),
+      0
+    )
+  }, [previousMonthSales])
+
+  // Calculate sales count (number of transactions)
+  const currentMonthSalesCount = useMemo(() => {
+    return currentMonthSales?.data?.length || 0
+  }, [currentMonthSales])
+
+  const previousMonthSalesCount = useMemo(() => {
+    return previousMonthSales?.data?.length || 0
+  }, [previousMonthSales])
+
+  // Calculate inventory value (stock quantity × cost price)
+  const inventoryValue = useMemo(() => {
+    if (!productsData?.data) return 0
+    return productsData.data.reduce((sum, product) => {
+      const stock = product.stock_quantity || 0
+      const costPrice = parseFloat(product.cost_price || "0")
+      return sum + (stock * costPrice)
+    }, 0)
+  }, [productsData])
+
+  // Calculate total products count
+  const totalProductsCount = useMemo(() => {
+    return productsData?.data?.length || 0
+  }, [productsData])
+
+  // Calculate percentages
+  const revenueChange = calculatePercentageChange(currentMonthRevenue, previousMonthRevenue)
+  const salesCountChange = calculatePercentageChange(currentMonthSalesCount, previousMonthSalesCount)
+
   return (
     <Box 
       mb={8}
@@ -49,11 +138,19 @@ export function RevenueSalesPurchaseCards({ totalRevenue, isMounted }: RevenueSa
                 color={{ base: "#ffffff", _light: "#1a1d29" }}
                 mb={1}
               >
-                {formatCurrency(totalRevenue)}
+                {formatCurrency(currentMonthRevenue)}
               </Text>
               <HStack gap={2} mt={1}>
-                <Text fontSize="xs" color="#22c55e" fontWeight="600">+3.5%</Text>
-                <Text fontSize="xs" color={{ base: "#6b7280", _light: "#9ca3af" }}>11.38% Since last month</Text>
+                <Text 
+                  fontSize="xs" 
+                  color={revenueChange >= 0 ? "#22c55e" : "#ef4444"} 
+                  fontWeight="600"
+                >
+                  {revenueChange >= 0 ? "+" : ""}{revenueChange.toFixed(1)}%
+                </Text>
+                <Text fontSize="xs" color={{ base: "#6b7280", _light: "#9ca3af" }}>
+                  vs last month
+                </Text>
               </HStack>
             </VStack>
             <Box
@@ -71,7 +168,7 @@ export function RevenueSalesPurchaseCards({ totalRevenue, isMounted }: RevenueSa
           </HStack>
         </Box>
 
-        {/* Sales Card */}
+        {/* Sales Count Card */}
         <Box 
           p={6} 
           bg={{ base: "#1a1d29", _light: "#ffffff" }}
@@ -90,7 +187,7 @@ export function RevenueSalesPurchaseCards({ totalRevenue, isMounted }: RevenueSa
           <HStack justify="space-between" align="start" mb={3}>
             <VStack align="start" gap={0} flex={1}>
               <Text fontSize="xs" color={{ base: "#9ca3af", _light: "#6b7280" }} fontWeight="500" textTransform="uppercase" letterSpacing="0.5px" mb={2}>
-                Sales
+                Transactions
               </Text>
               <Text 
                 fontSize="3xl" 
@@ -98,11 +195,19 @@ export function RevenueSalesPurchaseCards({ totalRevenue, isMounted }: RevenueSa
                 color={{ base: "#ffffff", _light: "#1a1d29" }}
                 mb={1}
               >
-                {formatCurrency(totalRevenue)}
+                {currentMonthSalesCount}
               </Text>
               <HStack gap={2} mt={1}>
-                <Text fontSize="xs" color="#22c55e" fontWeight="600">+8.3%</Text>
-                <Text fontSize="xs" color={{ base: "#6b7280", _light: "#9ca3af" }}>9.61% Since last month</Text>
+                <Text 
+                  fontSize="xs" 
+                  color={salesCountChange >= 0 ? "#22c55e" : "#ef4444"} 
+                  fontWeight="600"
+                >
+                  {salesCountChange >= 0 ? "+" : ""}{salesCountChange.toFixed(1)}%
+                </Text>
+                <Text fontSize="xs" color={{ base: "#6b7280", _light: "#9ca3af" }}>
+                  vs last month
+                </Text>
               </HStack>
             </VStack>
             <Box
@@ -120,7 +225,7 @@ export function RevenueSalesPurchaseCards({ totalRevenue, isMounted }: RevenueSa
           </HStack>
         </Box>
 
-        {/* Purchase Card */}
+        {/* Inventory Value Card */}
         <Box 
           p={6} 
           bg={{ base: "#1a1d29", _light: "#ffffff" }}
@@ -139,7 +244,7 @@ export function RevenueSalesPurchaseCards({ totalRevenue, isMounted }: RevenueSa
           <HStack justify="space-between" align="start" mb={3}>
             <VStack align="start" gap={0} flex={1}>
               <Text fontSize="xs" color={{ base: "#9ca3af", _light: "#6b7280" }} fontWeight="500" textTransform="uppercase" letterSpacing="0.5px" mb={2}>
-                Purchase
+                Inventory Value
               </Text>
               <Text 
                 fontSize="3xl" 
@@ -147,11 +252,12 @@ export function RevenueSalesPurchaseCards({ totalRevenue, isMounted }: RevenueSa
                 color={{ base: "#ffffff", _light: "#1a1d29" }}
                 mb={1}
               >
-                {formatCurrency(0)}
+                {formatCurrency(inventoryValue)}
               </Text>
               <HStack gap={2} mt={1}>
-                <Text fontSize="xs" color="#ef4444" fontWeight="600">-2.1%</Text>
-                <Text fontSize="xs" color={{ base: "#6b7280", _light: "#9ca3af" }}>2.27% Since last month</Text>
+                <Text fontSize="xs" color={{ base: "#6b7280", _light: "#9ca3af" }} fontWeight="500">
+                  {totalProductsCount} products
+                </Text>
               </HStack>
             </VStack>
             <Box
@@ -172,4 +278,3 @@ export function RevenueSalesPurchaseCards({ totalRevenue, isMounted }: RevenueSa
     </Box>
   )
 }
-

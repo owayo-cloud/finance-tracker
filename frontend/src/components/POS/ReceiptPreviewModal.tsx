@@ -103,40 +103,43 @@ export function ReceiptPreviewModal({
                 {/* Receipt Header */}
                 <Box p={6} bg={{ base: "#1a1d29", _light: "#ffffff" }} borderBottom="2px solid" borderColor="#14b8a6">
                   <VStack gap={2} align="center">
-                    <Text fontSize="xl" fontWeight="bold" color="#14b8a6">
+                    <Text fontSize="2xl" fontWeight="bold" color="#14b8a6" letterSpacing="wide">
                       WISEMAN PALACE
                     </Text>
-                    <Text fontSize="sm" color={{ base: "#9ca3af", _light: "#6b7280" }}>
-                      Receipt No: {receipt.id.slice(-6)}
-                    </Text>
-                    <Text fontSize="sm" color={{ base: "#9ca3af", _light: "#6b7280" }}>
-                      Date: {formatDate(receipt.sale_date)}
-                    </Text>
-                    {receipt.customer_name && (
-                      <Text fontSize="sm" color={{ base: "#9ca3af", _light: "#6b7280" }}>
-                        Customer: {receipt.customer_name}
-                      </Text>
-                    )}
+                    <Box w="full" borderTop="1px solid" borderColor={{ base: "rgba(255, 255, 255, 0.1)", _light: "#e5e7eb" }} pt={2} mt={1}>
+                      <VStack gap={1.5} align="center" fontSize="xs" color={{ base: "#9ca3af", _light: "#6b7280" }}>
+                        <Text fontWeight="medium">Receipt No: <Text as="span" fontWeight="bold" color={{ base: "#ffffff", _light: "#1a1d29" }}>{receipt.id.slice(-6)}</Text></Text>
+                        <Text>Date: {formatDate(receipt.sale_date)}</Text>
+                        {receipt.created_by && (
+                          <Text>Cashier: <Text as="span" fontWeight="medium" color={{ base: "#ffffff", _light: "#1a1d29" }}>{receipt.created_by.full_name || receipt.created_by.username || "Unknown"}</Text></Text>
+                        )}
+                        {receipt.notes && (
+                          <Text mt={1} pt={2} borderTop="1px solid" borderColor={{ base: "rgba(255, 255, 255, 0.1)", _light: "#e5e7eb" }} w="full" textAlign="center">
+                            Remarks: <Text as="span" fontWeight="medium" color={{ base: "#ffffff", _light: "#1a1d29" }}>{receipt.notes}</Text>
+                          </Text>
+                        )}
+                      </VStack>
+                    </Box>
                   </VStack>
                 </Box>
 
                 {/* Receipt Items */}
                 <Box flex={1} overflowY="auto" p={6} bg={{ base: "rgba(255, 255, 255, 0.02)", _light: "#f9fafb" }}>
-                  <Table.Root size="sm">
+                  <Table.Root size="sm" variant="outline">
                     <Table.Header>
-                      <Table.Row>
-                        <Table.ColumnHeader color={{ base: "#ffffff", _light: "#1a1d29" }}>Product</Table.ColumnHeader>
-                        <Table.ColumnHeader color={{ base: "#ffffff", _light: "#1a1d29" }}>Qty</Table.ColumnHeader>
-                        <Table.ColumnHeader color={{ base: "#ffffff", _light: "#1a1d29" }}>Unit Price</Table.ColumnHeader>
-                        <Table.ColumnHeader color={{ base: "#ffffff", _light: "#1a1d29" }}>Total</Table.ColumnHeader>
+                      <Table.Row bg={{ base: "#14b8a6", _light: "#e0f2fe" }}>
+                        <Table.ColumnHeader color="white" fontWeight="bold" textAlign="left">Product</Table.ColumnHeader>
+                        <Table.ColumnHeader color="white" fontWeight="bold" textAlign="center">Qty</Table.ColumnHeader>
+                        <Table.ColumnHeader color="white" fontWeight="bold" textAlign="right">Unit Price</Table.ColumnHeader>
+                        <Table.ColumnHeader color="white" fontWeight="bold" textAlign="right">Total</Table.ColumnHeader>
                       </Table.Row>
                     </Table.Header>
                     <Table.Body>
-                      <Table.Row>
+                      <Table.Row _hover={{ bg: { base: "rgba(20, 184, 166, 0.1)", _light: "#f0f9ff" } }}>
                         <Table.Cell fontWeight="medium" color={{ base: "#ffffff", _light: "#1a1d29" }}>{receipt.product.name}</Table.Cell>
-                        <Table.Cell color={{ base: "#ffffff", _light: "#1a1d29" }}>{receipt.quantity}</Table.Cell>
-                        <Table.Cell color={{ base: "#ffffff", _light: "#1a1d29" }}>Ksh {formatCurrency(unitPrice)}</Table.Cell>
-                        <Table.Cell fontWeight="bold" color={{ base: "#ffffff", _light: "#1a1d29" }}>Ksh {formatCurrency(totalAmount)}</Table.Cell>
+                        <Table.Cell color={{ base: "#ffffff", _light: "#1a1d29" }} textAlign="center">{receipt.quantity}</Table.Cell>
+                        <Table.Cell color={{ base: "#ffffff", _light: "#1a1d29" }} textAlign="right">Ksh {formatCurrency(unitPrice)}</Table.Cell>
+                        <Table.Cell fontWeight="bold" color={{ base: "#ffffff", _light: "#1a1d29" }} textAlign="right">Ksh {formatCurrency(totalAmount)}</Table.Cell>
                       </Table.Row>
                     </Table.Body>
                   </Table.Root>
@@ -144,73 +147,78 @@ export function ReceiptPreviewModal({
 
                 {/* Receipt Summary */}
                 <Box p={6} bg={{ base: "#1a1d29", _light: "#ffffff" }} borderTop="2px solid" borderColor="#14b8a6">
-                  <VStack gap={2} align="stretch" fontSize="sm">
-                    <HStack justify="space-between">
-                      <Text fontWeight="medium" color={{ base: "#ffffff", _light: "#1a1d29" }}>Subtotal:</Text>
-                      <Text color={{ base: "#ffffff", _light: "#1a1d29" }}>Ksh {formatCurrency(netTotal)}</Text>
-                    </HStack>
-                    <HStack justify="space-between">
-                      <Text fontWeight="medium" color={{ base: "#ffffff", _light: "#1a1d29" }}>VAT ({vatRate}%):</Text>
-                      <Text color={{ base: "#ffffff", _light: "#1a1d29" }}>Ksh {formatCurrency(vatAmount)}</Text>
-                    </HStack>
-                    <Box borderTop="1px solid" borderColor={{ base: "rgba(255, 255, 255, 0.1)", _light: "#e5e7eb" }} pt={2} mt={2}>
+                  <VStack gap={3} align="stretch" fontSize="sm">
+                    <VStack gap={1.5} align="stretch">
+                      <HStack justify="space-between" py={1}>
+                        <Text fontWeight="medium" color={{ base: "#d1d5db", _light: "#6b7280" }}>Subtotal:</Text>
+                        <Text fontWeight="medium" color={{ base: "#ffffff", _light: "#1a1d29" }}>Ksh {formatCurrency(netTotal)}</Text>
+                      </HStack>
+                      <HStack justify="space-between" py={1}>
+                        <Text fontWeight="medium" color={{ base: "#d1d5db", _light: "#6b7280" }}>VAT ({vatRate}%):</Text>
+                        <Text fontWeight="medium" color={{ base: "#ffffff", _light: "#1a1d29" }}>Ksh {formatCurrency(vatAmount)}</Text>
+                      </HStack>
+                    </VStack>
+                    <Box borderTop="2px solid" borderColor="#14b8a6" pt={3} mt={1}>
                       <HStack justify="space-between">
-                        <Text fontWeight="bold" fontSize="lg" color={{ base: "#ffffff", _light: "#1a1d29" }}>Total:</Text>
-                        <Text fontWeight="bold" fontSize="lg" color={{ base: "#ffffff", _light: "#1a1d29" }}>Ksh {formatCurrency(totalAmount)}</Text>
+                        <Text fontWeight="bold" fontSize="lg" color="#14b8a6">Total:</Text>
+                        <Text fontWeight="bold" fontSize="lg" color="#14b8a6">Ksh {formatCurrency(totalAmount)}</Text>
                       </HStack>
                     </Box>
-                      {/* Payment Methods */}
-                      <Box mt={2} pt={2} borderTop="1px solid" borderColor={{ base: "rgba(255, 255, 255, 0.1)", _light: "gray.300" }}>
-                        <Text fontWeight="bold" mb={2} color={{ base: "#ffffff", _light: "#1a1d29" }}>Payment Methods:</Text>
-                        {salePayments && salePayments.length > 0 ? (
-                          <VStack gap={1} align="stretch">
-                            {salePayments.map((payment: any) => {
-                              const cashMethod = payment.payment_method?.name?.toUpperCase().includes("CASH")
-                              const cashAmount = parseFloat(payment.amount || "0")
-                              const change = cashMethod && cashAmount > totalAmount ? cashAmount - totalAmount : 0
-                              
-                              return (
-                                <Box key={payment.id}>
-                                  <HStack justify="space-between">
-                                    <Text fontSize="sm" color={{ base: "#ffffff", _light: "#1a1d29" }}>
-                                      {payment.payment_method?.name || "Unknown"}:
-                                    </Text>
-                                    <Text fontSize="sm" fontWeight="medium" color={{ base: "#ffffff", _light: "#1a1d29" }}>
-                                      Ksh {formatCurrency(parseFloat(payment.amount || "0"))}
+                    {/* Payment Methods */}
+                    <Box mt={2} pt={3} borderTop="1px solid" borderColor={{ base: "rgba(255, 255, 255, 0.1)", _light: "#e5e7eb" }}>
+                      <Text fontWeight="bold" mb={2} fontSize="sm" color={{ base: "#ffffff", _light: "#1a1d29" }}>Payment Methods:</Text>
+                      {salePayments && salePayments.length > 0 ? (
+                        <VStack gap={2} align="stretch">
+                          {salePayments.map((payment: any) => {
+                            const cashMethod = payment.payment_method?.name?.toUpperCase().includes("CASH")
+                            const cashAmount = parseFloat(payment.amount || "0")
+                            const change = cashMethod && cashAmount > totalAmount ? cashAmount - totalAmount : 0
+                            
+                            return (
+                              <Box key={payment.id} p={2} bg={{ base: "rgba(255, 255, 255, 0.05)", _light: "#f9fafb" }} borderRadius="md">
+                                <HStack justify="space-between" mb={payment.reference_number || change > 0 ? 1 : 0}>
+                                  <Text fontSize="sm" fontWeight="medium" color={{ base: "#ffffff", _light: "#1a1d29" }}>
+                                    {payment.payment_method?.name || "Unknown"}:
+                                  </Text>
+                                  <Text fontSize="sm" fontWeight="bold" color={{ base: "#ffffff", _light: "#1a1d29" }}>
+                                    Ksh {formatCurrency(parseFloat(payment.amount || "0"))}
+                                  </Text>
+                                </HStack>
+                                {payment.reference_number && (
+                                  <Text fontSize="xs" color={{ base: "#9ca3af", _light: "#6b7280" }} mt={1}>
+                                    Ref: {payment.reference_number}
+                                  </Text>
+                                )}
+                                {change > 0 && (
+                                  <HStack justify="space-between" mt={2} pt={2} borderTop="1px solid" borderColor={{ base: "rgba(255, 255, 255, 0.1)", _light: "#e5e7eb" }}>
+                                    <Text fontSize="sm" fontWeight="bold" color="#22c55e">Change:</Text>
+                                    <Text fontSize="sm" fontWeight="bold" color="#22c55e">
+                                      Ksh {formatCurrency(change)}
                                     </Text>
                                   </HStack>
-                                  {payment.reference_number && (
-                                    <Text fontSize="xs" color={{ base: "#9ca3af", _light: "#6b7280" }} ml={2}>
-                                      Ref: {payment.reference_number}
-                                    </Text>
-                                  )}
-                                  {change > 0 && (
-                                    <HStack justify="space-between" mt={1}>
-                                      <Text fontSize="sm" fontWeight="bold" color="#22c55e">Change:</Text>
-                                      <Text fontSize="sm" fontWeight="bold" color="#22c55e">
-                                        Ksh {formatCurrency(change)}
-                                      </Text>
-                                    </HStack>
-                                  )}
-                                </Box>
-                              )
-                            })}
-                          </VStack>
-                        ) : (
+                                )}
+                              </Box>
+                            )
+                          })}
+                        </VStack>
+                      ) : (
+                        <Box p={2} bg={{ base: "rgba(255, 255, 255, 0.05)", _light: "#f9fafb" }} borderRadius="md">
                           <HStack justify="space-between">
-                            <Text fontSize="sm" color={{ base: "#ffffff", _light: "#1a1d29" }}>
+                            <Text fontSize="sm" fontWeight="medium" color={{ base: "#ffffff", _light: "#1a1d29" }}>
                               {receipt.payment_method.name}:
                             </Text>
-                            <Text fontSize="sm" fontWeight="medium" color={{ base: "#ffffff", _light: "#1a1d29" }}>
+                            <Text fontSize="sm" fontWeight="bold" color={{ base: "#ffffff", _light: "#1a1d29" }}>
                               Ksh {formatCurrency(totalAmount)}
                             </Text>
                           </HStack>
-                        )}
-                      </Box>
+                        </Box>
+                      )}
+                    </Box>
+                    {/* Remarks Section */}
                     {receipt.notes && (
-                      <Box mt={2} pt={2} borderTop="1px solid" borderColor={{ base: "rgba(255, 255, 255, 0.1)", _light: "#e5e7eb" }}>
-                        <Text fontWeight="medium" mb={1} color={{ base: "#ffffff", _light: "#1a1d29" }}>Notes:</Text>
-                        <Text fontSize="xs" color={{ base: "#9ca3af", _light: "#6b7280" }}>{receipt.notes}</Text>
+                      <Box mt={3} pt={3} borderTop="1px solid" borderColor={{ base: "rgba(255, 255, 255, 0.1)", _light: "#e5e7eb" }}>
+                        <Text fontWeight="bold" mb={1} fontSize="sm" color={{ base: "#ffffff", _light: "#1a1d29" }}>Remarks:</Text>
+                        <Text fontSize="sm" color={{ base: "#d1d5db", _light: "#6b7280" }}>{receipt.notes}</Text>
                       </Box>
                     )}
                   </VStack>
@@ -225,8 +233,137 @@ export function ReceiptPreviewModal({
                       color="white"
                       _hover={{ bg: "#0d9488" }}
                       onClick={() => {
-                        // TODO: Add print functionality
-                        window.print()
+                        // Create a print-friendly version
+                        const printWindow = window.open("", "_blank")
+                        if (printWindow) {
+                          printWindow.document.write(`
+                            <!DOCTYPE html>
+                            <html>
+                              <head>
+                                <title>Receipt - ${receipt.id.slice(-6)}</title>
+                                <style>
+                                  @media print {
+                                    body { margin: 0; padding: 20px; }
+                                    .no-print { display: none; }
+                                  }
+                                  body {
+                                    font-family: Arial, sans-serif;
+                                    max-width: 300px;
+                                    margin: 0 auto;
+                                    padding: 20px;
+                                  }
+                                  .header { text-align: center; border-bottom: 2px solid #14b8a6; padding-bottom: 10px; margin-bottom: 15px; }
+                                  .header h1 { color: #14b8a6; margin: 0; font-size: 24px; font-weight: bold; letter-spacing: 1px; }
+                                  .receipt-info { text-align: center; margin-bottom: 15px; font-size: 11px; color: #666; line-height: 1.6; }
+                                  .receipt-info p { margin: 4px 0; }
+                                  table { width: 100%; border-collapse: collapse; margin-bottom: 15px; }
+                                  th, td { padding: 10px 8px; text-align: left; border-bottom: 1px solid #ddd; }
+                                  th { background-color: #14b8a6; color: white; font-weight: bold; text-align: left; }
+                                  th:nth-child(2), th:nth-child(3), th:nth-child(4) { text-align: right; }
+                                  td:nth-child(2), td:nth-child(3), td:nth-child(4) { text-align: right; }
+                                  .total-section { border-top: 2px solid #14b8a6; padding-top: 12px; margin-top: 15px; }
+                                  .total-row { display: flex; justify-content: space-between; margin: 6px 0; font-size: 13px; }
+                                  .grand-total { font-size: 18px; font-weight: bold; color: #14b8a6; margin-top: 8px; }
+                                  .payment-methods { margin-top: 15px; padding-top: 15px; border-top: 1px solid #ddd; }
+                                  .payment-methods h3 { font-size: 13px; margin-bottom: 10px; color: #333; }
+                                  .payment-item { display: flex; justify-content: space-between; margin: 6px 0; padding: 6px; background-color: #f9fafb; border-radius: 4px; }
+                                  .payment-item span:first-child { font-weight: 500; }
+                                  .payment-item span:last-child { font-weight: bold; }
+                                  .change-item { color: #22c55e; font-weight: bold; }
+                                  .footer { text-align: center; margin-top: 25px; font-size: 11px; color: #999; padding-top: 15px; border-top: 1px solid #ddd; }
+                                </style>
+                              </head>
+                              <body>
+                                <div class="header">
+                                  <h1>WISEMAN PALACE</h1>
+                                </div>
+                                <div class="receipt-info">
+                                  <p><strong>Receipt No:</strong> ${receipt.id.slice(-6)}</p>
+                                  <p><strong>Date:</strong> ${formatDate(receipt.sale_date)}</p>
+                                  ${receipt.created_by ? `<p><strong>Cashier:</strong> ${receipt.created_by.full_name || receipt.created_by.username || "Unknown"}</p>` : ""}
+                                  ${receipt.notes ? `<p style="margin-top: 8px; padding-top: 8px; border-top: 1px solid #ddd;"><strong>Remarks:</strong> ${receipt.notes}</p>` : ""}
+                                </div>
+                                <table>
+                                  <thead>
+                                    <tr>
+                                      <th>Product</th>
+                                      <th>Qty</th>
+                                      <th>Price</th>
+                                      <th>Total</th>
+                                    </tr>
+                                  </thead>
+                                  <tbody>
+                                    <tr>
+                                      <td>${receipt.product.name}</td>
+                                      <td>${receipt.quantity}</td>
+                                      <td>Ksh ${formatCurrency(unitPrice)}</td>
+                                      <td>Ksh ${formatCurrency(totalAmount)}</td>
+                                    </tr>
+                                  </tbody>
+                                </table>
+                                <div class="total-section">
+                                  <div class="total-row">
+                                    <span>Subtotal:</span>
+                                    <span>Ksh ${formatCurrency(netTotal)}</span>
+                                  </div>
+                                  <div class="total-row">
+                                    <span>VAT (${vatRate}%):</span>
+                                    <span>Ksh ${formatCurrency(vatAmount)}</span>
+                                  </div>
+                                  <div class="total-row grand-total">
+                                    <span>Total:</span>
+                                    <span>Ksh ${formatCurrency(totalAmount)}</span>
+                                  </div>
+                                </div>
+                                ${salePayments && salePayments.length > 0 ? `
+                                  <div class="payment-methods">
+                                    <h3>Payment Methods:</h3>
+                                    ${salePayments.map((payment: any) => {
+                                      const cashMethod = payment.payment_method?.name?.toUpperCase().includes("CASH")
+                                      const cashAmount = parseFloat(payment.amount || "0")
+                                      const change = cashMethod && cashAmount > totalAmount ? cashAmount - totalAmount : 0
+                                      return `
+                                        <div class="payment-item">
+                                          <span>${payment.payment_method?.name || "Unknown"}:</span>
+                                          <span>Ksh ${formatCurrency(cashAmount)}</span>
+                                        </div>
+                                        ${payment.reference_number ? `<div style="font-size: 10px; color: #666; margin-left: 10px; margin-top: 2px;">Ref: ${payment.reference_number}</div>` : ""}
+                                        ${change > 0 ? `<div class="payment-item change-item">
+                                          <span>Change:</span>
+                                          <span>Ksh ${formatCurrency(change)}</span>
+                                        </div>` : ""}
+                                      `
+                                    }).join("")}
+                                  </div>
+                                ` : `
+                                  <div class="payment-methods">
+                                    <h3>Payment Methods:</h3>
+                                    <div class="payment-item">
+                                      <span>${receipt.payment_method.name}:</span>
+                                      <span>Ksh ${formatCurrency(totalAmount)}</span>
+                                    </div>
+                                  </div>
+                                `}
+                                ${receipt.notes ? `<div style="margin-top: 15px; padding-top: 15px; border-top: 1px solid #ddd;">
+                                  <div style="font-weight: bold; font-size: 13px; color: #333; margin-bottom: 5px;">Remarks:</div>
+                                  <div style="font-size: 12px; color: #666;">${receipt.notes}</div>
+                                </div>` : ""}
+                                <div class="footer">
+                                  <p>Thank you for your business!</p>
+                                  <p>©Anchor Core : Developed by NBS</p>
+                                </div>
+                              </body>
+                            </html>
+                          `)
+                          printWindow.document.close()
+                          setTimeout(() => {
+                            printWindow.print()
+                            printWindow.close()
+                          }, 250)
+                        } else {
+                          // Fallback to regular print
+                          window.print()
+                        }
                       }}
                     >
                       Print

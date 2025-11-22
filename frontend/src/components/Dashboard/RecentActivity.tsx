@@ -50,11 +50,11 @@ export function RecentActivity({ recentSales }: RecentActivityProps) {
               key={sale.id}
               p={3}
               borderRadius="md"
-              bg={{ base: "rgba(255, 255, 255, 0.08)", _light: "#f9fafb" }}
+              bg="item.bg"
               border="1px solid"
-              borderColor="border.card"
+              borderColor="item.border"
               _hover={{
-                bg: { base: "rgba(255, 255, 255, 0.08)", _light: "#f3f4f6" },
+                bg: "item.bg.hover",
                 transform: "translateX(4px)",
               }}
               transition="all 0.2s"

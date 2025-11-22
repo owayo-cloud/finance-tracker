@@ -1,5 +1,5 @@
 import { Box, Button, Flex, Input, Stack, Text, HStack, Table, Grid, Icon, IconButton } from "@chakra-ui/react"
-import { FiPlus, FiEye, FiChevronLeft, FiChevronRight } from "react-icons/fi"
+import { FiPlus, FiEye, FiChevronLeft, FiChevronRight, FiPlay } from "react-icons/fi"
 import { SuspendedSale } from "./types"
 import { ThemedSelect } from "./ThemedSelect"
 import { formatCurrency } from "./utils"
@@ -46,7 +46,7 @@ export function CustomerPanel({
   onNewCustomer,
   onClearCustomer,
   suspendedSales,
-  selectedSaleId: _selectedSaleId,
+  selectedSaleId,
   onSelectSale,
   onResumeSale,
   onViewReceipt,
@@ -318,15 +318,15 @@ export function CustomerPanel({
                       return sum + (price * item.quantity - discountAmount)
                     }, 0)
                     const itemsCount = sale.cart.reduce((sum, item) => sum + item.quantity, 0)
+                    const isSelected = selectedSaleId === sale.id
                     return (
                       <Table.Row
                         key={sale.id}
                         cursor="pointer"
-                        _hover={{ bg: { base: "rgba(255, 255, 255, 0.05)", _light: "#f9fafb" } }}
+                        bg={isSelected ? { base: "rgba(20, 184, 166, 0.2)", _light: "rgba(20, 184, 166, 0.1)" } : "transparent"}
+                        _hover={{ bg: isSelected ? { base: "rgba(20, 184, 166, 0.25)", _light: "rgba(20, 184, 166, 0.15)" } : { base: "rgba(255, 255, 255, 0.05)", _light: "#f9fafb" } }}
                         onClick={() => {
                           onSelectSale(sale.id)
-                          onResumeSale(sale.id)
-                          onTabChange("customer")
                         }}
                       >
                         <Table.Cell>-</Table.Cell>
@@ -341,6 +341,30 @@ export function CustomerPanel({
               </Table.Body>
             </Table.Root>
           </Box>
+
+          {/* Resume Sale Button */}
+          {selectedSaleId && (
+            <Box
+              p={{ base: 3, md: 4 }}
+              borderTop="1px solid"
+              borderColor={{ base: "rgba(255, 255, 255, 0.08)", _light: "#e5e7eb" }}
+              bg={{ base: "rgba(20, 184, 166, 0.1)", _light: "rgba(20, 184, 166, 0.05)" }}
+            >
+              <Button
+                w="full"
+                bg="#14b8a6"
+                color="white"
+                _hover={{ bg: "#0d9488" }}
+                onClick={() => {
+                  onResumeSale(selectedSaleId)
+                  onTabChange("customer")
+                }}
+              >
+                <Icon as={FiPlay} mr={2} />
+                Resume Selected Sale
+              </Button>
+            </Box>
+          )}
 
           {/* Pagination */}
           <Box

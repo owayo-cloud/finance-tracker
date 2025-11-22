@@ -698,6 +698,11 @@ class DebtPaymentPublic(DebtPaymentBase):
     payment_method: PaymentMethodPublic
 
 
+class DebtPaymentsPublic(SQLModel):
+    data: list[DebtPaymentPublic]
+    count: int
+
+
 # ==================== SHIFT RECONCILIATION MODELS ====================
 
 class ShiftReconciliationBase(SQLModel):

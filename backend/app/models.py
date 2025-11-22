@@ -544,6 +544,11 @@ class ExpenseCategoryPublic(ExpenseCategoryBase):
     id: uuid.UUID
 
 
+class ExpenseCategoriesPublic(SQLModel):
+    data: list[ExpenseCategoryPublic]
+    count: int
+
+
 # ==================== EXPENSE MODELS ====================
 
 class ExpenseBase(SQLModel):
@@ -581,6 +586,9 @@ class Expense(ExpenseBase, table=True):
 class ExpensePublic(ExpenseBase):
     id: uuid.UUID
     category: ExpenseCategoryPublic
+    created_by: UserPublic
+    created_at: datetime
+    updated_at: datetime
 
 
 class ExpensesPublic(SQLModel):

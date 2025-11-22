@@ -64,6 +64,7 @@ function UsersTable() {
         <Table.Header>
           <Table.Row>
             <Table.ColumnHeader w="sm">Full name</Table.ColumnHeader>
+            <Table.ColumnHeader w="sm">Username</Table.ColumnHeader>
             <Table.ColumnHeader w="sm">Email</Table.ColumnHeader>
             <Table.ColumnHeader w="sm">Role</Table.ColumnHeader>
             <Table.ColumnHeader w="sm">Status</Table.ColumnHeader>
@@ -84,11 +85,24 @@ function UsersTable() {
                   </Badge>
                 )}
               </Table.Cell>
+              <Table.Cell truncate maxW="sm" color={!user.username ? "gray.500" : undefined}>
+                {user.username || "N/A"}
+              </Table.Cell>
               <Table.Cell truncate maxW="sm">
                 {user.email}
               </Table.Cell>
               <Table.Cell>
-                {user.is_superuser ? "Superuser" : "User"}
+                <Badge
+                  colorPalette={
+                    user.is_superuser 
+                      ? "purple" 
+                      : user.is_auditor 
+                        ? "blue" 
+                        : "gray"
+                  }
+                >
+                  {user.is_superuser ? "Admin" : user.is_auditor ? "Auditor" : "Cashier"}
+                </Badge>
               </Table.Cell>
               <Table.Cell>{user.is_active ? "Active" : "Inactive"}</Table.Cell>
               <Table.Cell>
@@ -132,7 +146,7 @@ function Admin() {
             size="lg"
             color={{ base: "#e5e7eb", _light: "#111827" }}
           >
-            Users Management
+            Users
           </Heading>
           <AddUser />
         </Flex>

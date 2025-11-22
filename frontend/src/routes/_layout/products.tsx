@@ -17,7 +17,7 @@ import {
 import { Checkbox } from "@/components/ui/checkbox"
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
 import { createFileRoute, useNavigate } from "@tanstack/react-router"
-import { FiSearch, FiTrash2, FiEdit2, FiMoreVertical } from "react-icons/fi"
+import { FiSearch, FiTrash2, FiMoreVertical } from "react-icons/fi"
 import { z } from "zod"
 import { useState, useEffect } from "react"
 

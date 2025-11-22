@@ -11,7 +11,8 @@ import {
 import { useMutation, useQueryClient } from "@tanstack/react-query"
 import { useState } from "react"
 import { type SubmitHandler, useForm } from "react-hook-form"
-import { FaExchangeAlt, FaTrash } from "react-icons/fa"
+import { FiEdit } from "react-icons/fi"
+import { FaTrash } from "react-icons/fa"
 import type { ExpenseCategoryPublic } from "@/client"
 import type { ApiError } from "@/client/core/ApiError"
 import { ExpensesService } from "@/client"
@@ -123,7 +124,7 @@ const EditExpenseCategory = ({ category }: EditExpenseCategoryProps) => {
           color="white"
           _hover={{ bg: "#2563eb" }}
         >
-          <FaExchangeAlt fontSize="14px" />
+          <FiEdit fontSize="14px" />
         </Button>
       </DialogTrigger>
       <DialogContent>

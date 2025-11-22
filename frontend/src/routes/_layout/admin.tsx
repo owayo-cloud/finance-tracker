@@ -93,13 +93,20 @@ function UsersTable() {
               </Table.Cell>
               <Table.Cell>
                 <Badge
-                  colorPalette={
-                    user.is_superuser 
-                      ? "purple" 
-                      : user.is_auditor 
-                        ? "blue" 
-                        : "gray"
+                  bg={
+                    user.is_superuser
+                      ? "linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%)"
+                      : user.is_auditor
+                        ? "linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)"
+                        : "linear-gradient(135deg, #22c55e 0%, #16a34a 100%)"
                   }
+                  color="white"
+                  fontSize="xs"
+                  fontWeight="700"
+                  px={3}
+                  py={1}
+                  borderRadius="sm"
+                  textTransform="uppercase"
                 >
                   {user.is_superuser ? "Admin" : user.is_auditor ? "Auditor" : "Cashier"}
                 </Badge>

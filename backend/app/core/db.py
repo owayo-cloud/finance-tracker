@@ -68,6 +68,9 @@ def _seed_product_categories(session: Session) -> None:
         {"name": "Gin", "description": "Gin products"},
         {"name": "Soft-Drinks", "description": "Non-alcoholic beverages"},
         {"name": "Smokes", "description": "Tobacco products"},
+        {"name": "Shelves", "description": "Shelves/crates products"},
+        {"name": "Spirits", "description": "Spirit products"},
+        {"name": "Syrups", "description": "Syrups products"},
     ]
 
     for category_data in categories:

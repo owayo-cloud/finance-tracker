@@ -11,13 +11,12 @@ import {
   Input,
   Box,
   HStack,
-  Stack,
   Icon,
 } from "@chakra-ui/react"
 import { Checkbox } from "@/components/ui/checkbox"
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
 import { createFileRoute, useNavigate } from "@tanstack/react-router"
-import { FiSearch, FiTrash2, FiEdit2, FiMoreVertical } from "react-icons/fi"
+import { FiSearch, FiTrash2 } from "react-icons/fi"
 import { z } from "zod"
 import { useState, useEffect } from "react"
 
@@ -26,22 +25,12 @@ import ProductActionsMenu from "@/components/Products/ProductActionsMenu"
 import PendingProducts from "@/components/Pending/PendingProducts"
 import useCustomToast from "@/hooks/useCustomToast"
 import { handleError } from "@/utils"
-<<<<<<< HEAD
-=======
-import { Field } from "@/components/ui/field"
->>>>>>> 9fd8e78a32c7ce473abbe48ed698869e2a32adfd
 import {
   PaginationItems,
   PaginationNextTrigger,
   PaginationPrevTrigger,
   PaginationRoot,
 } from "@/components/ui/pagination.tsx"
-import {
-  MenuRoot,
-  MenuTrigger,
-  MenuContent,
-  MenuItem,
-} from "@/components/ui/menu"
 
 const productsSearchSchema = z.object({
   page: z.number().catch(1),

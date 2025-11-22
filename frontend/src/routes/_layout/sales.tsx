@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router"
 import { Box } from "@chakra-ui/react"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
-import { useState, useMemo } from "react"
+import { useState, useMemo, useEffect } from "react"
 
 import { ProductsService, SalesService, type ProductPublic, OpenAPI } from "../../client"
 import useCustomToast from "../../hooks/useCustomToast"
@@ -13,6 +13,10 @@ import { CustomerPanel } from "@/components/POS/CustomerPanel"
 import { PaymentModal } from "@/components/POS/PaymentModal"
 import { RecentReceiptsModal } from "@/components/POS/RecentReceiptsModal"
 import { ReceiptPreviewModal } from "@/components/POS/ReceiptPreviewModal"
+import { CreditNoteModal } from "@/components/POS/CreditNoteModal"
+import { CashMovementModal } from "@/components/POS/CashMovementModal"
+import { CustomerSearchModal } from "@/components/POS/CustomerSearchModal"
+import { NewCustomerModal } from "@/components/POS/NewCustomerModal"
 import { CartItem, SuspendedSale } from "@/components/POS/types"
 
 export const Route = createFileRoute("/_layout/sales")({
@@ -30,6 +34,10 @@ function Sales() {
   const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false)
   const [isRecentReceiptsModalOpen, setIsRecentReceiptsModalOpen] = useState(false)
   const [isReceiptPreviewModalOpen, setIsReceiptPreviewModalOpen] = useState(false)
+  const [isCreditNoteModalOpen, setIsCreditNoteModalOpen] = useState(false)
+  const [isCashMovementModalOpen, setIsCashMovementModalOpen] = useState(false)
+  const [isCustomerSearchModalOpen, setIsCustomerSearchModalOpen] = useState(false)
+  const [isNewCustomerModalOpen, setIsNewCustomerModalOpen] = useState(false)
   const [selectedReceiptId, setSelectedReceiptId] = useState<string | null>(null)
   const [receiptDateValue, setReceiptDateValue] = useState<string>(new Date().toISOString().split('T')[0])
   const [receiptDate, setReceiptDate] = useState<string>(() => {
@@ -40,7 +48,15 @@ function Sales() {
     return `${day}/${month}/${year}`
   })
   const [pricelist, setPricelist] = useState<string>("RETAIL 0.0")
-  const [suspendedSales, setSuspendedSales] = useState<SuspendedSale[]>([])
+  const [suspendedSales, setSuspendedSales] = useState<SuspendedSale[]>(() => {
+    // Load from localStorage on mount
+    try {
+      const saved = localStorage.getItem("pos_suspended_sales")
+      return saved ? JSON.parse(saved) : []
+    } catch {
+      return []
+    }
+  })
   const [selectedSaleId, setSelectedSaleId] = useState<string | null>(null)
   const [activeTab, setActiveTab] = useState<"customer" | "suspended">("customer")
   
@@ -50,6 +66,78 @@ function Sales() {
   const [customerBalance, setCustomerBalance] = useState<number>(0)
   const [remarks, setRemarks] = useState<string>("")
   const [customerPin, setCustomerPin] = useState<string>("")
+  
+  // Save suspended sales to localStorage whenever they change
+  useEffect(() => {
+    try {
+      localStorage.setItem("pos_suspended_sales", JSON.stringify(suspendedSales))
+    } catch (error) {
+      console.error("Failed to save suspended sales:", error)
+    }
+  }, [suspendedSales])
+  
+  // Keyboard shortcuts
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // F1 - Cash Movement
+      if (e.key === "F1") {
+        e.preventDefault()
+        setIsCashMovementModalOpen(true)
+      }
+      // F2 - Credit Note
+      if (e.key === "F2") {
+        e.preventDefault()
+        setIsCreditNoteModalOpen(true)
+      }
+      // F3 - Suspend Sale
+      if (e.key === "F3") {
+        e.preventDefault()
+        if (cart.length === 0) {
+          showToast.showErrorToast("Cart is empty")
+          return
+        }
+        const suspendedSale: SuspendedSale = {
+          id: Date.now().toString(),
+          cart: [...cart],
+          customer: customerName ? { name: customerName, tel: customerTel, balance: customerBalance } : undefined,
+          receiptDate,
+          pricelist,
+          remarks: remarks || undefined,
+        }
+        setSuspendedSales((prev) => [...prev, suspendedSale])
+        setCart([])
+        setCustomerName("")
+        setCustomerTel("")
+        setCustomerBalance(0)
+        setRemarks("")
+        showToast.showSuccessToast("Sale suspended successfully")
+      }
+      // F4 - Resume Sale
+      if (e.key === "F4") {
+        e.preventDefault()
+        if (selectedSaleId) {
+          const sale = suspendedSales.find((s) => s.id === selectedSaleId)
+          if (sale) {
+            setCart(sale.cart)
+            if (sale.customer) {
+              setCustomerName(sale.customer.name)
+              setCustomerTel(sale.customer.tel)
+              setCustomerBalance(sale.customer.balance)
+            }
+            setReceiptDate(sale.receiptDate)
+            setPricelist(sale.pricelist)
+            setRemarks(sale.remarks || "")
+            setSuspendedSales((prev) => prev.filter((s) => s.id !== selectedSaleId))
+            setSelectedSaleId(null)
+            showToast.showSuccessToast("Sale resumed")
+          }
+        }
+      }
+    }
+    
+    window.addEventListener("keydown", handleKeyDown)
+    return () => window.removeEventListener("keydown", handleKeyDown)
+  }, [selectedSaleId, suspendedSales, cart, customerName, customerTel, customerBalance, receiptDate, pricelist, remarks, showToast])
 
   // Fetch payment methods
   const { data: paymentMethods, isLoading: isLoadingPaymentMethods, error: paymentMethodsError } = useQuery({
@@ -325,6 +413,10 @@ function Sales() {
         }
       }
 
+      // Store the last sale ID for receipt printing (we'll get it from the response)
+      // Note: Since we process multiple items, we'll use the most recent sale
+      // The receipt preview will show all sales for this transaction
+
       showToast.showSuccessToast(`Sale completed successfully`)
       queryClient.invalidateQueries({ queryKey: ["today-summary"] })
       queryClient.invalidateQueries({ queryKey: ["search-products"] })
@@ -350,8 +442,30 @@ function Sales() {
   }
 
   const handleSaveAndPrint = async (payments: Record<string, { amount: number; refNo?: string }>) => {
-    await processPayment(payments)
-    // TODO: Add print functionality
+    try {
+      await processPayment(payments)
+      // Get the most recent sale for printing
+      const token = await OpenAPI.TOKEN?.() || localStorage.getItem("access_token") || ""
+      const apiBase = OpenAPI.BASE || import.meta.env.VITE_API_URL || ""
+      const lastSaleResponse = await fetch(`${apiBase}/api/v1/sales?limit=1`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      })
+      if (lastSaleResponse.ok) {
+        const lastSales = await lastSaleResponse.json()
+        if (lastSales.data && lastSales.data.length > 0) {
+          setSelectedReceiptId(lastSales.data[0].id)
+          setIsReceiptPreviewModalOpen(true)
+          // Trigger print after modal opens
+          setTimeout(() => {
+            window.print()
+          }, 1000)
+        }
+      }
+    } catch (error) {
+      // Error already handled in processPayment
+    }
   }
 
   const resetSale = () => {
@@ -369,6 +483,16 @@ function Sales() {
     setCustomerName("")
     setCustomerTel("")
     setCustomerBalance(0)
+  }
+
+  const handleSelectCustomer = (customer: { name: string; tel: string; balance: number }) => {
+    setCustomerName(customer.name)
+    setCustomerTel(customer.tel)
+    setCustomerBalance(customer.balance)
+  }
+
+  const handleNewCustomerSave = (customer: { name: string; tel: string; balance: number }) => {
+    handleSelectCustomer(customer)
   }
 
   const handleReceiptDateFocus = (e: React.FocusEvent<HTMLInputElement>) => {
@@ -394,8 +518,15 @@ function Sales() {
         onLogout={logout}
         onReset={resetSale}
         onSuspendSale={suspendSale}
-        onResumeSale={() => selectedSaleId && resumeSale(selectedSaleId)}
+        onResumeSale={() => {
+          if (selectedSaleId) {
+            resumeSale(selectedSaleId)
+            setActiveTab("customer")
+          }
+        }}
         onCompleteSale={openPaymentModal}
+        onCreditNote={() => setIsCreditNoteModalOpen(true)}
+        onCashMovement={() => setIsCashMovementModalOpen(true)}
         cartLength={cart.length}
         selectedSaleId={selectedSaleId}
         isPending={createSale.isPending}
@@ -463,8 +594,8 @@ function Sales() {
           onCustomerBalanceChange={setCustomerBalance}
           onRemarksChange={setRemarks}
           onCustomerPinChange={setCustomerPin}
-          onSelectCustomer={() => {}}
-          onNewCustomer={() => {}}
+          onSelectCustomer={() => setIsCustomerSearchModalOpen(true)}
+          onNewCustomer={() => setIsNewCustomerModalOpen(true)}
           onClearCustomer={clearCustomer}
           suspendedSales={suspendedSales}
           selectedSaleId={selectedSaleId}
@@ -511,6 +642,39 @@ function Sales() {
           setSelectedReceiptId(null)
         }}
         receiptId={selectedReceiptId}
+      />
+
+      <CreditNoteModal
+        isOpen={isCreditNoteModalOpen}
+        onClose={() => setIsCreditNoteModalOpen(false)}
+        onSuccess={() => {
+          queryClient.invalidateQueries({ queryKey: ["today-summary"] })
+          queryClient.invalidateQueries({ queryKey: ["recent-receipts"] })
+        }}
+      />
+
+      <CashMovementModal
+        isOpen={isCashMovementModalOpen}
+        onClose={() => setIsCashMovementModalOpen(false)}
+        onSuccess={() => {
+          queryClient.invalidateQueries({ queryKey: ["today-summary"] })
+        }}
+      />
+
+      <CustomerSearchModal
+        isOpen={isCustomerSearchModalOpen}
+        onClose={() => setIsCustomerSearchModalOpen(false)}
+        onSelectCustomer={handleSelectCustomer}
+        onNewCustomer={() => {
+          setIsCustomerSearchModalOpen(false)
+          setIsNewCustomerModalOpen(true)
+        }}
+      />
+
+      <NewCustomerModal
+        isOpen={isNewCustomerModalOpen}
+        onClose={() => setIsNewCustomerModalOpen(false)}
+        onSave={handleNewCustomerSave}
       />
           </Box>
   )

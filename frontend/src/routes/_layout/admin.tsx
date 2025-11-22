@@ -98,7 +98,7 @@ function UsersTable() {
                       ? "purple" 
                       : user.is_auditor 
                         ? "blue" 
-                        : "gray"
+                        : "green"
                   }
                 >
                   {user.is_superuser ? "Admin" : user.is_auditor ? "Auditor" : "Cashier"}

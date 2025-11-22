@@ -5,6 +5,7 @@ import { FiLogOut, FiMoreVertical, FiX } from "react-icons/fi"
 
 import type { UserPublic } from "@/client"
 import useAuth from "@/hooks/useAuth"
+import { getUserInitials } from "@/utils"
 import {
   DrawerBackdrop,
   DrawerBody,
@@ -151,7 +152,7 @@ const Sidebar = ({ open: controlledOpen, onOpenChange, isCollapsed = false }: Si
                       fontWeight="bold"
                       flexShrink={0}
                     >
-                      {(currentUser.full_name || currentUser.email || "U")[0].toUpperCase()}
+                      {getUserInitials(currentUser.full_name, currentUser.email)}
                     </Box>
                     <VStack align="start" flex={1} gap={0}>
                       <Text fontSize="sm" fontWeight="600" color={{ base: "white", _light: "gray.800" }}>
@@ -232,7 +233,7 @@ const Sidebar = ({ open: controlledOpen, onOpenChange, isCollapsed = false }: Si
                   border="2px solid"
                   borderColor={{ base: "rgba(255, 255, 255, 0.1)", _light: "rgba(0, 0, 0, 0.1)" }}
                 >
-                  {(currentUser.full_name || currentUser.email || "U")[0].toUpperCase()}
+                  {getUserInitials(currentUser.full_name, currentUser.email)}
                 </Box>
                 <VStack align="start" gap={0} flex={1} minW={0}>
                   <Text fontSize="sm" fontWeight="600" color={{ base: "#ffffff", _light: "#1a1d29" }} lineHeight="1.2">
@@ -242,7 +243,13 @@ const Sidebar = ({ open: controlledOpen, onOpenChange, isCollapsed = false }: Si
                     mt={1}
                     px={2}
                     py={0.5}
-                    bg="linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%)"
+                    bg={
+                      currentUser.is_superuser
+                        ? "linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%)" // Purple for Admin
+                        : currentUser.is_auditor
+                        ? "linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)" // Blue for Auditor
+                        : "linear-gradient(135deg, #22c55e 0%, #16a34a 100%)" // Green for Cashier
+                    }
                     color="white"
                     fontSize="2xs"
                     fontWeight="700"
@@ -250,7 +257,7 @@ const Sidebar = ({ open: controlledOpen, onOpenChange, isCollapsed = false }: Si
                     textTransform="uppercase"
                     letterSpacing="0.5px"
                   >
-                    {currentUser.is_superuser ? "Gold Member" : "Member"}
+                    {currentUser.is_superuser ? "Admin" : currentUser.is_auditor ? "Auditor" : "Cashier"}
                   </Badge>
                 </VStack>
               </HStack>

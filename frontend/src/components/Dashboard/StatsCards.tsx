@@ -1,5 +1,7 @@
 import { Box, Grid, HStack, VStack, Text, Icon } from "@chakra-ui/react"
 import { FiArrowUp, FiArrowDown } from "react-icons/fi"
+import { useQuery } from "@tanstack/react-query"
+import { ExpensesService } from "@/client"
 import { formatCurrency } from "./utils"
 
 interface StatsCardsProps {
@@ -8,6 +10,15 @@ interface StatsCardsProps {
 }
 
 export function StatsCards({ totalRevenue, isMounted }: StatsCardsProps) {
+  // Fetch expense summary for dashboard
+  const { data: expenseSummary } = useQuery({
+    queryKey: ["expenseSummary"],
+    queryFn: () => ExpensesService.getExpenseSummary(),
+  })
+
+  const totalExpenses = expenseSummary && typeof expenseSummary === 'object' && 'total_amount' in expenseSummary 
+    ? Number(expenseSummary.total_amount) 
+    : 0
   return (
     <Box 
       mb={8}
@@ -161,13 +172,13 @@ export function StatsCards({ totalRevenue, isMounted }: StatsCardsProps) {
                 color={{ base: "#ffffff", _light: "#1a1d29" }}
                 mt={1}
               >
-                {formatCurrency(0)}
+                {formatCurrency(totalExpenses)}
               </Text>
             </VStack>
             <Icon as={FiArrowUp} color="#22c55e" fontSize="lg" />
           </HStack>
           <HStack gap={1}>
-            <Text fontSize="xs" color="#22c55e" fontWeight="600">+3.5%</Text>
+            <Text fontSize="xs" color="#22c55e" fontWeight="600">Total Expenses</Text>
           </HStack>
         </Box>
       </Grid>

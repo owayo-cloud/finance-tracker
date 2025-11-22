@@ -204,10 +204,10 @@ function Expenses() {
         {/* Filters */}
         <Box
           p={4}
-          bg={{ base: "#1a1d29", _light: "#ffffff" }}
+          bg="bg.surface"
           borderRadius="lg"
           border="1px solid"
-          borderColor={{ base: "rgba(255, 255, 255, 0.08)", _light: "#e5e7eb" }}
+          borderColor="border.card"
         >
           <Flex gap={4} flexWrap="wrap" align="end">
             <Box flex="1" minW="200px">
@@ -218,8 +218,8 @@ function Expenses() {
                 placeholder="Search expenses..."
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                bg={{ base: "#0f1419", _light: "#f9fafb" }}
-                borderColor={{ base: "rgba(255, 255, 255, 0.1)", _light: "#e5e7eb" }}
+                bg="input.bg"
+                borderColor="input.border"
               />
             </Box>
             <Box flex="1" minW="200px">
@@ -262,8 +262,8 @@ function Expenses() {
                 type="date"
                 value={startDate}
                 onChange={(e) => setStartDate(e.target.value)}
-                bg={{ base: "#0f1419", _light: "#f9fafb" }}
-                borderColor={{ base: "rgba(255, 255, 255, 0.1)", _light: "#e5e7eb" }}
+                bg="input.bg"
+                borderColor="input.border"
               />
             </Box>
             <Box flex="1" minW="150px">
@@ -274,8 +274,8 @@ function Expenses() {
                 type="date"
                 value={endDate}
                 onChange={(e) => setEndDate(e.target.value)}
-                bg={{ base: "#0f1419", _light: "#f9fafb" }}
-                borderColor={{ base: "rgba(255, 255, 255, 0.1)", _light: "#e5e7eb" }}
+                bg="input.bg"
+                borderColor="input.border"
               />
             </Box>
             <Button
@@ -290,10 +290,10 @@ function Expenses() {
 
         {/* Expenses List */}
         <Box
-          bg={{ base: "#1a1d29", _light: "#ffffff" }}
+          bg="bg.surface"
           borderRadius="lg"
           border="1px solid"
-          borderColor={{ base: "rgba(255, 255, 255, 0.08)", _light: "#e5e7eb" }}
+          borderColor="border.card"
           overflow="hidden"
         >
           {isLoadingExpenses ? (
@@ -344,10 +344,10 @@ function StatCard({
   return (
     <Box
       p={5}
-      bg={{ base: "#1a1d29", _light: "#ffffff" }}
+      bg="bg.surface"
       borderRadius="lg"
       border="1px solid"
-      borderColor={{ base: "rgba(255, 255, 255, 0.08)", _light: "#e5e7eb" }}
+      borderColor="border.card"
       boxShadow={{ base: "0 2px 4px rgba(0, 0, 0, 0.2)", _light: "0 1px 3px rgba(0, 0, 0, 0.1)" }}
     >
       {isLoading ? (
@@ -441,9 +441,9 @@ function ExpenseRow({
     <HStack
       p={3}
       borderRadius="md"
-      bg={{ base: "#0f1419", _light: "#f9fafb" }}
+      bg={{ base: "rgba(255, 255, 255, 0.05)", _light: "#f9fafb" }}
       border="1px solid"
-      borderColor={{ base: "rgba(255, 255, 255, 0.05)", _light: "#e5e7eb" }}
+      borderColor="border.card"
       justify="space-between"
       _hover={{
         bg: { base: "rgba(255, 255, 255, 0.05)", _light: "#f3f4f6" },

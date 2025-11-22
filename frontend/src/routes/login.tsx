@@ -1,11 +1,11 @@
-import { Container, Image, Input, Text } from "@chakra-ui/react"
+import { Box, Card, Container, Image, Input, Text, VStack, Heading } from "@chakra-ui/react"
 import {
   createFileRoute,
   Link as RouterLink,
   redirect,
 } from "@tanstack/react-router"
 import { type SubmitHandler, useForm } from "react-hook-form"
-import { FiLock, FiMail } from "react-icons/fi"
+import { FiLock, FiMail, FiUser } from "react-icons/fi"
 
 import type { Body_login_login_access_token as AccessToken } from "@/client"
 import { Button } from "@/components/ui/button"
@@ -13,8 +13,8 @@ import { Field } from "@/components/ui/field"
 import { InputGroup } from "@/components/ui/input-group"
 import { PasswordInput } from "@/components/ui/password-input"
 import useAuth, { isLoggedIn } from "@/hooks/useAuth"
-import Logo from "/assets/images/fastapi-logo.svg"
-import { emailPattern, passwordRules } from "../utils"
+import Logo from "/assets/images/favicon.png"
+import { passwordRules } from "../utils"
 
 export const Route = createFileRoute("/login")({
   component: Login,
@@ -55,58 +55,139 @@ function Login() {
   }
 
   return (
-    <Container
-      as="form"
-      onSubmit={handleSubmit(onSubmit)}
-      h="100vh"
-      maxW="sm"
-      alignItems="stretch"
+    <Box
+      minH="100vh"
+      display="flex"
+      alignItems="center"
       justifyContent="center"
-      gap={4}
-      centerContent
+      bg={{ base: "bg.canvas", _light: "bg.canvas" }}
+      p={4}
     >
-      <Image
-        src={Logo}
-        alt="FastAPI logo"
-        height="auto"
-        maxW="2xs"
-        alignSelf="center"
-        mb={4}
-      />
-      <Field
-        invalid={!!errors.username}
-        errorText={errors.username?.message || !!error}
-      >
-        <InputGroup w="100%" startElement={<FiMail />}>
-          <Input
-            {...register("username", {
-              required: "Username is required",
-              pattern: emailPattern,
-            })}
-            placeholder="Email"
-            type="email"
-          />
-        </InputGroup>
-      </Field>
-      <PasswordInput
-        type="password"
-        startElement={<FiLock />}
-        {...register("password", passwordRules())}
-        placeholder="Password"
-        errors={errors}
-      />
-      <RouterLink to="/recover-password" className="main-link">
-        Forgot Password?
-      </RouterLink>
-      <Button variant="solid" type="submit" loading={isSubmitting} size="md">
-        Log In
-      </Button>
-      <Text>
-        Don't have an account?{" "}
-        <RouterLink to="/signup" className="main-link">
-          Sign Up
-        </RouterLink>
-      </Text>
-    </Container>
+      <Container maxW="md" w="full">
+        <Card.Root
+          variant="outline"
+          bg={{ base: "rgba(15, 20, 30, 0.7)", _light: "rgba(255, 255, 255, 0.95)" }}
+          backdropFilter="blur(20px) saturate(180%)"
+          border="1px solid"
+          borderColor={{ base: "rgba(0, 150, 136, 0.3)", _light: "rgba(0, 150, 136, 0.2)" }}
+          borderRadius="2xl"
+          boxShadow={{ 
+            base: "0 10px 40px rgba(0, 0, 0, 0.4), 0 0 1px rgba(0, 150, 136, 0.3)", 
+            _light: "0 10px 40px rgba(0, 0, 0, 0.1), 0 0 1px rgba(0, 150, 136, 0.2)" 
+          }}
+        >
+          <Card.Body p={{ base: 6, md: 8 }}>
+            <Box
+              as="form"
+              onSubmit={handleSubmit(onSubmit)}
+              w="full"
+            >
+              <VStack gap={6} align="stretch">
+                {/* Logo and Title */}
+                <VStack gap={4}>
+                  <Box
+                    display="flex"
+                    alignItems="center"
+                    justifyContent="center"
+                    w={20}
+                    h={20}
+                    borderRadius="xl"
+                    bg="rgba(0, 150, 136, 0.1)"
+                    border="2px solid"
+                    borderColor="rgba(0, 150, 136, 0.3)"
+                    boxShadow="0 0 20px rgba(0, 150, 136, 0.2)"
+                  >
+                    <Image
+                      src={Logo}
+                      alt="Finance Tracker"
+                      height="auto"
+                      maxW="12"
+                      maxH="12"
+                      objectFit="contain"
+                    />
+                  </Box>
+                  <VStack gap={1}>
+                    <Heading
+                      size="lg"
+                      fontWeight="bold"
+                      css={{
+                        background: "linear-gradient(to right, #009688, #00bcd4)",
+                        WebkitBackgroundClip: "text",
+                        WebkitTextFillColor: "transparent",
+                        backgroundClip: "text",
+                      }}
+                    >
+                      Finance Tracker
+                    </Heading>
+                    <Text
+                      fontSize="sm"
+                      color="text.secondary"
+                    >
+                      Sign in to your account
+                    </Text>
+                  </VStack>
+                </VStack>
+
+                {/* Form Fields */}
+                <VStack gap={4} align="stretch">
+                  <Field
+                    invalid={!!errors.username}
+                    errorText={errors.username?.message || !!error}
+                  >
+                    <InputGroup w="100%" startElement={<FiUser />}>
+                      <Input
+                        {...register("username", {
+                          required: "Username or email is required",
+                        })}
+                        placeholder="Username or Email"
+                        type="text"
+                        autoComplete="username"
+                      />
+                    </InputGroup>
+                  </Field>
+                  <PasswordInput
+                    type="password"
+                    startElement={<FiLock />}
+                    {...register("password", passwordRules())}
+                    placeholder="Password"
+                    errors={errors}
+                    autoComplete="current-password"
+                  />
+                </VStack>
+
+                {/* Forgot Password */}
+                <Box textAlign="right">
+                  <RouterLink to="/recover-password" className="main-link">
+                    <Text fontSize="sm">Forgot Password?</Text>
+                  </RouterLink>
+                </Box>
+
+                {/* Submit Button */}
+                <Button 
+                  variant="solid" 
+                  type="submit" 
+                  loading={isSubmitting} 
+                  size="lg"
+                  w="full"
+                  colorPalette="teal"
+                >
+                  Log In
+                </Button>
+
+                {/* Sign Up Link */}
+                <Box textAlign="center">
+                  <Text fontSize="sm" color="text.secondary">
+                    Don't have an account?{" "}
+                    <RouterLink to="/signup" className="main-link">
+                      Sign Up
+                    </RouterLink>
+                  </Text>
+                </Box>
+              </VStack>
+            </Box>
+          </Card.Body>
+        </Card.Root>
+      </Container>
+    </Box>
   )
 }

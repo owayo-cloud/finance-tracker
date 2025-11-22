@@ -142,9 +142,12 @@ export function StockReport({ stockSummary }: StockReportProps) {
                 </Button>
               </HStack>
             </HStack>
-            <Table.Root size="sm">
+            <Table.Root 
+              size="sm"
+              variant="outline"
+            >
               <Table.Header>
-                <Table.Row>
+                <Table.Row bg="table.header.bg">
                   <Table.ColumnHeader>Product</Table.ColumnHeader>
                   <Table.ColumnHeader>Category</Table.ColumnHeader>
                   <Table.ColumnHeader textAlign="right">Stock</Table.ColumnHeader>
@@ -157,7 +160,11 @@ export function StockReport({ stockSummary }: StockReportProps) {
                 {stockSummary.products
                   .sort((a, b) => b.inventoryValue - a.inventoryValue)
                   .map((product) => (
-                    <Table.Row key={product.id}>
+                    <Table.Row 
+                      key={product.id}
+                      bg="table.row.bg"
+                      _hover={{ bg: "table.row.hover" }}
+                    >
                       <Table.Cell fontWeight="medium">{product.name}</Table.Cell>
                       <Table.Cell>
                         <Badge colorPalette="purple">{product.category}</Badge>

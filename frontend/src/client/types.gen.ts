@@ -63,6 +63,10 @@ export type BulkImportSessionPublic = {
     id: string;
     created_at: string;
     completed_at?: (string | null);
+    columns?: (Array<(string)> | null);
+    auto_mapping?: ({
+    [key: string]: unknown;
+} | null);
 };
 
 /**
@@ -99,61 +103,6 @@ export type ColumnMappingResponse = {
     error_rows: number;
     duplicate_rows: number;
     preview_rows: Array<ImportRow>;
-};
-
-export type ExpenseCategoriesPublic = {
-    data: Array<ExpenseCategoryPublic>;
-    count: number;
-};
-
-export type ExpenseCategoryCreate = {
-    name: string;
-    description?: (string | null);
-};
-
-export type ExpenseCategoryPublic = {
-    name: string;
-    description?: (string | null);
-    id: string;
-};
-
-export type ExpenseCategoryUpdate = {
-    name?: (string | null);
-    description?: (string | null);
-};
-
-export type ExpenseCreate = {
-    category_id: string;
-    amount: (number | string);
-    description: string;
-    expense_date?: string;
-    notes?: (string | null);
-};
-
-export type ExpensePublic = {
-    category_id: string;
-    amount: string;
-    description: string;
-    expense_date?: string;
-    notes?: (string | null);
-    id: string;
-    category: ExpenseCategoryPublic;
-    created_by: UserPublic;
-    created_at: string;
-    updated_at: string;
-};
-
-export type ExpensesPublic = {
-    data: Array<ExpensePublic>;
-    count: number;
-};
-
-export type ExpenseUpdate = {
-    category_id?: (string | null);
-    amount?: (number | string | null);
-    description?: (string | null);
-    expense_date?: (string | null);
-    notes?: (string | null);
 };
 
 /**
@@ -575,82 +524,6 @@ export type BulkImportGetImportStatusData = {
 };
 
 export type BulkImportGetImportStatusResponse = (BulkImportSessionPublic);
-
-export type ExpensesReadExpenseCategoriesData = {
-    limit?: number;
-    skip?: number;
-};
-
-export type ExpensesReadExpenseCategoriesResponse = (ExpenseCategoriesPublic);
-
-export type ExpensesCreateExpenseCategoryData = {
-    requestBody: ExpenseCategoryCreate;
-};
-
-export type ExpensesCreateExpenseCategoryResponse = (ExpenseCategoryPublic);
-
-export type ExpensesReadExpenseCategoryData = {
-    categoryId: string;
-};
-
-export type ExpensesReadExpenseCategoryResponse = (ExpenseCategoryPublic);
-
-export type ExpensesUpdateExpenseCategoryData = {
-    categoryId: string;
-    requestBody: ExpenseCategoryUpdate;
-};
-
-export type ExpensesUpdateExpenseCategoryResponse = (ExpenseCategoryPublic);
-
-export type ExpensesDeleteExpenseCategoryData = {
-    categoryId: string;
-};
-
-export type ExpensesDeleteExpenseCategoryResponse = (unknown);
-
-export type ExpensesReadExpensesData = {
-    categoryId?: (string | null);
-    endDate?: (string | null);
-    limit?: number;
-    search?: (string | null);
-    skip?: number;
-    startDate?: (string | null);
-};
-
-export type ExpensesReadExpensesResponse = (ExpensesPublic);
-
-export type ExpensesCreateExpenseData = {
-    requestBody: ExpenseCreate;
-};
-
-export type ExpensesCreateExpenseResponse = (ExpensePublic);
-
-export type ExpensesReadExpenseData = {
-    expenseId: string;
-};
-
-export type ExpensesReadExpenseResponse = (ExpensePublic);
-
-export type ExpensesUpdateExpenseData = {
-    expenseId: string;
-    requestBody: ExpenseUpdate;
-};
-
-export type ExpensesUpdateExpenseResponse = (ExpensePublic);
-
-export type ExpensesDeleteExpenseData = {
-    expenseId: string;
-};
-
-export type ExpensesDeleteExpenseResponse = (unknown);
-
-export type ExpensesGetExpenseSummaryData = {
-    categoryId?: (string | null);
-    endDate?: (string | null);
-    startDate?: (string | null);
-};
-
-export type ExpensesGetExpenseSummaryResponse = (unknown);
 
 export type LoginLoginAccessTokenData = {
     formData: Body_login_login_access_token;

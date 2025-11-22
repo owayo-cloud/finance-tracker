@@ -28,6 +28,7 @@ import { Route as LayoutDebtsRouteImport } from './routes/_layout/debts'
 import { Route as LayoutAdminRouteImport } from './routes/_layout/admin'
 import { Route as LayoutStockEntryIndexRouteImport } from './routes/_layout/stock-entry/index'
 import { Route as LayoutStockEntryBulkImportRouteImport } from './routes/_layout/stock-entry/bulk-import'
+import { Route as LayoutProductsBulkImportRouteImport } from './routes/_layout/products/bulk-import'
 
 const SignupRoute = SignupRouteImport.update({
   id: '/signup',
@@ -125,6 +126,12 @@ const LayoutStockEntryBulkImportRoute =
     path: '/stock-entry/bulk-import',
     getParentRoute: () => LayoutRoute,
   } as any)
+const LayoutProductsBulkImportRoute =
+  LayoutProductsBulkImportRouteImport.update({
+    id: '/bulk-import',
+    path: '/bulk-import',
+    getParentRoute: () => LayoutProductsRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/login': typeof LoginRoute
@@ -135,14 +142,19 @@ export interface FileRoutesByFullPath {
   '/debts': typeof LayoutDebtsRoute
   '/expense-categories': typeof LayoutExpenseCategoriesRoute
   '/expenses': typeof LayoutExpensesRoute
+<<<<<<< HEAD
+  '/products': typeof LayoutProductsRouteWithChildren
+=======
   '/payment-methods': typeof LayoutPaymentMethodsRoute
   '/products': typeof LayoutProductsRoute
+>>>>>>> 9fd8e78a32c7ce473abbe48ed698869e2a32adfd
   '/reports': typeof LayoutReportsRoute
   '/sales': typeof LayoutSalesRoute
   '/sales-list': typeof LayoutSalesListRoute
   '/settings': typeof LayoutSettingsRoute
   '/shift-reconciliation': typeof LayoutShiftReconciliationRoute
   '/': typeof LayoutIndexRoute
+  '/products/bulk-import': typeof LayoutProductsBulkImportRoute
   '/stock-entry/bulk-import': typeof LayoutStockEntryBulkImportRoute
   '/stock-entry': typeof LayoutStockEntryIndexRoute
 }
@@ -155,14 +167,19 @@ export interface FileRoutesByTo {
   '/debts': typeof LayoutDebtsRoute
   '/expense-categories': typeof LayoutExpenseCategoriesRoute
   '/expenses': typeof LayoutExpensesRoute
+<<<<<<< HEAD
+  '/products': typeof LayoutProductsRouteWithChildren
+=======
   '/payment-methods': typeof LayoutPaymentMethodsRoute
   '/products': typeof LayoutProductsRoute
+>>>>>>> 9fd8e78a32c7ce473abbe48ed698869e2a32adfd
   '/reports': typeof LayoutReportsRoute
   '/sales': typeof LayoutSalesRoute
   '/sales-list': typeof LayoutSalesListRoute
   '/settings': typeof LayoutSettingsRoute
   '/shift-reconciliation': typeof LayoutShiftReconciliationRoute
   '/': typeof LayoutIndexRoute
+  '/products/bulk-import': typeof LayoutProductsBulkImportRoute
   '/stock-entry/bulk-import': typeof LayoutStockEntryBulkImportRoute
   '/stock-entry': typeof LayoutStockEntryIndexRoute
 }
@@ -177,14 +194,19 @@ export interface FileRoutesById {
   '/_layout/debts': typeof LayoutDebtsRoute
   '/_layout/expense-categories': typeof LayoutExpenseCategoriesRoute
   '/_layout/expenses': typeof LayoutExpensesRoute
+<<<<<<< HEAD
+  '/_layout/products': typeof LayoutProductsRouteWithChildren
+=======
   '/_layout/payment-methods': typeof LayoutPaymentMethodsRoute
   '/_layout/products': typeof LayoutProductsRoute
+>>>>>>> 9fd8e78a32c7ce473abbe48ed698869e2a32adfd
   '/_layout/reports': typeof LayoutReportsRoute
   '/_layout/sales': typeof LayoutSalesRoute
   '/_layout/sales-list': typeof LayoutSalesListRoute
   '/_layout/settings': typeof LayoutSettingsRoute
   '/_layout/shift-reconciliation': typeof LayoutShiftReconciliationRoute
   '/_layout/': typeof LayoutIndexRoute
+  '/_layout/products/bulk-import': typeof LayoutProductsBulkImportRoute
   '/_layout/stock-entry/bulk-import': typeof LayoutStockEntryBulkImportRoute
   '/_layout/stock-entry/': typeof LayoutStockEntryIndexRoute
 }
@@ -207,6 +229,7 @@ export interface FileRouteTypes {
     | '/settings'
     | '/shift-reconciliation'
     | '/'
+    | '/products/bulk-import'
     | '/stock-entry/bulk-import'
     | '/stock-entry'
   fileRoutesByTo: FileRoutesByTo
@@ -227,6 +250,7 @@ export interface FileRouteTypes {
     | '/settings'
     | '/shift-reconciliation'
     | '/'
+    | '/products/bulk-import'
     | '/stock-entry/bulk-import'
     | '/stock-entry'
   id:
@@ -248,6 +272,7 @@ export interface FileRouteTypes {
     | '/_layout/settings'
     | '/_layout/shift-reconciliation'
     | '/_layout/'
+    | '/_layout/products/bulk-import'
     | '/_layout/stock-entry/bulk-import'
     | '/_layout/stock-entry/'
   fileRoutesById: FileRoutesById
@@ -395,16 +420,39 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LayoutStockEntryBulkImportRouteImport
       parentRoute: typeof LayoutRoute
     }
+    '/_layout/products/bulk-import': {
+      id: '/_layout/products/bulk-import'
+      path: '/bulk-import'
+      fullPath: '/products/bulk-import'
+      preLoaderRoute: typeof LayoutProductsBulkImportRouteImport
+      parentRoute: typeof LayoutProductsRoute
+    }
   }
 }
+
+interface LayoutProductsRouteChildren {
+  LayoutProductsBulkImportRoute: typeof LayoutProductsBulkImportRoute
+}
+
+const LayoutProductsRouteChildren: LayoutProductsRouteChildren = {
+  LayoutProductsBulkImportRoute: LayoutProductsBulkImportRoute,
+}
+
+const LayoutProductsRouteWithChildren = LayoutProductsRoute._addFileChildren(
+  LayoutProductsRouteChildren,
+)
 
 interface LayoutRouteChildren {
   LayoutAdminRoute: typeof LayoutAdminRoute
   LayoutDebtsRoute: typeof LayoutDebtsRoute
   LayoutExpenseCategoriesRoute: typeof LayoutExpenseCategoriesRoute
   LayoutExpensesRoute: typeof LayoutExpensesRoute
+<<<<<<< HEAD
+  LayoutProductsRoute: typeof LayoutProductsRouteWithChildren
+=======
   LayoutPaymentMethodsRoute: typeof LayoutPaymentMethodsRoute
   LayoutProductsRoute: typeof LayoutProductsRoute
+>>>>>>> 9fd8e78a32c7ce473abbe48ed698869e2a32adfd
   LayoutReportsRoute: typeof LayoutReportsRoute
   LayoutSalesRoute: typeof LayoutSalesRoute
   LayoutSalesListRoute: typeof LayoutSalesListRoute
@@ -420,8 +468,12 @@ const LayoutRouteChildren: LayoutRouteChildren = {
   LayoutDebtsRoute: LayoutDebtsRoute,
   LayoutExpenseCategoriesRoute: LayoutExpenseCategoriesRoute,
   LayoutExpensesRoute: LayoutExpensesRoute,
+<<<<<<< HEAD
+  LayoutProductsRoute: LayoutProductsRouteWithChildren,
+=======
   LayoutPaymentMethodsRoute: LayoutPaymentMethodsRoute,
   LayoutProductsRoute: LayoutProductsRoute,
+>>>>>>> 9fd8e78a32c7ce473abbe48ed698869e2a32adfd
   LayoutReportsRoute: LayoutReportsRoute,
   LayoutSalesRoute: LayoutSalesRoute,
   LayoutSalesListRoute: LayoutSalesListRoute,

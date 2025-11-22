@@ -521,7 +521,7 @@ const AddProduct = () => {
                 </HStack>
 
                 {/* Product Image Upload */}
-                <Field
+                {/* <Field
                   label="Product Image"
                   helperText="Upload a JPG or PNG image (max 5MB)"
                 >
@@ -578,7 +578,7 @@ const AddProduct = () => {
                       </Flex>
                     </Box>
                   )}
-                </Field>
+                </Field> */}
               </VStack>
             </SimpleGrid>
           </DialogBody>

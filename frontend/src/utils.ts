@@ -71,3 +71,29 @@ export const handleError = (err: ApiError) => {
   }
   showErrorToast(errorMessage)
 }
+
+/**
+ * Get user initials from full name or email
+ * - If full_name has multiple words, returns first letter of first and last word (e.g., "John Doe" -> "JD")
+ * - If full_name is a single word, returns first letter (e.g., "John" -> "J")
+ * - Falls back to email first letter or "U" if no name/email
+ */
+export const getUserInitials = (fullName?: string | null, email?: string | null): string => {
+  if (fullName) {
+    const nameParts = fullName.trim().split(/\s+/).filter(part => part.length > 0)
+    if (nameParts.length >= 2) {
+      // Multiple names: take first letter of first and last name
+      return (nameParts[0][0] + nameParts[nameParts.length - 1][0]).toUpperCase()
+    } else if (nameParts.length === 1) {
+      // Single name: take first letter
+      return nameParts[0][0].toUpperCase()
+    }
+  }
+  
+  // Fallback to email or "U"
+  if (email) {
+    return email[0].toUpperCase()
+  }
+  
+  return "U"
+}

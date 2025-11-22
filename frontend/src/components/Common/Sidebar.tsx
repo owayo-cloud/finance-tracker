@@ -1,7 +1,7 @@
 import { Box, Flex, IconButton, Text, HStack, VStack, Badge, Icon } from "@chakra-ui/react"
 import { useQueryClient } from "@tanstack/react-query"
 import { useState } from "react"
-import { FiLogOut, FiMoreVertical } from "react-icons/fi"
+import { FiLogOut, FiMoreVertical, FiX } from "react-icons/fi"
 
 import type { UserPublic } from "@/client"
 import useAuth from "@/hooks/useAuth"
@@ -46,44 +46,96 @@ const Sidebar = ({ open: controlledOpen, onOpenChange, isCollapsed = false }: Si
         onOpenChange={(e) => setOpen(e.open)}
       >
         <DrawerBackdrop />
-        <DrawerTrigger asChild>
-          <Box display={{ base: "block", md: "none" }} />
-        </DrawerTrigger>
-        <DrawerContent maxW="xs" bg={{ base: "gray.900", _light: "white" }}>
-          <DrawerCloseTrigger />
+        <DrawerContent 
+          maxW="xs" 
+          w="280px"
+          bg={{ base: "#1a1d29", _light: "#ffffff" }}
+          borderRight="1px solid"
+          borderColor={{ base: "rgba(255, 255, 255, 0.08)", _light: "#e5e7eb" }}
+        >
+          {/* Mobile Drawer Header */}
+          <Flex
+            align="center"
+            justify="space-between"
+            p={4}
+            borderBottom="1px solid"
+            borderColor={{ base: "rgba(255, 255, 255, 0.08)", _light: "#e5e7eb" }}
+            flexShrink={0}
+          >
+            <HStack gap={2}>
+              <Box
+                w={8}
+                h={8}
+                borderRadius="lg"
+                bg="rgba(0, 150, 136, 0.1)"
+                border="2px solid"
+                borderColor="rgba(0, 150, 136, 0.3)"
+                display="flex"
+                alignItems="center"
+                justifyContent="center"
+                flexShrink={0}
+              >
+                <Text fontSize="xs" fontWeight="800" color="#009688">
+                  FT
+                </Text>
+              </Box>
+              <Text fontSize="md" fontWeight="700" color={{ base: "#ffffff", _light: "#1a1d29" }}>
+                Menu
+              </Text>
+            </HStack>
+            <DrawerCloseTrigger asChild>
+              <IconButton
+                variant="ghost"
+                aria-label="Close menu"
+                size="sm"
+                color={{ base: "#9ca3af", _light: "#6b7280" }}
+                _hover={{ bg: { base: "rgba(255, 255, 255, 0.05)", _light: "rgba(0, 0, 0, 0.05)" } }}
+              >
+                <Icon as={FiX} fontSize="20px" />
+              </IconButton>
+            </DrawerCloseTrigger>
+          </Flex>
           <DrawerBody 
             p={0}
-            css={{
-              "&::-webkit-scrollbar": {
-                width: "6px",
-              },
-              "&::-webkit-scrollbar-track": {
-                background: "transparent",
-              },
-              "&::-webkit-scrollbar-thumb": {
-                background: { base: "rgba(255, 255, 255, 0.2)", _light: "rgba(0, 0, 0, 0.2)" },
-                borderRadius: "3px",
-              },
-              "&::-webkit-scrollbar-thumb:hover": {
-                background: { base: "rgba(255, 255, 255, 0.3)", _light: "rgba(0, 0, 0, 0.3)" },
-              },
-              scrollbarWidth: "thin",
-              scrollbarColor: { base: "rgba(255, 255, 255, 0.2) transparent", _light: "rgba(0, 0, 0, 0.2) transparent" },
-            }}
+            overflow="hidden"
           >
-            <Flex flexDir="column" h="full">
+            <Flex flexDir="column" h="full" overflow="hidden">
 
-              {/* Menu Items */}
-              <Box flex="1" overflowY="auto" py={4}>
+              {/* Menu Items - Scrollable */}
+              <Box 
+                flex="1" 
+                overflowY="auto" 
+                overflowX="hidden"
+                py={4}
+                minH="0"
+                css={{
+                  "&::-webkit-scrollbar": {
+                    width: "6px",
+                  },
+                  "&::-webkit-scrollbar-track": {
+                    background: "transparent",
+                  },
+                  "&::-webkit-scrollbar-thumb": {
+                    background: { base: "rgba(255, 255, 255, 0.2)", _light: "rgba(0, 0, 0, 0.2)" },
+                    borderRadius: "3px",
+                  },
+                  "&::-webkit-scrollbar-thumb:hover": {
+                    background: { base: "rgba(255, 255, 255, 0.3)", _light: "rgba(0, 0, 0, 0.3)" },
+                  },
+                  scrollbarWidth: "thin",
+                  scrollbarColor: { base: "rgba(255, 255, 255, 0.2) transparent", _light: "rgba(0, 0, 0, 0.2) transparent" },
+                }}
+              >
                 <SidebarItems onClose={() => setOpen(false)} />
               </Box>
               
-              {/* User Profile Footer */}
+              {/* User Profile Footer - Fixed */}
               <Box 
                 borderTop="1px solid" 
                 borderColor={{ base: "rgba(255, 255, 255, 0.1)", _light: "gray.200" }}
                 p={4}
                 bg={{ base: "rgba(0, 0, 0, 0.2)", _light: "gray.50" }}
+                flexShrink={0}
               >
                 {currentUser && (
                   <HStack mb={3} p={2} borderRadius="lg" _hover={{ bg: { base: "rgba(255, 255, 255, 0.05)", _light: "rgba(0, 0, 0, 0.05)" } }}>
@@ -136,34 +188,35 @@ const Sidebar = ({ open: controlledOpen, onOpenChange, isCollapsed = false }: Si
               </Box>
             </Flex>
           </DrawerBody>
-          <DrawerCloseTrigger />
         </DrawerContent>
       </DrawerRoot>
 
       {/* Desktop */}
-      <Box
+      <Flex
         display={{ base: "none", md: "flex" }}
-        position="sticky"
         bg={{ base: "#1a1d29", _light: "#ffffff" }}
         borderRight="1px solid"
         borderColor={{ base: "rgba(255, 255, 255, 0.08)", _light: "#e5e7eb" }}
-        top={0}
         w={isCollapsed ? "0px" : "260px"}
-        h="100vh"
-        flexDirection="column"
+        h="100%"
+        direction="column"
         boxShadow={isCollapsed ? "none" : { base: "2px 0 8px rgba(0, 0, 0, 0.4)", _light: "2px 0 8px rgba(0, 0, 0, 0.08)" }}
         transition="width 0.3s ease, box-shadow 0.3s ease"
         overflow="hidden"
         flexShrink={0}
         opacity={isCollapsed ? 0 : 1}
         visibility={isCollapsed ? "hidden" : "visible"}
+        alignSelf="stretch"
       >
-        {/* User Profile Section at Top */}
+        {/* User Profile Section at Top - Fixed */}
         {currentUser && !isCollapsed && (
           <Box 
             p={4}
             bg={{ base: "#1a1d29", _light: "#ffffff" }}
             minW="260px"
+            flexShrink={0}
+            borderBottom="1px solid"
+            borderColor={{ base: "rgba(255, 255, 255, 0.08)", _light: "#e5e7eb" }}
           >
             <HStack gap={3} justify="space-between" align="center">
               <HStack gap={3} flex={1}>
@@ -224,6 +277,8 @@ const Sidebar = ({ open: controlledOpen, onOpenChange, isCollapsed = false }: Si
           overflowX="hidden"
           py={4}
           minW={isCollapsed ? "0" : "260px"}
+          minH="0"
+          maxH="100%"
           css={{
             "&::-webkit-scrollbar": {
               width: "6px",
@@ -244,7 +299,7 @@ const Sidebar = ({ open: controlledOpen, onOpenChange, isCollapsed = false }: Si
         >
           {!isCollapsed && <SidebarItems />}
         </Box>
-      </Box>
+      </Flex>
     </>
   )
 }

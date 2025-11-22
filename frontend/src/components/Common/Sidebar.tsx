@@ -197,15 +197,13 @@ const Sidebar = ({ open: controlledOpen, onOpenChange, isCollapsed = false }: Si
         bg={{ base: "#1a1d29", _light: "#ffffff" }}
         borderRight="1px solid"
         borderColor={{ base: "rgba(255, 255, 255, 0.08)", _light: "#e5e7eb" }}
-        w={isCollapsed ? "0px" : "260px"}
+        w={isCollapsed ? "70px" : "260px"}
         h="100%"
         direction="column"
-        boxShadow={isCollapsed ? "none" : { base: "2px 0 8px rgba(0, 0, 0, 0.4)", _light: "2px 0 8px rgba(0, 0, 0, 0.08)" }}
+        boxShadow={{ base: "2px 0 8px rgba(0, 0, 0, 0.4)", _light: "2px 0 8px rgba(0, 0, 0, 0.08)" }}
         transition="width 0.3s ease, box-shadow 0.3s ease"
         overflow="hidden"
         flexShrink={0}
-        opacity={isCollapsed ? 0 : 1}
-        visibility={isCollapsed ? "hidden" : "visible"}
         alignSelf="stretch"
       >
         {/* User Profile Section at Top - Fixed */}
@@ -276,7 +274,7 @@ const Sidebar = ({ open: controlledOpen, onOpenChange, isCollapsed = false }: Si
           overflowY="auto"
           overflowX="hidden"
           py={4}
-          minW={isCollapsed ? "0" : "260px"}
+          minW={isCollapsed ? "70px" : "260px"}
           minH="0"
           maxH="100%"
           css={{
@@ -297,7 +295,7 @@ const Sidebar = ({ open: controlledOpen, onOpenChange, isCollapsed = false }: Si
             scrollbarColor: { base: "rgba(255, 255, 255, 0.2) transparent", _light: "rgba(0, 0, 0, 0.2) transparent" },
           }}
         >
-          {!isCollapsed && <SidebarItems />}
+          <SidebarItems isCollapsed={isCollapsed} />
         </Box>
       </Flex>
     </>

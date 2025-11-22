@@ -19,20 +19,101 @@ function Navbar({ onMenuClick, sidebarCollapsed = false, isPOSMode = false }: Na
   const { user, logout } = useAuth()
 
   return (
-    <Flex
-      display={display}
-      justify="space-between"
-      position="sticky"
-      align="center"
-      bg={{ base: "#1a1d29", _light: "#ffffff" }}
-      w="100%"
-      top={0}
-      px={isPOSMode ? 4 : 6}
-      py={3}
-      zIndex={10}
-      boxShadow={{ base: "0 1px 3px rgba(0, 0, 0, 0.2)", _light: "0 1px 2px rgba(0, 0, 0, 0.05)" }}
-      gap={4}
-    >
+    <>
+      {/* Mobile Navbar - Visible on small screens */}
+      <Flex
+        display={{ base: "flex", md: "none" }}
+        justify="space-between"
+        position="sticky"
+        align="center"
+        bg={{ base: "#1a1d29", _light: "#ffffff" }}
+        w="100%"
+        top={0}
+        px={4}
+        py={3}
+        zIndex={10}
+        boxShadow={{ base: "0 1px 3px rgba(0, 0, 0, 0.2)", _light: "0 1px 2px rgba(0, 0, 0, 0.05)" }}
+        gap={4}
+      >
+        {/* Left: Hamburger Menu */}
+        <HStack gap={2}>
+          <IconButton
+            variant="ghost"
+            aria-label="Menu"
+            color={{ base: "#ffffff", _light: "#1a1d29" }}
+            _hover={{ bg: { base: "rgba(255, 255, 255, 0.1)", _light: "rgba(0, 0, 0, 0.05)" } }}
+            size="sm"
+            onClick={onMenuClick}
+          >
+            <FaBars fontSize="20px" />
+          </IconButton>
+          <Text fontSize="lg" fontWeight="700" color={{ base: "#ffffff", _light: "#1a1d29" }}>
+            Finance Tracker
+          </Text>
+        </HStack>
+
+        {/* Right: User Profile */}
+        <MenuRoot>
+          <MenuTrigger asChild>
+            <IconButton
+              variant="ghost"
+              aria-label="User menu"
+              size="sm"
+              w={10}
+              h={10}
+              borderRadius="full"
+              bg="linear-gradient(135deg, #667eea 0%, #764ba2 100%)"
+              color="white"
+              fontSize="xs"
+              fontWeight="700"
+              border="2px solid"
+              borderColor={{ base: "rgba(255, 255, 255, 0.1)", _light: "rgba(0, 0, 0, 0.1)" }}
+            >
+              {(user?.full_name || user?.email || "U")[0].toUpperCase()}
+            </IconButton>
+          </MenuTrigger>
+          <MenuContent>
+            <Link to="/settings">
+              <MenuItem
+                closeOnSelect
+                value="user-settings"
+                gap={2}
+                py={2}
+                style={{ cursor: "pointer" }}
+              >
+                <FiUser fontSize="18px" />
+                <Box flex="1">My Profile</Box>
+              </MenuItem>
+            </Link>
+            <MenuItem
+              value="logout"
+              gap={2}
+              py={2}
+              onClick={logout}
+              style={{ cursor: "pointer" }}
+            >
+              <FiLogOut />
+              Log Out
+            </MenuItem>
+          </MenuContent>
+        </MenuRoot>
+      </Flex>
+
+      {/* Desktop Navbar - Visible on medium+ screens */}
+      <Flex
+        display={display}
+        justify="space-between"
+        position="sticky"
+        align="center"
+        bg={{ base: "#1a1d29", _light: "#ffffff" }}
+        w="100%"
+        top={0}
+        px={isPOSMode ? 4 : 6}
+        py={3}
+        zIndex={10}
+        boxShadow={{ base: "0 1px 3px rgba(0, 0, 0, 0.2)", _light: "0 1px 2px rgba(0, 0, 0, 0.05)" }}
+        gap={4}
+      >
       {/* Left Section: Logo and Hamburger */}
       <HStack gap={3} flexShrink={0} alignItems="center" position="relative">
         <Link to="/" style={{ textDecoration: "none" }}>
@@ -322,6 +403,7 @@ function Navbar({ onMenuClick, sidebarCollapsed = false, isPOSMode = false }: Na
         </HStack>
       )}
     </Flex>
+    </>
   )
 }
 

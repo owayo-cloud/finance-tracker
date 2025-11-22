@@ -406,7 +406,7 @@ function ProductsTable() {
           <Box borderWidth="1px" borderRadius="lg" overflow="hidden">
             <Table.Root size="md" variant="outline">
               <Table.Header>
-                <Table.Row bg={{ base: "gray.800", _light: "gray.50" }}>
+                <Table.Row bg={{ base: "rgba(255, 255, 255, 0.05)", _light: "#f9fafb" }}>
                   <Table.ColumnHeader width="50px">
                     <Checkbox
                       checked={isAllSelected}
@@ -433,7 +433,7 @@ function ProductsTable() {
                     _hover={{
                       bg: selectedProducts.has(product.id) 
                         ? { base: "rgba(56, 178, 172, 0.12)", _light: "rgba(56, 178, 172, 0.06)" }
-                        : { base: "rgba(255, 255, 255, 0.02)", _light: "rgba(0, 0, 0, 0.02)" }
+                        : { base: "rgba(255, 255, 255, 0.08)", _light: "rgba(0, 0, 0, 0.02)" }
                     }}
                   >
                     <Table.Cell>

@@ -229,6 +229,15 @@ class ProductUpdate(SQLModel):
     category_id: Optional[uuid.UUID] = Field(default=None, foreign_key="product_category.id")
     status_id: Optional[uuid.UUID] = Field(default=None, foreign_key="product_status.id")
     image_id: Optional[uuid.UUID] = Field(default=None, foreign_key="media.id")
+    
+    @model_validator(mode="after")
+    def validate_selling_price(self) -> "ProductUpdate":
+        """Ensure selling price is greater than buying price when both are provided"""
+        # Only validate if both prices are being updated
+        if self.selling_price is not None and self.buying_price is not None:
+            if self.selling_price <= self.buying_price:
+                raise ValueError("Selling price must be greater than buying price")
+        return self
 
 class Product(ProductBase, table=True):
     __tablename__ = "product"

@@ -40,7 +40,6 @@ const productsSearchSchema = z.object({
   pageSize: z.number().catch(25),
 })
 
-const DEFAULT_PAGE_SIZE = 25
 
 // Theme-aware Select Component matching the image
 function ThemedSelect({ 
@@ -363,7 +362,7 @@ function ProductsTable() {
               colorScheme="red"
               variant="solid"
               onClick={handleBulkDelete}
-              isLoading={isDeleting}
+              loading={isDeleting}
               loadingText="Deleting..."
             >
               <FiTrash2 /> Delete Selected
@@ -403,7 +402,7 @@ function ProductsTable() {
                   <Table.ColumnHeader width="50px">
                     <Checkbox
                       checked={isAllSelected}
-                      indeterminate={isIndeterminate}
+                      {...(isIndeterminate ? { _indeterminate: {} } : {})}
                       onCheckedChange={toggleAllProducts}
                       aria-label="Select all products"
                     />
@@ -457,8 +456,8 @@ function ProductsTable() {
                     <Table.Cell>
                       <Badge
                         colorScheme={
-                          product.current_stock === 0 ? 'red' :
-                          product.reorder_level && product.current_stock <= product.reorder_level ? 'orange' :
+                          (product.current_stock ?? 0) === 0 ? 'red' :
+                          product.reorder_level && (product.current_stock ?? 0) <= product.reorder_level ? 'orange' :
                           'green'
                         }
                         size="sm"

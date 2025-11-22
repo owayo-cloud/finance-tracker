@@ -441,13 +441,13 @@ function ExpenseRow({
     <HStack
       p={3}
       borderRadius="md"
-      bg={{ base: "rgba(255, 255, 255, 0.05)", _light: "#f9fafb" }}
+      bg="item.bg"
       border="1px solid"
-      borderColor="border.card"
+      borderColor="item.border"
       justify="space-between"
       _hover={{
-        bg: { base: "rgba(255, 255, 255, 0.05)", _light: "#f3f4f6" },
-        borderColor: { base: "rgba(255, 255, 255, 0.1)", _light: "#d1d5db" },
+        bg: "item.bg.hover",
+        borderColor: "item.border",
       }}
       cursor="pointer"
       onClick={onEdit}

@@ -142,12 +142,8 @@ export interface FileRoutesByFullPath {
   '/debts': typeof LayoutDebtsRoute
   '/expense-categories': typeof LayoutExpenseCategoriesRoute
   '/expenses': typeof LayoutExpensesRoute
-<<<<<<< HEAD
-  '/products': typeof LayoutProductsRouteWithChildren
-=======
   '/payment-methods': typeof LayoutPaymentMethodsRoute
-  '/products': typeof LayoutProductsRoute
->>>>>>> 9fd8e78a32c7ce473abbe48ed698869e2a32adfd
+  '/products': typeof LayoutProductsRouteWithChildren
   '/reports': typeof LayoutReportsRoute
   '/sales': typeof LayoutSalesRoute
   '/sales-list': typeof LayoutSalesListRoute
@@ -167,12 +163,8 @@ export interface FileRoutesByTo {
   '/debts': typeof LayoutDebtsRoute
   '/expense-categories': typeof LayoutExpenseCategoriesRoute
   '/expenses': typeof LayoutExpensesRoute
-<<<<<<< HEAD
-  '/products': typeof LayoutProductsRouteWithChildren
-=======
   '/payment-methods': typeof LayoutPaymentMethodsRoute
-  '/products': typeof LayoutProductsRoute
->>>>>>> 9fd8e78a32c7ce473abbe48ed698869e2a32adfd
+  '/products': typeof LayoutProductsRouteWithChildren
   '/reports': typeof LayoutReportsRoute
   '/sales': typeof LayoutSalesRoute
   '/sales-list': typeof LayoutSalesListRoute
@@ -194,12 +186,8 @@ export interface FileRoutesById {
   '/_layout/debts': typeof LayoutDebtsRoute
   '/_layout/expense-categories': typeof LayoutExpenseCategoriesRoute
   '/_layout/expenses': typeof LayoutExpensesRoute
-<<<<<<< HEAD
-  '/_layout/products': typeof LayoutProductsRouteWithChildren
-=======
   '/_layout/payment-methods': typeof LayoutPaymentMethodsRoute
-  '/_layout/products': typeof LayoutProductsRoute
->>>>>>> 9fd8e78a32c7ce473abbe48ed698869e2a32adfd
+  '/_layout/products': typeof LayoutProductsRouteWithChildren
   '/_layout/reports': typeof LayoutReportsRoute
   '/_layout/sales': typeof LayoutSalesRoute
   '/_layout/sales-list': typeof LayoutSalesListRoute
@@ -447,12 +435,8 @@ interface LayoutRouteChildren {
   LayoutDebtsRoute: typeof LayoutDebtsRoute
   LayoutExpenseCategoriesRoute: typeof LayoutExpenseCategoriesRoute
   LayoutExpensesRoute: typeof LayoutExpensesRoute
-<<<<<<< HEAD
-  LayoutProductsRoute: typeof LayoutProductsRouteWithChildren
-=======
   LayoutPaymentMethodsRoute: typeof LayoutPaymentMethodsRoute
-  LayoutProductsRoute: typeof LayoutProductsRoute
->>>>>>> 9fd8e78a32c7ce473abbe48ed698869e2a32adfd
+  LayoutProductsRoute: typeof LayoutProductsRouteWithChildren
   LayoutReportsRoute: typeof LayoutReportsRoute
   LayoutSalesRoute: typeof LayoutSalesRoute
   LayoutSalesListRoute: typeof LayoutSalesListRoute
@@ -468,12 +452,8 @@ const LayoutRouteChildren: LayoutRouteChildren = {
   LayoutDebtsRoute: LayoutDebtsRoute,
   LayoutExpenseCategoriesRoute: LayoutExpenseCategoriesRoute,
   LayoutExpensesRoute: LayoutExpensesRoute,
-<<<<<<< HEAD
-  LayoutProductsRoute: LayoutProductsRouteWithChildren,
-=======
   LayoutPaymentMethodsRoute: LayoutPaymentMethodsRoute,
-  LayoutProductsRoute: LayoutProductsRoute,
->>>>>>> 9fd8e78a32c7ce473abbe48ed698869e2a32adfd
+  LayoutProductsRoute: LayoutProductsRouteWithChildren,
   LayoutReportsRoute: LayoutReportsRoute,
   LayoutSalesRoute: LayoutSalesRoute,
   LayoutSalesListRoute: LayoutSalesListRoute,

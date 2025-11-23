@@ -51,14 +51,22 @@ export function CustomerSearchModal({
         headers: {
           Authorization: `Bearer ${token}`,
         },
+        cache: "no-store", // Prevent caching to ensure fresh data
       })
       if (!response.ok) {
         console.error("Failed to fetch customers:", response.statusText)
         return null
       }
-      return response.json()
+      const data = await response.json()
+      console.log("Fetched customers:", data?.data?.length || 0, "customers")
+      console.log("Customers data:", data)
+      if (data?.data && data.data.length > 0) {
+        console.log("First customer:", data.data[0])
+      }
+      return data
     },
     enabled: isOpen,
+    staleTime: 0, // Always consider data stale to force refetch
   })
 
   // Refresh when modal opens
@@ -71,8 +79,15 @@ export function CustomerSearchModal({
   // Listen for customer created event
   useEffect(() => {
     if (isOpen) {
-      const handleCustomerCreated = () => {
-        refetchCustomers()
+      const handleCustomerCreated = async (event: Event) => {
+        const customEvent = event as CustomEvent
+        console.log("Customer created event received:", customEvent.detail)
+        // Small delay to ensure backend has processed the creation
+        await new Promise(resolve => setTimeout(resolve, 300))
+        // Force refetch with fresh data
+        console.log("Refetching customers...")
+        const result = await refetchCustomers()
+        console.log("Refetch result:", result.data?.data?.length || 0, "customers found")
       }
       window.addEventListener("customerCreated", handleCustomerCreated)
       return () => {
@@ -171,9 +186,13 @@ export function CustomerSearchModal({
                 </Box>
               ) : (
                 <Grid
-                  templateColumns="repeat(auto-fill, minmax(200px, 1fr))"
+                  templateColumns={{
+                    base: "repeat(1, 1fr)",
+                    sm: "repeat(2, 1fr)",
+                    md: "repeat(3, 1fr)",
+                    lg: "repeat(4, 1fr)",
+                  }}
                   gap={3}
-                  minW="600px"
                 >
                   {filteredCustomers.map((customer: Customer, index: number) => {
                     const balance = customer.balance
@@ -184,10 +203,10 @@ export function CustomerSearchModal({
                       <Button
                         key={`${customer.name}-${index}`}
                         onClick={() => handleSelectCustomer(customer)}
-                        bg={isNegative ? "#dc2626" : "#b8860b"}
+                        bg={isNegative ? "#ef4444" : "#6366f1"}
                         color="white"
                         _hover={{ 
-                          bg: isNegative ? "#b91c1c" : "#9a7209",
+                          bg: isNegative ? "#dc2626" : "#4f46e5",
                           transform: "scale(1.02)",
                         }}
                         h="auto"
@@ -198,6 +217,8 @@ export function CustomerSearchModal({
                         whiteSpace="normal"
                         wordBreak="break-word"
                         transition="all 0.2s"
+                        borderRadius="md"
+                        boxShadow="sm"
                       >
                         <Text
                           fontSize="sm"
@@ -214,7 +235,7 @@ export function CustomerSearchModal({
                           {customer.name}
                         </Text>
                         <Text fontSize="xs" opacity={0.9}>
-                          ({displayBalance.toFixed(2)})
+                          {isNegative ? "-" : ""}Ksh {displayBalance.toFixed(2)}
                         </Text>
                       </Button>
                     )

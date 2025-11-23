@@ -57,6 +57,8 @@ export function PaymentModal({
   customerName,
   customerBalance = 0,
 }: PaymentModalProps) {
+  // Debug: Log customer info when modal opens
+  console.log("[PaymentModal] Props:", { customerName, customerBalance, totalAmount, isOpen })
   const [paymentAmounts, setPaymentAmounts] = useState<Record<string, number>>({})
   const [paymentRefs, setPaymentRefs] = useState<Record<string, string>>({})
   const [selectedMethods, setSelectedMethods] = useState<Record<string, boolean>>({})
@@ -82,19 +84,27 @@ export function PaymentModal({
     return Math.max(0, totalPaid - totalAmount)
   }, [totalPaid, totalAmount])
 
-  // Check if payment is sufficient (full payment required if no customer, partial allowed if customer selected)
+  // Check if payment is sufficient (full payment required if no customer, partial/zero allowed if customer selected)
   const isPaymentSufficient = useMemo(() => {
-    if (!customerName) {
+    // Check if customer is actually selected (handle empty string, null, undefined)
+    const hasCustomer = customerName && customerName.trim().length > 0
+    
+    if (!hasCustomer) {
       // No customer: require full payment (allow small rounding differences)
-      return totalPaid >= totalAmount - 0.01
+      const isSufficient = totalPaid >= totalAmount - 0.01
+      console.log("[PaymentModal] No customer - Full payment required:", { totalPaid, totalAmount, isSufficient })
+      return isSufficient
     } else {
-      // Customer selected: allow partial payment (at least some payment required)
-      return totalPaid > 0
+      // Customer selected: allow partial or zero payment (entire amount can be debt)
+      const isSufficient = totalPaid >= 0
+      console.log("[PaymentModal] Customer selected - Partial/zero payment allowed:", { customerName, totalPaid, totalAmount, isSufficient })
+      return isSufficient
     }
   }, [totalPaid, totalAmount, customerName])
 
   const paymentShortfall = useMemo(() => {
-    if (!customerName && totalPaid < totalAmount) {
+    const hasCustomer = customerName && customerName.trim().length > 0
+    if (!hasCustomer && totalPaid < totalAmount) {
       return totalAmount - totalPaid
     }
     return 0
@@ -493,14 +503,17 @@ export function PaymentModal({
                     Save Only
                   </Button>
                 </HStack>
-                {!customerName && paymentShortfall > 0 && (
+                {(!customerName || customerName.trim().length === 0) && paymentShortfall > 0 && (
                   <Text fontSize="xs" color="red.500" textAlign="center" mt={2} fontWeight="medium">
                     Full payment required: Please add {formatCurrency(paymentShortfall)} more
                   </Text>
                 )}
-                {customerName && totalPaid < totalAmount && totalPaid > 0 && (
+                {customerName && customerName.trim().length > 0 && totalPaid < totalAmount && (
                   <Text fontSize="xs" color="orange.500" textAlign="center" mt={2}>
-                    Partial payment: {formatCurrency(totalAmount - totalPaid)} will be recorded as debt
+                    {totalPaid === 0 
+                      ? `Full amount (${formatCurrency(totalAmount)}) will be recorded as debt`
+                      : `Partial payment: ${formatCurrency(totalAmount - totalPaid)} will be recorded as debt`
+                    }
                   </Text>
                 )}
               </VStack>

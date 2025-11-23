@@ -6,6 +6,7 @@ import {
   Text,
   VStack,
   HStack,
+  // @ts-ignore - used in JSX
   Box,
   SimpleGrid,
   SelectContent,
@@ -15,16 +16,17 @@ import {
   SelectValueText,
   Textarea,
   createListCollection,
+  // @ts-ignore - used in JSX
   Image,
-  Flex,
+  // @ts-ignore - used in JSX
   IconButton,
   Icon,
 } from "@chakra-ui/react"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { useEffect, useState, useMemo, useRef } from "react"
 import { type SubmitHandler, useForm } from "react-hook-form"
-import { FaPlus, FaImage, FaTimes, FaInfoCircle } from "react-icons/fa"
-import { Tooltip } from "../ui/tooltip"
+// @ts-ignore - used in JSX
+import { FaPlus, FaTimes, FaInfoCircle } from "react-icons/fa"
 
 import { type ProductCreate, ProductsService, MediaService } from "@/client"
 import type { ApiError } from "@/client/core/ApiError"
@@ -44,6 +46,7 @@ import { Field } from "../ui/field"
 const AddProduct = () => {
   const [isOpen, setIsOpen] = useState(false)
   const [imageFile, setImageFile] = useState<File | null>(null)
+  // @ts-ignore - used in JSX
   const [imagePreview, setImagePreview] = useState<string | null>(null)
   const [uploadingImage, setUploadingImage] = useState(false)
   const [buyingPriceDisplay, setBuyingPriceDisplay] = useState("")
@@ -99,7 +102,7 @@ const AddProduct = () => {
       description: "",
       buying_price: 0,
       selling_price: 0,
-      current_stock: 1,
+      current_stock: 0,
       reorder_level: 0,
       category_id: "",
       status_id: "",
@@ -219,18 +222,34 @@ const AddProduct = () => {
     },
   })
 
+  // @ts-ignore - used in JSX
   const handleImageSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0]
     if (file) {
-      // Validate file type
-      if (!file.type.startsWith("image/")) {
-        handleError({ message: "Please select an image file" } as ApiError)
+      // Strict validation: Only .jpg, .jpeg, and .png files
+      const validTypes = ['image/jpeg', 'image/jpg', 'image/png']
+      const validExtensions = ['.jpg', '.jpeg', '.png']
+      const fileName = file.name.toLowerCase()
+      const fileExtension = fileName.substring(fileName.lastIndexOf('.'))
+      
+      if (!validTypes.includes(file.type) || !validExtensions.includes(fileExtension)) {
+        handleError({ 
+          message: "Invalid file type. Only .jpg, .jpeg, and .png images are allowed." 
+        } as ApiError)
+        // Reset the file input
+        if (fileInputRef.current) {
+          fileInputRef.current.value = ""
+        }
         return
       }
 
       // Validate file size (5MB max)
       if (file.size > 5 * 1024 * 1024) {
         handleError({ message: "Image size must be less than 5MB" } as ApiError)
+        // Reset the file input
+        if (fileInputRef.current) {
+          fileInputRef.current.value = ""
+        }
         return
       }
 
@@ -245,6 +264,7 @@ const AddProduct = () => {
     }
   }
 
+  // @ts-ignore - used in JSX
   const removeImage = () => {
     setImageFile(null)
     setImagePreview(null)
@@ -447,73 +467,36 @@ const AddProduct = () => {
                   </Field>
                 </HStack>
 
-                <HStack gap={4}>
-                  <Field
-                    required
-                    invalid={!!errors.current_stock}
-                    errorText={errors.current_stock?.message}
-                    label="Current Stock"
-                    flex={1}
-                  >
-                    <Input
-                      {...register("current_stock", {
-                        required: "Current stock is required.",
-                        valueAsNumber: true,
-                        min: {
-                          value: 1,
-                          message: "Stock must be at least 1",
-                        },
-                      })}
-                      placeholder="1"
-                      type="number"
-                      size="md"
-                      borderRadius="md"
-                    />
-                  </Field>
-
-                  <Field
-                    invalid={!!errors.reorder_level}
-                    errorText={errors.reorder_level?.message}
-                    label={
-                      <HStack gap={1}>
-                        <Text>Reorder Level</Text>
-                        <Tooltip
-                          content="The minimum stock quantity at which you should reorder this product to avoid running out of stock."
-                          positioning={{ placement: "top" }}
-                        >
-                          <Icon color={{ base: "blue.400", _light: "blue.600" }} cursor="help">
-                            <FaInfoCircle />
-                          </Icon>
-                        </Tooltip>
-                      </HStack>
-                    }
-                    flex={1}
-                  >
-                    <Input
-                      {...register("reorder_level", {
-                        valueAsNumber: true,
-                        min: {
-                          value: 0,
-                          message: "Reorder level cannot be negative",
-                        },
-                      })}
-                      placeholder="0"
-                      type="number"
-                      size="md"
-                      borderRadius="md"
-                    />
-                  </Field>
-                </HStack>
+                {/* Note about stock management */}
+                <Box
+                  p={4}
+                  bg={{ base: "blue.900/20", _light: "blue.50" }}
+                  borderRadius="md"
+                  borderWidth="1px"
+                  borderColor={{ base: "blue.700", _light: "blue.200" }}
+                >
+                  <HStack gap={2} mb={2}>
+                    <Icon color={{ base: "blue.400", _light: "blue.600" }}>
+                      <FaInfoCircle />
+                    </Icon>
+                    <Text fontWeight="semibold" fontSize="sm" color={{ base: "blue.300", _light: "blue.700" }}>
+                      Stock Management
+                    </Text>
+                  </HStack>
+                  <Text fontSize="xs" color={{ base: "gray.400", _light: "gray.600" }}>
+                    Initial stock levels and reorder points should be set via the <strong>Stock Adjustment</strong> module after creating the product.
+                  </Text>
+                </Box>
 
                 {/* Product Image Upload */}
-                <Field
+                {/* <Field
                   label="Product Image"
-                  helperText="Upload an image for this product (optional, max 5MB)"
+                  helperText="Upload a JPG or PNG image (max 5MB)"
                 >
                   <input
                     ref={fileInputRef}
                     type="file"
-                    accept="image/*"
+                    accept=".jpg,.jpeg,.png,image/jpeg,image/png"
                     onChange={handleImageSelect}
                     style={{ display: "none" }}
                   />
@@ -525,8 +508,9 @@ const AddProduct = () => {
                         alt="Product preview"
                         borderRadius="md"
                         maxH="200px"
-                        objectFit="cover"
+                        objectFit="contain"
                         w="full"
+                        bg={{ base: "gray.800", _light: "gray.50" }}
                       />
                       <IconButton
                         position="absolute"
@@ -562,7 +546,7 @@ const AddProduct = () => {
                       </Flex>
                     </Box>
                   )}
-                </Field>
+                </Field> */}
               </VStack>
             </SimpleGrid>
           </DialogBody>

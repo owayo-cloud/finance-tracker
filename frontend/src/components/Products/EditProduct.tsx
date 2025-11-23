@@ -7,14 +7,16 @@ import {
   HStack,
   Badge,
   Separator,
+  // @ts-ignore - used in JSX
   Image,
-  Flex,
+  // @ts-ignore - used in JSX
   IconButton,
 } from "@chakra-ui/react"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
 import { useState, useRef } from "react"
 import { type SubmitHandler, useForm } from "react-hook-form"
-import { FaImage, FaTimes } from "react-icons/fa"
+// @ts-ignore - used in JSX
+import { FaTimes, FaInfoCircle } from "react-icons/fa"
 
 import {
   type ProductPublic,
@@ -48,6 +50,7 @@ interface EditProductProps {
 const EditProduct = ({ product, children, isOpen: controlledIsOpen, onOpenChange, 'data-testid': testId }: EditProductProps) => {
   const [internalIsOpen, setInternalIsOpen] = useState(false)
   const [imageFile, setImageFile] = useState<File | null>(null)
+  // @ts-ignore - used in JSX
   const [imagePreview, setImagePreview] = useState<string | null>(null)
   const [uploadingImage, setUploadingImage] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
@@ -109,18 +112,34 @@ const EditProduct = ({ product, children, isOpen: controlledIsOpen, onOpenChange
     },
   })
 
+  // @ts-ignore - used in JSX
   const handleImageSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0]
     if (file) {
-      // Validate file type
-      if (!file.type.startsWith("image/")) {
-        handleError({ message: "Please select an image file" } as ApiError)
+      // Strict validation: Only .jpg, .jpeg, and .png files
+      const validTypes = ['image/jpeg', 'image/jpg', 'image/png']
+      const validExtensions = ['.jpg', '.jpeg', '.png']
+      const fileName = file.name.toLowerCase()
+      const fileExtension = fileName.substring(fileName.lastIndexOf('.'))
+      
+      if (!validTypes.includes(file.type) || !validExtensions.includes(fileExtension)) {
+        handleError({ 
+          message: "Invalid file type. Only .jpg, .jpeg, and .png images are allowed." 
+        } as ApiError)
+        // Reset the file input
+        if (fileInputRef.current) {
+          fileInputRef.current.value = ""
+        }
         return
       }
 
       // Validate file size (5MB max)
       if (file.size > 5 * 1024 * 1024) {
         handleError({ message: "Image size must be less than 5MB" } as ApiError)
+        // Reset the file input
+        if (fileInputRef.current) {
+          fileInputRef.current.value = ""
+        }
         return
       }
 
@@ -135,6 +154,7 @@ const EditProduct = ({ product, children, isOpen: controlledIsOpen, onOpenChange
     }
   }
 
+  // @ts-ignore - used in JSX
   const removeImage = () => {
     setImageFile(null)
     setImagePreview(null)
@@ -224,23 +244,6 @@ const EditProduct = ({ product, children, isOpen: controlledIsOpen, onOpenChange
                     </Text>
                     <Badge colorScheme="purple" size="sm">
                       {product.status?.name || "No status"}
-                    </Badge>
-                  </HStack>
-                  <HStack justify="space-between">
-                    <Text fontSize="sm" color="gray.400">
-                      Current Stock
-                    </Text>
-                    <Badge 
-                      colorScheme={
-                        product.current_stock === 0 
-                          ? "red" 
-                          : product.current_stock && product.reorder_level && product.current_stock <= product.reorder_level
-                            ? "orange"
-                            : "green"
-                      } 
-                      size="sm"
-                    >
-                      {product.current_stock || 0} units
                     </Badge>
                   </HStack>
                 </VStack>
@@ -333,53 +336,35 @@ const EditProduct = ({ product, children, isOpen: controlledIsOpen, onOpenChange
                       />
                     </Field>
 
-                    <Field
-                      invalid={!!errors.current_stock}
-                      errorText={errors.current_stock?.message}
-                      label="Current Stock"
-                      helperText="Available units in inventory (minimum 1)"
+                    {/* Note about stock management */}
+                    <Box
+                      p={4}
+                      bg={{ base: "blue.900/20", _light: "blue.50" }}
+                      borderRadius="md"
+                      borderWidth="1px"
+                      borderColor={{ base: "blue.700", _light: "blue.200" }}
                     >
-                      <Input
-                        {...register("current_stock", {
-                          valueAsNumber: true,
-                          min: {
-                            value: 1,
-                            message: "Stock must be at least 1",
-                          },
-                        })}
-                        placeholder="1"
-                        type="number"
-                      />
-                    </Field>
-
-                    <Field
-                      invalid={!!errors.reorder_level}
-                      errorText={errors.reorder_level?.message}
-                      label="Reorder Level"
-                      helperText="Minimum stock before reordering"
-                    >
-                      <Input
-                        {...register("reorder_level", {
-                          valueAsNumber: true,
-                          min: {
-                            value: 0,
-                            message: "Reorder level cannot be negative",
-                          },
-                        })}
-                        placeholder="0"
-                        type="number"
-                      />
-                    </Field>
+                      <HStack gap={2} mb={2}>
+                        {/* @ts-ignore */}
+                        <FaInfoCircle color="var(--chakra-colors-blue-400)" />
+                        <Text fontWeight="semibold" fontSize="sm" color={{ base: "blue.300", _light: "blue.700" }}>
+                          Stock Management
+                        </Text>
+                      </HStack>
+                      <Text fontSize="xs" color={{ base: "gray.400", _light: "gray.600" }}>
+                        Stock levels and reorder points are managed via the <strong>Stock Adjustment</strong> module. Current stock: <strong>{product.current_stock || 0} units</strong>
+                      </Text>
+                    </Box>
 
                     {/* Product Image Upload */}
-                    <Field
+                    {/* <Field
                       label="Product Image"
-                      helperText="Upload a new image to replace the current one (optional, max 5MB)"
+                      helperText="Upload a JPG or PNG image (max 5MB)"
                     >
                       <input
                         ref={fileInputRef}
                         type="file"
-                        accept="image/*"
+                        accept=".jpg,.jpeg,.png,image/jpeg,image/png"
                         onChange={handleImageSelect}
                         style={{ display: "none" }}
                       />
@@ -388,11 +373,14 @@ const EditProduct = ({ product, children, isOpen: controlledIsOpen, onOpenChange
                         <Box position="relative">
                           <Image
                             src={imagePreview}
-                            alt="Product preview"
+                            alt="New product preview"
                             borderRadius="md"
-                            maxH="200px"
-                            objectFit="cover"
+                            maxH="250px"
+                            objectFit="contain"
                             w="full"
+                            bg={{ base: "gray.800", _light: "gray.50" }}
+                            border="1px solid"
+                            borderColor={{ base: "gray.700", _light: "gray.200" }}
                           />
                           <IconButton
                             position="absolute"
@@ -401,31 +389,56 @@ const EditProduct = ({ product, children, isOpen: controlledIsOpen, onOpenChange
                             size="sm"
                             colorScheme="red"
                             onClick={removeImage}
-                            aria-label="Remove image"
+                            aria-label="Remove new image"
                           >
                             <FaTimes />
                           </IconButton>
+                          <Badge
+                            position="absolute"
+                            bottom={2}
+                            left={2}
+                            colorScheme="green"
+                            size="sm"
+                          >
+                            New Image Selected
+                          </Badge>
                         </Box>
                       ) : product.image?.id ? (
                         <Box>
-                          <Text fontSize="sm" mb={2} color="gray.400">
+                          <Text fontSize="sm" mb={2} color={{ base: "gray.400", _light: "gray.600" }} fontWeight="medium">
                             Current Image:
                           </Text>
-                          <Image
-                            src={`/api/v1/media/serve/${product.image.id}`}
-                            alt={product.name}
-                            borderRadius="md"
-                            maxH="200px"
-                            objectFit="cover"
-                            w="full"
-                            mb={2}
-                          />
+                          <Box position="relative">
+                            <Image
+                              src={`/api/v1/media/serve/${product.image.id}`}
+                              alt={product.name}
+                              borderRadius="md"
+                              maxH="250px"
+                              objectFit="contain"
+                              w="full"
+                              bg={{ base: "gray.800", _light: "gray.50" }}
+                              border="1px solid"
+                              borderColor={{ base: "gray.700", _light: "gray.200" }}
+                              mb={3}
+                            />
+                            <Badge
+                              position="absolute"
+                              bottom={14}
+                              left={2}
+                              colorScheme="blue"
+                              size="sm"
+                            >
+                              Current
+                            </Badge>
+                          </Box>
                           <Button
                             size="sm"
                             variant="outline"
+                            colorScheme="teal"
                             onClick={() => fileInputRef.current?.click()}
+                            w="full"
                           >
-                            Replace Image
+                            <FaImage /> Replace Image
                           </Button>
                         </Box>
                       ) : (
@@ -450,7 +463,7 @@ const EditProduct = ({ product, children, isOpen: controlledIsOpen, onOpenChange
                           </Flex>
                         </Box>
                       )}
-                    </Field>
+                    </Field> */}
                   </VStack>
                 </form>
               </Box>

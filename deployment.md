@@ -144,6 +144,24 @@ You can set several variables, like:
 * `POSTGRES_DB`: The database name to use for this application. You can leave the default of `app`.
 * `SENTRY_DSN`: The DSN for Sentry, if you are using it.
 
+### Email Configuration for Background Jobs
+
+The application uses **Supervisor** to manage background jobs that send automated emails for:
+- Debt reminders (daily at 8:00 AM)
+- Low stock alerts (daily at 9:00 AM)  
+- Notification cleanup (weekly on Sundays)
+
+**Required Email Variables** (same as above):
+* `SMTP_HOST`: Your SMTP server hostname
+* `SMTP_PORT`: SMTP port (usually 587 for TLS or 465 for SSL)
+* `SMTP_USER`: SMTP authentication username
+* `SMTP_PASSWORD`: SMTP authentication password
+* `SMTP_TLS`: Set to `true` for TLS or `false` for SSL
+* `EMAILS_FROM_EMAIL`: Sender email address
+* `EMAILS_FROM_NAME`: Sender display name (optional, defaults to PROJECT_NAME)
+
+**Note**: Without valid SMTP configuration, background jobs will run but email sending will fail. Check supervisor logs to verify email delivery.
+
 ## GitHub Actions Environment Variables
 
 There are some environment variables only used by GitHub Actions that you can configure:
@@ -172,6 +190,33 @@ docker compose -f docker-compose.yml up -d
 ```
 
 For production you wouldn't want to have the overrides in `docker-compose.override.yml`, that's why we explicitly specify `docker-compose.yml` as the file to use.
+
+### Verify Deployment
+
+After deployment, verify that both the FastAPI application and background scheduler are running:
+
+```bash
+# Check all processes managed by Supervisor
+docker exec -it <backend-container-name> supervisorctl status
+```
+
+Expected output:
+```
+fastapi                          RUNNING   pid 12, uptime 0:01:23
+scheduler                        RUNNING   pid 13, uptime 0:01:23
+```
+
+To view scheduler logs and verify background jobs are scheduled:
+
+```bash
+# View scheduler logs
+docker exec -it <backend-container-name> tail -f /var/log/supervisor/scheduler.log
+
+# View FastAPI logs
+docker exec -it <backend-container-name> tail -f /var/log/supervisor/fastapi.log
+```
+
+For detailed supervisor management, see `backend/SUPERVISOR.md`.
 
 ## Continuous Deployment (CD)
 
@@ -307,3 +352,100 @@ Backend API docs: `https://api.staging.fastapi-project.example.com/docs`
 Backend API base URL: `https://api.staging.fastapi-project.example.com`
 
 Adminer: `https://adminer.staging.fastapi-project.example.com`
+
+## Background Jobs & Supervisor
+
+The backend container uses **Supervisor** to manage two processes:
+
+1. **FastAPI Application** - Your main web server (4 workers)
+2. **Scheduler** - APScheduler for automated background jobs
+
+### Background Jobs Schedule
+
+| Job | Schedule | Description |
+|-----|----------|-------------|
+| Debt Reminders | Daily at 8:00 AM | Sends email reminders for overdue supplier payments |
+| Reorder Alerts | Daily at 9:00 AM | Alerts admins about products below reorder level |
+| Notification Cleanup | Weekly (Sunday midnight) | Deletes read notifications older than 30 days |
+
+### Managing Supervisor Processes
+
+**Check process status:**
+```bash
+docker exec -it <backend-container> supervisorctl status
+```
+
+**Restart a process:**
+```bash
+# Restart scheduler after configuration changes
+docker exec -it <backend-container> supervisorctl restart scheduler
+
+# Restart FastAPI
+docker exec -it <backend-container> supervisorctl restart fastapi
+
+# Restart all
+docker exec -it <backend-container> supervisorctl restart all
+```
+
+**View logs:**
+```bash
+# Scheduler logs (see background job execution)
+docker exec -it <backend-container> tail -f /var/log/supervisor/scheduler.log
+
+# FastAPI logs
+docker exec -it <backend-container> tail -f /var/log/supervisor/fastapi.log
+
+# All supervisor logs
+docker logs <backend-container>
+```
+
+### Email Templates
+
+Email templates are automatically built from MJML sources during the Docker build process. The templates are located in:
+
+- **MJML Sources**: `backend/app/email-templates/src/*.mjml`
+- **Built HTML**: `backend/app/email-templates/build/*.html`
+
+If you modify email templates:
+
+1. Edit the MJML source files
+2. Rebuild the Docker image: `docker-compose build backend`
+3. Restart the container: `docker-compose up -d backend`
+
+### Troubleshooting Background Jobs
+
+**Jobs not running:**
+```bash
+# Check scheduler status
+docker exec -it <backend-container> supervisorctl status scheduler
+
+# Check for errors in scheduler logs
+docker exec -it <backend-container> tail -100 /var/log/supervisor/scheduler_error.log
+
+# Verify database connectivity
+docker exec -it <backend-container> python -c "from app.core.db import engine; print('DB OK')"
+```
+
+**Emails not sending:**
+```bash
+# Verify SMTP configuration
+docker exec -it <backend-container> env | grep SMTP
+
+# Test email sending manually
+docker exec -it <backend-container> python -m app.background_services debt_reminders
+```
+
+**Customize job schedules:**
+
+Edit `backend/scheduler.py` and modify the cron expressions, then:
+```bash
+docker-compose build backend
+docker-compose up -d backend
+docker exec -it <backend-container> supervisorctl restart scheduler
+```
+
+For detailed documentation on Supervisor configuration and management, see:
+- `backend/SUPERVISOR.md` - Complete Supervisor guide
+- `backend/QUICK_REFERENCE.md` - Quick command reference
+- `backend/supervisor-ctl.sh` - Helper script for common operations
+

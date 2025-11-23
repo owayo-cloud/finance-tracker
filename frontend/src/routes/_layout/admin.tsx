@@ -62,8 +62,9 @@ function UsersTable() {
     <>
       <Table.Root size={{ base: "sm", md: "md" }} variant="outline">
         <Table.Header>
-          <Table.Row>
+          <Table.Row bg="table.header.bg">
             <Table.ColumnHeader w="sm">Full name</Table.ColumnHeader>
+            <Table.ColumnHeader w="sm">Username</Table.ColumnHeader>
             <Table.ColumnHeader w="sm">Email</Table.ColumnHeader>
             <Table.ColumnHeader w="sm">Role</Table.ColumnHeader>
             <Table.ColumnHeader w="sm">Status</Table.ColumnHeader>
@@ -75,6 +76,8 @@ function UsersTable() {
             <Table.Row 
               key={user.id} 
               opacity={isPlaceholderData ? 0.5 : 1}
+              bg="table.row.bg"
+              _hover={{ bg: "table.row.hover" }}
             >
               <Table.Cell color={!user.full_name ? "gray.500" : undefined}>
                 {user.full_name || "N/A"}
@@ -84,11 +87,31 @@ function UsersTable() {
                   </Badge>
                 )}
               </Table.Cell>
+              <Table.Cell truncate maxW="sm" color={!user.username ? "gray.500" : undefined}>
+                {user.username || "N/A"}
+              </Table.Cell>
               <Table.Cell truncate maxW="sm">
                 {user.email}
               </Table.Cell>
               <Table.Cell>
-                {user.is_superuser ? "Superuser" : "User"}
+                <Badge
+                  bg={
+                    user.is_superuser
+                      ? "linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%)"
+                      : user.is_auditor
+                        ? "linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)"
+                        : "linear-gradient(135deg, #22c55e 0%, #16a34a 100%)"
+                  }
+                  color="white"
+                  fontSize="xs"
+                  fontWeight="700"
+                  px={3}
+                  py={1}
+                  borderRadius="sm"
+                  textTransform="uppercase"
+                >
+                  {user.is_superuser ? "Admin" : user.is_auditor ? "Auditor" : "Cashier"}
+                </Badge>
               </Table.Cell>
               <Table.Cell>{user.is_active ? "Active" : "Inactive"}</Table.Cell>
               <Table.Cell>
@@ -128,8 +151,11 @@ function Admin() {
         pb={8}
       >
         <Flex justify="space-between" align="center">
-          <Heading size="lg">
-            Users Management
+          <Heading 
+            size="lg"
+            color={{ base: "#e5e7eb", _light: "#111827" }}
+          >
+            Users
           </Heading>
           <AddUser />
         </Flex>

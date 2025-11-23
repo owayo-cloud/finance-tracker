@@ -1,142 +1,161 @@
-import { createFileRoute, redirect } from "@tanstack/react-router"
-import {
-  Box,
-  Button,
-  Container,
-  Flex,
-  Heading,
-  Input,
-  Stack,
-  Text,
-  Grid,
-  Card,
-  Badge,
-  IconButton,
-  VStack,
-  HStack,
-} from "@chakra-ui/react"
+import { createFileRoute } from "@tanstack/react-router"
+import { Box, Button } from "@chakra-ui/react"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
-import { useState, useMemo } from "react"
-import { FiPlus, FiMinus, FiTrash2, FiShoppingCart, FiSearch } from "react-icons/fi"
+import { useState, useMemo, useEffect } from "react"
 
-import { ProductsService, SalesService, UsersService, type ProductPublic } from "../../client"
+import { SalesService, type ProductPublic, OpenAPI } from "../../client"
 import useCustomToast from "../../hooks/useCustomToast"
-
-
-function formatCurrency(amount: number): string {
-  return amount.toLocaleString('en-US', {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  })
-}
+import useAuth from "../../hooks/useAuth"
+import { ActionButtons } from "@/components/POS/ActionButtons"
+import { ReceiptDetails } from "@/components/POS/ReceiptDetails"
+import { ProductTable } from "@/components/POS/ProductTable"
+import { CustomerPanel } from "@/components/POS/CustomerPanel"
+import { PaymentModal } from "@/components/POS/PaymentModal"
+import { RecentReceiptsModal } from "@/components/POS/RecentReceiptsModal"
+import { ReceiptPreviewModal } from "@/components/POS/ReceiptPreviewModal"
+import { CreditNoteModal } from "@/components/POS/CreditNoteModal"
+import { CashMovementModal } from "@/components/POS/CashMovementModal"
+import { CustomerSearchModal } from "@/components/POS/CustomerSearchModal"
+import { NewCustomerModal } from "@/components/POS/NewCustomerModal"
+import { CartItem, SuspendedSale } from "@/components/POS/types"
 
 export const Route = createFileRoute("/_layout/sales")({
   component: Sales,
-  beforeLoad: async () => {
-    // Only cashiers can access the sales dashboard
-    try {
-      const user = await UsersService.readUserMe()
-      
-      // If user is an admin (superuser), redirect to admin dashboard
-      if (user.is_superuser) {
-        throw redirect({
-          to: "/",
-        })
-      }
-    } catch (error) {
-      throw error
-    }
-  },
 })
-
-
-function ThemedSelect({
-  value,
-  onChange,
-  children,
-  ...props
-}: {
-  value: string
-  onChange: (value: string) => void
-  children: React.ReactNode
-  [key: string]: any
-}) {
-  return (
-    <select
-      value={value}
-      onChange={(e) => onChange(e.target.value)}
-      onFocus={(e) => {
-        e.target.style.borderColor = "var(--chakra-colors-border-focused)"
-        e.target.style.boxShadow = "0 0 0 1px var(--chakra-colors-border-focused)"
-      }}
-      onBlur={(e) => {
-        e.target.style.borderColor = "var(--chakra-colors-input-border)"
-        e.target.style.boxShadow = "none"
-      }}
-      style={{
-        width: "100%",
-        padding: "0.5rem 0.75rem",
-        borderRadius: "0.375rem",
-        border: "1px solid",
-        backgroundColor: "var(--chakra-colors-input-bg)",
-        borderColor: "var(--chakra-colors-input-border)",
-        color: "var(--chakra-colors-text-primary)",
-        fontSize: "1rem",
-        outline: "none",
-        cursor: "pointer",
-      }}
-      {...props}
-    >
-      {children}
-    </select>
-  )
-}
-
-// Cart item interface
-interface CartItem {
-  product: ProductPublic
-  quantity: number
-}
 
 function Sales() {
   const queryClient = useQueryClient()
   const showToast = useCustomToast()
+  const { logout } = useAuth()
   
   // State management
   const [searchQuery, setSearchQuery] = useState("")
-  const [selectedCategoryId, setSelectedCategoryId] = useState<string>("")
   const [cart, setCart] = useState<CartItem[]>([])
-  const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<string>("")
-
-  // Fetch product categories for filtering
-  const { data: categories } = useQuery({
-    queryKey: ["categories"],
-    queryFn: () => ProductsService.readCategories(),
+  const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false)
+  const [isProcessingPayment, setIsProcessingPayment] = useState(false) // Prevent double-saving
+  const [isCustomerPanelOpen, setIsCustomerPanelOpen] = useState(false) // Mobile: customer panel collapsed by default
+  const [isRecentReceiptsModalOpen, setIsRecentReceiptsModalOpen] = useState(false)
+  const [isReceiptPreviewModalOpen, setIsReceiptPreviewModalOpen] = useState(false)
+  const [isCreditNoteModalOpen, setIsCreditNoteModalOpen] = useState(false)
+  const [isCashMovementModalOpen, setIsCashMovementModalOpen] = useState(false)
+  const [isCustomerSearchModalOpen, setIsCustomerSearchModalOpen] = useState(false)
+  const [isNewCustomerModalOpen, setIsNewCustomerModalOpen] = useState(false)
+  const [selectedReceiptId, setSelectedReceiptId] = useState<string | null>(null)
+  const [receiptDateValue, setReceiptDateValue] = useState<string>(new Date().toISOString().split('T')[0])
+  const [receiptDate, setReceiptDate] = useState<string>(() => {
+    const today = new Date()
+    const day = today.getDate().toString().padStart(2, '0')
+    const month = today.toLocaleString('en-US', { month: 'short' })
+    const year = today.getFullYear()
+    return `${day}/${month}/${year}`
   })
+  const [pricelist, setPricelist] = useState<string>("RETAIL 0.0")
+  const [suspendedSales, setSuspendedSales] = useState<SuspendedSale[]>(() => {
+    // Load from localStorage on mount
+    try {
+      const saved = localStorage.getItem("pos_suspended_sales")
+      return saved ? JSON.parse(saved) : []
+    } catch {
+      return []
+    }
+  })
+  const [selectedSaleId, setSelectedSaleId] = useState<string | null>(null)
+  const [activeTab, setActiveTab] = useState<"customer" | "suspended">("customer")
+  
+  // Customer state
+  const [customerName, setCustomerName] = useState<string>("")
+  const [customerTel, setCustomerTel] = useState<string>("")
+  const [customerBalance, setCustomerBalance] = useState<number>(0)
+  const [remarks, setRemarks] = useState<string>("")
+  const [customerPin, setCustomerPin] = useState<string>("")
+  
+  // Save suspended sales to localStorage whenever they change
+  useEffect(() => {
+    try {
+      localStorage.setItem("pos_suspended_sales", JSON.stringify(suspendedSales))
+    } catch (error) {
+      console.error("Failed to save suspended sales:", error)
+    }
+  }, [suspendedSales])
+  
+  // Keyboard shortcuts
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // F1 - Cash Movement
+      if (e.key === "F1") {
+        e.preventDefault()
+        setIsCashMovementModalOpen(true)
+      }
+      // F2 - Credit Note
+      if (e.key === "F2") {
+        e.preventDefault()
+        setIsCreditNoteModalOpen(true)
+      }
+      // F3 - Suspend Sale
+      if (e.key === "F3") {
+        e.preventDefault()
+        if (cart.length === 0) {
+          showToast.showErrorToast("Cart is empty")
+          return
+        }
+        const suspendedSale: SuspendedSale = {
+          id: Date.now().toString(),
+          cart: [...cart],
+          customer: customerName ? { name: customerName, tel: customerTel, balance: customerBalance } : undefined,
+          receiptDate,
+          pricelist,
+          remarks: remarks || undefined,
+        }
+        setSuspendedSales((prev) => [...prev, suspendedSale])
+        setCart([])
+        setCustomerName("")
+        setCustomerTel("")
+        setCustomerBalance(0)
+        setRemarks("")
+        showToast.showSuccessToast("Sale suspended successfully")
+      }
+      // F4 - Resume Sale
+      if (e.key === "F4") {
+        e.preventDefault()
+        if (selectedSaleId) {
+          const sale = suspendedSales.find((s) => s.id === selectedSaleId)
+          if (sale) {
+            setCart(sale.cart)
+            if (sale.customer) {
+              setCustomerName(sale.customer.name)
+              setCustomerTel(sale.customer.tel)
+              setCustomerBalance(sale.customer.balance)
+            }
+            setReceiptDate(sale.receiptDate)
+            setPricelist(sale.pricelist)
+            setRemarks(sale.remarks || "")
+            setSuspendedSales((prev) => prev.filter((s) => s.id !== selectedSaleId))
+            setSelectedSaleId(null)
+            showToast.showSuccessToast("Sale resumed")
+          }
+        }
+      }
+    }
+    
+    window.addEventListener("keydown", handleKeyDown)
+    return () => window.removeEventListener("keydown", handleKeyDown)
+  }, [selectedSaleId, suspendedSales, cart, customerName, customerTel, customerBalance, receiptDate, pricelist, remarks, showToast])
 
   // Fetch payment methods
-  const { data: paymentMethods } = useQuery({
+  const { data: paymentMethods, isLoading: isLoadingPaymentMethods, error: paymentMethodsError } = useQuery({
     queryKey: ["payment-methods"],
-    queryFn: () => SalesService.readPaymentMethods({}),
+    queryFn: () => SalesService.readPaymentMethods({ limit: 100 }),
   })
 
-  // Fetch today's sales summary
-  const { data: todaySummary } = useQuery({
-    queryKey: ["today-summary"],
-    queryFn: () => SalesService.getTodaySalesSummary(),
-    refetchInterval: 30000, // Refresh every 30 seconds
-  })
 
-  // Search products mutation
+  // Search products
   const searchProducts = useQuery({
-    queryKey: ["search-products", searchQuery, selectedCategoryId],
+    queryKey: ["search-products", searchQuery],
     queryFn: () =>
       SalesService.searchProductsForSale({
-        q: searchQuery || "a", // Default search to show some products
-        categoryId: selectedCategoryId || undefined,
+        q: searchQuery || "a",
         limit: 50,
       }),
-    // Always enabled - when "All" is selected, show all products
     enabled: true,
   })
 
@@ -148,6 +167,8 @@ function Sales() {
       unitPrice: number
       totalAmount: number
       paymentMethodId: string
+      customerName?: string | null
+      notes?: string | null
     }) =>
       SalesService.createSale({
         requestBody: {
@@ -156,24 +177,22 @@ function Sales() {
           unit_price: data.unitPrice,
           total_amount: data.totalAmount,
           payment_method_id: data.paymentMethodId,
+          customer_name: data.customerName || null,
+          notes: data.notes || null,
         },
       }),
-    onSuccess: () => {
-      // Don't show toast or invalidate yet - wait for all items
-    },
     onError: (error: any) => {
       const detail = error.body?.detail || "Failed to create sale"
       showToast.showErrorToast(detail)
-      throw error // Re-throw to stop batch processing
+      throw error
     },
   })
 
-  // Cart management functions
+  // Cart management
   const addToCart = (product: ProductPublic) => {
     setCart((prevCart) => {
       const existingItem = prevCart.find((item) => item.product.id === product.id)
       if (existingItem) {
-        // Check stock availability
         if (existingItem.quantity + 1 > (product.current_stock || 0)) {
           showToast.showErrorToast("Insufficient stock")
           return prevCart
@@ -184,7 +203,7 @@ function Sales() {
             : item
         )
       }
-      return [...prevCart, { product, quantity: 1 }]
+      return [...prevCart, { product, quantity: 1, discount: 0 }]
     })
   }
 
@@ -198,7 +217,6 @@ function Sales() {
         .map((item) => {
           if (item.product.id === productId) {
             const newQuantity = item.quantity + delta
-            // Check stock availability
             if (newQuantity > (item.product.current_stock || 0)) {
               showToast.showErrorToast("Insufficient stock")
               return item
@@ -211,405 +229,611 @@ function Sales() {
     )
   }
 
-  // Calculate cart totals
+  const updateDiscount = (productId: string, discount: number) => {
+    setCart((prevCart) =>
+      prevCart.map((item) =>
+        item.product.id === productId ? { ...item, discount: Math.max(0, Math.min(100, discount)) } : item
+      )
+    )
+  }
+
+  // Calculate totals
   const cartTotal = useMemo(() => {
     return cart.reduce((total, item) => {
-      return total + Number(item.product.selling_price) * item.quantity
+      const price = Number(item.product.selling_price)
+      const discountAmount = (price * item.quantity * (item.discount || 0)) / 100
+      return total + (price * item.quantity - discountAmount)
     }, 0)
   }, [cart])
 
-  const cartItemsCount = useMemo(() => {
-    return cart.reduce((count, item) => count + item.quantity, 0)
-  }, [cart])
-
-  // Complete sale
-  const completeSale = async () => {
+  // Suspend sale
+  const suspendSale = () => {
     if (cart.length === 0) {
       showToast.showErrorToast("Cart is empty")
       return
     }
+    const suspendedSale: SuspendedSale = {
+      id: Date.now().toString(),
+      cart: [...cart],
+      customer: customerName ? { name: customerName, tel: customerTel, balance: customerBalance } : undefined,
+      receiptDate,
+      pricelist,
+      remarks: remarks || undefined,
+    }
+    setSuspendedSales([...suspendedSales, suspendedSale])
+    setCart([])
+    setCustomerName("")
+    setCustomerTel("")
+    setCustomerBalance(0)
+    setRemarks("")
+    showToast.showSuccessToast("Sale suspended successfully")
+  }
 
-    if (!selectedPaymentMethod) {
-      showToast.showErrorToast("Please select a payment method")
+  // Resume sale
+  const resumeSale = (saleId: string) => {
+    const sale = suspendedSales.find((s) => s.id === saleId)
+    if (sale) {
+      setCart(sale.cart)
+      if (sale.customer) {
+        setCustomerName(sale.customer.name)
+        setCustomerTel(sale.customer.tel)
+        setCustomerBalance(sale.customer.balance)
+      }
+      setReceiptDate(sale.receiptDate)
+      setPricelist(sale.pricelist)
+      setRemarks(sale.remarks || "")
+      setSuspendedSales(suspendedSales.filter((s) => s.id !== saleId))
+      setSelectedSaleId(null)
+      showToast.showSuccessToast("Sale resumed")
+    }
+  }
+
+  // Open payment modal
+  const openPaymentModal = () => {
+    if (cart.length === 0) {
+      showToast.showErrorToast("Cart is empty")
       return
     }
+    setIsPaymentModalOpen(true)
+    }
 
+  // Process payment with multiple payment methods
+  const processPayment = async (payments: Record<string, { amount: number; refNo?: string }>) => {
+    // Prevent double-saving
+    if (isProcessingPayment) {
+      console.log("Payment already processing, ignoring duplicate request")
+      return
+    }
+    
+    setIsProcessingPayment(true)
     try {
-      // Process each cart item as a separate sale
-      for (const item of cart) {
-        // Validate stock availability before processing
-        const currentProduct = await ProductsService.readProduct({ id: item.product.id })
-        
-        if (!currentProduct.current_stock || currentProduct.current_stock < item.quantity) {
+      // Note: Stock validation is handled by the backend endpoint
+      // No need to validate here as it causes unnecessary API calls and potential CORS issues
+
+      // Convert payments to array format for API
+      const paymentArray = Object.entries(payments)
+        .filter(([_, payment]) => payment.amount > 0)
+        .map(([methodId, payment]) => ({
+          payment_method_id: methodId,
+          amount: payment.amount,
+          reference_number: payment.refNo || null,
+        }))
+
+      // Validate total payments
+      const totalPaid = paymentArray.reduce((sum, p) => sum + p.amount, 0)
+      const difference = totalPaid - cartTotal
+      
+      // If customer is selected, allow partial payment (will create debt)
+      // Otherwise, require full payment
+      if (!customerName) {
+        // No customer: require full payment
+        if (difference < -0.01) {
           showToast.showErrorToast(
-            `Insufficient stock for ${item.product.name}. Available: ${currentProduct.current_stock || 0}`
+            `Payment total (${totalPaid.toFixed(2)}) is less than cart total (${cartTotal.toFixed(2)}). Please add ${Math.abs(difference).toFixed(2)} more.`
           )
           return
         }
+        
+        // If there's a small underpayment (0.01-0.10), adjust the largest payment to match exactly
+        if (difference >= -0.10 && difference < -0.01 && paymentArray.length > 0) {
+          const largestPaymentIndex = paymentArray.reduce((maxIdx, p, idx) => 
+            p.amount > paymentArray[maxIdx].amount ? idx : maxIdx, 0
+          )
+          const adjustment = cartTotal - totalPaid
+          paymentArray[largestPaymentIndex].amount += adjustment
+        }
+      } else {
+        // Customer selected: allow partial or zero payment (entire amount can be debt)
+        // No minimum payment required - zero payment means full amount becomes debt
+        // If payment exceeds total, that's fine (change will be given)
+      }
+      
+      // Overpayment is allowed (for change), so we don't need to adjust or error on that
 
+      // Process each cart item with all payment methods
+      const createdSaleIds: string[] = []
+      const token = localStorage.getItem("access_token") || ""
+      const apiBase = OpenAPI.BASE || import.meta.env.VITE_API_URL || ""
+      let firstSaleId: string | null = null
+      
+      for (let itemIndex = 0; itemIndex < cart.length; itemIndex++) {
+        const item = cart[itemIndex]
         const unitPrice = Number(item.product.selling_price)
-        const totalAmount = unitPrice * item.quantity
-
-        await createSale.mutateAsync({
-          productId: item.product.id,
-          quantity: item.quantity,
-          unitPrice: unitPrice,
-          totalAmount: totalAmount,
-          paymentMethodId: selectedPaymentMethod,
+        const discountAmount = (unitPrice * item.quantity * (item.discount || 0)) / 100
+        const itemTotal = unitPrice * item.quantity - discountAmount
+        
+        // Calculate payment amounts proportionally for this item
+        const itemPaymentRatio = itemTotal / cartTotal
+        const isLastItem = itemIndex === cart.length - 1
+        
+        const itemPayments = paymentArray.map((payment) => {
+          let amount = payment.amount * itemPaymentRatio
+          
+          // For the last item, ensure we use the remaining amount to avoid rounding errors
+          if (isLastItem) {
+            // Calculate what was already allocated to previous items
+            const previousItemsTotal = cart.slice(0, -1).reduce((sum, prevItem) => {
+              const prevUnitPrice = Number(prevItem.product.selling_price)
+              const prevDiscountAmount = (prevUnitPrice * prevItem.quantity * (prevItem.discount || 0)) / 100
+              return sum + (prevUnitPrice * prevItem.quantity - prevDiscountAmount)
+            }, 0)
+            const previousRatio = previousItemsTotal / cartTotal
+            const alreadyAllocated = payment.amount * previousRatio
+            amount = payment.amount - alreadyAllocated
+          }
+          
+          // Round to 2 decimal places
+          return {
+            payment_method_id: payment.payment_method_id,
+            amount: Math.round(amount * 100) / 100,
+            reference_number: payment.reference_number,
+          }
         })
+        
+        // Ensure item payment totals match item total exactly (adjust largest payment if needed)
+        // But if customer is selected and partial payment, allow it
+        const itemPaymentsTotal = itemPayments.reduce((sum, p) => sum + p.amount, 0)
+        const itemDifference = itemTotal - itemPaymentsTotal
+        
+        // Only adjust if no customer (full payment required) or if overpayment
+        if (!customerName && Math.abs(itemDifference) > 0.001 && itemPayments.length > 0) {
+          // Adjust the largest payment to match exactly
+          const largestPaymentIndex = itemPayments.reduce((maxIdx, p, idx) => 
+            p.amount > itemPayments[maxIdx].amount ? idx : maxIdx, 0
+          )
+          itemPayments[largestPaymentIndex].amount = Math.round((itemPayments[largestPaymentIndex].amount + itemDifference) * 100) / 100
+        }
+
+        // Use the new multi-payment endpoint
+        const response = await fetch(`${apiBase}/api/v1/sales/multi-payment`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({
+            product_id: item.product.id,
+            quantity: item.quantity,
+            unit_price: unitPrice,
+            total_amount: itemTotal,
+            customer_name: customerName || null,
+            notes: remarks || null,
+            payments: itemPayments,
+          }),
+        })
+
+        if (!response.ok) {
+          let errorMessage = "Failed to create sale"
+          try {
+            const error = await response.json()
+            errorMessage = error.detail || error.message || errorMessage
+          } catch (e) {
+            errorMessage = `HTTP ${response.status}: ${response.statusText}`
+          }
+          throw new Error(errorMessage)
+        }
+        
+        // Get sale ID from response
+        const saleData = await response.json()
+        if (saleData.id) {
+          createdSaleIds.push(saleData.id)
+          if (!firstSaleId) {
+            firstSaleId = saleData.id
+          }
+        }
+      }
+      
+      // Create debt if customer is selected and payment is less than total
+      if (customerName && totalPaid < cartTotal) {
+        const debtAmount = cartTotal - totalPaid
+        
+        try {
+          // Create one debt for the entire cart (linked to first sale)
+          const debtResponse = await fetch(`${apiBase}/api/v1/debts/`, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
+            },
+            body: JSON.stringify({
+              customer_name: customerName,
+              customer_contact: customerTel || null,
+              sale_id: firstSaleId || null,
+              amount: debtAmount,
+              amount_paid: 0,
+              balance: debtAmount,
+              debt_date: new Date().toISOString(),
+              due_date: null,
+              status: "pending",
+              notes: remarks || `Credit sale - ${cart.length} item(s), Balance: ${debtAmount.toFixed(2)}`,
+            }),
+          })
+          
+          if (!debtResponse.ok) {
+            const errorText = await debtResponse.text()
+            console.error("Failed to create debt:", errorText)
+            // Don't throw - sale was successful, debt creation is secondary
+            showToast.showErrorToast(`Sale completed but failed to record debt: ${errorText}`)
+          } else {
+            showToast.showSuccessToast(`Sale completed. Debt of ${debtAmount.toFixed(2)} recorded for ${customerName}`)
+          }
+        } catch (error: any) {
+          console.error("Error creating debt:", error)
+          // Don't throw - sale was successful
+          showToast.showErrorToast(`Sale completed but failed to record debt: ${error.message || "Unknown error"}`)
+        }
       }
 
-      // All sales successful
-      showToast.showSuccessToast(`${cart.length} sale(s) completed successfully`)
+      // Store the last sale ID for receipt printing (we'll get it from the response)
+      // Note: Since we process multiple items, we'll use the most recent sale
+      // The receipt preview will show all sales for this transaction
+
+      showToast.showSuccessToast(`Sale completed successfully`)
       queryClient.invalidateQueries({ queryKey: ["today-summary"] })
       queryClient.invalidateQueries({ queryKey: ["search-products"] })
+      queryClient.invalidateQueries({ queryKey: ["recent-receipts"] })
+      queryClient.invalidateQueries({ queryKey: ["debts-for-customers"] })
+      queryClient.invalidateQueries({ queryKey: ["recent-sales-for-customers"] })
 
-      // Clear cart after successful sale
+      setIsPaymentModalOpen(false)
       setCart([])
-      setSelectedPaymentMethod("")
       setSearchQuery("")
-    } catch (error) {
-      // Error already handled in mutation
+      setCustomerName("")
+      setCustomerTel("")
+      setCustomerBalance(0)
+      setRemarks("")
+    } catch (error: any) {
       console.error("Sale completion error:", error)
+      const errorMessage = error?.message || error?.detail || "Failed to complete sale. Please check your connection and try again."
+      showToast.showErrorToast(errorMessage)
+      throw error
+    } finally {
+      setIsProcessingPayment(false)
+    }
+  }
+
+  const handleSave = async (payments: Record<string, { amount: number; refNo?: string }>) => {
+    await processPayment(payments)
+  }
+
+  const handleSaveAndPrint = async (payments: Record<string, { amount: number; refNo?: string }>) => {
+    try {
+      await processPayment(payments)
+      // Get the most recent sale for printing
+      const token = localStorage.getItem("access_token") || ""
+      const apiBase = OpenAPI.BASE || import.meta.env.VITE_API_URL || ""
+      const lastSaleResponse = await fetch(`${apiBase}/api/v1/sales?limit=1`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      })
+      if (lastSaleResponse.ok) {
+        const lastSales = await lastSaleResponse.json()
+        if (lastSales.data && lastSales.data.length > 0) {
+          setSelectedReceiptId(lastSales.data[0].id)
+          setIsReceiptPreviewModalOpen(true)
+          // Trigger print after modal opens
+          setTimeout(() => {
+            window.print()
+          }, 1000)
+        }
+      }
+    } catch (error) {
+      // Error already handled in processPayment
+    }
+  }
+
+  const resetSale = () => {
+    setCart([])
+    setSearchQuery("")
+    setCustomerName("")
+    setCustomerTel("")
+    setCustomerBalance(0)
+    setRemarks("")
+    setCustomerPin("")
+    setSelectedSaleId(null)
+  }
+
+  const clearCustomer = () => {
+    setCustomerName("")
+    setCustomerTel("")
+    setCustomerBalance(0)
+  }
+
+  const handleSelectCustomer = async (customer: { name: string; tel: string; balance: number }) => {
+    setCustomerName(customer.name)
+    setCustomerTel(customer.tel)
+    setCustomerBalance(customer.balance)
+    
+    // Fetch latest balance from API
+    try {
+      const token = localStorage.getItem("access_token") || ""
+      const apiBase = OpenAPI.BASE || import.meta.env.VITE_API_URL || ""
+      // URL encode the customer name properly
+      const encodedName = encodeURIComponent(customer.name)
+      const response = await fetch(`${apiBase}/api/v1/debts/customers/${encodedName}/balance`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      })
+      if (response.ok) {
+        const balanceData = await response.json()
+        setCustomerBalance(balanceData.total_balance || 0)
+      } else if (response.status === 404) {
+        // Customer has no debts yet, balance is 0
+        setCustomerBalance(0)
+      }
+    } catch (error) {
+      console.error("Failed to fetch customer balance:", error)
+      // Use the balance from customer object as fallback
+    }
+  }
+
+  const handleNewCustomerSave = (customer: { name: string; tel: string; balance: number }) => {
+    handleSelectCustomer(customer)
+  }
+
+  const handleReceiptDateFocus = (e: React.FocusEvent<HTMLInputElement>) => {
+    e.target.type = "date"
+    e.target.value = receiptDateValue
+  }
+
+  const handleReceiptDateBlur = (e: React.FocusEvent<HTMLInputElement>) => {
+    e.target.type = "text"
+    if (e.target.value) {
+      const date = new Date(e.target.value)
+      const day = date.getDate().toString().padStart(2, '0')
+      const month = date.toLocaleString('en-US', { month: 'short' })
+      const year = date.getFullYear()
+      setReceiptDate(`${day}/${month}/${year}`)
+      setReceiptDateValue(e.target.value)
     }
   }
 
   return (
-    <Container maxW="full" p={0} h="calc(100vh - 60px)">
-      {/* POS-Style Two-Panel Layout */}
-      <Grid 
-        templateColumns={{ base: "1fr", lg: "1fr 400px" }} 
-        h="full"
-        gap={0}
+    <Box h="100%" bg="bg.canvas" display="flex" flexDirection="column" overflow={{ base: "auto", lg: "hidden" }}>
+      <ActionButtons
+        onLogout={logout}
+        onReset={resetSale}
+        onSuspendSale={suspendSale}
+        onResumeSale={() => {
+          if (selectedSaleId) {
+            resumeSale(selectedSaleId)
+            setActiveTab("customer")
+          }
+        }}
+        onCompleteSale={openPaymentModal}
+        onCreditNote={() => setIsCreditNoteModalOpen(true)}
+        onCashMovement={() => setIsCashMovementModalOpen(true)}
+        cartLength={cart.length}
+        selectedSaleId={selectedSaleId}
+        isPending={createSale.isPending}
+      />
+
+      <PaymentModal
+        isOpen={isPaymentModalOpen}
+        onClose={() => setIsPaymentModalOpen(false)}
+        cart={cart}
+        totalAmount={cartTotal}
+        paymentMethods={paymentMethods?.data ? paymentMethods.data.map((m) => ({
+          id: m.id,
+          name: m.name,
+          type: m.name.toUpperCase().includes("CASH") ? "CASH" :
+                m.name.toUpperCase().includes("MPESA") ? "MPESA" :
+                m.name.toUpperCase().includes("PDQ") || m.name.toUpperCase().includes("KCB") ? "PDQ" :
+                m.name.toUpperCase().includes("BANK") || m.name.toUpperCase().includes("EQUITY") ? "BANK" :
+                m.name.toUpperCase().includes("CREDIT") ? "CREDIT_NOTE" : "OTHER",
+        })) : []}
+        onSave={handleSave}
+        onSaveAndPrint={handleSaveAndPrint}
+        isProcessing={isProcessingPayment || createSale.isPending}
+        isLoadingPaymentMethods={isLoadingPaymentMethods}
+        paymentMethodsError={paymentMethodsError}
+        customerName={customerName || undefined}
+        customerBalance={customerBalance}
+      />
+
+      {/* Main Content Area */}
+      <Box 
+        display="flex" 
+        flex={1} 
+        overflow={{ base: "visible", lg: "hidden" }} 
+        minH={0} 
+        flexDirection={{ base: "column", lg: "row" }}
+        position="relative"
       >
-        {/* LEFT PANEL - Product Search & Discovery */}
-        <Flex 
-          direction="column" 
-          h="full" 
-          borderRight="1px solid"
-          borderColor="var(--chakra-colors-input-border)"
-          bg="var(--chakra-colors-bg-canvas)"
+        {/* Left Panel - Products Table (Prioritized on mobile) */}
+        <Box 
+          flex={1} 
+          display="flex" 
+          flexDirection="column" 
+          bg="bg.canvas" 
+          minW={0} 
+          overflow="hidden"
+          order={{ base: 1, lg: 0 }} // Show first on mobile
+          minH={{ base: isCustomerPanelOpen ? "50vh" : "70vh", lg: "auto" }} // Adjust height based on panel state
+          maxH={{ base: isCustomerPanelOpen ? "50vh" : "none", lg: "none" }} // Limit height when panel is open
         >
-          {/* Sticky Search Header */}
-          <Box
-            position="sticky"
-            top={0}
-            zIndex={10}
-            bg="var(--chakra-colors-bg-surface)"
-            borderBottom="1px solid"
-            borderColor="var(--chakra-colors-input-border)"
-            p={4}
-          >
-            <Heading size="lg" mb={4}>Product Search</Heading>
-            
-            {/* Search and Filter */}
-            <Stack gap={3}>
-              <Box position="relative">
-                <Input
-                  placeholder="Search products by name..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  bg="var(--chakra-colors-input-bg)"
-                  borderColor="var(--chakra-colors-input-border)"
-                  color="var(--chakra-colors-text-primary)"
-                  size="lg"
-                  _focus={{
-                    borderColor: "var(--chakra-colors-border-focused)",
-                    boxShadow: "0 0 0 1px var(--chakra-colors-border-focused)",
-                  }}
-                />
-                <Box
-                  position="absolute"
-                  right={3}
-                  top="50%"
-                  transform="translateY(-50%)"
-                  pointerEvents="none"
-                >
-                  <FiSearch size={20} />
-                </Box>
-              </Box>
+          <ReceiptDetails
+            receiptDate={receiptDate}
+            receiptDateValue={receiptDateValue}
+            onReceiptDateChange={setReceiptDate}
+            onReceiptDateFocus={handleReceiptDateFocus}
+            onReceiptDateBlur={handleReceiptDateBlur}
+            pricelist={pricelist}
+            onPricelistChange={setPricelist}
+            onSearch={() => {}}
+          />
 
-              {/* Category Filter Tabs */}
-              <Box>
-                <Text fontSize="sm" fontWeight="medium" mb={2}>
-                  Filter by Category
-                </Text>
-                <Flex gap={2} flexWrap="wrap">
-                  <Button
-                    size="sm"
-                    variant={selectedCategoryId === "" ? "solid" : "outline"}
-                    colorScheme={selectedCategoryId === "" ? "blue" : "gray"}
-                    onClick={() => setSelectedCategoryId("")}
-                  >
-                    All
-                  </Button>
-                  {categories?.data?.map((category: { id: string; name: string }) => (
-                    <Button
-                      key={category.id}
-                      size="sm"
-                      variant={selectedCategoryId === category.id ? "solid" : "outline"}
-                      colorScheme={selectedCategoryId === category.id ? "blue" : "gray"}
-                      onClick={() => setSelectedCategoryId(category.id)}
-                    >
-                      {category.name}
-                    </Button>
-                  ))}
-                </Flex>
-              </Box>
-            </Stack>
-          </Box>
+          <ProductTable
+            cart={cart}
+            searchQuery={searchQuery}
+            onSearchQueryChange={setSearchQuery}
+            onAddToCart={addToCart}
+            onRemoveFromCart={removeFromCart}
+            onUpdateQuantity={updateQuantity}
+            onUpdateDiscount={updateDiscount}
+            searchResults={searchProducts.data}
+            cartTotal={cartTotal}
+          />
+        </Box>
 
-          {/* Scrollable Product Grid */}
-          <Box flex={1} overflowY="auto" p={4}>
-            {searchProducts.isLoading ? (
-              <Grid templateColumns="repeat(auto-fill, minmax(160px, 1fr))" gap={3}>
-                {[...Array(8)].map((_, i) => (
-                  <Box key={i} h="200px" bg="var(--chakra-colors-bg-surface)" borderRadius="lg" />
-                ))}
-              </Grid>
-            ) : searchProducts.data && searchProducts.data.length > 0 ? (
-              <Grid templateColumns="repeat(auto-fill, minmax(160px, 1fr))" gap={3}>
-                {searchProducts.data.map((product) => (
-                  <Card.Root
-                    key={product.id}
-                    cursor="pointer"
-                    onClick={() => addToCart(product)}
-                    borderWidth={1}
-                    borderColor="var(--chakra-colors-input-border)"
-                    transition="all 0.2s"
-                    _hover={{
-                      borderColor: "var(--chakra-colors-border-focused)",
-                      boxShadow: "lg",
-                      transform: "translateY(-2px)",
-                    }}
-                    _active={{
-                      transform: "scale(0.98)",
-                    }}
-                  >
-                    <Card.Body p={3}>
-                      <VStack align="stretch" gap={2}>
-                        <Badge colorScheme="purple" alignSelf="flex-start" fontSize="xs">
-                          {product.category?.name}
-                        </Badge>
-                        <Text fontWeight="bold" fontSize="sm" lineClamp={2} minH="40px">
-                          {product.name}
-                        </Text>
-                        <Flex justify="space-between" align="center" mt={2}>
-                          <Text fontSize="xl" fontWeight="bold" color="green.500">
-                            Ksh {formatCurrency(Number(product.selling_price))}
-                          </Text>
-                        </Flex>
-                        <Text fontSize="xs" color="gray.500">
-                          Stock: {product.current_stock}
-                        </Text>
-                        <Button size="sm" colorScheme="blue" w="full">
-                          Add
-                        </Button>
-                      </VStack>
-                    </Card.Body>
-                  </Card.Root>
-                ))}
-              </Grid>
-            ) : (
-              <Flex direction="column" align="center" justify="center" h="full" gap={4}>
-                <Text fontSize="lg" color="gray.500">No products found</Text>
-                <Text fontSize="sm" color="gray.400">
-                  {searchQuery || selectedCategoryId 
-                    ? "Try a different search or category" 
-                    : "No products available"}
-                </Text>
-              </Flex>
-            )}
-          </Box>
-        </Flex>
-
-        {/* RIGHT PANEL - Checkout Cart */}
-        <Flex 
-          direction="column" 
-          h="full"
-          bg="var(--chakra-colors-bg-surface)"
+        {/* Customer Panel - Collapsible on mobile */}
+        <Box
+          data-customer-panel
+          display={{ base: isCustomerPanelOpen ? "flex" : "none", lg: "flex" }}
+          flexDirection="column"
+          w={{ base: "100%", lg: "400px" }}
+          flexShrink={0}
+          order={{ base: 2, lg: 0 }}
+          maxH={{ base: "50vh", lg: "none" }} // Limit height on mobile
+          overflowY={{ base: "auto", lg: "hidden" }} // Allow scrolling on mobile
+          position={{ base: "relative", lg: "static" }}
         >
-          {/* Cart Header */}
-          <Box
-            borderBottom="1px solid"
-            borderColor="var(--chakra-colors-input-border)"
-            p={4}
+          <CustomerPanel
+            activeTab={activeTab}
+            onTabChange={setActiveTab}
+            customerName={customerName}
+            customerTel={customerTel}
+            customerBalance={customerBalance}
+            remarks={remarks}
+            customerPin={customerPin}
+            onCustomerNameChange={setCustomerName}
+            onCustomerTelChange={setCustomerTel}
+            onCustomerBalanceChange={setCustomerBalance}
+            onRemarksChange={setRemarks}
+            onCustomerPinChange={setCustomerPin}
+            onSelectCustomer={() => setIsCustomerSearchModalOpen(true)}
+            onNewCustomer={() => setIsNewCustomerModalOpen(true)}
+            onClearCustomer={clearCustomer}
+            suspendedSales={suspendedSales}
+            selectedSaleId={selectedSaleId}
+            onSelectSale={setSelectedSaleId}
+            onResumeSale={resumeSale}
+            onViewReceipt={() => setIsRecentReceiptsModalOpen(true)}
+            selectedReceiptId={selectedReceiptId}
+            onPreviewReceipt={() => {
+              if (selectedReceiptId) {
+                setIsReceiptPreviewModalOpen(true)
+              } else {
+                showToast.showErrorToast("Please select a receipt first")
+              }
+            }}
+          />
+        </Box>
+        
+        {/* Mobile: Toggle button for customer panel */}
+        <Box
+          display={{ base: "block", lg: "none" }}
+          position="fixed"
+          bottom="80px"
+          right="20px"
+          zIndex={10}
+        >
+          <Button
+            onClick={() => {
+              setIsCustomerPanelOpen(!isCustomerPanelOpen)
+              // Scroll to customer panel when opening
+              if (!isCustomerPanelOpen) {
+                setTimeout(() => {
+                  const customerPanel = document.querySelector('[data-customer-panel]')
+                  if (customerPanel) {
+                    customerPanel.scrollIntoView({ behavior: 'smooth', block: 'start' })
+                  }
+                }, 100)
+              }
+            }}
+            bg="#14b8a6"
+            color="white"
+            borderRadius="full"
+            size="lg"
+            boxShadow="lg"
+            _hover={{ bg: "#0d9488" }}
           >
-            <Flex justify="space-between" align="center">
-              <Heading size="md">
-                <HStack>
-                  <FiShoppingCart />
-                  <Text>Cart ({cartItemsCount})</Text>
-                </HStack>
-              </Heading>
-              {cart.length > 0 && (
-                <Button
-                  size="sm"
-                  variant="ghost"
-                  colorScheme="red"
-                  onClick={() => setCart([])}
-                >
-                  Clear All
-                </Button>
-              )}
-            </Flex>
-          </Box>
-
-          {/* Scrollable Cart Items */}
-          <Box flex={1} overflowY="auto" p={4}>
-            {cart.length === 0 ? (
-              <Flex direction="column" align="center" justify="center" h="full" gap={4}>
-                <FiShoppingCart size={48} color="var(--chakra-colors-gray-400)" />
-                <Text fontSize="lg" color="gray.500" textAlign="center">
-                  Cart is empty
-                </Text>
-                <Text fontSize="sm" color="gray.400" textAlign="center">
-                  Search and click products to add
-                </Text>
-              </Flex>
-            ) : (
-              <Stack gap={3}>
-                {cart.map((item) => (
-                  <Box
-                    key={item.product.id}
-                    p={3}
-                    borderWidth={1}
-                    borderRadius="md"
-                    borderColor="var(--chakra-colors-input-border)"
-                    bg="var(--chakra-colors-bg-canvas)"
-                  >
-                    <Flex justify="space-between" align="start" mb={2}>
-                      <VStack align="start" flex={1} gap={1}>
-                        <Text fontWeight="bold" fontSize="sm" lineClamp={2}>
-                          {item.product.name}
-                        </Text>
-                        <Text fontSize="xs" color="gray.500">
-                          Ksh {formatCurrency(Number(item.product.selling_price))} each
-                        </Text>
-                      </VStack>
-                      <IconButton
-                        size="xs"
-                        variant="ghost"
-                        colorScheme="red"
-                        onClick={() => removeFromCart(item.product.id)}
-                        aria-label="Remove from cart"
-                      >
-                        <FiTrash2 />
-                      </IconButton>
-                    </Flex>
+            {isCustomerPanelOpen ? "Hide Customer" : "Show Customer"}
+          </Button>
+        </Box>
+      </Box>
                     
-                    <Flex justify="space-between" align="center">
-                      <HStack gap={2}>
-                        <IconButton
-                          size="sm"
-                          onClick={() => updateQuantity(item.product.id, -1)}
-                          aria-label="Decrease quantity"
-                          variant="outline"
-                        >
-                          <FiMinus />
-                        </IconButton>
-                        <Text fontWeight="bold" minW="40px" textAlign="center" fontSize="lg">
-                          {item.quantity}
-                        </Text>
-                        <IconButton
-                          size="sm"
-                          onClick={() => updateQuantity(item.product.id, 1)}
-                          aria-label="Increase quantity"
-                          variant="outline"
-                        >
-                          <FiPlus />
-                        </IconButton>
-                      </HStack>
-                      <Text fontWeight="bold" fontSize="lg" color="green.500">
-                        Ksh {formatCurrency(Number(item.product.selling_price) * item.quantity)}
-                      </Text>
-                    </Flex>
-                  </Box>
-                ))}
-              </Stack>
-            )}
+      {/* Footer */}
+      <Box py={2} textAlign="right" px={{ base: 4, md: 6 }} fontSize="xs" color={{ base: "#9ca3af", _light: "#6b7280" }}>
+        ©Anchor Core : Developed by NBS
           </Box>
 
-          {/* Fixed Bottom Section - Totals + Sell Button */}
-          <Box
-            borderTop="2px solid"
-            borderColor="var(--chakra-colors-input-border)"
-            p={4}
-            bg="var(--chakra-colors-bg-surface)"
-          >
-            <Stack gap={3}>
-              {/* Payment Method Selection */}
-              {cart.length > 0 && (
-                <Box>
-                  <Text fontWeight="bold" mb={2} fontSize="sm">
-                    Payment Method *
-                  </Text>
-                  <ThemedSelect
-                    value={selectedPaymentMethod}
-                    onChange={setSelectedPaymentMethod}
-                  >
-                    <option value="">Select payment method...</option>
-                    {paymentMethods?.data?.map((method) => (
-                      <option key={method.id} value={method.id}>
-                        {method.name}
-                      </option>
-                    ))}
-                  </ThemedSelect>
-                </Box>
-              )}
+      <RecentReceiptsModal
+        isOpen={isRecentReceiptsModalOpen}
+        onClose={() => setIsRecentReceiptsModalOpen(false)}
+        onAttach={(receiptId) => {
+          // TODO: Implement attach receipt functionality
+          showToast.showSuccessToast(`Receipt ${receiptId.slice(-6)} attached`)
+        }}
+        onPreviewReceipt={(receiptId) => {
+          setSelectedReceiptId(receiptId)
+          setIsReceiptPreviewModalOpen(true)
+          setIsRecentReceiptsModalOpen(false)
+        }}
+        onSelectReceipt={(receiptId) => {
+          setSelectedReceiptId(receiptId)
+        }}
+      />
 
-              {/* Total */}
-              <Flex justify="space-between" align="center" py={2}>
-                <Text fontSize="lg" fontWeight="bold">
-                  Total
-                </Text>
-                <Text fontSize="3xl" fontWeight="bold" color="green.500">
-                  Ksh {formatCurrency(cartTotal)}
-                </Text>
-              </Flex>
+      <ReceiptPreviewModal
+        isOpen={isReceiptPreviewModalOpen}
+        onClose={() => {
+          setIsReceiptPreviewModalOpen(false)
+          setSelectedReceiptId(null)
+        }}
+        receiptId={selectedReceiptId}
+      />
 
-              {/* Big SELL Button */}
-              <Button
-                size="lg"
-                h="60px"
-                fontSize="xl"
-                fontWeight="bold"
-                colorScheme="green"
-                onClick={completeSale}
-                disabled={cart.length === 0 || !selectedPaymentMethod || createSale.isPending}
-                loading={createSale.isPending}
-                w="full"
-              >
-                {createSale.isPending ? "Processing..." : "SELL"}
-              </Button>
+      <CreditNoteModal
+        isOpen={isCreditNoteModalOpen}
+        onClose={() => setIsCreditNoteModalOpen(false)}
+        onSuccess={() => {
+          queryClient.invalidateQueries({ queryKey: ["today-summary"] })
+          queryClient.invalidateQueries({ queryKey: ["recent-receipts"] })
+        }}
+      />
 
-              {/* Today's Summary (Collapsible) */}
-              {todaySummary && (todaySummary as any).total_sales > 0 && (
-                <Box
-                  mt={2}
-                  p={3}
-                  borderRadius="md"
-                  bg="var(--chakra-colors-bg-canvas)"
-                  borderWidth={1}
-                  borderColor="var(--chakra-colors-input-border)"
-                >
-                  <Text fontSize="xs" fontWeight="bold" mb={2} color="gray.500">
-                    TODAY'S SUMMARY
-                  </Text>
-                  <Flex justify="space-between" fontSize="sm">
-                    <Text>Sales</Text>
-                    <Text fontWeight="bold">Ksh {formatCurrency(Number((todaySummary as any).total_amount) || 0)}</Text>
-                  </Flex>
-                  <Flex justify="space-between" fontSize="sm" color="gray.500">
-                    <Text>{(todaySummary as any).total_sales} transactions</Text>
-                    <Text>{(todaySummary as any).total_items} items</Text>
-                  </Flex>
-                </Box>
-              )}
-            </Stack>
+      <CashMovementModal
+        isOpen={isCashMovementModalOpen}
+        onClose={() => setIsCashMovementModalOpen(false)}
+        onSuccess={() => {
+          queryClient.invalidateQueries({ queryKey: ["today-summary"] })
+        }}
+      />
+
+      <CustomerSearchModal
+        isOpen={isCustomerSearchModalOpen}
+        onClose={() => setIsCustomerSearchModalOpen(false)}
+        onSelectCustomer={handleSelectCustomer}
+      />
+
+      <NewCustomerModal
+        isOpen={isNewCustomerModalOpen}
+        onClose={() => setIsNewCustomerModalOpen(false)}
+        onSave={handleNewCustomerSave}
+      />
           </Box>
-        </Flex>
-      </Grid>
-    </Container>
   )
 }

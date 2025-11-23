@@ -24,10 +24,14 @@ const ModuleCard = ({
   const content = (
     <Card.Root
       variant="outline"
+      bg="bg.surface"
+      borderColor="border.card"
+      borderWidth="1px"
       _hover={{
-        shadow: disabled ? "none" : "lg",
+        shadow: disabled ? "none" : "md",
         transform: disabled ? "none" : "translateY(-2px)",
-        borderColor: disabled ? undefined : "teal.500",
+        borderColor: disabled ? "border.card" : { base: "rgba(59, 130, 246, 0.4)", _light: "#3b82f6" },
+        bg: disabled ? undefined : "bg.elevated",
       }}
       transition="all 0.2s"
       cursor={disabled ? "not-allowed" : "pointer"}
@@ -44,6 +48,7 @@ const ModuleCard = ({
             align="center"
             justify="center"
             bg={iconBg}
+            _dark={{ bg: `${iconColor.split('.')[0]}.900` }}
             borderRadius="lg"
             w={{ base: 12, md: 14 }}
             h={{ base: 12, md: 14 }}

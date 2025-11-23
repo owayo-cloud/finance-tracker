@@ -15,15 +15,25 @@ import { Route as RecoverPasswordRouteImport } from './routes/recover-password'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as LayoutRouteImport } from './routes/_layout'
 import { Route as LayoutIndexRouteImport } from './routes/_layout/index'
-import { Route as LayoutStockEntryRouteImport } from './routes/_layout/stock-entry'
+import { Route as LayoutTransportersRouteImport } from './routes/_layout/transporters'
+import { Route as LayoutSuppliersRouteImport } from './routes/_layout/suppliers'
 import { Route as LayoutShiftReconciliationRouteImport } from './routes/_layout/shift-reconciliation'
 import { Route as LayoutSettingsRouteImport } from './routes/_layout/settings'
+import { Route as LayoutSalesListRouteImport } from './routes/_layout/sales-list'
 import { Route as LayoutSalesRouteImport } from './routes/_layout/sales'
 import { Route as LayoutReportsRouteImport } from './routes/_layout/reports'
 import { Route as LayoutProductsRouteImport } from './routes/_layout/products'
+import { Route as LayoutPaymentMethodsRouteImport } from './routes/_layout/payment-methods'
+import { Route as LayoutInvoicesRouteImport } from './routes/_layout/invoices'
 import { Route as LayoutExpensesRouteImport } from './routes/_layout/expenses'
+import { Route as LayoutExpenseCategoriesRouteImport } from './routes/_layout/expense-categories'
 import { Route as LayoutDebtsRouteImport } from './routes/_layout/debts'
 import { Route as LayoutAdminRouteImport } from './routes/_layout/admin'
+import { Route as LayoutStockEntryIndexRouteImport } from './routes/_layout/stock-entry/index'
+import { Route as LayoutStockAdjustmentIndexRouteImport } from './routes/_layout/stock-adjustment/index'
+import { Route as LayoutGrnIndexRouteImport } from './routes/_layout/grn/index'
+import { Route as LayoutStockEntryBulkImportRouteImport } from './routes/_layout/stock-entry/bulk-import'
+import { Route as LayoutProductsBulkImportRouteImport } from './routes/_layout/products/bulk-import'
 
 const SignupRoute = SignupRouteImport.update({
   id: '/signup',
@@ -54,9 +64,14 @@ const LayoutIndexRoute = LayoutIndexRouteImport.update({
   path: '/',
   getParentRoute: () => LayoutRoute,
 } as any)
-const LayoutStockEntryRoute = LayoutStockEntryRouteImport.update({
-  id: '/stock-entry',
-  path: '/stock-entry',
+const LayoutTransportersRoute = LayoutTransportersRouteImport.update({
+  id: '/transporters',
+  path: '/transporters',
+  getParentRoute: () => LayoutRoute,
+} as any)
+const LayoutSuppliersRoute = LayoutSuppliersRouteImport.update({
+  id: '/suppliers',
+  path: '/suppliers',
   getParentRoute: () => LayoutRoute,
 } as any)
 const LayoutShiftReconciliationRoute =
@@ -68,6 +83,11 @@ const LayoutShiftReconciliationRoute =
 const LayoutSettingsRoute = LayoutSettingsRouteImport.update({
   id: '/settings',
   path: '/settings',
+  getParentRoute: () => LayoutRoute,
+} as any)
+const LayoutSalesListRoute = LayoutSalesListRouteImport.update({
+  id: '/sales-list',
+  path: '/sales-list',
   getParentRoute: () => LayoutRoute,
 } as any)
 const LayoutSalesRoute = LayoutSalesRouteImport.update({
@@ -85,9 +105,24 @@ const LayoutProductsRoute = LayoutProductsRouteImport.update({
   path: '/products',
   getParentRoute: () => LayoutRoute,
 } as any)
+const LayoutPaymentMethodsRoute = LayoutPaymentMethodsRouteImport.update({
+  id: '/payment-methods',
+  path: '/payment-methods',
+  getParentRoute: () => LayoutRoute,
+} as any)
+const LayoutInvoicesRoute = LayoutInvoicesRouteImport.update({
+  id: '/invoices',
+  path: '/invoices',
+  getParentRoute: () => LayoutRoute,
+} as any)
 const LayoutExpensesRoute = LayoutExpensesRouteImport.update({
   id: '/expenses',
   path: '/expenses',
+  getParentRoute: () => LayoutRoute,
+} as any)
+const LayoutExpenseCategoriesRoute = LayoutExpenseCategoriesRouteImport.update({
+  id: '/expense-categories',
+  path: '/expense-categories',
   getParentRoute: () => LayoutRoute,
 } as any)
 const LayoutDebtsRoute = LayoutDebtsRouteImport.update({
@@ -100,6 +135,34 @@ const LayoutAdminRoute = LayoutAdminRouteImport.update({
   path: '/admin',
   getParentRoute: () => LayoutRoute,
 } as any)
+const LayoutStockEntryIndexRoute = LayoutStockEntryIndexRouteImport.update({
+  id: '/stock-entry/',
+  path: '/stock-entry/',
+  getParentRoute: () => LayoutRoute,
+} as any)
+const LayoutStockAdjustmentIndexRoute =
+  LayoutStockAdjustmentIndexRouteImport.update({
+    id: '/stock-adjustment/',
+    path: '/stock-adjustment/',
+    getParentRoute: () => LayoutRoute,
+  } as any)
+const LayoutGrnIndexRoute = LayoutGrnIndexRouteImport.update({
+  id: '/grn/',
+  path: '/grn/',
+  getParentRoute: () => LayoutRoute,
+} as any)
+const LayoutStockEntryBulkImportRoute =
+  LayoutStockEntryBulkImportRouteImport.update({
+    id: '/stock-entry/bulk-import',
+    path: '/stock-entry/bulk-import',
+    getParentRoute: () => LayoutRoute,
+  } as any)
+const LayoutProductsBulkImportRoute =
+  LayoutProductsBulkImportRouteImport.update({
+    id: '/bulk-import',
+    path: '/bulk-import',
+    getParentRoute: () => LayoutProductsRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/login': typeof LoginRoute
@@ -108,14 +171,24 @@ export interface FileRoutesByFullPath {
   '/signup': typeof SignupRoute
   '/admin': typeof LayoutAdminRoute
   '/debts': typeof LayoutDebtsRoute
+  '/expense-categories': typeof LayoutExpenseCategoriesRoute
   '/expenses': typeof LayoutExpensesRoute
-  '/products': typeof LayoutProductsRoute
+  '/invoices': typeof LayoutInvoicesRoute
+  '/payment-methods': typeof LayoutPaymentMethodsRoute
+  '/products': typeof LayoutProductsRouteWithChildren
   '/reports': typeof LayoutReportsRoute
   '/sales': typeof LayoutSalesRoute
+  '/sales-list': typeof LayoutSalesListRoute
   '/settings': typeof LayoutSettingsRoute
   '/shift-reconciliation': typeof LayoutShiftReconciliationRoute
-  '/stock-entry': typeof LayoutStockEntryRoute
+  '/suppliers': typeof LayoutSuppliersRoute
+  '/transporters': typeof LayoutTransportersRoute
   '/': typeof LayoutIndexRoute
+  '/products/bulk-import': typeof LayoutProductsBulkImportRoute
+  '/stock-entry/bulk-import': typeof LayoutStockEntryBulkImportRoute
+  '/grn': typeof LayoutGrnIndexRoute
+  '/stock-adjustment': typeof LayoutStockAdjustmentIndexRoute
+  '/stock-entry': typeof LayoutStockEntryIndexRoute
 }
 export interface FileRoutesByTo {
   '/login': typeof LoginRoute
@@ -124,14 +197,24 @@ export interface FileRoutesByTo {
   '/signup': typeof SignupRoute
   '/admin': typeof LayoutAdminRoute
   '/debts': typeof LayoutDebtsRoute
+  '/expense-categories': typeof LayoutExpenseCategoriesRoute
   '/expenses': typeof LayoutExpensesRoute
-  '/products': typeof LayoutProductsRoute
+  '/invoices': typeof LayoutInvoicesRoute
+  '/payment-methods': typeof LayoutPaymentMethodsRoute
+  '/products': typeof LayoutProductsRouteWithChildren
   '/reports': typeof LayoutReportsRoute
   '/sales': typeof LayoutSalesRoute
+  '/sales-list': typeof LayoutSalesListRoute
   '/settings': typeof LayoutSettingsRoute
   '/shift-reconciliation': typeof LayoutShiftReconciliationRoute
-  '/stock-entry': typeof LayoutStockEntryRoute
+  '/suppliers': typeof LayoutSuppliersRoute
+  '/transporters': typeof LayoutTransportersRoute
   '/': typeof LayoutIndexRoute
+  '/products/bulk-import': typeof LayoutProductsBulkImportRoute
+  '/stock-entry/bulk-import': typeof LayoutStockEntryBulkImportRoute
+  '/grn': typeof LayoutGrnIndexRoute
+  '/stock-adjustment': typeof LayoutStockAdjustmentIndexRoute
+  '/stock-entry': typeof LayoutStockEntryIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -142,14 +225,24 @@ export interface FileRoutesById {
   '/signup': typeof SignupRoute
   '/_layout/admin': typeof LayoutAdminRoute
   '/_layout/debts': typeof LayoutDebtsRoute
+  '/_layout/expense-categories': typeof LayoutExpenseCategoriesRoute
   '/_layout/expenses': typeof LayoutExpensesRoute
-  '/_layout/products': typeof LayoutProductsRoute
+  '/_layout/invoices': typeof LayoutInvoicesRoute
+  '/_layout/payment-methods': typeof LayoutPaymentMethodsRoute
+  '/_layout/products': typeof LayoutProductsRouteWithChildren
   '/_layout/reports': typeof LayoutReportsRoute
   '/_layout/sales': typeof LayoutSalesRoute
+  '/_layout/sales-list': typeof LayoutSalesListRoute
   '/_layout/settings': typeof LayoutSettingsRoute
   '/_layout/shift-reconciliation': typeof LayoutShiftReconciliationRoute
-  '/_layout/stock-entry': typeof LayoutStockEntryRoute
+  '/_layout/suppliers': typeof LayoutSuppliersRoute
+  '/_layout/transporters': typeof LayoutTransportersRoute
   '/_layout/': typeof LayoutIndexRoute
+  '/_layout/products/bulk-import': typeof LayoutProductsBulkImportRoute
+  '/_layout/stock-entry/bulk-import': typeof LayoutStockEntryBulkImportRoute
+  '/_layout/grn/': typeof LayoutGrnIndexRoute
+  '/_layout/stock-adjustment/': typeof LayoutStockAdjustmentIndexRoute
+  '/_layout/stock-entry/': typeof LayoutStockEntryIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -160,14 +253,24 @@ export interface FileRouteTypes {
     | '/signup'
     | '/admin'
     | '/debts'
+    | '/expense-categories'
     | '/expenses'
+    | '/invoices'
+    | '/payment-methods'
     | '/products'
     | '/reports'
     | '/sales'
+    | '/sales-list'
     | '/settings'
     | '/shift-reconciliation'
-    | '/stock-entry'
+    | '/suppliers'
+    | '/transporters'
     | '/'
+    | '/products/bulk-import'
+    | '/stock-entry/bulk-import'
+    | '/grn'
+    | '/stock-adjustment'
+    | '/stock-entry'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/login'
@@ -176,14 +279,24 @@ export interface FileRouteTypes {
     | '/signup'
     | '/admin'
     | '/debts'
+    | '/expense-categories'
     | '/expenses'
+    | '/invoices'
+    | '/payment-methods'
     | '/products'
     | '/reports'
     | '/sales'
+    | '/sales-list'
     | '/settings'
     | '/shift-reconciliation'
-    | '/stock-entry'
+    | '/suppliers'
+    | '/transporters'
     | '/'
+    | '/products/bulk-import'
+    | '/stock-entry/bulk-import'
+    | '/grn'
+    | '/stock-adjustment'
+    | '/stock-entry'
   id:
     | '__root__'
     | '/_layout'
@@ -193,14 +306,24 @@ export interface FileRouteTypes {
     | '/signup'
     | '/_layout/admin'
     | '/_layout/debts'
+    | '/_layout/expense-categories'
     | '/_layout/expenses'
+    | '/_layout/invoices'
+    | '/_layout/payment-methods'
     | '/_layout/products'
     | '/_layout/reports'
     | '/_layout/sales'
+    | '/_layout/sales-list'
     | '/_layout/settings'
     | '/_layout/shift-reconciliation'
-    | '/_layout/stock-entry'
+    | '/_layout/suppliers'
+    | '/_layout/transporters'
     | '/_layout/'
+    | '/_layout/products/bulk-import'
+    | '/_layout/stock-entry/bulk-import'
+    | '/_layout/grn/'
+    | '/_layout/stock-adjustment/'
+    | '/_layout/stock-entry/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -255,11 +378,18 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LayoutIndexRouteImport
       parentRoute: typeof LayoutRoute
     }
-    '/_layout/stock-entry': {
-      id: '/_layout/stock-entry'
-      path: '/stock-entry'
-      fullPath: '/stock-entry'
-      preLoaderRoute: typeof LayoutStockEntryRouteImport
+    '/_layout/transporters': {
+      id: '/_layout/transporters'
+      path: '/transporters'
+      fullPath: '/transporters'
+      preLoaderRoute: typeof LayoutTransportersRouteImport
+      parentRoute: typeof LayoutRoute
+    }
+    '/_layout/suppliers': {
+      id: '/_layout/suppliers'
+      path: '/suppliers'
+      fullPath: '/suppliers'
+      preLoaderRoute: typeof LayoutSuppliersRouteImport
       parentRoute: typeof LayoutRoute
     }
     '/_layout/shift-reconciliation': {
@@ -274,6 +404,13 @@ declare module '@tanstack/react-router' {
       path: '/settings'
       fullPath: '/settings'
       preLoaderRoute: typeof LayoutSettingsRouteImport
+      parentRoute: typeof LayoutRoute
+    }
+    '/_layout/sales-list': {
+      id: '/_layout/sales-list'
+      path: '/sales-list'
+      fullPath: '/sales-list'
+      preLoaderRoute: typeof LayoutSalesListRouteImport
       parentRoute: typeof LayoutRoute
     }
     '/_layout/sales': {
@@ -297,11 +434,32 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LayoutProductsRouteImport
       parentRoute: typeof LayoutRoute
     }
+    '/_layout/payment-methods': {
+      id: '/_layout/payment-methods'
+      path: '/payment-methods'
+      fullPath: '/payment-methods'
+      preLoaderRoute: typeof LayoutPaymentMethodsRouteImport
+      parentRoute: typeof LayoutRoute
+    }
+    '/_layout/invoices': {
+      id: '/_layout/invoices'
+      path: '/invoices'
+      fullPath: '/invoices'
+      preLoaderRoute: typeof LayoutInvoicesRouteImport
+      parentRoute: typeof LayoutRoute
+    }
     '/_layout/expenses': {
       id: '/_layout/expenses'
       path: '/expenses'
       fullPath: '/expenses'
       preLoaderRoute: typeof LayoutExpensesRouteImport
+      parentRoute: typeof LayoutRoute
+    }
+    '/_layout/expense-categories': {
+      id: '/_layout/expense-categories'
+      path: '/expense-categories'
+      fullPath: '/expense-categories'
+      preLoaderRoute: typeof LayoutExpenseCategoriesRouteImport
       parentRoute: typeof LayoutRoute
     }
     '/_layout/debts': {
@@ -318,33 +476,98 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LayoutAdminRouteImport
       parentRoute: typeof LayoutRoute
     }
+    '/_layout/stock-entry/': {
+      id: '/_layout/stock-entry/'
+      path: '/stock-entry'
+      fullPath: '/stock-entry'
+      preLoaderRoute: typeof LayoutStockEntryIndexRouteImport
+      parentRoute: typeof LayoutRoute
+    }
+    '/_layout/stock-adjustment/': {
+      id: '/_layout/stock-adjustment/'
+      path: '/stock-adjustment'
+      fullPath: '/stock-adjustment'
+      preLoaderRoute: typeof LayoutStockAdjustmentIndexRouteImport
+      parentRoute: typeof LayoutRoute
+    }
+    '/_layout/grn/': {
+      id: '/_layout/grn/'
+      path: '/grn'
+      fullPath: '/grn'
+      preLoaderRoute: typeof LayoutGrnIndexRouteImport
+      parentRoute: typeof LayoutRoute
+    }
+    '/_layout/stock-entry/bulk-import': {
+      id: '/_layout/stock-entry/bulk-import'
+      path: '/stock-entry/bulk-import'
+      fullPath: '/stock-entry/bulk-import'
+      preLoaderRoute: typeof LayoutStockEntryBulkImportRouteImport
+      parentRoute: typeof LayoutRoute
+    }
+    '/_layout/products/bulk-import': {
+      id: '/_layout/products/bulk-import'
+      path: '/bulk-import'
+      fullPath: '/products/bulk-import'
+      preLoaderRoute: typeof LayoutProductsBulkImportRouteImport
+      parentRoute: typeof LayoutProductsRoute
+    }
   }
 }
+
+interface LayoutProductsRouteChildren {
+  LayoutProductsBulkImportRoute: typeof LayoutProductsBulkImportRoute
+}
+
+const LayoutProductsRouteChildren: LayoutProductsRouteChildren = {
+  LayoutProductsBulkImportRoute: LayoutProductsBulkImportRoute,
+}
+
+const LayoutProductsRouteWithChildren = LayoutProductsRoute._addFileChildren(
+  LayoutProductsRouteChildren,
+)
 
 interface LayoutRouteChildren {
   LayoutAdminRoute: typeof LayoutAdminRoute
   LayoutDebtsRoute: typeof LayoutDebtsRoute
+  LayoutExpenseCategoriesRoute: typeof LayoutExpenseCategoriesRoute
   LayoutExpensesRoute: typeof LayoutExpensesRoute
-  LayoutProductsRoute: typeof LayoutProductsRoute
+  LayoutInvoicesRoute: typeof LayoutInvoicesRoute
+  LayoutPaymentMethodsRoute: typeof LayoutPaymentMethodsRoute
+  LayoutProductsRoute: typeof LayoutProductsRouteWithChildren
   LayoutReportsRoute: typeof LayoutReportsRoute
   LayoutSalesRoute: typeof LayoutSalesRoute
+  LayoutSalesListRoute: typeof LayoutSalesListRoute
   LayoutSettingsRoute: typeof LayoutSettingsRoute
   LayoutShiftReconciliationRoute: typeof LayoutShiftReconciliationRoute
-  LayoutStockEntryRoute: typeof LayoutStockEntryRoute
+  LayoutSuppliersRoute: typeof LayoutSuppliersRoute
+  LayoutTransportersRoute: typeof LayoutTransportersRoute
   LayoutIndexRoute: typeof LayoutIndexRoute
+  LayoutStockEntryBulkImportRoute: typeof LayoutStockEntryBulkImportRoute
+  LayoutGrnIndexRoute: typeof LayoutGrnIndexRoute
+  LayoutStockAdjustmentIndexRoute: typeof LayoutStockAdjustmentIndexRoute
+  LayoutStockEntryIndexRoute: typeof LayoutStockEntryIndexRoute
 }
 
 const LayoutRouteChildren: LayoutRouteChildren = {
   LayoutAdminRoute: LayoutAdminRoute,
   LayoutDebtsRoute: LayoutDebtsRoute,
+  LayoutExpenseCategoriesRoute: LayoutExpenseCategoriesRoute,
   LayoutExpensesRoute: LayoutExpensesRoute,
-  LayoutProductsRoute: LayoutProductsRoute,
+  LayoutInvoicesRoute: LayoutInvoicesRoute,
+  LayoutPaymentMethodsRoute: LayoutPaymentMethodsRoute,
+  LayoutProductsRoute: LayoutProductsRouteWithChildren,
   LayoutReportsRoute: LayoutReportsRoute,
   LayoutSalesRoute: LayoutSalesRoute,
+  LayoutSalesListRoute: LayoutSalesListRoute,
   LayoutSettingsRoute: LayoutSettingsRoute,
   LayoutShiftReconciliationRoute: LayoutShiftReconciliationRoute,
-  LayoutStockEntryRoute: LayoutStockEntryRoute,
+  LayoutSuppliersRoute: LayoutSuppliersRoute,
+  LayoutTransportersRoute: LayoutTransportersRoute,
   LayoutIndexRoute: LayoutIndexRoute,
+  LayoutStockEntryBulkImportRoute: LayoutStockEntryBulkImportRoute,
+  LayoutGrnIndexRoute: LayoutGrnIndexRoute,
+  LayoutStockAdjustmentIndexRoute: LayoutStockAdjustmentIndexRoute,
+  LayoutStockEntryIndexRoute: LayoutStockEntryIndexRoute,
 }
 
 const LayoutRouteWithChildren =

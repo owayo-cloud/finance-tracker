@@ -10,9 +10,9 @@ docker compose watch
 
 * Now you can open your browser and interact with these URLs:
 
-Frontend, built with Docker, with routes handled based on the path: http://localhost:5173
+Frontend, running Vite dev server with **Hot Module Replacement (HMR)** - auto-refreshes on changes: http://localhost:5173
 
-Backend, JSON based web API based on OpenAPI: http://localhost:8000
+Backend, JSON based web API based on OpenAPI (auto-reloads on code changes): http://localhost:8000
 
 Automatic interactive documentation with Swagger UI (from the OpenAPI backend): http://localhost:8000/docs
 
@@ -21,6 +21,20 @@ Adminer, database web administration: http://localhost:8080
 Traefik UI, to see how the routes are being handled by the proxy: http://localhost:8090
 
 **Note**: The first time you start your stack, it might take a minute for it to be ready. While the backend waits for the database to be ready and configures everything. You can check the logs to monitor it.
+
+### Auto-Refresh / Hot Reload
+
+The development setup includes automatic browser refresh and code reloading:
+
+- **Frontend**: Vite dev server with HMR - changes to React/TypeScript files automatically update in the browser
+- **Backend**: FastAPI with `--reload` flag - Python code changes trigger automatic server restart
+- **File Watching**: Docker Compose `watch` mode syncs your local files into containers in real-time
+
+**How it works:**
+1. Edit any file in `frontend/src/` or `backend/app/`
+2. Save the file
+3. The browser automatically refreshes (frontend) or the server restarts (backend)
+4. No manual refresh needed! 🎉
 
 To check the logs, run (in another terminal):
 
@@ -32,6 +46,18 @@ To check the logs of a specific service, add the name of the service, e.g.:
 
 ```bash
 docker compose logs backend
+```
+
+To watch logs from both backend and frontend services simultaneously:
+
+```bash
+docker compose logs -f backend frontend
+```
+
+Or use the provided helper script:
+
+```bash
+./watch-logs.sh
 ```
 
 ## Local Development

@@ -100,6 +100,83 @@ def generate_new_account_email(
     return EmailData(html_content=html_content, subject=subject)
 
 
+def generate_debt_reminder_email(
+    email_to: str,
+    username: str,
+    supplier_name: str,
+    total_overdue: str,
+    currency: str,
+    debt_count: int,
+    debts: list[dict[str, Any]],
+) -> EmailData:
+    project_name = settings.PROJECT_NAME
+    subject = f"{project_name} - Overdue Payments: {supplier_name}"
+    link = f"{settings.FRONTEND_HOST}/supplier-debts"
+    html_content = render_email_template(
+        template_name="debt_reminder.html",
+        context={
+            "project_name": settings.PROJECT_NAME,
+            "username": username,
+            "supplier_name": supplier_name,
+            "total_overdue": total_overdue,
+            "currency": currency,
+            "debt_count": debt_count,
+            "debts": debts,
+            "link": link,
+        },
+    )
+    return EmailData(html_content=html_content, subject=subject)
+
+
+def generate_reorder_alert_email(
+    email_to: str,
+    username: str,
+    products: list[dict[str, Any]],
+    product_count: int,
+) -> EmailData:
+    project_name = settings.PROJECT_NAME
+    subject = f"{project_name} - Reorder Alert: {product_count} Product(s) Low in Stock"
+    link = f"{settings.FRONTEND_HOST}/products"
+    html_content = render_email_template(
+        template_name="reorder_alert.html",
+        context={
+            "project_name": settings.PROJECT_NAME,
+            "username": username,
+            "products": products,
+            "product_count": product_count,
+            "link": link,
+        },
+    )
+    return EmailData(html_content=html_content, subject=subject)
+
+
+def generate_low_stock_notification_email(
+    email_to: str,
+    username: str,
+    product_name: str,
+    current_stock: int,
+    reorder_level: int,
+    product_category: str | None = None,
+    product_id: str | None = None,
+) -> EmailData:
+    project_name = settings.PROJECT_NAME
+    subject = f"{project_name} - Low Stock Alert: {product_name}"
+    link = f"{settings.FRONTEND_HOST}/products/{product_id}" if product_id else f"{settings.FRONTEND_HOST}/products"
+    html_content = render_email_template(
+        template_name="low_stock_notification.html",
+        context={
+            "project_name": settings.PROJECT_NAME,
+            "username": username,
+            "product_name": product_name,
+            "current_stock": current_stock,
+            "reorder_level": reorder_level,
+            "product_category": product_category,
+            "link": link,
+        },
+    )
+    return EmailData(html_content=html_content, subject=subject)
+
+
 def generate_password_reset_token(email: str) -> str:
     delta = timedelta(hours=settings.EMAIL_RESET_TOKEN_EXPIRE_HOURS)
     now = datetime.now(timezone.utc)

@@ -1,11 +1,11 @@
-import { Container, Flex, Image, Input, Text } from "@chakra-ui/react"
+import { Box, Card, Container, Image, Input, Text, VStack, Heading } from "@chakra-ui/react"
 import {
   createFileRoute,
   Link as RouterLink,
   redirect,
 } from "@tanstack/react-router"
 import { type SubmitHandler, useForm } from "react-hook-form"
-import { FiLock, FiUser } from "react-icons/fi"
+import { FiLock, FiUser, FiMail } from "react-icons/fi"
 
 import type { UserRegister } from "@/client"
 import { Button } from "@/components/ui/button"
@@ -14,7 +14,7 @@ import { InputGroup } from "@/components/ui/input-group"
 import { PasswordInput } from "@/components/ui/password-input"
 import useAuth, { isLoggedIn } from "@/hooks/useAuth"
 import { confirmPasswordRules, emailPattern, passwordRules } from "@/utils"
-import Logo from "/assets/images/fastapi-logo.svg"
+import Logo from "/assets/images/favicon.png"
 
 export const Route = createFileRoute("/signup")({
   component: SignUp,
@@ -43,6 +43,7 @@ function SignUp() {
     criteriaMode: "all",
     defaultValues: {
       email: "",
+      username: "",
       full_name: "",
       password: "",
       confirm_password: "",
@@ -54,78 +55,177 @@ function SignUp() {
   }
 
   return (
-    <Flex flexDir={{ base: "column", md: "row" }} justify="center" h="100vh">
-      <Container
-        as="form"
-        onSubmit={handleSubmit(onSubmit)}
-        h="100vh"
-        maxW="sm"
-        alignItems="stretch"
-        justifyContent="center"
-        gap={4}
-        centerContent
-      >
-        <Image
-          src={Logo}
-          alt="FastAPI logo"
-          height="auto"
-          maxW="2xs"
-          alignSelf="center"
-          mb={4}
-        />
-        <Field
-          invalid={!!errors.full_name}
-          errorText={errors.full_name?.message}
+    <Box
+      minH="100vh"
+      display="flex"
+      alignItems="center"
+      justifyContent="center"
+      bg={{ base: "bg.canvas", _light: "bg.canvas" }}
+      p={4}
+    >
+      <Container maxW="md" w="full">
+        <Card.Root
+          variant="outline"
+          bg={{ base: "rgba(15, 20, 30, 0.7)", _light: "rgba(255, 255, 255, 0.95)" }}
+          backdropFilter="blur(20px) saturate(180%)"
+          border="1px solid"
+          borderColor={{ base: "rgba(0, 150, 136, 0.3)", _light: "rgba(0, 150, 136, 0.2)" }}
+          borderRadius="2xl"
+          boxShadow={{ 
+            base: "0 10px 40px rgba(0, 0, 0, 0.4), 0 0 1px rgba(0, 150, 136, 0.3)", 
+            _light: "0 10px 40px rgba(0, 0, 0, 0.1), 0 0 1px rgba(0, 150, 136, 0.2)" 
+          }}
         >
-          <InputGroup w="100%" startElement={<FiUser />}>
-            <Input
-              minLength={3}
-              {...register("full_name", {
-                required: "Full Name is required",
-              })}
-              placeholder="Full Name"
-              type="text"
-            />
-          </InputGroup>
-        </Field>
+          <Card.Body p={{ base: 6, md: 8 }}>
+            <Box
+              as="form"
+              onSubmit={handleSubmit(onSubmit)}
+              w="full"
+            >
+              <VStack gap={6} align="stretch">
+                {/* Logo and Title */}
+                <VStack gap={4}>
+                  <Box
+                    display="flex"
+                    alignItems="center"
+                    justifyContent="center"
+                    w={20}
+                    h={20}
+                    borderRadius="xl"
+                    bg="rgba(0, 150, 136, 0.1)"
+                    border="2px solid"
+                    borderColor="rgba(0, 150, 136, 0.3)"
+                    boxShadow="0 0 20px rgba(0, 150, 136, 0.2)"
+                  >
+                    <Image
+                      src={Logo}
+                      alt="Finance Tracker"
+                      height="auto"
+                      maxW="12"
+                      maxH="12"
+                      objectFit="contain"
+                    />
+                  </Box>
+                  <VStack gap={1}>
+                    <Heading
+                      size="lg"
+                      fontWeight="bold"
+                      css={{
+                        background: "linear-gradient(to right, #009688, #00bcd4)",
+                        WebkitBackgroundClip: "text",
+                        WebkitTextFillColor: "transparent",
+                        backgroundClip: "text",
+                      }}
+                    >
+                      Create Account
+                    </Heading>
+                    <Text
+                      fontSize="sm"
+                      color="text.secondary"
+                    >
+                      Sign up to get started
+                    </Text>
+                  </VStack>
+                </VStack>
 
-        <Field invalid={!!errors.email} errorText={errors.email?.message}>
-          <InputGroup w="100%" startElement={<FiUser />}>
-            <Input
-              {...register("email", {
-                required: "Email is required",
-                pattern: emailPattern,
-              })}
-              placeholder="Email"
-              type="email"
-            />
-          </InputGroup>
-        </Field>
-        <PasswordInput
-          type="password"
-          startElement={<FiLock />}
-          {...register("password", passwordRules())}
-          placeholder="Password"
-          errors={errors}
-        />
-        <PasswordInput
-          type="confirm_password"
-          startElement={<FiLock />}
-          {...register("confirm_password", confirmPasswordRules(getValues))}
-          placeholder="Confirm Password"
-          errors={errors}
-        />
-        <Button variant="solid" type="submit" loading={isSubmitting}>
-          Sign Up
-        </Button>
-        <Text>
-          Already have an account?{" "}
-          <RouterLink to="/login" className="main-link">
-            Log In
-          </RouterLink>
-        </Text>
+                {/* Form Fields */}
+                <VStack gap={4} align="stretch">
+                  <Field
+                    invalid={!!errors.full_name}
+                    errorText={errors.full_name?.message}
+                  >
+                    <InputGroup w="100%" startElement={<FiUser />}>
+                      <Input
+                        minLength={3}
+                        {...register("full_name", {
+                          required: "Full Name is required",
+                        })}
+                        placeholder="Full Name"
+                        type="text"
+                        autoComplete="name"
+                      />
+                    </InputGroup>
+                  </Field>
+
+                  <Field invalid={!!errors.username} errorText={errors.username?.message}>
+                    <InputGroup w="100%" startElement={<FiUser />}>
+                      <Input
+                        {...register("username", {
+                          minLength: {
+                            value: 3,
+                            message: "Username must be at least 3 characters",
+                          },
+                          maxLength: {
+                            value: 100,
+                            message: "Username must be less than 100 characters",
+                          },
+                        })}
+                        placeholder="Username (optional)"
+                        type="text"
+                        autoComplete="username"
+                      />
+                    </InputGroup>
+                  </Field>
+
+                  <Field invalid={!!errors.email} errorText={errors.email?.message}>
+                    <InputGroup w="100%" startElement={<FiMail />}>
+                      <Input
+                        {...register("email", {
+                          required: "Email is required",
+                          pattern: emailPattern,
+                        })}
+                        placeholder="Email"
+                        type="email"
+                        autoComplete="email"
+                      />
+                    </InputGroup>
+                  </Field>
+
+                  <PasswordInput
+                    type="password"
+                    startElement={<FiLock />}
+                    {...register("password", passwordRules())}
+                    placeholder="Password"
+                    errors={errors}
+                    autoComplete="new-password"
+                  />
+                  <PasswordInput
+                    type="confirm_password"
+                    startElement={<FiLock />}
+                    {...register("confirm_password", confirmPasswordRules(getValues))}
+                    placeholder="Confirm Password"
+                    errors={errors}
+                    autoComplete="new-password"
+                  />
+                </VStack>
+
+                {/* Submit Button */}
+                <Button 
+                  variant="solid" 
+                  type="submit" 
+                  loading={isSubmitting}
+                  size="lg"
+                  w="full"
+                  colorPalette="teal"
+                >
+                  Sign Up
+                </Button>
+
+                {/* Login Link */}
+                <Box textAlign="center">
+                  <Text fontSize="sm" color="text.secondary">
+                    Already have an account?{" "}
+                    <RouterLink to="/login" className="main-link">
+                      Log In
+                    </RouterLink>
+                  </Text>
+                </Box>
+              </VStack>
+            </Box>
+          </Card.Body>
+        </Card.Root>
       </Container>
-    </Flex>
+    </Box>
   )
 }
 

@@ -16,7 +16,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query"
 import { useState, useRef } from "react"
 import { type SubmitHandler, useForm } from "react-hook-form"
 // @ts-ignore - used in JSX
-import { FaTimes } from "react-icons/fa"
+import { FaTimes, FaInfoCircle } from "react-icons/fa"
 
 import {
   type ProductPublic,
@@ -246,23 +246,6 @@ const EditProduct = ({ product, children, isOpen: controlledIsOpen, onOpenChange
                       {product.status?.name || "No status"}
                     </Badge>
                   </HStack>
-                  <HStack justify="space-between">
-                    <Text fontSize="sm" color="gray.400">
-                      Current Stock
-                    </Text>
-                    <Badge 
-                      colorScheme={
-                        product.current_stock === 0 
-                          ? "red" 
-                          : product.current_stock && product.reorder_level && product.current_stock <= product.reorder_level
-                            ? "orange"
-                            : "green"
-                      } 
-                      size="sm"
-                    >
-                      {product.current_stock || 0} units
-                    </Badge>
-                  </HStack>
                 </VStack>
               </Box>
 
@@ -353,43 +336,25 @@ const EditProduct = ({ product, children, isOpen: controlledIsOpen, onOpenChange
                       />
                     </Field>
 
-                    <Field
-                      invalid={!!errors.current_stock}
-                      errorText={errors.current_stock?.message}
-                      label="Current Stock"
-                      helperText="Available units in inventory (minimum 1)"
+                    {/* Note about stock management */}
+                    <Box
+                      p={4}
+                      bg={{ base: "blue.900/20", _light: "blue.50" }}
+                      borderRadius="md"
+                      borderWidth="1px"
+                      borderColor={{ base: "blue.700", _light: "blue.200" }}
                     >
-                      <Input
-                        {...register("current_stock", {
-                          valueAsNumber: true,
-                          min: {
-                            value: 1,
-                            message: "Stock must be at least 1",
-                          },
-                        })}
-                        placeholder="1"
-                        type="number"
-                      />
-                    </Field>
-
-                    <Field
-                      invalid={!!errors.reorder_level}
-                      errorText={errors.reorder_level?.message}
-                      label="Reorder Level"
-                      helperText="Minimum stock before reordering"
-                    >
-                      <Input
-                        {...register("reorder_level", {
-                          valueAsNumber: true,
-                          min: {
-                            value: 0,
-                            message: "Reorder level cannot be negative",
-                          },
-                        })}
-                        placeholder="0"
-                        type="number"
-                      />
-                    </Field>
+                      <HStack gap={2} mb={2}>
+                        {/* @ts-ignore */}
+                        <FaInfoCircle color="var(--chakra-colors-blue-400)" />
+                        <Text fontWeight="semibold" fontSize="sm" color={{ base: "blue.300", _light: "blue.700" }}>
+                          Stock Management
+                        </Text>
+                      </HStack>
+                      <Text fontSize="xs" color={{ base: "gray.400", _light: "gray.600" }}>
+                        Stock levels and reorder points are managed via the <strong>Stock Adjustment</strong> module. Current stock: <strong>{product.current_stock || 0} units</strong>
+                      </Text>
+                    </Box>
 
                     {/* Product Image Upload */}
                     {/* <Field

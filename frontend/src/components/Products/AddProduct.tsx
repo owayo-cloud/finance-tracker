@@ -27,7 +27,6 @@ import { useEffect, useState, useMemo, useRef } from "react"
 import { type SubmitHandler, useForm } from "react-hook-form"
 // @ts-ignore - used in JSX
 import { FaPlus, FaTimes, FaInfoCircle } from "react-icons/fa"
-import { Tooltip } from "../ui/tooltip"
 
 import { type ProductCreate, ProductsService, MediaService } from "@/client"
 import type { ApiError } from "@/client/core/ApiError"
@@ -103,7 +102,7 @@ const AddProduct = () => {
       description: "",
       buying_price: 0,
       selling_price: 0,
-      current_stock: 1,
+      current_stock: 0,
       reorder_level: 0,
       category_id: "",
       status_id: "",
@@ -468,63 +467,26 @@ const AddProduct = () => {
                   </Field>
                 </HStack>
 
-                <HStack gap={4}>
-                  <Field
-                    required
-                    invalid={!!errors.current_stock}
-                    errorText={errors.current_stock?.message}
-                    label="Current Stock"
-                    flex={1}
-                  >
-                    <Input
-                      {...register("current_stock", {
-                        required: "Current stock is required.",
-                        valueAsNumber: true,
-                        min: {
-                          value: 1,
-                          message: "Stock must be at least 1",
-                        },
-                      })}
-                      placeholder="1"
-                      type="number"
-                      size="md"
-                      borderRadius="md"
-                    />
-                  </Field>
-
-                  <Field
-                    invalid={!!errors.reorder_level}
-                    errorText={errors.reorder_level?.message}
-                    label={
-                      <HStack gap={1}>
-                        <Text>Reorder Level</Text>
-                        <Tooltip
-                          content="The minimum stock quantity at which you should reorder this product to avoid running out of stock."
-                          positioning={{ placement: "top" }}
-                        >
-                          <Icon color={{ base: "blue.400", _light: "blue.600" }} cursor="help">
-                            <FaInfoCircle />
-                          </Icon>
-                        </Tooltip>
-                      </HStack>
-                    }
-                    flex={1}
-                  >
-                    <Input
-                      {...register("reorder_level", {
-                        valueAsNumber: true,
-                        min: {
-                          value: 0,
-                          message: "Reorder level cannot be negative",
-                        },
-                      })}
-                      placeholder="0"
-                      type="number"
-                      size="md"
-                      borderRadius="md"
-                    />
-                  </Field>
-                </HStack>
+                {/* Note about stock management */}
+                <Box
+                  p={4}
+                  bg={{ base: "blue.900/20", _light: "blue.50" }}
+                  borderRadius="md"
+                  borderWidth="1px"
+                  borderColor={{ base: "blue.700", _light: "blue.200" }}
+                >
+                  <HStack gap={2} mb={2}>
+                    <Icon color={{ base: "blue.400", _light: "blue.600" }}>
+                      <FaInfoCircle />
+                    </Icon>
+                    <Text fontWeight="semibold" fontSize="sm" color={{ base: "blue.300", _light: "blue.700" }}>
+                      Stock Management
+                    </Text>
+                  </HStack>
+                  <Text fontSize="xs" color={{ base: "gray.400", _light: "gray.600" }}>
+                    Initial stock levels and reorder points should be set via the <strong>Stock Adjustment</strong> module after creating the product.
+                  </Text>
+                </Box>
 
                 {/* Product Image Upload */}
                 {/* <Field

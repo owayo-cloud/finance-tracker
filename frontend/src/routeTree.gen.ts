@@ -15,6 +15,8 @@ import { Route as RecoverPasswordRouteImport } from './routes/recover-password'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as LayoutRouteImport } from './routes/_layout'
 import { Route as LayoutIndexRouteImport } from './routes/_layout/index'
+import { Route as LayoutTransportersRouteImport } from './routes/_layout/transporters'
+import { Route as LayoutSuppliersRouteImport } from './routes/_layout/suppliers'
 import { Route as LayoutShiftReconciliationRouteImport } from './routes/_layout/shift-reconciliation'
 import { Route as LayoutSettingsRouteImport } from './routes/_layout/settings'
 import { Route as LayoutSalesListRouteImport } from './routes/_layout/sales-list'
@@ -27,6 +29,8 @@ import { Route as LayoutExpenseCategoriesRouteImport } from './routes/_layout/ex
 import { Route as LayoutDebtsRouteImport } from './routes/_layout/debts'
 import { Route as LayoutAdminRouteImport } from './routes/_layout/admin'
 import { Route as LayoutStockEntryIndexRouteImport } from './routes/_layout/stock-entry/index'
+import { Route as LayoutStockAdjustmentIndexRouteImport } from './routes/_layout/stock-adjustment/index'
+import { Route as LayoutGrnIndexRouteImport } from './routes/_layout/grn/index'
 import { Route as LayoutStockEntryBulkImportRouteImport } from './routes/_layout/stock-entry/bulk-import'
 import { Route as LayoutProductsBulkImportRouteImport } from './routes/_layout/products/bulk-import'
 
@@ -57,6 +61,16 @@ const LayoutRoute = LayoutRouteImport.update({
 const LayoutIndexRoute = LayoutIndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => LayoutRoute,
+} as any)
+const LayoutTransportersRoute = LayoutTransportersRouteImport.update({
+  id: '/transporters',
+  path: '/transporters',
+  getParentRoute: () => LayoutRoute,
+} as any)
+const LayoutSuppliersRoute = LayoutSuppliersRouteImport.update({
+  id: '/suppliers',
+  path: '/suppliers',
   getParentRoute: () => LayoutRoute,
 } as any)
 const LayoutShiftReconciliationRoute =
@@ -120,6 +134,17 @@ const LayoutStockEntryIndexRoute = LayoutStockEntryIndexRouteImport.update({
   path: '/stock-entry/',
   getParentRoute: () => LayoutRoute,
 } as any)
+const LayoutStockAdjustmentIndexRoute =
+  LayoutStockAdjustmentIndexRouteImport.update({
+    id: '/stock-adjustment/',
+    path: '/stock-adjustment/',
+    getParentRoute: () => LayoutRoute,
+  } as any)
+const LayoutGrnIndexRoute = LayoutGrnIndexRouteImport.update({
+  id: '/grn/',
+  path: '/grn/',
+  getParentRoute: () => LayoutRoute,
+} as any)
 const LayoutStockEntryBulkImportRoute =
   LayoutStockEntryBulkImportRouteImport.update({
     id: '/stock-entry/bulk-import',
@@ -149,9 +174,13 @@ export interface FileRoutesByFullPath {
   '/sales-list': typeof LayoutSalesListRoute
   '/settings': typeof LayoutSettingsRoute
   '/shift-reconciliation': typeof LayoutShiftReconciliationRoute
+  '/suppliers': typeof LayoutSuppliersRoute
+  '/transporters': typeof LayoutTransportersRoute
   '/': typeof LayoutIndexRoute
   '/products/bulk-import': typeof LayoutProductsBulkImportRoute
   '/stock-entry/bulk-import': typeof LayoutStockEntryBulkImportRoute
+  '/grn': typeof LayoutGrnIndexRoute
+  '/stock-adjustment': typeof LayoutStockAdjustmentIndexRoute
   '/stock-entry': typeof LayoutStockEntryIndexRoute
 }
 export interface FileRoutesByTo {
@@ -170,9 +199,13 @@ export interface FileRoutesByTo {
   '/sales-list': typeof LayoutSalesListRoute
   '/settings': typeof LayoutSettingsRoute
   '/shift-reconciliation': typeof LayoutShiftReconciliationRoute
+  '/suppliers': typeof LayoutSuppliersRoute
+  '/transporters': typeof LayoutTransportersRoute
   '/': typeof LayoutIndexRoute
   '/products/bulk-import': typeof LayoutProductsBulkImportRoute
   '/stock-entry/bulk-import': typeof LayoutStockEntryBulkImportRoute
+  '/grn': typeof LayoutGrnIndexRoute
+  '/stock-adjustment': typeof LayoutStockAdjustmentIndexRoute
   '/stock-entry': typeof LayoutStockEntryIndexRoute
 }
 export interface FileRoutesById {
@@ -193,9 +226,13 @@ export interface FileRoutesById {
   '/_layout/sales-list': typeof LayoutSalesListRoute
   '/_layout/settings': typeof LayoutSettingsRoute
   '/_layout/shift-reconciliation': typeof LayoutShiftReconciliationRoute
+  '/_layout/suppliers': typeof LayoutSuppliersRoute
+  '/_layout/transporters': typeof LayoutTransportersRoute
   '/_layout/': typeof LayoutIndexRoute
   '/_layout/products/bulk-import': typeof LayoutProductsBulkImportRoute
   '/_layout/stock-entry/bulk-import': typeof LayoutStockEntryBulkImportRoute
+  '/_layout/grn/': typeof LayoutGrnIndexRoute
+  '/_layout/stock-adjustment/': typeof LayoutStockAdjustmentIndexRoute
   '/_layout/stock-entry/': typeof LayoutStockEntryIndexRoute
 }
 export interface FileRouteTypes {
@@ -216,9 +253,13 @@ export interface FileRouteTypes {
     | '/sales-list'
     | '/settings'
     | '/shift-reconciliation'
+    | '/suppliers'
+    | '/transporters'
     | '/'
     | '/products/bulk-import'
     | '/stock-entry/bulk-import'
+    | '/grn'
+    | '/stock-adjustment'
     | '/stock-entry'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -237,9 +278,13 @@ export interface FileRouteTypes {
     | '/sales-list'
     | '/settings'
     | '/shift-reconciliation'
+    | '/suppliers'
+    | '/transporters'
     | '/'
     | '/products/bulk-import'
     | '/stock-entry/bulk-import'
+    | '/grn'
+    | '/stock-adjustment'
     | '/stock-entry'
   id:
     | '__root__'
@@ -259,9 +304,13 @@ export interface FileRouteTypes {
     | '/_layout/sales-list'
     | '/_layout/settings'
     | '/_layout/shift-reconciliation'
+    | '/_layout/suppliers'
+    | '/_layout/transporters'
     | '/_layout/'
     | '/_layout/products/bulk-import'
     | '/_layout/stock-entry/bulk-import'
+    | '/_layout/grn/'
+    | '/_layout/stock-adjustment/'
     | '/_layout/stock-entry/'
   fileRoutesById: FileRoutesById
 }
@@ -315,6 +364,20 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof LayoutIndexRouteImport
+      parentRoute: typeof LayoutRoute
+    }
+    '/_layout/transporters': {
+      id: '/_layout/transporters'
+      path: '/transporters'
+      fullPath: '/transporters'
+      preLoaderRoute: typeof LayoutTransportersRouteImport
+      parentRoute: typeof LayoutRoute
+    }
+    '/_layout/suppliers': {
+      id: '/_layout/suppliers'
+      path: '/suppliers'
+      fullPath: '/suppliers'
+      preLoaderRoute: typeof LayoutSuppliersRouteImport
       parentRoute: typeof LayoutRoute
     }
     '/_layout/shift-reconciliation': {
@@ -401,6 +464,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LayoutStockEntryIndexRouteImport
       parentRoute: typeof LayoutRoute
     }
+    '/_layout/stock-adjustment/': {
+      id: '/_layout/stock-adjustment/'
+      path: '/stock-adjustment'
+      fullPath: '/stock-adjustment'
+      preLoaderRoute: typeof LayoutStockAdjustmentIndexRouteImport
+      parentRoute: typeof LayoutRoute
+    }
+    '/_layout/grn/': {
+      id: '/_layout/grn/'
+      path: '/grn'
+      fullPath: '/grn'
+      preLoaderRoute: typeof LayoutGrnIndexRouteImport
+      parentRoute: typeof LayoutRoute
+    }
     '/_layout/stock-entry/bulk-import': {
       id: '/_layout/stock-entry/bulk-import'
       path: '/stock-entry/bulk-import'
@@ -442,8 +519,12 @@ interface LayoutRouteChildren {
   LayoutSalesListRoute: typeof LayoutSalesListRoute
   LayoutSettingsRoute: typeof LayoutSettingsRoute
   LayoutShiftReconciliationRoute: typeof LayoutShiftReconciliationRoute
+  LayoutSuppliersRoute: typeof LayoutSuppliersRoute
+  LayoutTransportersRoute: typeof LayoutTransportersRoute
   LayoutIndexRoute: typeof LayoutIndexRoute
   LayoutStockEntryBulkImportRoute: typeof LayoutStockEntryBulkImportRoute
+  LayoutGrnIndexRoute: typeof LayoutGrnIndexRoute
+  LayoutStockAdjustmentIndexRoute: typeof LayoutStockAdjustmentIndexRoute
   LayoutStockEntryIndexRoute: typeof LayoutStockEntryIndexRoute
 }
 
@@ -459,8 +540,12 @@ const LayoutRouteChildren: LayoutRouteChildren = {
   LayoutSalesListRoute: LayoutSalesListRoute,
   LayoutSettingsRoute: LayoutSettingsRoute,
   LayoutShiftReconciliationRoute: LayoutShiftReconciliationRoute,
+  LayoutSuppliersRoute: LayoutSuppliersRoute,
+  LayoutTransportersRoute: LayoutTransportersRoute,
   LayoutIndexRoute: LayoutIndexRoute,
   LayoutStockEntryBulkImportRoute: LayoutStockEntryBulkImportRoute,
+  LayoutGrnIndexRoute: LayoutGrnIndexRoute,
+  LayoutStockAdjustmentIndexRoute: LayoutStockAdjustmentIndexRoute,
   LayoutStockEntryIndexRoute: LayoutStockEntryIndexRoute,
 }
 

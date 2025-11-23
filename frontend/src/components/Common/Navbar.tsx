@@ -1,7 +1,7 @@
 import { Flex, useBreakpointValue, HStack, Text, Box, IconButton, Icon, VStack } from "@chakra-ui/react"
 import { Link } from "@tanstack/react-router"
 import { FaBars } from "react-icons/fa"
-import { FiGrid, FiMail, FiChevronDown } from "react-icons/fi"
+import { FiChevronDown } from "react-icons/fi"
 
 import useAuth from "@/hooks/useAuth"
 import { getUserInitials } from "@/utils"
@@ -277,43 +277,8 @@ function Navbar({ onMenuClick, sidebarCollapsed = false, isPOSMode = false }: Na
       {/* Right Section: Icons and User - Hidden in POS mode */}
       {!isPOSMode && (
         <HStack gap={3} alignItems="center" flexShrink={0}>
-          {/* Grid Icon */}
-          <IconButton
-            variant="ghost"
-            aria-label="Grid"
-            color={{ base: "#ffffff", _light: "#1a1d29" }}
-            _hover={{ bg: { base: "rgba(255, 255, 255, 0.05)", _light: "rgba(0, 0, 0, 0.05)" } }}
-            size="sm"
-          >
-            <FiGrid fontSize="18px" />
-          </IconButton>
-
           {/* Theme Toggle */}
           <ColorModeButton />
-
-          {/* Mail Icon with Notification */}
-          <Box position="relative" display="inline-flex" alignItems="center" justifyContent="center">
-            <IconButton
-              variant="ghost"
-              aria-label="Messages"
-              color={{ base: "#ffffff", _light: "#1a1d29" }}
-              _hover={{ bg: { base: "rgba(255, 255, 255, 0.05)", _light: "rgba(0, 0, 0, 0.05)" } }}
-              size="sm"
-            >
-              <FiMail fontSize="18px" />
-            </IconButton>
-            <Box
-              position="absolute"
-              top="4px"
-              right="4px"
-              w="8px"
-              h="8px"
-              borderRadius="full"
-              bg="#22c55e"
-              border="none"
-              zIndex={1}
-            />
-          </Box>
 
           {/* Notification Bell Component */}
           <NotificationBell variant="desktop" />

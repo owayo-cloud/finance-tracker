@@ -6,7 +6,7 @@
 
 import { Box, IconButton, Text, VStack, HStack, Spinner, Badge, Icon } from "@chakra-ui/react"
 import { FiBell, FiCheck, FiCheckCircle, FiTrash2, FiAlertCircle, FiInfo } from "react-icons/fi"
-import { MenuContent, MenuItem, MenuRoot, MenuSeparator, MenuTrigger } from "../ui/menu"
+import { MenuContent, MenuRoot, MenuSeparator, MenuTrigger } from "../ui/menu"
 import { Link } from "@tanstack/react-router"
 import { useNotifications } from "@/hooks/useNotifications"
 import { formatDistanceToNow } from "date-fns"
@@ -35,7 +35,7 @@ const getTypeIcon = (type: string) => {
   return FiInfo
 }
 
-function NotificationBell({ variant = "desktop" }: NotificationBellProps) {
+function NotificationBell({ variant: _variant = "desktop" }: NotificationBellProps) {
   const {
     notifications,
     unreadCount,
@@ -43,7 +43,6 @@ function NotificationBell({ variant = "desktop" }: NotificationBellProps) {
     markAsRead,
     markAllAsRead,
     deleteNotification,
-    isMarkingAsRead,
     isMarkingAllAsRead,
   } = useNotifications({
     pollInterval: 30000, // Refresh every 30 seconds
@@ -137,7 +136,7 @@ function NotificationBell({ variant = "desktop" }: NotificationBellProps) {
               aria-label="Mark all as read"
               size="sm"
               onClick={() => markAllAsRead()}
-              isLoading={isMarkingAllAsRead}
+              loading={isMarkingAllAsRead}
               color={{ base: "#14b8a6", _light: "#0d9488" }}
               _hover={{ bg: { base: "rgba(255, 255, 255, 0.05)", _light: "rgba(0, 0, 0, 0.05)" } }}
             >
@@ -167,8 +166,8 @@ function NotificationBell({ variant = "desktop" }: NotificationBellProps) {
         ) : (
           <VStack gap={0} align="stretch">
             {notifications.map((notification) => {
-              const TypeIcon = getTypeIcon(notification.type)
-              const priorityColor = getPriorityColor(notification.priority)
+              const TypeIcon = getTypeIcon(notification.notification_type || "")
+              const priorityColor = getPriorityColor(notification.priority || "info")
               
               const notificationContent = (
                 <HStack
@@ -212,7 +211,12 @@ function NotificationBell({ variant = "desktop" }: NotificationBellProps) {
                       fontSize="sm"
                       fontWeight={!notification.is_read ? "700" : "500"}
                       color={{ base: "#ffffff", _light: "#1a1d29" }}
-                      noOfLines={2}
+                      style={{ 
+                        display: "-webkit-box",
+                        WebkitLineClamp: 2,
+                        WebkitBoxOrient: "vertical",
+                        overflow: "hidden"
+                      }}
                     >
                       {notification.title}
                     </Text>
@@ -220,7 +224,12 @@ function NotificationBell({ variant = "desktop" }: NotificationBellProps) {
                       <Text
                         fontSize="xs"
                         color={{ base: "#9ca3af", _light: "#6b7280" }}
-                        noOfLines={2}
+                        style={{ 
+                          display: "-webkit-box",
+                          WebkitLineClamp: 2,
+                          WebkitBoxOrient: "vertical",
+                          overflow: "hidden"
+                        }}
                       >
                         {notification.message}
                       </Text>
@@ -284,7 +293,7 @@ function NotificationBell({ variant = "desktop" }: NotificationBellProps) {
               borderColor={{ base: "rgba(255, 255, 255, 0.1)", _light: "#e5e7eb" }}
               bg={{ base: "#1a1d29", _light: "#f9fafb" }}
             >
-              <Link to="/notifications" style={{ textDecoration: "none" }}>
+              <Link to="/" style={{ textDecoration: "none" }}>
                 <Text
                   fontSize="sm"
                   fontWeight="600"

@@ -41,6 +41,10 @@ def get_customers(
     This endpoint aggregates customer information from both debts and sales tables,
     calculating total balances and finding the most recent sale date.
     """
+    # Debug: Check total debts in database
+    total_debts = session.exec(select(func.count()).select_from(Debt)).one()
+    print(f"[Customers API] Total debts in database: {total_debts}")
+    
     # Build base query to get unique customer names from debts
     # Use a subquery approach to get the most recent contact for each customer
     debt_customers_query = (
@@ -66,6 +70,11 @@ def get_customers(
     # Execute queries
     debt_results = session.exec(debt_customers_query).all()
     sale_results = session.exec(last_sale_query).all()
+    
+    # Debug logging
+    print(f"[Customers API] Found {len(debt_results)} customers from debts")
+    if debt_results:
+        print(f"[Customers API] First debt result: {debt_results[0]}")
     
     # Create a map of customer data
     customer_map: dict[str, CustomerSummary] = {}
@@ -138,6 +147,11 @@ def get_customers(
     # Convert to list and apply search filter
     customers = list(customer_map.values())
     
+    # Debug logging
+    print(f"[Customers API] Total customers before filtering: {len(customers)}")
+    if customers:
+        print(f"[Customers API] First customer: {customers[0].name}, balance: {customers[0].balance}")
+    
     # Apply search filter if provided
     if search:
         search_lower = search.lower().strip()
@@ -145,6 +159,7 @@ def get_customers(
             c for c in customers
             if search_lower in c.name.lower() or search_lower in c.tel.lower()
         ]
+        print(f"[Customers API] After search filter: {len(customers)} customers")
     
     # Sort by name alphabetically
     customers.sort(key=lambda x: x.name.lower())
@@ -152,6 +167,8 @@ def get_customers(
     # Apply pagination
     total_count = len(customers)
     customers = customers[skip:skip + limit]
+    
+    print(f"[Customers API] Returning {len(customers)} customers (total: {total_count})")
     
     return CustomersPublic(data=customers, count=total_count)
 

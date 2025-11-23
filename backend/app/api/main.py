@@ -1,6 +1,25 @@
 from fastapi import APIRouter
 
-from app.api.routes import login, media, private, products, sales, stock_entries, users, utils, bulk_import, shift_reconciliation, expenses, debts, customers, analytics
+from app.api.routes import (
+    analytics,
+    bulk_import,
+    customers,
+    debts,
+    expenses,
+    grn,
+    login,
+    media,
+    notifications,
+    private,
+    products,
+    reminders,
+    sales,
+    shift_reconciliation,
+    stock_entries,
+    supplier_debts,
+    users,
+    utils,
+)
 from app.core.config import settings
 
 api_router = APIRouter()
@@ -16,7 +35,12 @@ api_router.include_router(expenses.router)
 api_router.include_router(debts.router)
 api_router.include_router(customers.router)
 api_router.include_router(analytics.router)
+api_router.include_router(grn.router)
+api_router.include_router(supplier_debts.router, prefix="/supplier-debts", tags=["supplier-debts"])
+api_router.include_router(notifications.router, prefix="/notifications", tags=["notifications"])
+api_router.include_router(reminders.router, prefix="/reminders", tags=["reminders"])
 api_router.include_router(media.router)
+
 
 
 if settings.ENVIRONMENT == "local":

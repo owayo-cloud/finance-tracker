@@ -15,7 +15,9 @@ import {
   FiChevronDown,
   FiChevronRight,
   FiCreditCard,
-  FiTag
+  FiTag,
+  FiTruck,
+  FiUserCheck
 } from "react-icons/fi"
 import { TbReceiptDollar } from "react-icons/tb"
 import type { IconType } from "react-icons/lib"
@@ -44,7 +46,10 @@ const menuItems: MenuItem[] = [
     icon: FiBox, 
     title: "Purchases",
     submenu: [
-      { title: "Goods Receipt Note", path: "/stock-entry" }
+      { title: "Goods Receipt Note", path: "/grn" },
+      { title: "Stock Entry", path: "/stock-entry" },
+      { title: "Suppliers", path: "/suppliers" },
+      { title: "Transporters", path: "/transporters" }
     ]
   },
   { 
@@ -77,27 +82,42 @@ interface SidebarItemsProps {
   isCollapsed?: boolean
 }
 
-// Icon color mapping for each menu item
 const getIconColor = (title: string, isActive: boolean): string => {
   if (isActive) {
-    return "#14b8a6" // Teal for active items
+    return "#14b8a6"
   }
   
-  // Different colors for each menu item
   const colorMap: Record<string, string> = {
-    "Dashboard": "#3b82f6",      // Blue
-    "Sales": "#ef4444",           // Red
-    "Purchases": "#f59e0b",     // Amber
-    "Products": "#8b5cf6",        // Purple
-    "Reports": "#10b981",         // Green
-    "Expenses": "#f97316",        // Orange
-    "Debts": "#ec4899",           // Pink
-    "Payment Methods": "#06b6d4", // Cyan
-    "Users": "#6366f1",           // Indigo
-    "User Settings": "#64748b",   // Slate
+    "Dashboard": "#3b82f6",
+    "Sales": "#ef4444",
+    "Purchases": "#f59e0b",
+    "Products": "#8b5cf6",
+    "Reports": "#10b981",
+    "Expenses": "#f97316",
+    "Debts": "#ec4899",
+    "Payment Methods": "#06b6d4",
+    "Users": "#6366f1",
+    "User Settings": "#64748b",
   }
   
-  return colorMap[title] || "#9ca3af" // Default gray
+  return colorMap[title] || "#9ca3af"
+}
+
+const getSubmenuIcon = (title: string): IconType => {
+  const iconMap: Record<string, IconType> = {
+    "POS": FiCreditCard,
+    "Shift Reconciliation": TbReceiptDollar,
+    "Goods Receipt Note": TbReceiptDollar,
+    "Stock Entry": FiBox,
+    "Suppliers": FiUserCheck,
+    "Transporters": FiTruck,
+    "Products": FiPackage,
+    "Stock Adjustment": FiBox,
+    "Expenses": FiDollarSign,
+    "Categories": FiTag,
+  }
+  
+  return iconMap[title] || FiBox
 }
 
 const SidebarItems = ({ onClose, isCollapsed = false }: SidebarItemsProps) => {
@@ -107,11 +127,10 @@ const SidebarItems = ({ onClose, isCollapsed = false }: SidebarItemsProps) => {
   const [openSubmenus, setOpenSubmenus] = useState<Record<string, boolean>>({
     Sales: location.pathname === "/sales" || location.pathname === "/shift-reconciliation",
     Expenses: location.pathname === "/expenses" || location.pathname === "/expense-categories",
-    Purchases: location.pathname === "/stock-entry",
+    Purchases: location.pathname === "/grn" || location.pathname === "/stock-entry" || location.pathname === "/suppliers" || location.pathname === "/transporters",
     Products: location.pathname === "/products" || location.pathname === "/stock-adjustment"
   })
 
-  // Filter items based on user role
   const filteredItems = menuItems.filter(
     (item) => !item.adminOnly || currentUser?.is_superuser
   )
@@ -135,7 +154,7 @@ const SidebarItems = ({ onClose, isCollapsed = false }: SidebarItemsProps) => {
     return submenu.some(item => location.pathname === item.path)
   }
 
-    const listItems = finalItems.map((item) => {
+  const listItems = finalItems.map((item) => {
     const hasSubmenu = item.submenu && item.submenu.length > 0
     const isSubmenuOpen = openSubmenus[item.title] || false
     const isActive = isPathActive(item.path) || isSubmenuItemActive(item.submenu)
@@ -256,13 +275,7 @@ const SidebarItems = ({ onClose, isCollapsed = false }: SidebarItemsProps) => {
                         } : undefined}
                       >
                         <Icon 
-                          as={
-                            subItem.title === "POS" 
-                              ? FiCreditCard 
-                              : subItem.title === "Categories"
-                              ? FiTag
-                              : TbReceiptDollar
-                          }
+                          as={getSubmenuIcon(subItem.title)}
                           fontSize="16px"
                           color={isSubActive ? "#14b8a6" : getIconColor(item.title, false)}
                         />

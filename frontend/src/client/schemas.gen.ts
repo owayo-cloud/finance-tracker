@@ -1366,6 +1366,1320 @@ export const FixRowRequestSchema = {
     description: 'Request to fix a specific row.'
 } as const;
 
+export const GRNCreateSchema = {
+    properties: {
+        supplier_id: {
+            type: 'string',
+            format: 'uuid',
+            title: 'Supplier Id'
+        },
+        transporter_id: {
+            anyOf: [
+                {
+                    type: 'string',
+                    format: 'uuid'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Transporter Id'
+        },
+        transaction_date: {
+            type: 'string',
+            format: 'date-time',
+            title: 'Transaction Date'
+        },
+        goods_receipt_date: {
+            type: 'string',
+            format: 'date-time',
+            title: 'Goods Receipt Date'
+        },
+        shipping_address: {
+            anyOf: [
+                {
+                    type: 'string',
+                    maxLength: 500
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Shipping Address'
+        },
+        delivery_number: {
+            anyOf: [
+                {
+                    type: 'string',
+                    maxLength: 100
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Delivery Number'
+        },
+        delivery_date: {
+            anyOf: [
+                {
+                    type: 'string',
+                    format: 'date-time'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Delivery Date'
+        },
+        consignment_number: {
+            anyOf: [
+                {
+                    type: 'string',
+                    maxLength: 100
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Consignment Number'
+        },
+        consignment_date: {
+            anyOf: [
+                {
+                    type: 'string',
+                    format: 'date-time'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Consignment Date'
+        },
+        batch_number: {
+            anyOf: [
+                {
+                    type: 'string',
+                    maxLength: 100
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Batch Number'
+        },
+        driver_name: {
+            anyOf: [
+                {
+                    type: 'string',
+                    maxLength: 255
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Driver Name'
+        },
+        vehicle_reg_number: {
+            anyOf: [
+                {
+                    type: 'string',
+                    maxLength: 100
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Vehicle Reg Number'
+        },
+        department: {
+            anyOf: [
+                {
+                    type: 'string',
+                    maxLength: 255
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Department'
+        },
+        section: {
+            anyOf: [
+                {
+                    type: 'string',
+                    maxLength: 255
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Section'
+        },
+        currency: {
+            type: 'string',
+            maxLength: 10,
+            title: 'Currency',
+            default: 'KES'
+        },
+        total_amount: {
+            anyOf: [
+                {
+                    type: 'number',
+                    minimum: 0
+                },
+                {
+                    type: 'string',
+                    pattern: '^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d{0,2}0*$'
+                }
+            ],
+            title: 'Total Amount',
+            default: '0'
+        },
+        is_approved: {
+            type: 'boolean',
+            title: 'Is Approved',
+            default: false
+        },
+        approved_at: {
+            anyOf: [
+                {
+                    type: 'string',
+                    format: 'date-time'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Approved At'
+        },
+        approved_by_id: {
+            anyOf: [
+                {
+                    type: 'string',
+                    format: 'uuid'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Approved By Id'
+        },
+        payment_type: {
+            type: 'string',
+            maxLength: 20,
+            title: 'Payment Type',
+            default: 'Cash'
+        },
+        credit_terms: {
+            anyOf: [
+                {
+                    type: 'string',
+                    maxLength: 50
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Credit Terms'
+        },
+        requires_approval: {
+            type: 'boolean',
+            title: 'Requires Approval',
+            default: false
+        },
+        creates_debt: {
+            type: 'boolean',
+            title: 'Creates Debt',
+            default: false
+        },
+        notes: {
+            anyOf: [
+                {
+                    type: 'string',
+                    maxLength: 2000
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Notes'
+        },
+        items: {
+            items: {
+                '$ref': '#/components/schemas/GRNItemCreate'
+            },
+            type: 'array',
+            title: 'Items',
+            default: []
+        }
+    },
+    type: 'object',
+    required: ['supplier_id'],
+    title: 'GRNCreate'
+} as const;
+
+export const GRNItemCreateSchema = {
+    properties: {
+        grn_id: {
+            anyOf: [
+                {
+                    type: 'string',
+                    format: 'uuid'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Grn Id'
+        },
+        product_id: {
+            type: 'string',
+            format: 'uuid',
+            title: 'Product Id'
+        },
+        order_quantity: {
+            anyOf: [
+                {
+                    type: 'number',
+                    minimum: 0
+                },
+                {
+                    type: 'string',
+                    pattern: '^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d{0,2}0*$'
+                }
+            ],
+            title: 'Order Quantity',
+            default: '0'
+        },
+        pending_quantity: {
+            anyOf: [
+                {
+                    type: 'number',
+                    minimum: 0
+                },
+                {
+                    type: 'string',
+                    pattern: '^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d{0,2}0*$'
+                }
+            ],
+            title: 'Pending Quantity',
+            default: '0'
+        },
+        received_quantity: {
+            anyOf: [
+                {
+                    type: 'number',
+                    minimum: 0
+                },
+                {
+                    type: 'string',
+                    pattern: '^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d{0,2}0*$'
+                }
+            ],
+            title: 'Received Quantity'
+        },
+        lpo_number: {
+            anyOf: [
+                {
+                    type: 'string',
+                    maxLength: 100
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Lpo Number'
+        },
+        ledger_account: {
+            anyOf: [
+                {
+                    type: 'string',
+                    maxLength: 100
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Ledger Account'
+        },
+        is_promo: {
+            type: 'boolean',
+            title: 'Is Promo',
+            default: false
+        },
+        unit_price: {
+            anyOf: [
+                {
+                    type: 'number',
+                    minimum: 0
+                },
+                {
+                    type: 'string',
+                    pattern: '^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d{0,2}0*$'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Unit Price'
+        },
+        total_price: {
+            anyOf: [
+                {
+                    type: 'number',
+                    minimum: 0
+                },
+                {
+                    type: 'string',
+                    pattern: '^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d{0,2}0*$'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Total Price'
+        },
+        notes: {
+            anyOf: [
+                {
+                    type: 'string',
+                    maxLength: 500
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Notes'
+        }
+    },
+    type: 'object',
+    required: ['product_id', 'received_quantity'],
+    title: 'GRNItemCreate'
+} as const;
+
+export const GRNItemPublicSchema = {
+    properties: {
+        grn_id: {
+            type: 'string',
+            format: 'uuid',
+            title: 'Grn Id'
+        },
+        product_id: {
+            type: 'string',
+            format: 'uuid',
+            title: 'Product Id'
+        },
+        order_quantity: {
+            type: 'string',
+            pattern: '^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d{0,2}0*$',
+            title: 'Order Quantity',
+            default: '0'
+        },
+        pending_quantity: {
+            type: 'string',
+            pattern: '^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d{0,2}0*$',
+            title: 'Pending Quantity',
+            default: '0'
+        },
+        received_quantity: {
+            type: 'string',
+            pattern: '^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d{0,2}0*$',
+            title: 'Received Quantity'
+        },
+        lpo_number: {
+            anyOf: [
+                {
+                    type: 'string',
+                    maxLength: 100
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Lpo Number'
+        },
+        ledger_account: {
+            anyOf: [
+                {
+                    type: 'string',
+                    maxLength: 100
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Ledger Account'
+        },
+        is_promo: {
+            type: 'boolean',
+            title: 'Is Promo',
+            default: false
+        },
+        unit_price: {
+            anyOf: [
+                {
+                    type: 'string',
+                    pattern: '^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d{0,2}0*$'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Unit Price'
+        },
+        total_price: {
+            anyOf: [
+                {
+                    type: 'string',
+                    pattern: '^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d{0,2}0*$'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Total Price'
+        },
+        notes: {
+            anyOf: [
+                {
+                    type: 'string',
+                    maxLength: 500
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Notes'
+        },
+        id: {
+            type: 'string',
+            format: 'uuid',
+            title: 'Id'
+        },
+        product_name: {
+            anyOf: [
+                {
+                    type: 'string'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Product Name'
+        },
+        product_code: {
+            anyOf: [
+                {
+                    type: 'string'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Product Code'
+        }
+    },
+    type: 'object',
+    required: ['grn_id', 'product_id', 'received_quantity', 'id'],
+    title: 'GRNItemPublic'
+} as const;
+
+export const GRNPublicSchema = {
+    properties: {
+        supplier_id: {
+            type: 'string',
+            format: 'uuid',
+            title: 'Supplier Id'
+        },
+        transporter_id: {
+            anyOf: [
+                {
+                    type: 'string',
+                    format: 'uuid'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Transporter Id'
+        },
+        transaction_date: {
+            type: 'string',
+            format: 'date-time',
+            title: 'Transaction Date'
+        },
+        goods_receipt_date: {
+            type: 'string',
+            format: 'date-time',
+            title: 'Goods Receipt Date'
+        },
+        shipping_address: {
+            anyOf: [
+                {
+                    type: 'string',
+                    maxLength: 500
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Shipping Address'
+        },
+        delivery_number: {
+            anyOf: [
+                {
+                    type: 'string',
+                    maxLength: 100
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Delivery Number'
+        },
+        delivery_date: {
+            anyOf: [
+                {
+                    type: 'string',
+                    format: 'date-time'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Delivery Date'
+        },
+        consignment_number: {
+            anyOf: [
+                {
+                    type: 'string',
+                    maxLength: 100
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Consignment Number'
+        },
+        consignment_date: {
+            anyOf: [
+                {
+                    type: 'string',
+                    format: 'date-time'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Consignment Date'
+        },
+        batch_number: {
+            anyOf: [
+                {
+                    type: 'string',
+                    maxLength: 100
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Batch Number'
+        },
+        driver_name: {
+            anyOf: [
+                {
+                    type: 'string',
+                    maxLength: 255
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Driver Name'
+        },
+        vehicle_reg_number: {
+            anyOf: [
+                {
+                    type: 'string',
+                    maxLength: 100
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Vehicle Reg Number'
+        },
+        department: {
+            anyOf: [
+                {
+                    type: 'string',
+                    maxLength: 255
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Department'
+        },
+        section: {
+            anyOf: [
+                {
+                    type: 'string',
+                    maxLength: 255
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Section'
+        },
+        currency: {
+            type: 'string',
+            maxLength: 10,
+            title: 'Currency',
+            default: 'KES'
+        },
+        total_amount: {
+            type: 'string',
+            pattern: '^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d{0,2}0*$',
+            title: 'Total Amount',
+            default: '0'
+        },
+        is_approved: {
+            type: 'boolean',
+            title: 'Is Approved',
+            default: false
+        },
+        approved_at: {
+            anyOf: [
+                {
+                    type: 'string',
+                    format: 'date-time'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Approved At'
+        },
+        approved_by_id: {
+            anyOf: [
+                {
+                    type: 'string',
+                    format: 'uuid'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Approved By Id'
+        },
+        payment_type: {
+            type: 'string',
+            maxLength: 20,
+            title: 'Payment Type',
+            default: 'Cash'
+        },
+        credit_terms: {
+            anyOf: [
+                {
+                    type: 'string',
+                    maxLength: 50
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Credit Terms'
+        },
+        requires_approval: {
+            type: 'boolean',
+            title: 'Requires Approval',
+            default: false
+        },
+        creates_debt: {
+            type: 'boolean',
+            title: 'Creates Debt',
+            default: false
+        },
+        notes: {
+            anyOf: [
+                {
+                    type: 'string',
+                    maxLength: 2000
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Notes'
+        },
+        id: {
+            type: 'string',
+            format: 'uuid',
+            title: 'Id'
+        },
+        grn_number: {
+            type: 'string',
+            title: 'Grn Number'
+        },
+        created_at: {
+            type: 'string',
+            format: 'date-time',
+            title: 'Created At'
+        },
+        supplier_name: {
+            anyOf: [
+                {
+                    type: 'string'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Supplier Name'
+        },
+        transporter_name: {
+            anyOf: [
+                {
+                    type: 'string'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Transporter Name'
+        },
+        items_count: {
+            type: 'integer',
+            title: 'Items Count',
+            default: 0
+        }
+    },
+    type: 'object',
+    required: ['supplier_id', 'id', 'grn_number', 'created_at'],
+    title: 'GRNPublic'
+} as const;
+
+export const GRNPublicWithItemsSchema = {
+    properties: {
+        supplier_id: {
+            type: 'string',
+            format: 'uuid',
+            title: 'Supplier Id'
+        },
+        transporter_id: {
+            anyOf: [
+                {
+                    type: 'string',
+                    format: 'uuid'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Transporter Id'
+        },
+        transaction_date: {
+            type: 'string',
+            format: 'date-time',
+            title: 'Transaction Date'
+        },
+        goods_receipt_date: {
+            type: 'string',
+            format: 'date-time',
+            title: 'Goods Receipt Date'
+        },
+        shipping_address: {
+            anyOf: [
+                {
+                    type: 'string',
+                    maxLength: 500
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Shipping Address'
+        },
+        delivery_number: {
+            anyOf: [
+                {
+                    type: 'string',
+                    maxLength: 100
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Delivery Number'
+        },
+        delivery_date: {
+            anyOf: [
+                {
+                    type: 'string',
+                    format: 'date-time'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Delivery Date'
+        },
+        consignment_number: {
+            anyOf: [
+                {
+                    type: 'string',
+                    maxLength: 100
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Consignment Number'
+        },
+        consignment_date: {
+            anyOf: [
+                {
+                    type: 'string',
+                    format: 'date-time'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Consignment Date'
+        },
+        batch_number: {
+            anyOf: [
+                {
+                    type: 'string',
+                    maxLength: 100
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Batch Number'
+        },
+        driver_name: {
+            anyOf: [
+                {
+                    type: 'string',
+                    maxLength: 255
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Driver Name'
+        },
+        vehicle_reg_number: {
+            anyOf: [
+                {
+                    type: 'string',
+                    maxLength: 100
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Vehicle Reg Number'
+        },
+        department: {
+            anyOf: [
+                {
+                    type: 'string',
+                    maxLength: 255
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Department'
+        },
+        section: {
+            anyOf: [
+                {
+                    type: 'string',
+                    maxLength: 255
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Section'
+        },
+        currency: {
+            type: 'string',
+            maxLength: 10,
+            title: 'Currency',
+            default: 'KES'
+        },
+        total_amount: {
+            type: 'string',
+            pattern: '^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d{0,2}0*$',
+            title: 'Total Amount',
+            default: '0'
+        },
+        is_approved: {
+            type: 'boolean',
+            title: 'Is Approved',
+            default: false
+        },
+        approved_at: {
+            anyOf: [
+                {
+                    type: 'string',
+                    format: 'date-time'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Approved At'
+        },
+        approved_by_id: {
+            anyOf: [
+                {
+                    type: 'string',
+                    format: 'uuid'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Approved By Id'
+        },
+        payment_type: {
+            type: 'string',
+            maxLength: 20,
+            title: 'Payment Type',
+            default: 'Cash'
+        },
+        credit_terms: {
+            anyOf: [
+                {
+                    type: 'string',
+                    maxLength: 50
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Credit Terms'
+        },
+        requires_approval: {
+            type: 'boolean',
+            title: 'Requires Approval',
+            default: false
+        },
+        creates_debt: {
+            type: 'boolean',
+            title: 'Creates Debt',
+            default: false
+        },
+        notes: {
+            anyOf: [
+                {
+                    type: 'string',
+                    maxLength: 2000
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Notes'
+        },
+        id: {
+            type: 'string',
+            format: 'uuid',
+            title: 'Id'
+        },
+        grn_number: {
+            type: 'string',
+            title: 'Grn Number'
+        },
+        created_at: {
+            type: 'string',
+            format: 'date-time',
+            title: 'Created At'
+        },
+        supplier_name: {
+            anyOf: [
+                {
+                    type: 'string'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Supplier Name'
+        },
+        transporter_name: {
+            anyOf: [
+                {
+                    type: 'string'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Transporter Name'
+        },
+        items_count: {
+            type: 'integer',
+            title: 'Items Count',
+            default: 0
+        },
+        items: {
+            items: {
+                '$ref': '#/components/schemas/GRNItemPublic'
+            },
+            type: 'array',
+            title: 'Items',
+            default: []
+        }
+    },
+    type: 'object',
+    required: ['supplier_id', 'id', 'grn_number', 'created_at'],
+    title: 'GRNPublicWithItems'
+} as const;
+
+export const GRNUpdateSchema = {
+    properties: {
+        supplier_id: {
+            anyOf: [
+                {
+                    type: 'string',
+                    format: 'uuid'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Supplier Id'
+        },
+        transporter_id: {
+            anyOf: [
+                {
+                    type: 'string',
+                    format: 'uuid'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Transporter Id'
+        },
+        transaction_date: {
+            anyOf: [
+                {
+                    type: 'string',
+                    format: 'date-time'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Transaction Date'
+        },
+        goods_receipt_date: {
+            anyOf: [
+                {
+                    type: 'string',
+                    format: 'date-time'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Goods Receipt Date'
+        },
+        shipping_address: {
+            anyOf: [
+                {
+                    type: 'string'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Shipping Address'
+        },
+        delivery_number: {
+            anyOf: [
+                {
+                    type: 'string'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Delivery Number'
+        },
+        delivery_date: {
+            anyOf: [
+                {
+                    type: 'string',
+                    format: 'date-time'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Delivery Date'
+        },
+        consignment_number: {
+            anyOf: [
+                {
+                    type: 'string'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Consignment Number'
+        },
+        consignment_date: {
+            anyOf: [
+                {
+                    type: 'string',
+                    format: 'date-time'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Consignment Date'
+        },
+        batch_number: {
+            anyOf: [
+                {
+                    type: 'string'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Batch Number'
+        },
+        driver_name: {
+            anyOf: [
+                {
+                    type: 'string'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Driver Name'
+        },
+        vehicle_reg_number: {
+            anyOf: [
+                {
+                    type: 'string'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Vehicle Reg Number'
+        },
+        department: {
+            anyOf: [
+                {
+                    type: 'string'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Department'
+        },
+        section: {
+            anyOf: [
+                {
+                    type: 'string'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Section'
+        },
+        currency: {
+            anyOf: [
+                {
+                    type: 'string'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Currency'
+        },
+        total_amount: {
+            anyOf: [
+                {
+                    type: 'number'
+                },
+                {
+                    type: 'string',
+                    pattern: '^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Total Amount'
+        },
+        is_approved: {
+            anyOf: [
+                {
+                    type: 'boolean'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Is Approved'
+        },
+        notes: {
+            anyOf: [
+                {
+                    type: 'string'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Notes'
+        }
+    },
+    type: 'object',
+    title: 'GRNUpdate'
+} as const;
+
+export const GRNsPublicSchema = {
+    properties: {
+        data: {
+            items: {
+                '$ref': '#/components/schemas/GRNPublic'
+            },
+            type: 'array',
+            title: 'Data'
+        },
+        count: {
+            type: 'integer',
+            title: 'Count'
+        }
+    },
+    type: 'object',
+    required: ['data', 'count'],
+    title: 'GRNsPublic'
+} as const;
+
 export const HTTPValidationErrorSchema = {
     properties: {
         detail: {
@@ -1585,6 +2899,139 @@ export const NewPasswordSchema = {
     type: 'object',
     required: ['token', 'new_password'],
     title: 'NewPassword'
+} as const;
+
+export const NotificationPublicSchema = {
+    properties: {
+        user_id: {
+            type: 'string',
+            format: 'uuid',
+            title: 'User Id'
+        },
+        notification_type: {
+            type: 'string',
+            maxLength: 50,
+            title: 'Notification Type'
+        },
+        title: {
+            type: 'string',
+            maxLength: 200,
+            title: 'Title'
+        },
+        message: {
+            type: 'string',
+            maxLength: 2000,
+            title: 'Message'
+        },
+        priority: {
+            type: 'string',
+            maxLength: 20,
+            title: 'Priority',
+            default: 'info'
+        },
+        is_read: {
+            type: 'boolean',
+            title: 'Is Read',
+            default: false
+        },
+        read_at: {
+            anyOf: [
+                {
+                    type: 'string',
+                    format: 'date-time'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Read At'
+        },
+        link_url: {
+            anyOf: [
+                {
+                    type: 'string',
+                    maxLength: 500
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Link Url'
+        },
+        link_text: {
+            anyOf: [
+                {
+                    type: 'string',
+                    maxLength: 100
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Link Text'
+        },
+        extra_data: {
+            anyOf: [
+                {
+                    additionalProperties: true,
+                    type: 'object'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Extra Data'
+        },
+        expires_at: {
+            anyOf: [
+                {
+                    type: 'string',
+                    format: 'date-time'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Expires At'
+        },
+        id: {
+            type: 'string',
+            format: 'uuid',
+            title: 'Id'
+        },
+        created_at: {
+            type: 'string',
+            format: 'date-time',
+            title: 'Created At'
+        }
+    },
+    type: 'object',
+    required: ['user_id', 'notification_type', 'title', 'message', 'id', 'created_at'],
+    title: 'NotificationPublic'
+} as const;
+
+export const NotificationsPublicSchema = {
+    properties: {
+        data: {
+            items: {
+                '$ref': '#/components/schemas/NotificationPublic'
+            },
+            type: 'array',
+            title: 'Data'
+        },
+        count: {
+            type: 'integer',
+            title: 'Count'
+        },
+        unread_count: {
+            type: 'integer',
+            title: 'Unread Count',
+            default: 0
+        }
+    },
+    type: 'object',
+    required: ['data', 'count'],
+    title: 'NotificationsPublic'
 } as const;
 
 export const PaymentDataSchema = {
@@ -1902,6 +3349,27 @@ export const ProductCreateSchema = {
             ],
             title: 'Reorder Level'
         },
+        reorder_quantity: {
+            anyOf: [
+                {
+                    type: 'number',
+                    minimum: 0
+                },
+                {
+                    type: 'string',
+                    pattern: '^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d{0,2}0*$'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Reorder Quantity'
+        },
+        enable_reorder_alerts: {
+            type: 'boolean',
+            title: 'Enable Reorder Alerts',
+            default: false
+        },
         category_id: {
             type: 'string',
             format: 'uuid',
@@ -1976,6 +3444,23 @@ export const ProductPublicSchema = {
                 }
             ],
             title: 'Reorder Level'
+        },
+        reorder_quantity: {
+            anyOf: [
+                {
+                    type: 'string',
+                    pattern: '^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d{0,2}0*$'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Reorder Quantity'
+        },
+        enable_reorder_alerts: {
+            type: 'boolean',
+            title: 'Enable Reorder Alerts',
+            default: false
         },
         category_id: {
             type: 'string',
@@ -2143,6 +3628,33 @@ export const ProductUpdateSchema = {
             ],
             title: 'Reorder Level'
         },
+        reorder_quantity: {
+            anyOf: [
+                {
+                    type: 'number',
+                    minimum: 0
+                },
+                {
+                    type: 'string',
+                    pattern: '^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d{0,2}0*$'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Reorder Quantity'
+        },
+        enable_reorder_alerts: {
+            anyOf: [
+                {
+                    type: 'boolean'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Enable Reorder Alerts'
+        },
         category_id: {
             anyOf: [
                 {
@@ -2201,6 +3713,344 @@ export const ProductsPublicSchema = {
     type: 'object',
     required: ['data', 'count'],
     title: 'ProductsPublic'
+} as const;
+
+export const ReminderLogPublicSchema = {
+    properties: {
+        reminder_setting_id: {
+            anyOf: [
+                {
+                    type: 'string',
+                    format: 'uuid'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Reminder Setting Id'
+        },
+        user_id: {
+            type: 'string',
+            format: 'uuid',
+            title: 'User Id'
+        },
+        sent_to_email: {
+            type: 'string',
+            maxLength: 255,
+            title: 'Sent To Email'
+        },
+        sent_at: {
+            type: 'string',
+            format: 'date-time',
+            title: 'Sent At'
+        },
+        status: {
+            type: 'string',
+            maxLength: 20,
+            title: 'Status'
+        },
+        error_message: {
+            anyOf: [
+                {
+                    type: 'string',
+                    maxLength: 2000
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Error Message'
+        },
+        items_included: {
+            type: 'integer',
+            title: 'Items Included',
+            default: 0
+        },
+        subject_line: {
+            anyOf: [
+                {
+                    type: 'string',
+                    maxLength: 500
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Subject Line'
+        },
+        extra_data: {
+            anyOf: [
+                {
+                    additionalProperties: true,
+                    type: 'object'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Extra Data'
+        },
+        id: {
+            type: 'string',
+            format: 'uuid',
+            title: 'Id'
+        },
+        created_at: {
+            type: 'string',
+            format: 'date-time',
+            title: 'Created At'
+        }
+    },
+    type: 'object',
+    required: ['user_id', 'sent_to_email', 'status', 'id', 'created_at'],
+    title: 'ReminderLogPublic'
+} as const;
+
+export const ReminderLogsPublicSchema = {
+    properties: {
+        data: {
+            items: {
+                '$ref': '#/components/schemas/ReminderLogPublic'
+            },
+            type: 'array',
+            title: 'Data'
+        },
+        count: {
+            type: 'integer',
+            title: 'Count'
+        }
+    },
+    type: 'object',
+    required: ['data', 'count'],
+    title: 'ReminderLogsPublic'
+} as const;
+
+export const ReminderSettingCreateSchema = {
+    properties: {
+        user_id: {
+            type: 'string',
+            format: 'uuid',
+            title: 'User Id'
+        },
+        reminder_type: {
+            type: 'string',
+            maxLength: 50,
+            title: 'Reminder Type'
+        },
+        is_enabled: {
+            type: 'boolean',
+            title: 'Is Enabled',
+            default: true
+        },
+        frequency: {
+            type: 'string',
+            maxLength: 20,
+            title: 'Frequency'
+        },
+        send_time: {
+            type: 'string',
+            maxLength: 8,
+            title: 'Send Time',
+            default: '09:00:00'
+        },
+        send_days: {
+            anyOf: [
+                {
+                    additionalProperties: true,
+                    type: 'object'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Send Days'
+        },
+        filter_criteria: {
+            anyOf: [
+                {
+                    additionalProperties: true,
+                    type: 'object'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Filter Criteria'
+        }
+    },
+    type: 'object',
+    required: ['user_id', 'reminder_type', 'frequency'],
+    title: 'ReminderSettingCreate'
+} as const;
+
+export const ReminderSettingPublicSchema = {
+    properties: {
+        user_id: {
+            type: 'string',
+            format: 'uuid',
+            title: 'User Id'
+        },
+        reminder_type: {
+            type: 'string',
+            maxLength: 50,
+            title: 'Reminder Type'
+        },
+        is_enabled: {
+            type: 'boolean',
+            title: 'Is Enabled',
+            default: true
+        },
+        frequency: {
+            type: 'string',
+            maxLength: 20,
+            title: 'Frequency'
+        },
+        send_time: {
+            type: 'string',
+            maxLength: 8,
+            title: 'Send Time',
+            default: '09:00:00'
+        },
+        send_days: {
+            anyOf: [
+                {
+                    additionalProperties: true,
+                    type: 'object'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Send Days'
+        },
+        filter_criteria: {
+            anyOf: [
+                {
+                    additionalProperties: true,
+                    type: 'object'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Filter Criteria'
+        },
+        last_sent_at: {
+            anyOf: [
+                {
+                    type: 'string',
+                    format: 'date-time'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Last Sent At'
+        },
+        next_send_at: {
+            anyOf: [
+                {
+                    type: 'string',
+                    format: 'date-time'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Next Send At'
+        },
+        id: {
+            type: 'string',
+            format: 'uuid',
+            title: 'Id'
+        }
+    },
+    type: 'object',
+    required: ['user_id', 'reminder_type', 'frequency', 'id'],
+    title: 'ReminderSettingPublic'
+} as const;
+
+export const ReminderSettingUpdateSchema = {
+    properties: {
+        is_enabled: {
+            anyOf: [
+                {
+                    type: 'boolean'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Is Enabled'
+        },
+        frequency: {
+            anyOf: [
+                {
+                    type: 'string'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Frequency'
+        },
+        send_time: {
+            anyOf: [
+                {
+                    type: 'string'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Send Time'
+        },
+        send_days: {
+            anyOf: [
+                {
+                    additionalProperties: true,
+                    type: 'object'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Send Days'
+        },
+        filter_criteria: {
+            anyOf: [
+                {
+                    additionalProperties: true,
+                    type: 'object'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Filter Criteria'
+        }
+    },
+    type: 'object',
+    title: 'ReminderSettingUpdate'
+} as const;
+
+export const ReminderSettingsPublicSchema = {
+    properties: {
+        data: {
+            items: {
+                '$ref': '#/components/schemas/ReminderSettingPublic'
+            },
+            type: 'array',
+            title: 'Data'
+        },
+        count: {
+            type: 'integer',
+            title: 'Count'
+        }
+    },
+    type: 'object',
+    required: ['data', 'count'],
+    title: 'ReminderSettingsPublic'
 } as const;
 
 export const SaleCreateSchema = {
@@ -3269,6 +5119,1026 @@ export const StockSummarySchema = {
     title: 'StockSummary'
 } as const;
 
+export const SupplierCreateSchema = {
+    properties: {
+        name: {
+            type: 'string',
+            maxLength: 255,
+            title: 'Name'
+        },
+        contact_person: {
+            anyOf: [
+                {
+                    type: 'string',
+                    maxLength: 255
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Contact Person'
+        },
+        email: {
+            anyOf: [
+                {
+                    type: 'string',
+                    format: 'email'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Email'
+        },
+        phone: {
+            anyOf: [
+                {
+                    type: 'string',
+                    maxLength: 50
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Phone'
+        },
+        address: {
+            anyOf: [
+                {
+                    type: 'string',
+                    maxLength: 500
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Address'
+        },
+        credit_limit: {
+            anyOf: [
+                {
+                    type: 'number',
+                    minimum: 0
+                },
+                {
+                    type: 'string',
+                    pattern: '^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d{0,2}0*$'
+                }
+            ],
+            title: 'Credit Limit',
+            default: '0'
+        },
+        current_credit_used: {
+            anyOf: [
+                {
+                    type: 'number',
+                    minimum: 0
+                },
+                {
+                    type: 'string',
+                    pattern: '^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d{0,2}0*$'
+                }
+            ],
+            title: 'Current Credit Used',
+            default: '0'
+        },
+        is_active: {
+            type: 'boolean',
+            title: 'Is Active',
+            default: true
+        }
+    },
+    type: 'object',
+    required: ['name'],
+    title: 'SupplierCreate'
+} as const;
+
+export const SupplierDebtCreateSchema = {
+    properties: {
+        supplier_id: {
+            type: 'string',
+            format: 'uuid',
+            title: 'Supplier Id'
+        },
+        grn_id: {
+            type: 'string',
+            format: 'uuid',
+            title: 'Grn Id'
+        },
+        total_amount: {
+            anyOf: [
+                {
+                    type: 'number',
+                    exclusiveMinimum: 0
+                },
+                {
+                    type: 'string',
+                    pattern: '^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d{0,2}0*$'
+                }
+            ],
+            title: 'Total Amount'
+        },
+        payment_terms: {
+            type: 'string',
+            maxLength: 50,
+            title: 'Payment Terms'
+        },
+        credit_period_days: {
+            anyOf: [
+                {
+                    type: 'integer'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Credit Period Days'
+        },
+        invoice_number: {
+            anyOf: [
+                {
+                    type: 'string'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Invoice Number'
+        },
+        invoice_date: {
+            anyOf: [
+                {
+                    type: 'string',
+                    format: 'date-time'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Invoice Date'
+        },
+        due_date: {
+            anyOf: [
+                {
+                    type: 'string',
+                    format: 'date-time'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Due Date'
+        },
+        currency: {
+            type: 'string',
+            maxLength: 10,
+            title: 'Currency',
+            default: 'KES'
+        },
+        notes: {
+            anyOf: [
+                {
+                    type: 'string'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Notes'
+        }
+    },
+    type: 'object',
+    required: ['supplier_id', 'grn_id', 'total_amount', 'payment_terms'],
+    title: 'SupplierDebtCreate'
+} as const;
+
+export const SupplierDebtInstallmentCreateSchema = {
+    properties: {
+        supplier_debt_id: {
+            type: 'string',
+            format: 'uuid',
+            title: 'Supplier Debt Id'
+        },
+        installment_number: {
+            type: 'integer',
+            title: 'Installment Number'
+        },
+        installment_amount: {
+            anyOf: [
+                {
+                    type: 'number',
+                    exclusiveMinimum: 0
+                },
+                {
+                    type: 'string',
+                    pattern: '^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d{0,2}0*$'
+                }
+            ],
+            title: 'Installment Amount'
+        },
+        due_date: {
+            type: 'string',
+            format: 'date-time',
+            title: 'Due Date'
+        },
+        notes: {
+            anyOf: [
+                {
+                    type: 'string'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Notes'
+        }
+    },
+    type: 'object',
+    required: ['supplier_debt_id', 'installment_number', 'installment_amount', 'due_date'],
+    title: 'SupplierDebtInstallmentCreate'
+} as const;
+
+export const SupplierDebtInstallmentPublicSchema = {
+    properties: {
+        supplier_debt_id: {
+            type: 'string',
+            format: 'uuid',
+            title: 'Supplier Debt Id'
+        },
+        installment_number: {
+            type: 'integer',
+            exclusiveMinimum: 0,
+            title: 'Installment Number'
+        },
+        installment_amount: {
+            type: 'string',
+            pattern: '^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d{0,2}0*$',
+            title: 'Installment Amount'
+        },
+        due_date: {
+            type: 'string',
+            format: 'date-time',
+            title: 'Due Date'
+        },
+        amount_paid: {
+            type: 'string',
+            pattern: '^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d{0,2}0*$',
+            title: 'Amount Paid',
+            default: '0'
+        },
+        balance: {
+            type: 'string',
+            pattern: '^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d{0,2}0*$',
+            title: 'Balance'
+        },
+        status: {
+            type: 'string',
+            maxLength: 20,
+            title: 'Status',
+            default: 'pending'
+        },
+        notes: {
+            anyOf: [
+                {
+                    type: 'string',
+                    maxLength: 1000
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Notes'
+        },
+        id: {
+            type: 'string',
+            format: 'uuid',
+            title: 'Id'
+        }
+    },
+    type: 'object',
+    required: ['supplier_debt_id', 'installment_number', 'installment_amount', 'due_date', 'balance', 'id'],
+    title: 'SupplierDebtInstallmentPublic'
+} as const;
+
+export const SupplierDebtInstallmentsPublicSchema = {
+    properties: {
+        data: {
+            items: {
+                '$ref': '#/components/schemas/SupplierDebtInstallmentPublic'
+            },
+            type: 'array',
+            title: 'Data'
+        },
+        count: {
+            type: 'integer',
+            title: 'Count'
+        }
+    },
+    type: 'object',
+    required: ['data', 'count'],
+    title: 'SupplierDebtInstallmentsPublic'
+} as const;
+
+export const SupplierDebtPaymentCreateSchema = {
+    properties: {
+        supplier_debt_id: {
+            type: 'string',
+            format: 'uuid',
+            title: 'Supplier Debt Id'
+        },
+        installment_id: {
+            anyOf: [
+                {
+                    type: 'string',
+                    format: 'uuid'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Installment Id'
+        },
+        payment_amount: {
+            anyOf: [
+                {
+                    type: 'number',
+                    exclusiveMinimum: 0
+                },
+                {
+                    type: 'string',
+                    pattern: '^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d{0,2}0*$'
+                }
+            ],
+            title: 'Payment Amount'
+        },
+        payment_date: {
+            type: 'string',
+            format: 'date-time',
+            title: 'Payment Date'
+        },
+        payment_method_id: {
+            type: 'string',
+            format: 'uuid',
+            title: 'Payment Method Id'
+        },
+        payment_reference: {
+            anyOf: [
+                {
+                    type: 'string',
+                    maxLength: 200
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Payment Reference'
+        },
+        notes: {
+            anyOf: [
+                {
+                    type: 'string',
+                    maxLength: 1000
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Notes'
+        }
+    },
+    type: 'object',
+    required: ['supplier_debt_id', 'payment_amount', 'payment_method_id'],
+    title: 'SupplierDebtPaymentCreate'
+} as const;
+
+export const SupplierDebtPaymentPublicSchema = {
+    properties: {
+        supplier_debt_id: {
+            type: 'string',
+            format: 'uuid',
+            title: 'Supplier Debt Id'
+        },
+        installment_id: {
+            anyOf: [
+                {
+                    type: 'string',
+                    format: 'uuid'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Installment Id'
+        },
+        payment_amount: {
+            type: 'string',
+            pattern: '^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d{0,2}0*$',
+            title: 'Payment Amount'
+        },
+        payment_date: {
+            type: 'string',
+            format: 'date-time',
+            title: 'Payment Date'
+        },
+        payment_method_id: {
+            type: 'string',
+            format: 'uuid',
+            title: 'Payment Method Id'
+        },
+        payment_reference: {
+            anyOf: [
+                {
+                    type: 'string',
+                    maxLength: 200
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Payment Reference'
+        },
+        notes: {
+            anyOf: [
+                {
+                    type: 'string',
+                    maxLength: 1000
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Notes'
+        },
+        id: {
+            type: 'string',
+            format: 'uuid',
+            title: 'Id'
+        },
+        payment_method: {
+            '$ref': '#/components/schemas/PaymentMethodPublic'
+        }
+    },
+    type: 'object',
+    required: ['supplier_debt_id', 'payment_amount', 'payment_method_id', 'id', 'payment_method'],
+    title: 'SupplierDebtPaymentPublic'
+} as const;
+
+export const SupplierDebtPublicSchema = {
+    properties: {
+        supplier_id: {
+            type: 'string',
+            format: 'uuid',
+            title: 'Supplier Id'
+        },
+        grn_id: {
+            type: 'string',
+            format: 'uuid',
+            title: 'Grn Id'
+        },
+        total_amount: {
+            type: 'string',
+            pattern: '^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d{0,2}0*$',
+            title: 'Total Amount'
+        },
+        amount_paid: {
+            type: 'string',
+            pattern: '^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d{0,2}0*$',
+            title: 'Amount Paid',
+            default: '0'
+        },
+        balance: {
+            type: 'string',
+            pattern: '^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d{0,2}0*$',
+            title: 'Balance'
+        },
+        payment_terms: {
+            type: 'string',
+            maxLength: 50,
+            title: 'Payment Terms'
+        },
+        credit_period_days: {
+            anyOf: [
+                {
+                    type: 'integer',
+                    minimum: 0
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Credit Period Days'
+        },
+        invoice_number: {
+            anyOf: [
+                {
+                    type: 'string',
+                    maxLength: 100
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Invoice Number'
+        },
+        invoice_date: {
+            type: 'string',
+            format: 'date-time',
+            title: 'Invoice Date'
+        },
+        due_date: {
+            type: 'string',
+            format: 'date-time',
+            title: 'Due Date'
+        },
+        status: {
+            type: 'string',
+            maxLength: 20,
+            title: 'Status',
+            default: 'pending'
+        },
+        is_overdue: {
+            type: 'boolean',
+            title: 'Is Overdue',
+            default: false
+        },
+        days_overdue: {
+            type: 'integer',
+            title: 'Days Overdue',
+            default: 0
+        },
+        currency: {
+            type: 'string',
+            maxLength: 10,
+            title: 'Currency',
+            default: 'KES'
+        },
+        notes: {
+            anyOf: [
+                {
+                    type: 'string',
+                    maxLength: 2000
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Notes'
+        },
+        id: {
+            type: 'string',
+            format: 'uuid',
+            title: 'Id'
+        },
+        created_at: {
+            type: 'string',
+            format: 'date-time',
+            title: 'Created At'
+        },
+        supplier_name: {
+            anyOf: [
+                {
+                    type: 'string'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Supplier Name'
+        },
+        grn_number: {
+            anyOf: [
+                {
+                    type: 'string'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Grn Number'
+        }
+    },
+    type: 'object',
+    required: ['supplier_id', 'grn_id', 'total_amount', 'balance', 'payment_terms', 'due_date', 'id', 'created_at'],
+    title: 'SupplierDebtPublic'
+} as const;
+
+export const SupplierDebtPublicWithDetailsSchema = {
+    properties: {
+        supplier_id: {
+            type: 'string',
+            format: 'uuid',
+            title: 'Supplier Id'
+        },
+        grn_id: {
+            type: 'string',
+            format: 'uuid',
+            title: 'Grn Id'
+        },
+        total_amount: {
+            type: 'string',
+            pattern: '^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d{0,2}0*$',
+            title: 'Total Amount'
+        },
+        amount_paid: {
+            type: 'string',
+            pattern: '^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d{0,2}0*$',
+            title: 'Amount Paid',
+            default: '0'
+        },
+        balance: {
+            type: 'string',
+            pattern: '^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d{0,2}0*$',
+            title: 'Balance'
+        },
+        payment_terms: {
+            type: 'string',
+            maxLength: 50,
+            title: 'Payment Terms'
+        },
+        credit_period_days: {
+            anyOf: [
+                {
+                    type: 'integer',
+                    minimum: 0
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Credit Period Days'
+        },
+        invoice_number: {
+            anyOf: [
+                {
+                    type: 'string',
+                    maxLength: 100
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Invoice Number'
+        },
+        invoice_date: {
+            type: 'string',
+            format: 'date-time',
+            title: 'Invoice Date'
+        },
+        due_date: {
+            type: 'string',
+            format: 'date-time',
+            title: 'Due Date'
+        },
+        status: {
+            type: 'string',
+            maxLength: 20,
+            title: 'Status',
+            default: 'pending'
+        },
+        is_overdue: {
+            type: 'boolean',
+            title: 'Is Overdue',
+            default: false
+        },
+        days_overdue: {
+            type: 'integer',
+            title: 'Days Overdue',
+            default: 0
+        },
+        currency: {
+            type: 'string',
+            maxLength: 10,
+            title: 'Currency',
+            default: 'KES'
+        },
+        notes: {
+            anyOf: [
+                {
+                    type: 'string',
+                    maxLength: 2000
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Notes'
+        },
+        id: {
+            type: 'string',
+            format: 'uuid',
+            title: 'Id'
+        },
+        created_at: {
+            type: 'string',
+            format: 'date-time',
+            title: 'Created At'
+        },
+        supplier_name: {
+            anyOf: [
+                {
+                    type: 'string'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Supplier Name'
+        },
+        grn_number: {
+            anyOf: [
+                {
+                    type: 'string'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Grn Number'
+        },
+        installments: {
+            items: {
+                '$ref': '#/components/schemas/SupplierDebtInstallmentPublic'
+            },
+            type: 'array',
+            title: 'Installments',
+            default: []
+        },
+        payments: {
+            items: {
+                '$ref': '#/components/schemas/SupplierDebtPaymentPublic'
+            },
+            type: 'array',
+            title: 'Payments',
+            default: []
+        }
+    },
+    type: 'object',
+    required: ['supplier_id', 'grn_id', 'total_amount', 'balance', 'payment_terms', 'due_date', 'id', 'created_at'],
+    title: 'SupplierDebtPublicWithDetails'
+} as const;
+
+export const SupplierDebtUpdateSchema = {
+    properties: {
+        payment_terms: {
+            anyOf: [
+                {
+                    type: 'string'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Payment Terms'
+        },
+        invoice_number: {
+            anyOf: [
+                {
+                    type: 'string'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Invoice Number'
+        },
+        due_date: {
+            anyOf: [
+                {
+                    type: 'string',
+                    format: 'date-time'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Due Date'
+        },
+        status: {
+            anyOf: [
+                {
+                    type: 'string'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Status'
+        },
+        notes: {
+            anyOf: [
+                {
+                    type: 'string'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Notes'
+        }
+    },
+    type: 'object',
+    title: 'SupplierDebtUpdate'
+} as const;
+
+export const SupplierDebtsPublicSchema = {
+    properties: {
+        data: {
+            items: {
+                '$ref': '#/components/schemas/SupplierDebtPublic'
+            },
+            type: 'array',
+            title: 'Data'
+        },
+        count: {
+            type: 'integer',
+            title: 'Count'
+        }
+    },
+    type: 'object',
+    required: ['data', 'count'],
+    title: 'SupplierDebtsPublic'
+} as const;
+
+export const SupplierPublicSchema = {
+    properties: {
+        name: {
+            type: 'string',
+            maxLength: 255,
+            title: 'Name'
+        },
+        contact_person: {
+            anyOf: [
+                {
+                    type: 'string',
+                    maxLength: 255
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Contact Person'
+        },
+        email: {
+            anyOf: [
+                {
+                    type: 'string',
+                    format: 'email'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Email'
+        },
+        phone: {
+            anyOf: [
+                {
+                    type: 'string',
+                    maxLength: 50
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Phone'
+        },
+        address: {
+            anyOf: [
+                {
+                    type: 'string',
+                    maxLength: 500
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Address'
+        },
+        credit_limit: {
+            type: 'string',
+            pattern: '^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d{0,2}0*$',
+            title: 'Credit Limit',
+            default: '0'
+        },
+        current_credit_used: {
+            type: 'string',
+            pattern: '^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d{0,2}0*$',
+            title: 'Current Credit Used',
+            default: '0'
+        },
+        is_active: {
+            type: 'boolean',
+            title: 'Is Active',
+            default: true
+        },
+        id: {
+            type: 'string',
+            format: 'uuid',
+            title: 'Id'
+        }
+    },
+    type: 'object',
+    required: ['name', 'id'],
+    title: 'SupplierPublic'
+} as const;
+
+export const SupplierUpdateSchema = {
+    properties: {
+        name: {
+            anyOf: [
+                {
+                    type: 'string',
+                    maxLength: 255
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Name'
+        },
+        contact_person: {
+            anyOf: [
+                {
+                    type: 'string',
+                    maxLength: 255
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Contact Person'
+        },
+        email: {
+            anyOf: [
+                {
+                    type: 'string',
+                    format: 'email'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Email'
+        },
+        phone: {
+            anyOf: [
+                {
+                    type: 'string',
+                    maxLength: 50
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Phone'
+        },
+        address: {
+            anyOf: [
+                {
+                    type: 'string',
+                    maxLength: 500
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Address'
+        },
+        is_active: {
+            anyOf: [
+                {
+                    type: 'boolean'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Is Active'
+        }
+    },
+    type: 'object',
+    title: 'SupplierUpdate'
+} as const;
+
+export const SuppliersPublicSchema = {
+    properties: {
+        data: {
+            items: {
+                '$ref': '#/components/schemas/SupplierPublic'
+            },
+            type: 'array',
+            title: 'Data'
+        },
+        count: {
+            type: 'integer',
+            title: 'Count'
+        }
+    },
+    type: 'object',
+    required: ['data', 'count'],
+    title: 'SuppliersPublic'
+} as const;
+
 export const TokenSchema = {
     properties: {
         access_token: {
@@ -3284,6 +6154,204 @@ export const TokenSchema = {
     type: 'object',
     required: ['access_token'],
     title: 'Token'
+} as const;
+
+export const TransporterCreateSchema = {
+    properties: {
+        name: {
+            type: 'string',
+            maxLength: 255,
+            title: 'Name'
+        },
+        contact_person: {
+            anyOf: [
+                {
+                    type: 'string',
+                    maxLength: 255
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Contact Person'
+        },
+        phone: {
+            anyOf: [
+                {
+                    type: 'string',
+                    maxLength: 50
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Phone'
+        },
+        vehicle_registration: {
+            anyOf: [
+                {
+                    type: 'string',
+                    maxLength: 100
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Vehicle Registration'
+        },
+        is_active: {
+            type: 'boolean',
+            title: 'Is Active',
+            default: true
+        }
+    },
+    type: 'object',
+    required: ['name'],
+    title: 'TransporterCreate'
+} as const;
+
+export const TransporterPublicSchema = {
+    properties: {
+        name: {
+            type: 'string',
+            maxLength: 255,
+            title: 'Name'
+        },
+        contact_person: {
+            anyOf: [
+                {
+                    type: 'string',
+                    maxLength: 255
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Contact Person'
+        },
+        phone: {
+            anyOf: [
+                {
+                    type: 'string',
+                    maxLength: 50
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Phone'
+        },
+        vehicle_registration: {
+            anyOf: [
+                {
+                    type: 'string',
+                    maxLength: 100
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Vehicle Registration'
+        },
+        is_active: {
+            type: 'boolean',
+            title: 'Is Active',
+            default: true
+        },
+        id: {
+            type: 'string',
+            format: 'uuid',
+            title: 'Id'
+        }
+    },
+    type: 'object',
+    required: ['name', 'id'],
+    title: 'TransporterPublic'
+} as const;
+
+export const TransporterUpdateSchema = {
+    properties: {
+        name: {
+            anyOf: [
+                {
+                    type: 'string',
+                    maxLength: 255
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Name'
+        },
+        contact_person: {
+            anyOf: [
+                {
+                    type: 'string',
+                    maxLength: 255
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Contact Person'
+        },
+        phone: {
+            anyOf: [
+                {
+                    type: 'string',
+                    maxLength: 50
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Phone'
+        },
+        vehicle_registration: {
+            anyOf: [
+                {
+                    type: 'string',
+                    maxLength: 100
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Vehicle Registration'
+        },
+        is_active: {
+            anyOf: [
+                {
+                    type: 'boolean'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Is Active'
+        }
+    },
+    type: 'object',
+    title: 'TransporterUpdate'
+} as const;
+
+export const TransportersPublicSchema = {
+    properties: {
+        data: {
+            items: {
+                '$ref': '#/components/schemas/TransporterPublic'
+            },
+            type: 'array',
+            title: 'Data'
+        },
+        count: {
+            type: 'integer',
+            title: 'Count'
+        }
+    },
+    type: 'object',
+    required: ['data', 'count'],
+    title: 'TransportersPublic'
 } as const;
 
 export const UpdatePasswordSchema = {

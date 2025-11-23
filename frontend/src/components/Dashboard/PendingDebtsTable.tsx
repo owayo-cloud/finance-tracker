@@ -19,6 +19,7 @@ export function PendingDebtsTable({ isMounted }: PendingDebtsTableProps) {
         border="1px solid"
         borderColor={{ base: "rgba(255, 255, 255, 0.08)", _light: "#e5e7eb" }}
         boxShadow={{ base: "0 2px 4px rgba(0, 0, 0, 0.2)", _light: "0 1px 3px rgba(0, 0, 0, 0.1)" }}
+      
       >
         <Heading 
           size="md" 

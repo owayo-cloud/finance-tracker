@@ -11,7 +11,6 @@ import {
   Table,
   IconButton,
   Badge,
-  Text,
   DrawerRoot,
   DrawerBackdrop,
   DrawerContent,
@@ -53,7 +52,7 @@ function TransportersPage() {
       GrnService.readTransporters({
         skip: 0,
         limit: 1000,
-        name: searchTerm || undefined,
+        search: searchTerm || undefined,
       }),
   });
 
@@ -75,7 +74,7 @@ function TransportersPage() {
   // Update mutation
   const updateMutation = useMutation({
     mutationFn: ({ id, data }: { id: string; data: TransporterUpdate }) =>
-      GrnService.updateTransporter({ id, requestBody: data }),
+      GrnService.updateTransporter({ transporterId: id, requestBody: data }),
     onSuccess: () => {
       showSuccessToast("Transporter updated successfully!");
       queryClient.invalidateQueries({ queryKey: ["transporters"] });
@@ -89,7 +88,7 @@ function TransportersPage() {
 
   // Delete mutation
   const deleteMutation = useMutation({
-    mutationFn: (id: string) => GrnService.deleteTransporter({ id }),
+    mutationFn: (id: string) => GrnService.deleteTransporter({ transporterId: id }),
     onSuccess: () => {
       showSuccessToast("Transporter deleted successfully!");
       queryClient.invalidateQueries({ queryKey: ["transporters"] });
@@ -106,7 +105,7 @@ function TransportersPage() {
       setName(transporter.name);
       setContactPerson(transporter.contact_person || "");
       setPhone(transporter.phone || "");
-      setIsActive(transporter.is_active);
+      setIsActive(transporter.is_active ?? true);
     } else {
       setEditingTransporter(null);
       setName("");

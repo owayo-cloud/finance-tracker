@@ -688,8 +688,17 @@ class DebtBase(SQLModel):
         return self
 
 
-class DebtCreate(DebtBase):
-    pass
+class DebtCreate(SQLModel):
+    """Create a new debt. Balance is calculated automatically from amount - amount_paid."""
+    customer_name: str = Field(max_length=255, index=True)
+    customer_contact: Optional[str] = Field(default=None, max_length=100)
+    sale_id: Optional[uuid.UUID] = Field(default=None, foreign_key="sale.id")
+    amount: Decimal = Field(decimal_places=2, gt=0)
+    amount_paid: Decimal = Field(default=Decimal(0), decimal_places=2, ge=0)
+    debt_date: Optional[datetime] = None  # Will default to now if not provided
+    due_date: Optional[datetime] = None
+    notes: Optional[str] = Field(default=None, max_length=1000)
+    # Note: balance and status are calculated by the backend, not provided in the request
 
 
 class DebtUpdate(SQLModel):
@@ -712,10 +721,12 @@ class Debt(DebtBase, table=True):
     # Relationships
     created_by: User = Relationship(back_populates="debts")
     payments: list["DebtPayment"] = Relationship(back_populates="debt", cascade_delete=True)
+    sale: Optional["Sale"] = Relationship()  # Link to sale if debt is from a sale
 
 
 class DebtPublic(DebtBase):
     id: uuid.UUID
+    sale: Optional["SalePublic"] = None  # Include sale info with product
 
 
 class DebtsPublic(SQLModel):

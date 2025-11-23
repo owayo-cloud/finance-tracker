@@ -178,7 +178,7 @@ function StockEntry() {
               }}
               cursor="pointer"
               transition="all 0.2s"
-              onClick={() => navigate({ to: "/products" })}
+              onClick={() => navigate({ to: "/products", search: { page: 1, search: "", category: "", status: "", pageSize: 25 } })}
             >
               <VStack align="start" gap={2}>
                 <HStack>

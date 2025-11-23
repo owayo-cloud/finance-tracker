@@ -5,10 +5,8 @@
  */
 
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
-import { useEffect } from "react"
 import {
   NotificationsService,
-  type NotificationPublic,
   type NotificationsPublic,
 } from "@/client"
 
@@ -57,7 +55,7 @@ export function useNotifications(options: UseNotificationsOptions = {}) {
   // Mark as read mutation
   const markAsReadMutation = useMutation({
     mutationFn: (notificationId: string) =>
-      NotificationsService.markAsRead({ id: notificationId }),
+      NotificationsService.markAsRead({ notificationId }),
     onSuccess: () => {
       // Invalidate queries to refetch
       queryClient.invalidateQueries({ queryKey: ["notifications"] })
@@ -75,7 +73,7 @@ export function useNotifications(options: UseNotificationsOptions = {}) {
   // Delete notification mutation
   const deleteNotificationMutation = useMutation({
     mutationFn: (notificationId: string) =>
-      NotificationsService.deleteNotification({ id: notificationId }),
+      NotificationsService.deleteNotification({ notificationId }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["notifications"] })
     },

@@ -23,7 +23,6 @@ import {
   DrawerBody,
   DrawerCloseTrigger,
   DrawerContent,
-  DrawerFooter,
   DrawerHeader,
   DrawerRoot,
   DrawerTitle,
@@ -119,7 +118,7 @@ function StockAdjustmentForm({
 
   const [currentStock, setCurrentStock] = useState(0);
   const [reorderLevel, setReorderLevel] = useState(0);
-  const [notes, setNotes] = useState("");
+  const [_notes, setNotes] = useState("");
 
   // Update form when product changes
   useEffect(() => {
@@ -341,7 +340,7 @@ function StockAdjustment() {
   const [selectedProduct, setSelectedProduct] = useState<ProductPublic | null>(null);
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [page, setPage] = useState(1);
-  const [pageSize, setPageSize] = useState(25);
+  const [pageSize] = useState(25);
   const [selectedCategory, setSelectedCategory] = useState("");
   const [selectedStatus, setSelectedStatus] = useState("");
 

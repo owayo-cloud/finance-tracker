@@ -59,14 +59,19 @@ services:
     restart: "no"
     ports:
       - "8000:8000"
+      - "9001:9001"  # Supervisor web interface
     build:
       context: ./backend
+    # Override CMD to use supervisor in development
     # command: sleep infinity  # Infinite loop to keep container alive doing nothing
-    command:
-      - fastapi
-      - run
-      - --reload
-      - "app/main.py"
+    # For development without supervisor:
+    # command:
+    #   - fastapi
+    #   - run
+    #   - --reload
+    #   - "app/main.py"
+    # For development with supervisor (comment out to disable background jobs in dev):
+    command: /usr/bin/supervisord -c /etc/supervisor/conf.d/supervisord.conf
     develop:
       watch:
         - path: ./backend
@@ -80,6 +85,7 @@ services:
     # TODO: remove once coverage is done locally
     volumes:
       - ./backend/htmlcov:/app/htmlcov
+      - supervisor-logs-dev:/var/log/supervisor
     environment:
       SMTP_HOST: "mailcatcher"
       SMTP_PORT: "1025"
@@ -148,3 +154,6 @@ networks:
   traefik-public:
     # For local dev, don't expect an external Traefik network
     external: false
+
+volumes:
+  supervisor-logs-dev:

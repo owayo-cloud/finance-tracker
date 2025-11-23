@@ -82,6 +82,24 @@ export function PaymentModal({
     return Math.max(0, totalPaid - totalAmount)
   }, [totalPaid, totalAmount])
 
+  // Check if payment is sufficient (full payment required if no customer, partial allowed if customer selected)
+  const isPaymentSufficient = useMemo(() => {
+    if (!customerName) {
+      // No customer: require full payment (allow small rounding differences)
+      return totalPaid >= totalAmount - 0.01
+    } else {
+      // Customer selected: allow partial payment (at least some payment required)
+      return totalPaid > 0
+    }
+  }, [totalPaid, totalAmount, customerName])
+
+  const paymentShortfall = useMemo(() => {
+    if (!customerName && totalPaid < totalAmount) {
+      return totalAmount - totalPaid
+    }
+    return 0
+  }, [totalPaid, totalAmount, customerName])
+
   const handleAmountChange = (methodId: string, amount: string) => {
     setPaymentAmounts((prev) => ({
       ...prev,
@@ -456,7 +474,7 @@ export function PaymentModal({
                     color="white"
                     _hover={{ bg: "#16a34a" }}
                     onClick={handleSaveAndPrint}
-                    disabled={totalPaid <= 0 || isProcessing}
+                    disabled={!isPaymentSufficient || isProcessing}
                     loading={isProcessing}
                     flex={1}
                   >
@@ -468,14 +486,19 @@ export function PaymentModal({
                     color="white"
                     _hover={{ bg: "#2563eb" }}
                     onClick={handleSave}
-                    disabled={totalPaid <= 0 || isProcessing}
+                    disabled={!isPaymentSufficient || isProcessing}
                     loading={isProcessing}
                     flex={1}
                   >
                     Save Only
                   </Button>
                 </HStack>
-                {totalPaid < totalAmount && totalPaid > 0 && (
+                {!customerName && paymentShortfall > 0 && (
+                  <Text fontSize="xs" color="red.500" textAlign="center" mt={2} fontWeight="medium">
+                    Full payment required: Please add {formatCurrency(paymentShortfall)} more
+                  </Text>
+                )}
+                {customerName && totalPaid < totalAmount && totalPaid > 0 && (
                   <Text fontSize="xs" color="orange.500" textAlign="center" mt={2}>
                     Partial payment: {formatCurrency(totalAmount - totalPaid)} will be recorded as debt
                   </Text>

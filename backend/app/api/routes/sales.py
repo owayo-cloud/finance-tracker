@@ -177,12 +177,22 @@ def create_sale(
     This is an atomic operation - both sale creation and stock update happen together.
     
     Business Rules:
+    - Till must be open (POS lock)
     - Product must exist and be active
     - Product must have sufficient stock (real-time check)
     - Stock is automatically decremented
     - Sale amount is calculated from product selling price × quantity
     - Each sale is tracked to the cashier who created it (current_user)
     """
+    # POS LOCK: Check if till is open
+    from app.api.utils.till_utils import get_current_open_shift
+    open_shift = get_current_open_shift(session)
+    if not open_shift:
+        raise HTTPException(
+            status_code=403,
+            detail="POS is locked. Please open a till before making sales."
+        )
+    
     # Verify current_user is valid and active
     if not current_user or not current_user.is_active:
         raise HTTPException(status_code=403, detail="User is not active or not authenticated")
@@ -296,12 +306,22 @@ def create_sale_with_multiple_payments(
     This allows splitting a single sale across multiple payment methods (e.g., cash + MPESA).
     
     Business Rules:
+    - Till must be open (POS lock)
     - Product must exist and be active
     - Product must have sufficient stock
     - Sum of all payment amounts must equal total_amount
     - Each payment can have an optional reference number
     - Sale is attributed to the currently authenticated user (current_user)
     """
+    # POS LOCK: Check if till is open
+    from app.api.utils.till_utils import get_current_open_shift
+    open_shift = get_current_open_shift(session)
+    if not open_shift:
+        raise HTTPException(
+            status_code=403,
+            detail="POS is locked. Please open a till before making sales."
+        )
+    
     # Verify current_user is valid and active
     if not current_user or not current_user.is_active:
         raise HTTPException(status_code=403, detail="User is not active or not authenticated")
@@ -389,7 +409,15 @@ def create_sale_with_multiple_payments(
                 status_code=400,
                 detail=f"Total payment amount ({total_payment_amount}) is less than sale total ({sale_total_amount}). Underpayment: {abs(payment_difference)}"
             )
-    # Overpayment is allowed (for change), so we don't error on that
+    # Overpayment validation: Allow reasonable overpayment (up to 20% of total) for change
+    # But flag excessive overpayments as potential errors
+    if payment_difference > Decimal("0.01"):  # Overpayment
+        overpayment_percentage = (payment_difference / sale_total_amount) * 100
+        if overpayment_percentage > 20:  # More than 20% overpayment
+            raise HTTPException(
+                status_code=400,
+                detail=f"Excessive overpayment detected: {payment_difference} ({overpayment_percentage:.1f}% of total). Please verify the payment amount."
+            )
     
     # Calculate total_amount from selling price if not provided
     if sale_in.total_amount is None or sale_in.total_amount == 0:

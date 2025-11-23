@@ -1,5 +1,6 @@
 import { Box, Flex, Icon, Text } from "@chakra-ui/react"
-import { useQueryClient } from "@tanstack/react-query"
+import { Tooltip } from "../ui/tooltip"
+import { useQueryClient, useQuery } from "@tanstack/react-query"
 import { Link as RouterLink, useLocation } from "@tanstack/react-router"
 import { useState } from "react"
 import { 
@@ -17,12 +18,20 @@ import {
   FiCreditCard,
   FiTag,
   FiTruck,
-  FiUserCheck
+  FiUserCheck,
+  FiLock
 } from "react-icons/fi"
 import { TbReceiptDollar } from "react-icons/tb"
 import type { IconType } from "react-icons/lib"
 
 import type { UserPublic } from "@/client"
+
+const API_BASE = import.meta.env.VITE_API_URL || ""
+
+const getAuthHeaders = () => ({
+  "Content-Type": "application/json",
+  Authorization: `Bearer ${localStorage.getItem("access_token") || ""}`,
+})
 
 interface MenuItem {
   icon: IconType
@@ -130,6 +139,27 @@ const SidebarItems = ({ onClose, isCollapsed = false }: SidebarItemsProps) => {
     Purchases: location.pathname === "/grn" || location.pathname === "/stock-entry" || location.pathname === "/suppliers" || location.pathname === "/transporters",
     Products: location.pathname === "/products" || location.pathname === "/stock-adjustment"
   })
+
+  // Check till status for POS link
+  const { data: tillStatus } = useQuery({
+    queryKey: ["till-status"],
+    queryFn: async () => {
+      const response = await fetch(`${API_BASE}/api/v1/till/status`, {
+        headers: getAuthHeaders(),
+      })
+      if (!response.ok) {
+        if (response.status === 404) {
+          return { is_open: false }
+        }
+        return { is_open: false }
+      }
+      return response.json()
+    },
+    refetchInterval: 5000, // Check every 5 seconds
+    enabled: true,
+  })
+
+  const isTillOpen = tillStatus?.is_open === true
 
   const filteredItems = menuItems.filter(
     (item) => !item.adminOnly || currentUser?.is_superuser
@@ -241,46 +271,76 @@ const SidebarItems = ({ onClose, isCollapsed = false }: SidebarItemsProps) => {
               >
               {item.submenu?.map((subItem) => {
                 const isSubActive = location.pathname === subItem.path
+                // Check if this is the POS link and if till is open
+                const isPOSLink = subItem.path === "/sales"
+                const isPOSDisabled = isPOSLink && !isTillOpen
+                
+                const menuItem = (
+                  <Flex
+                    gap={2.5}
+                    px={4}
+                    py={2}
+                    mx={1}
+                    mb={0.5}
+                    borderRadius="md"
+                    transition="all 0.2s"
+                    cursor={isPOSDisabled ? "not-allowed" : "pointer"}
+                    opacity={isPOSDisabled ? 0.5 : 1}
+                    onClick={isPOSDisabled ? (e) => e.preventDefault() : undefined}
+                    _hover={
+                      isPOSDisabled
+                        ? {}
+                        : {
+                            bg: isSubActive ? { base: "rgba(88, 28, 135, 0.3)", _light: "rgba(88, 28, 135, 0.15)" } : { base: "rgba(255, 255, 255, 0.05)", _light: "#f3f4f6" },
+                            transform: "translateX(2px)",
+                          }
+                    }
+                    bg={isSubActive ? { base: "rgba(88, 28, 135, 0.3)", _light: "rgba(88, 28, 135, 0.15)" } : isPOSDisabled ? { base: "rgba(0, 0, 0, 0.1)", _light: "rgba(0, 0, 0, 0.05)" } : "transparent"}
+                    color={isSubActive ? { base: "#ffffff", _light: "#581c87" } : isPOSDisabled ? { base: "#6b7280", _light: "#9ca3af" } : { base: "#9ca3af", _light: "#6b7280" }}
+                    alignItems="center"
+                    fontSize="sm"
+                    fontWeight={isSubActive ? "600" : "500"}
+                    position="relative"
+                    _before={isSubActive ? {
+                      content: '""',
+                      position: "absolute",
+                      left: 0,
+                      top: "50%",
+                      transform: "translateY(-50%)",
+                      width: "3px",
+                      height: "14px",
+                      bg: "#14b8a6",
+                      borderRadius: "0 2px 2px 0",
+                    } : undefined}
+                  >
+                    {isPOSDisabled && (
+                      <Icon 
+                        as={FiLock}
+                        fontSize="14px"
+                        color="red.500"
+                        mr={-1}
+                      />
+                    )}
+                    <Icon 
+                      as={getSubmenuIcon(subItem.title)}
+                      fontSize="16px"
+                      color={isSubActive ? "#14b8a6" : getIconColor(item.title, false)}
+                    />
+                    <Text>{subItem.title}</Text>
+                  </Flex>
+                )
+
+                if (isPOSDisabled) {
+                  return (
+                    <Tooltip key={subItem.path} content="Till not yet opened" openDelay={300}>
+                      <Box>{menuItem}</Box>
+                    </Tooltip>
+                  )
+                }
+
                 return (
                   <RouterLink key={subItem.path} to={subItem.path as any} onClick={onClose}>
-                      <Flex
-                        gap={2.5}
-                        px={4}
-                        py={2}
-                        mx={1}
-                        mb={0.5}
-                        borderRadius="md"
-                        transition="all 0.2s"
-                        cursor="pointer"
-                        _hover={{
-                          bg: isSubActive ? { base: "rgba(88, 28, 135, 0.3)", _light: "rgba(88, 28, 135, 0.15)" } : { base: "rgba(255, 255, 255, 0.05)", _light: "#f3f4f6" },
-                          transform: "translateX(2px)",
-                        }}
-                        bg={isSubActive ? { base: "rgba(88, 28, 135, 0.3)", _light: "rgba(88, 28, 135, 0.15)" } : "transparent"}
-                        color={isSubActive ? { base: "#ffffff", _light: "#581c87" } : { base: "#9ca3af", _light: "#6b7280" }}
-                        alignItems="center"
-                        fontSize="sm"
-                        fontWeight={isSubActive ? "600" : "500"}
-                        position="relative"
-                        _before={isSubActive ? {
-                          content: '""',
-                          position: "absolute",
-                          left: 0,
-                          top: "50%",
-                          transform: "translateY(-50%)",
-                          width: "3px",
-                          height: "14px",
-                          bg: "#14b8a6",
-                          borderRadius: "0 2px 2px 0",
-                        } : undefined}
-                      >
-                        <Icon 
-                          as={getSubmenuIcon(subItem.title)}
-                          fontSize="16px"
-                          color={isSubActive ? "#14b8a6" : getIconColor(item.title, false)}
-                        />
-                        <Text>{subItem.title}</Text>
-                      </Flex>
+                    {menuItem}
                   </RouterLink>
                 )
               })}

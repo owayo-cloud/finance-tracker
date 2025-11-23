@@ -92,6 +92,27 @@ class User(UserBase, table=True):
     notifications: list["Notification"] = Relationship(back_populates="user")
     reminder_settings: list["ReminderSetting"] = Relationship(back_populates="user")
     reminder_logs: list["ReminderLog"] = Relationship(back_populates="user")
+    opened_till_shifts: list["TillShift"] = Relationship(
+        back_populates="opened_by",
+        sa_relationship_kwargs={
+            "foreign_keys": "[TillShift.opened_by_id]",
+            "primaryjoin": "TillShift.opened_by_id == User.id"
+        }
+    )
+    closed_till_shifts: list["TillShift"] = Relationship(
+        back_populates="closed_by",
+        sa_relationship_kwargs={
+            "foreign_keys": "[TillShift.closed_by_id]",
+            "primaryjoin": "TillShift.closed_by_id == User.id"
+        }
+    )
+    cashier_variances: list["CashierVariance"] = Relationship(
+        back_populates="cashier",
+        sa_relationship_kwargs={
+            "foreign_keys": "[CashierVariance.cashier_id]",
+            "primaryjoin": "CashierVariance.cashier_id == User.id"
+        }
+    )
 
 
 
@@ -446,6 +467,7 @@ class PaymentMethod(PaymentMethodBase, table=True):
     sales: list["Sale"] = Relationship(back_populates="payment_method")
     debt_payments: list["DebtPayment"] = Relationship(back_populates="payment_method")
     supplier_debt_payments: list["SupplierDebtPayment"] = Relationship(back_populates="payment_method")
+    payment_reconciliations: list["PaymentMethodReconciliation"] = Relationship(back_populates="payment_method")
 
 
 class PaymentMethodPublic(PaymentMethodBase):
@@ -795,11 +817,14 @@ class ShiftReconciliation(ShiftReconciliationBase, table=True):
     __tablename__ = "shift_reconciliation"
     id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
     created_by_id: uuid.UUID = Field(foreign_key="user.id")
+    till_shift_id: Optional[uuid.UUID] = Field(default=None, foreign_key="till_shift.id")
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
     updated_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
     
     # Relationships
     created_by: User = Relationship(back_populates="shift_reconciliations")
+    till_shift: Optional["TillShift"] = Relationship(back_populates="reconciliation")
+    payment_reconciliations: list["PaymentMethodReconciliation"] = Relationship(back_populates="shift_reconciliation")
 
 
 class ShiftReconciliationPublic(ShiftReconciliationBase):
@@ -810,6 +835,159 @@ class ShiftReconciliationPublic(ShiftReconciliationBase):
 class ShiftReconciliationsPublic(SQLModel):
     data: list[ShiftReconciliationPublic]
     count: int
+
+
+# ==================== TILL/SHIFT MODELS ====================
+
+class TillShiftBase(SQLModel):
+    """Base model for till shift (opening/closing)"""
+    shift_type: str = Field(max_length=20)  # "day" or "night"
+    opening_cash_float: Decimal = Field(decimal_places=2, ge=0)
+    opening_balance: Optional[Decimal] = Field(default=None, decimal_places=2, ge=0)  # Balance left by previous cashier (optional)
+    opening_time: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    closing_time: Optional[datetime] = None
+    closing_cash_float: Optional[Decimal] = Field(default=None, decimal_places=2, ge=0)
+    status: str = Field(default="open", max_length=20)  # "open", "closed", "reconciled"
+    notes: Optional[str] = Field(default=None, max_length=2000)
+
+
+class TillShiftCreate(SQLModel):
+    """Create a new till shift"""
+    shift_type: str = Field(max_length=20)  # "day" or "night"
+    opening_cash_float: Decimal = Field(decimal_places=2, ge=0)
+    opening_balance: Optional[Decimal] = Field(default=None, decimal_places=2, ge=0)  # Balance left by previous cashier (optional)
+    notes: Optional[str] = None
+
+
+class TillShiftUpdate(SQLModel):
+    """Update till shift (for closing)"""
+    closing_cash_float: Optional[Decimal] = Field(default=None, decimal_places=2, ge=0)
+    notes: Optional[str] = None
+    status: Optional[str] = None
+
+
+class TillShift(TillShiftBase, table=True):
+    """Till shift tracking"""
+    __tablename__ = "till_shift"
+    id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
+    opened_by_id: uuid.UUID = Field(foreign_key="user.id")
+    closed_by_id: Optional[uuid.UUID] = Field(default=None, foreign_key="user.id")
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    updated_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    
+    # Relationships
+    opened_by: "User" = Relationship(
+        sa_relationship_kwargs={
+            "foreign_keys": "[TillShift.opened_by_id]",
+            "primaryjoin": "TillShift.opened_by_id == User.id"
+        }
+    )
+    closed_by: Optional["User"] = Relationship(
+        sa_relationship_kwargs={
+            "foreign_keys": "[TillShift.closed_by_id]",
+            "primaryjoin": "TillShift.closed_by_id == User.id"
+        }
+    )
+    reconciliation: Optional["ShiftReconciliation"] = Relationship(back_populates="till_shift")
+    variances: list["CashierVariance"] = Relationship(back_populates="till_shift")
+
+
+class TillShiftPublic(TillShiftBase):
+    """Public model for till shift"""
+    id: uuid.UUID
+    opened_by_id: uuid.UUID
+    closed_by_id: Optional[uuid.UUID]
+    opened_by_name: Optional[str] = None
+    closed_by_name: Optional[str] = None
+    created_at: datetime
+    updated_at: datetime
+
+
+class TillShiftsPublic(SQLModel):
+    data: list[TillShiftPublic]
+    count: int
+
+
+# ==================== PAYMENT METHOD RECONCILIATION MODELS ====================
+
+class PaymentMethodReconciliationBase(SQLModel):
+    """Payment method reconciliation for a shift"""
+    payment_method_id: uuid.UUID = Field(foreign_key="payment_method.id")
+    system_count: Decimal = Field(decimal_places=2, ge=0)  # Auto-calculated from sales
+    physical_count: Decimal = Field(decimal_places=2, ge=0)  # Entered by cashier
+    variance: Decimal = Field(decimal_places=2)  # physical_count - system_count (can be negative)
+
+
+class PaymentMethodReconciliationCreate(PaymentMethodReconciliationBase):
+    pass
+
+
+class PaymentMethodReconciliation(PaymentMethodReconciliationBase, table=True):
+    """Payment method reconciliation record"""
+    __tablename__ = "payment_method_reconciliation"
+    id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
+    shift_reconciliation_id: uuid.UUID = Field(foreign_key="shift_reconciliation.id")
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    
+    # Relationships
+    payment_method: PaymentMethod = Relationship()
+    shift_reconciliation: "ShiftReconciliation" = Relationship(back_populates="payment_reconciliations")
+
+
+class PaymentMethodReconciliationPublic(PaymentMethodReconciliationBase):
+    id: uuid.UUID
+    payment_method_name: Optional[str] = None
+
+
+# ==================== CASHIER VARIANCE MODELS ====================
+
+class CashierVarianceBase(SQLModel):
+    """Cashier variance tracking"""
+    till_shift_id: uuid.UUID = Field(foreign_key="till_shift.id")
+    cashier_id: uuid.UUID = Field(foreign_key="user.id")
+    total_variance: Decimal = Field(decimal_places=2)  # Sum of all payment method variances
+    variance_type: str = Field(max_length=20)  # "shortage", "overage", "none"
+    notes: Optional[str] = Field(default=None, max_length=2000)
+
+
+class CashierVarianceCreate(SQLModel):
+    """Create cashier variance record"""
+    till_shift_id: uuid.UUID
+    cashier_id: uuid.UUID
+    total_variance: Decimal
+    variance_type: str
+    notes: Optional[str] = None
+
+
+class CashierVariance(CashierVarianceBase, table=True):
+    """Cashier variance record"""
+    __tablename__ = "cashier_variance"
+    id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    updated_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    
+    # Relationships
+    till_shift: TillShift = Relationship(back_populates="variances")
+    cashier: "User" = Relationship(
+        sa_relationship_kwargs={
+            "foreign_keys": "[CashierVariance.cashier_id]",
+            "primaryjoin": "CashierVariance.cashier_id == User.id"
+        }
+    )
+
+
+class CashierVariancePublic(CashierVarianceBase):
+    id: uuid.UUID
+    cashier_name: Optional[str] = None
+    shift_type: Optional[str] = None
+    created_at: datetime
+
+
+class CashierVariancesPublic(SQLModel):
+    data: list[CashierVariancePublic]
+    count: int
+    total_shortage: Decimal = Field(default=Decimal(0), decimal_places=2)
+    total_overage: Decimal = Field(default=Decimal(0), decimal_places=2)
 
 
 # ==================== BULK IMPORT MODELS ====================

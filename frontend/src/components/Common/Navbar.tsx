@@ -1,7 +1,7 @@
-import { Flex, useBreakpointValue, HStack, Text, Box, Input, IconButton, Icon, VStack } from "@chakra-ui/react"
+import { Flex, useBreakpointValue, HStack, Text, Box, IconButton, Icon, VStack } from "@chakra-ui/react"
 import { Link } from "@tanstack/react-router"
 import { FaBars } from "react-icons/fa"
-import { FiGrid, FiMail, FiBell, FiChevronDown } from "react-icons/fi"
+import { FiGrid, FiMail, FiChevronDown } from "react-icons/fi"
 
 import useAuth from "@/hooks/useAuth"
 import { getUserInitials } from "@/utils"

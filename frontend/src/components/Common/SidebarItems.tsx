@@ -1,5 +1,6 @@
 import { Box, Flex, Icon, Text } from "@chakra-ui/react"
 import { Tooltip } from "../ui/tooltip"
+import { MenuRoot, MenuTrigger, MenuContent, MenuItem } from "../ui/menu"
 import { useQueryClient, useQuery } from "@tanstack/react-query"
 import { Link as RouterLink, useLocation } from "@tanstack/react-router"
 import { useState } from "react"
@@ -80,7 +81,7 @@ const menuItems: MenuItem[] = [
       { title: "Categories", path: "/expense-categories" }
     ]
   },
-  { icon: FiTrendingUp, title: "Debts", path: "/debts", adminOnly: true },
+  { icon: FiTrendingUp, title: "Invoices", path: "/invoices", adminOnly: true },
   { icon: FiCreditCard, title: "Payment Methods", path: "/payment-methods", adminOnly: true },
   { icon: FiUsers, title: "Users", path: "/admin", adminOnly: true },
   { icon: FiSettings, title: "User Settings", path: "/settings" },
@@ -103,7 +104,7 @@ const getIconColor = (title: string, isActive: boolean): string => {
     "Products": "#8b5cf6",
     "Reports": "#10b981",
     "Expenses": "#f97316",
-    "Debts": "#ec4899",
+    "Invoices": "#ec4899",
     "Payment Methods": "#06b6d4",
     "Users": "#6366f1",
     "User Settings": "#64748b",
@@ -195,27 +196,86 @@ const SidebarItems = ({ onClose, isCollapsed = false }: SidebarItemsProps) => {
         {hasSubmenu ? (
           <>
             {isCollapsed ? (
-              <Flex
-                justifyContent="center"
-                alignItems="center"
-                py={2.5}
-                mx={1}
-                borderRadius="md"
-                transition="all 0.2s"
-                cursor="pointer"
-                onClick={() => toggleSubmenu(item.title)}
-                _hover={{
-                  bg: { base: "rgba(255, 255, 255, 0.1)", _light: "#f3f4f6" },
-                }}
-                bg={isParentActive ? { base: "rgba(20, 184, 166, 0.2)", _light: "rgba(20, 184, 166, 0.1)" } : "transparent"}
-                title={item.title}
-              >
-                <Icon 
-                  as={item.icon} 
-                  fontSize="20px"
-                  color={getIconColor(item.title, isParentActive)}
-                />
-              </Flex>
+              <MenuRoot positioning={{ placement: "right-start", offset: { mainAxis: 8 } }}>
+                <MenuTrigger asChild>
+                  <Flex
+                    justifyContent="center"
+                    alignItems="center"
+                    py={2.5}
+                    mx={1}
+                    borderRadius="md"
+                    transition="all 0.2s"
+                    cursor="pointer"
+                    _hover={{
+                      bg: { base: "rgba(255, 255, 255, 0.1)", _light: "#f3f4f6" },
+                    }}
+                    bg={isParentActive ? { base: "rgba(20, 184, 166, 0.2)", _light: "rgba(20, 184, 166, 0.1)" } : "transparent"}
+                    title={item.title}
+                  >
+                    <Icon 
+                      as={item.icon} 
+                      fontSize="20px"
+                      color={getIconColor(item.title, isParentActive)}
+                    />
+                  </Flex>
+                </MenuTrigger>
+                <MenuContent
+                  bg={{ base: "#1a1d29", _light: "#ffffff" }}
+                  borderColor={{ base: "rgba(255, 255, 255, 0.1)", _light: "#e5e7eb" }}
+                  minW="200px"
+                  py={1}
+                >
+                  {item.submenu?.map((subItem) => {
+                    const isSubActive = location.pathname === subItem.path
+                    const isPOSLink = subItem.path === "/sales"
+                    const isPOSDisabled = isPOSLink && !isTillOpen
+                    
+                    const submenuItem = (
+                      <MenuItem
+                        key={subItem.path}
+                        value={subItem.path}
+                        asChild
+                        disabled={isPOSDisabled}
+                        bg={isSubActive ? { base: "rgba(20, 184, 166, 0.2)", _light: "rgba(20, 184, 166, 0.1)" } : "transparent"}
+                        color={isSubActive ? { base: "#14b8a6", _light: "#14b8a6" } : { base: "#ffffff", _light: "#1a1d29" }}
+                        _hover={isPOSDisabled ? {} : {
+                          bg: { base: "rgba(255, 255, 255, 0.1)", _light: "#f3f4f6" },
+                        }}
+                        opacity={isPOSDisabled ? 0.5 : 1}
+                        cursor={isPOSDisabled ? "not-allowed" : "pointer"}
+                      >
+                        <RouterLink to={subItem.path as any} onClick={onClose}>
+                          <Flex gap={2} alignItems="center" w="full">
+                            {isPOSDisabled && (
+                              <Icon 
+                                as={FiLock}
+                                fontSize="14px"
+                                color="red.500"
+                              />
+                            )}
+                            <Icon 
+                              as={getSubmenuIcon(subItem.title)}
+                              fontSize="16px"
+                              color={isSubActive ? "#14b8a6" : getIconColor(item.title, false)}
+                            />
+                            <Text fontSize="sm">{subItem.title}</Text>
+                          </Flex>
+                        </RouterLink>
+                      </MenuItem>
+                    )
+                    
+                    if (isPOSDisabled) {
+                      return (
+                        <Tooltip key={subItem.path} content="Till not yet opened" openDelay={300}>
+                          <Box>{submenuItem}</Box>
+                        </Tooltip>
+                      )
+                    }
+                    
+                    return submenuItem
+                  })}
+                </MenuContent>
+              </MenuRoot>
             ) : (
               <Flex
                 gap={3}

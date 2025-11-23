@@ -4,7 +4,7 @@ from datetime import datetime, timezone
 from decimal import Decimal
 
 from fastapi import APIRouter, HTTPException, Query
-from sqlmodel import func, select, and_, or_
+from sqlmodel import func, select, and_, or_, col
 from sqlalchemy.orm import selectinload
 
 from app.api.deps import AdminUser, CurrentUser, SessionDep
@@ -40,7 +40,13 @@ def read_debts(
         conditions.append(Debt.customer_name.ilike(f"%{customer_name}%"))
     
     if status:
-        conditions.append(Debt.status == status)
+        # Support multiple statuses separated by comma
+        status_list = [s.strip() for s in status.split(",") if s.strip()]
+        if len(status_list) == 1:
+            conditions.append(Debt.status == status_list[0])
+        elif len(status_list) > 1:
+            # Use col() for proper SQLAlchemy column reference
+            conditions.append(col(Debt.status).in_(status_list))
     
     if start_date:
         try:
@@ -61,7 +67,12 @@ def read_debts(
         count_statement = count_statement.where(and_(*conditions))
     count = session.exec(count_statement).one()
     
-    statement = select(Debt)
+    statement = (
+        select(Debt)
+        .options(
+            selectinload(Debt.sale).selectinload(Sale.product)  # Load sale and product relationships
+        )
+    )
     if conditions:
         statement = statement.where(and_(*conditions))
     statement = statement.order_by(Debt.debt_date.desc()).offset(skip).limit(limit)
@@ -82,43 +93,68 @@ def create_debt(
     Create a new debt record.
     Can be linked to a sale via sale_id.
     """
-    # Validate sale_id if provided
-    if debt_in.sale_id:
-        sale = session.get(Sale, debt_in.sale_id)
-        if not sale:
-            raise HTTPException(status_code=404, detail="Sale not found")
-    
-    # Calculate balance
-    balance = debt_in.amount - debt_in.amount_paid
-    
-    # Determine status
-    if balance <= 0:
-        status = "paid"
-    elif debt_in.amount_paid > 0:
-        status = "partial"
-    else:
-        status = "pending"
-    
-    # Check if due_date is in the past and balance > 0
-    if debt_in.due_date and balance > 0:
-        due_dt = debt_in.due_date
-        if isinstance(due_dt, str):
-            due_dt = datetime.fromisoformat(due_dt.replace("Z", "+00:00"))
-        if due_dt < datetime.now(timezone.utc):
-            status = "overdue"
-    
-    debt = Debt(
-        **debt_in.model_dump(),
-        balance=balance,
-        status=status,
-        created_by_id=current_user.id
-    )
-    
-    session.add(debt)
-    session.commit()
-    session.refresh(debt)
-    
-    return debt
+    try:
+        # Validate sale_id if provided
+        if debt_in.sale_id:
+            sale = session.get(Sale, debt_in.sale_id)
+            if not sale:
+                raise HTTPException(status_code=404, detail="Sale not found")
+        
+        # Calculate balance (backend always recalculates to ensure accuracy)
+        balance = debt_in.amount - debt_in.amount_paid
+        
+        # Debug logging
+        print(f"[Debts API] Creating debt: customer={debt_in.customer_name}, amount={debt_in.amount}, amount_paid={debt_in.amount_paid}, calculated_balance={balance}")
+        
+        # Determine status
+        if balance <= 0:
+            status = "paid"
+        elif debt_in.amount_paid > 0:
+            status = "partial"
+        else:
+            status = "pending"
+        
+        # Check if due_date is in the past and balance > 0
+        if debt_in.due_date and balance > 0:
+            due_dt = debt_in.due_date
+            if isinstance(due_dt, str):
+                due_dt = datetime.fromisoformat(due_dt.replace("Z", "+00:00"))
+            if due_dt < datetime.now(timezone.utc):
+                status = "overdue"
+        
+        # Create debt object with calculated balance and status
+        # DebtCreate no longer includes balance/status, so we can use model_dump() directly
+        debt = Debt(
+            customer_name=debt_in.customer_name,
+            customer_contact=debt_in.customer_contact,
+            sale_id=debt_in.sale_id,
+            amount=debt_in.amount,
+            amount_paid=debt_in.amount_paid,
+            balance=balance,
+            debt_date=debt_in.debt_date or datetime.now(timezone.utc),
+            due_date=debt_in.due_date,
+            status=status,
+            notes=debt_in.notes,
+            created_by_id=current_user.id
+        )
+        
+        session.add(debt)
+        session.commit()
+        session.refresh(debt)
+        
+        # Debug logging
+        print(f"[Debts API] Created debt successfully: id={debt.id}, customer={debt.customer_name}, balance={debt.balance}, status={debt.status}")
+        
+        return debt
+    except ValueError as e:
+        # Handle validation errors from the model
+        print(f"[Debts API] Validation error: {str(e)}")
+        raise HTTPException(status_code=422, detail=f"Validation error: {str(e)}")
+    except Exception as e:
+        # Handle any other errors
+        print(f"[Debts API] Error creating debt: {type(e).__name__}: {str(e)}")
+        session.rollback()
+        raise HTTPException(status_code=500, detail=f"Failed to create debt: {str(e)}")
 
 
 @router.get("/{debt_id}", response_model=DebtPublic)

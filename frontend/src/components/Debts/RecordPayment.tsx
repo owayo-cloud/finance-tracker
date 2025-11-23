@@ -64,27 +64,27 @@ export default function RecordPayment({
     mode: "onBlur",
     defaultValues: {
       amount: 0,
-      payment_method: "cash",
       notes: "",
     },
   })
 
   const paymentAmount = watch("amount")
+  const paymentAmountNum = typeof paymentAmount === "string" ? parseFloat(paymentAmount) : (paymentAmount || 0)
   const remainingBalance =
-    parseFloat(debt.balance.toString()) - (paymentAmount || 0)
+    parseFloat(debt.balance?.toString() || "0") - paymentAmountNum
 
   const mutation = useMutation({
     mutationFn: (data: DebtPaymentCreate) =>
       DebtsService.createDebtPayment({ debtId: debt.id, requestBody: data }),
     onSuccess: () => {
-      showToast("Success", "Payment recorded successfully", "success")
+      showToast.showSuccessToast("Payment recorded successfully")
       reset()
       onSuccess()
       queryClient.invalidateQueries({ queryKey: ["debts"] })
     },
     onError: (err: ApiError) => {
       const errDetail = (err.body as any)?.detail
-      showToast("Error", `${errDetail || "Failed to record payment"}`, "error")
+      showToast.showErrorToast(errDetail || "Failed to record payment")
     },
     onSettled: () => {
       setIsSubmitting(false)
@@ -116,7 +116,7 @@ export default function RecordPayment({
           <DialogCloseTrigger />
         </DialogHeader>
 
-        <form onSubmit={handleSubmit(onSubmit)}>
+        <form onSubmit={handleSubmit(onSubmit as SubmitHandler<any>)}>
           <DialogBody>
             <VStack gap={4} align="stretch">
               {/* Debt Summary */}
@@ -171,7 +171,7 @@ export default function RecordPayment({
                     fontWeight="600"
                     color={{ base: "#10b981", _light: "#059669" }}
                   >
-                    {formatCurrency(debt.amount_paid)}
+                    {formatCurrency(debt.amount_paid || 0)}
                   </Text>
                 </Flex>
 
@@ -234,7 +234,7 @@ export default function RecordPayment({
               </Box>
 
               {/* Remaining Balance Preview */}
-              {paymentAmount > 0 && (
+              {paymentAmountNum > 0 && (
                 <Box
                   p={3}
                   bg={
@@ -284,24 +284,8 @@ export default function RecordPayment({
                 </Box>
               )}
 
-              {/* Payment Method */}
-              <Box>
-                <Text
-                  fontSize="sm"
-                  fontWeight="500"
-                  mb={2}
-                  color={{ base: "#e5e7eb", _light: "#374151" }}
-                >
-                  Payment Method
-                </Text>
-                <Input
-                  placeholder="e.g., Cash, Bank Transfer, Mobile Money"
-                  {...register("payment_method")}
-                  bg={{ base: "#0f1117", _light: "#f9fafb" }}
-                  border="1px solid"
-                  borderColor={{ base: "rgba(255, 255, 255, 0.08)", _light: "#e5e7eb" }}
-                />
-              </Box>
+              {/* Payment Method - Note: payment_method_id is required but not implemented in this component */}
+              {/* TODO: Add payment method selection */}
 
               {/* Notes */}
               <Box>
@@ -332,7 +316,7 @@ export default function RecordPayment({
             <Button
               type="submit"
               colorPalette="blue"
-              isLoading={isSubmitting}
+              loading={isSubmitting}
               disabled={isSubmitting || Object.keys(errors).length > 0}
             >
               Record Payment

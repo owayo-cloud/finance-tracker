@@ -24,6 +24,7 @@ import { Route as LayoutSalesRouteImport } from './routes/_layout/sales'
 import { Route as LayoutReportsRouteImport } from './routes/_layout/reports'
 import { Route as LayoutProductsRouteImport } from './routes/_layout/products'
 import { Route as LayoutPaymentMethodsRouteImport } from './routes/_layout/payment-methods'
+import { Route as LayoutInvoicesRouteImport } from './routes/_layout/invoices'
 import { Route as LayoutExpensesRouteImport } from './routes/_layout/expenses'
 import { Route as LayoutExpenseCategoriesRouteImport } from './routes/_layout/expense-categories'
 import { Route as LayoutDebtsRouteImport } from './routes/_layout/debts'
@@ -109,6 +110,11 @@ const LayoutPaymentMethodsRoute = LayoutPaymentMethodsRouteImport.update({
   path: '/payment-methods',
   getParentRoute: () => LayoutRoute,
 } as any)
+const LayoutInvoicesRoute = LayoutInvoicesRouteImport.update({
+  id: '/invoices',
+  path: '/invoices',
+  getParentRoute: () => LayoutRoute,
+} as any)
 const LayoutExpensesRoute = LayoutExpensesRouteImport.update({
   id: '/expenses',
   path: '/expenses',
@@ -167,6 +173,7 @@ export interface FileRoutesByFullPath {
   '/debts': typeof LayoutDebtsRoute
   '/expense-categories': typeof LayoutExpenseCategoriesRoute
   '/expenses': typeof LayoutExpensesRoute
+  '/invoices': typeof LayoutInvoicesRoute
   '/payment-methods': typeof LayoutPaymentMethodsRoute
   '/products': typeof LayoutProductsRouteWithChildren
   '/reports': typeof LayoutReportsRoute
@@ -192,6 +199,7 @@ export interface FileRoutesByTo {
   '/debts': typeof LayoutDebtsRoute
   '/expense-categories': typeof LayoutExpenseCategoriesRoute
   '/expenses': typeof LayoutExpensesRoute
+  '/invoices': typeof LayoutInvoicesRoute
   '/payment-methods': typeof LayoutPaymentMethodsRoute
   '/products': typeof LayoutProductsRouteWithChildren
   '/reports': typeof LayoutReportsRoute
@@ -219,6 +227,7 @@ export interface FileRoutesById {
   '/_layout/debts': typeof LayoutDebtsRoute
   '/_layout/expense-categories': typeof LayoutExpenseCategoriesRoute
   '/_layout/expenses': typeof LayoutExpensesRoute
+  '/_layout/invoices': typeof LayoutInvoicesRoute
   '/_layout/payment-methods': typeof LayoutPaymentMethodsRoute
   '/_layout/products': typeof LayoutProductsRouteWithChildren
   '/_layout/reports': typeof LayoutReportsRoute
@@ -246,6 +255,7 @@ export interface FileRouteTypes {
     | '/debts'
     | '/expense-categories'
     | '/expenses'
+    | '/invoices'
     | '/payment-methods'
     | '/products'
     | '/reports'
@@ -271,6 +281,7 @@ export interface FileRouteTypes {
     | '/debts'
     | '/expense-categories'
     | '/expenses'
+    | '/invoices'
     | '/payment-methods'
     | '/products'
     | '/reports'
@@ -297,6 +308,7 @@ export interface FileRouteTypes {
     | '/_layout/debts'
     | '/_layout/expense-categories'
     | '/_layout/expenses'
+    | '/_layout/invoices'
     | '/_layout/payment-methods'
     | '/_layout/products'
     | '/_layout/reports'
@@ -429,6 +441,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LayoutPaymentMethodsRouteImport
       parentRoute: typeof LayoutRoute
     }
+    '/_layout/invoices': {
+      id: '/_layout/invoices'
+      path: '/invoices'
+      fullPath: '/invoices'
+      preLoaderRoute: typeof LayoutInvoicesRouteImport
+      parentRoute: typeof LayoutRoute
+    }
     '/_layout/expenses': {
       id: '/_layout/expenses'
       path: '/expenses'
@@ -512,6 +531,7 @@ interface LayoutRouteChildren {
   LayoutDebtsRoute: typeof LayoutDebtsRoute
   LayoutExpenseCategoriesRoute: typeof LayoutExpenseCategoriesRoute
   LayoutExpensesRoute: typeof LayoutExpensesRoute
+  LayoutInvoicesRoute: typeof LayoutInvoicesRoute
   LayoutPaymentMethodsRoute: typeof LayoutPaymentMethodsRoute
   LayoutProductsRoute: typeof LayoutProductsRouteWithChildren
   LayoutReportsRoute: typeof LayoutReportsRoute
@@ -533,6 +553,7 @@ const LayoutRouteChildren: LayoutRouteChildren = {
   LayoutDebtsRoute: LayoutDebtsRoute,
   LayoutExpenseCategoriesRoute: LayoutExpenseCategoriesRoute,
   LayoutExpensesRoute: LayoutExpensesRoute,
+  LayoutInvoicesRoute: LayoutInvoicesRoute,
   LayoutPaymentMethodsRoute: LayoutPaymentMethodsRoute,
   LayoutProductsRoute: LayoutProductsRouteWithChildren,
   LayoutReportsRoute: LayoutReportsRoute,

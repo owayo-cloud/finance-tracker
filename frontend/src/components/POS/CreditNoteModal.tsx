@@ -12,7 +12,6 @@ import {
   DialogTitle,
   DialogBody,
   DialogFooter,
-  DialogCloseTrigger,
   DialogActionTrigger,
 } from "@/components/ui/dialog"
 import { Field } from "@/components/ui/field"
@@ -230,9 +229,7 @@ export function CreditNoteModal({
           </DialogBody>
           <DialogFooter>
             <Flex gap={2} w="full" justify="flex-end">
-              <DialogCloseTrigger asChild>
-                <Button variant="outline" onClick={handleClose}>Cancel</Button>
-              </DialogCloseTrigger>
+              <Button variant="outline" onClick={handleClose}>Cancel</Button>
               <DialogActionTrigger asChild>
                 <Button
                   type="submit"

@@ -28,12 +28,12 @@ from app.background_services import (
     cleanup_old_notifications,
 )
 
-# Configure logging
+# Configure logging - use stdout/stderr which supervisor captures
+# Supervisor already logs to /var/log/supervisor/scheduler.log
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s [%(levelname)s] %(name)s: %(message)s",
     handlers=[
-        logging.FileHandler("logs/scheduler.log"),
         logging.StreamHandler(sys.stdout),
     ],
 )
@@ -56,9 +56,6 @@ def job_wrapper(job_name: str, job_func):
 
 def main():
     """Initialize and start the scheduler"""
-    # Create logs directory if it doesn't exist
-    Path("logs").mkdir(exist_ok=True)
-    
     # Initialize scheduler
     scheduler = BlockingScheduler(timezone="Africa/Nairobi")  # Adjust timezone as needed
     
@@ -111,7 +108,8 @@ def main():
     
     # Print next run times
     for job in scheduler.get_jobs():
-        logger.info(f"Next run: {job.name} at {job.next_run_time}")
+        next_run = job.next_run_time if hasattr(job, 'next_run_time') else "Not scheduled yet"
+        logger.info(f"Next run: {job.name} at {next_run}")
     
     try:
         # Start the scheduler (blocking)

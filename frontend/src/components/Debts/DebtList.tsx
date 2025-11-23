@@ -14,12 +14,10 @@ import {
   IconButton,
 } from "@chakra-ui/react"
 import { useQuery, useQueryClient } from "@tanstack/react-query"
-import { createFileRoute } from "@tanstack/react-router"
 import { useState } from "react"
-import { LuDollarSign, LuSearch, LuFilter } from "react-icons/lu"
+import { LuDollarSign } from "react-icons/lu"
 
 import { DebtsService, type DebtPublic } from "../../client"
-import { PaginationFooter } from "../Common/PaginationFooter"
 import RecordPayment from "./RecordPayment"
 
 const PER_PAGE = 20
@@ -296,7 +294,7 @@ export default function DebtList() {
                         {formatCurrency(debt.amount)}
                       </Table.Cell>
                       <Table.Cell color={{ base: "#9ca3af", _light: "#6b7280" }}>
-                        {formatCurrency(debt.amount_paid)}
+                        {formatCurrency(debt.amount_paid || 0)}
                       </Table.Cell>
                       <Table.Cell
                         color={{ base: "#fbbf24", _light: "#f59e0b" }}
@@ -305,14 +303,14 @@ export default function DebtList() {
                         {formatCurrency(debt.balance)}
                       </Table.Cell>
                       <Table.Cell color={{ base: "#9ca3af", _light: "#6b7280" }}>
-                        {formatDate(debt.debt_date)}
+                        {debt.debt_date ? formatDate(debt.debt_date) : "—"}
                       </Table.Cell>
                       <Table.Cell color={{ base: "#9ca3af", _light: "#6b7280" }}>
                         {debt.due_date ? formatDate(debt.due_date) : "—"}
                       </Table.Cell>
                       <Table.Cell>
-                        <Badge colorPalette={getStatusBadgeColor(debt.status)}>
-                          {debt.status}
+                        <Badge colorPalette={getStatusBadgeColor(debt.status || "pending")}>
+                          {debt.status || "pending"}
                         </Badge>
                       </Table.Cell>
                       <Table.Cell>
@@ -332,12 +330,25 @@ export default function DebtList() {
               </Table.Root>
             </Box>
 
-            <PaginationFooter
-              page={page}
-              onChangePage={setPage}
-              hasNextPage={page * PER_PAGE < totalItems}
-              hasPreviousPage={page > 1}
-            />
+            <Flex justify="space-between" align="center" mt={4}>
+              <Button
+                onClick={() => setPage(p => Math.max(1, p - 1))}
+                disabled={page <= 1}
+                size="sm"
+              >
+                Previous
+              </Button>
+              <Text fontSize="sm" color={{ base: "#9ca3af", _light: "#6b7280" }}>
+                Page {page} of {Math.ceil(totalItems / PER_PAGE)}
+              </Text>
+              <Button
+                onClick={() => setPage(p => p + 1)}
+                disabled={page * PER_PAGE >= totalItems}
+                size="sm"
+              >
+                Next
+              </Button>
+            </Flex>
           </>
         ) : (
           <Flex justify="center" align="center" minH="400px">

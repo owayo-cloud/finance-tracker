@@ -54,8 +54,9 @@ COPY ./supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 COPY ./scheduler.py /app/scheduler.py
 
 # Build MJML email templates to HTML
-RUN for file in /app/app/email-templates/src/*.mjml; do \
-    mjml "$file" -o "/app/app/email-templates/build/$(basename "$file" .mjml).html"; \
+RUN mkdir -p /app/app/email-templates/build && \
+    for file in /app/app/email-templates/src/*.mjml; do \
+        mjml "$file" -o "/app/app/email-templates/build/$(basename "$file" .mjml).html"; \
     done
 
 # Sync the project

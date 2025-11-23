@@ -99,3 +99,7 @@ temp/
 *.tmp
 *.bak
 *.backup
+
+# Core dump files
+core.*
+core

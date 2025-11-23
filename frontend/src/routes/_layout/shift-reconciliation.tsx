@@ -563,7 +563,6 @@ function ShiftReconciliation() {
                         {closedTillsData?.data && closedTillsData.data.length > 0 ? (
                           closedTillsData.data.map((till) => {
                             const openDate = new Date(till.opening_time)
-                            const closeDate = till.closing_time ? new Date(till.closing_time) : null
                             const dateStr = openDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
                             const timeStr = openDate.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })
                             const shiftType = till.shift_type === "day" ? "Day" : "Night"
@@ -653,16 +652,16 @@ function ShiftReconciliation() {
                       type="button"
                       color={currentTill ? { base: "#06b6d4", _light: "#06b6d4" } : "text.secondary"}
                       textDecoration="underline"
-                      cursor={currentTill ? "pointer" : "not-allowed"}
+                      cursor={currentTill && !attach ? "pointer" : "not-allowed"}
                       fontSize="sm"
-                      opacity={currentTill ? 1 : 0.5}
-                      _hover={currentTill ? { color: { base: "#0891b2", _light: "#0891b2" } } : {}}
+                      opacity={currentTill && !attach ? 1 : 0.5}
+                      _hover={currentTill && !attach ? { color: { base: "#0891b2", _light: "#0891b2" } } : {}}
+                      _disabled={{ opacity: 0.5, cursor: "not-allowed" }}
                       onClick={() => {
                         if (currentTill && !attach) {
                           setAttach(currentTill.id)
                         }
                       }}
-                      disabled={!currentTill || !!attach}
                     >
                       {currentTill ? "Click to select open till..." : "No till currently open"}
                     </Link>

@@ -233,6 +233,7 @@ const SidebarItems = ({ onClose, isCollapsed = false }: SidebarItemsProps) => {
                     const submenuItem = (
                       <MenuItem
                         key={subItem.path}
+                        value={subItem.path}
                         asChild
                         disabled={isPOSDisabled}
                         bg={isSubActive ? { base: "rgba(20, 184, 166, 0.2)", _light: "rgba(20, 184, 166, 0.1)" } : "transparent"}

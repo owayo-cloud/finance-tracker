@@ -1,11 +1,10 @@
-import { Container, Heading, Text, Box, Table, VStack, Badge, HStack, Button, Input, Flex } from "@chakra-ui/react"
+import { Container, Heading, Text, Box, Table, VStack, Badge, Flex, Input } from "@chakra-ui/react"
 import { createFileRoute } from "@tanstack/react-router"
 import { useQuery } from "@tanstack/react-query"
 import { DebtsService } from "@/client"
 import { formatCurrency } from "@/components/POS/utils"
 import { format } from "date-fns"
 import { useState } from "react"
-import { FiSearch } from "react-icons/fi"
 
 export const Route = createFileRoute("/_layout/invoices")({
   component: Invoices,
@@ -21,7 +20,7 @@ function Invoices() {
     queryFn: () => DebtsService.readDebts({ 
       skip: 0, 
       limit: 1000,
-      customer_name: searchQuery.trim() || undefined,
+      customerName: searchQuery.trim() || undefined,
       status: statusFilter !== "all" ? statusFilter : undefined,
     }),
   })
@@ -67,7 +66,7 @@ function Invoices() {
             <Input
               placeholder="Customer name..."
               value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSearchQuery(e.target.value)}
               bg={{ base: "#1a1d29", _light: "#ffffff" }}
               borderColor={{ base: "rgba(255, 255, 255, 0.1)", _light: "#e5e7eb" }}
               color={{ base: "#ffffff", _light: "#1a1d29" }}
@@ -80,7 +79,7 @@ function Invoices() {
             </Text>
             <select
               value={statusFilter}
-              onChange={(e) => setStatusFilter(e.target.value)}
+              onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setStatusFilter(e.target.value)}
               style={{
                 width: "100%",
                 padding: "0.5rem",

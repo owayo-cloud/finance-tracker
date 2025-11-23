@@ -12,7 +12,6 @@ import {
   DialogTitle,
   DialogBody,
   DialogFooter,
-  DialogActionTrigger,
 } from "@/components/ui/dialog"
 import { Field } from "@/components/ui/field"
 import { useState } from "react"
@@ -308,7 +307,7 @@ export function NewCustomerModal({
                 _hover={{ bg: "#0d9488" }}
                 disabled={!isValid || isSubmitting}
                 loading={isSubmitting}
-                onClick={(e) => {
+                onClick={() => {
                   console.log("Submit button clicked, isValid:", isValid, "isSubmitting:", isSubmitting)
                   // Let the form handle submission
                 }}

@@ -1,6 +1,6 @@
 import uuid
 from typing import Any, Optional
-from datetime import datetime, date
+from datetime import datetime, date, timezone
 from decimal import Decimal
 
 from fastapi import APIRouter, HTTPException, Query
@@ -358,51 +358,53 @@ def create_sale_with_multiple_payments(
         )
     
     # Validate payments
-    if not sale_in.payments or len(sale_in.payments) == 0:
-        raise HTTPException(status_code=400, detail="At least one payment method is required")
+    # If customer is provided, allow empty payments (full amount becomes debt)
+    # Otherwise, require at least one payment method
+    if not sale_in.customer_name:
+        if not sale_in.payments or len(sale_in.payments) == 0:
+            raise HTTPException(status_code=400, detail="At least one payment method is required when no customer is selected")
     
     total_payment_amount = Decimal(0)
     primary_payment_method_id = None
     
-    for payment_data in sale_in.payments:
-        try:
-            payment_method_id = uuid.UUID(payment_data.payment_method_id)
-        except (ValueError, AttributeError):
-            raise HTTPException(status_code=400, detail=f"Invalid payment method ID: {payment_data.payment_method_id}")
-        
-        amount = Decimal(str(payment_data.amount))
-        
-        # Validate payment method exists
-        payment_method = session.get(PaymentMethod, payment_method_id)
-        if not payment_method:
-            raise HTTPException(status_code=404, detail=f"Payment method {payment_method_id} not found")
-        
-        if not payment_method.is_active:
-            raise HTTPException(status_code=400, detail=f"Payment method '{payment_method.name}' is not active")
-        
-        if amount <= 0:
-            raise HTTPException(status_code=400, detail="Payment amount must be greater than 0")
-        
-        total_payment_amount += amount
-        
-        # Use first payment method as primary (for backward compatibility)
-        if primary_payment_method_id is None:
-            primary_payment_method_id = payment_method_id
+    # Process payments if any are provided
+    if sale_in.payments and len(sale_in.payments) > 0:
+        for payment_data in sale_in.payments:
+            try:
+                payment_method_id = uuid.UUID(payment_data.payment_method_id)
+            except (ValueError, AttributeError):
+                raise HTTPException(status_code=400, detail=f"Invalid payment method ID: {payment_data.payment_method_id}")
+            
+            amount = Decimal(str(payment_data.amount))
+            
+            # Validate payment method exists
+            payment_method = session.get(PaymentMethod, payment_method_id)
+            if not payment_method:
+                raise HTTPException(status_code=404, detail=f"Payment method {payment_method_id} not found")
+            
+            if not payment_method.is_active:
+                raise HTTPException(status_code=400, detail=f"Payment method '{payment_method.name}' is not active")
+            
+            if amount <= 0:
+                raise HTTPException(status_code=400, detail="Payment amount must be greater than 0")
+            
+            total_payment_amount += amount
+            
+            # Use first payment method as primary (for backward compatibility)
+            if primary_payment_method_id is None:
+                primary_payment_method_id = payment_method_id
     
     # Validate total payment amount
     # Convert sale_in.total_amount to Decimal for comparison
     sale_total_amount = Decimal(str(sale_in.total_amount))
     payment_difference = total_payment_amount - sale_total_amount
     
-    # If customer is provided, allow partial payment (debt will be created)
+    # If customer is provided, allow partial or zero payment (debt will be created)
     # Otherwise, require full payment
     if sale_in.customer_name:
-        # Customer provided: allow partial payment (minimum 0.01)
-        if total_payment_amount < Decimal("0.01"):
-            raise HTTPException(
-                status_code=400,
-                detail="At least 0.01 must be paid. Remaining amount will be recorded as debt."
-            )
+        # Customer provided: allow zero or partial payment (entire amount can be debt)
+        # No minimum payment required
+        pass
     else:
         # No customer: require full payment
         if payment_difference < -Decimal("0.01"):  # Underpayment not allowed
@@ -431,6 +433,38 @@ def create_sale_with_multiple_payments(
     else:
         calculated_total = sale_total_amount
     
+    # Handle payment_method_id for sales with no payments (credit sales)
+    # If no payments provided but customer exists, we need a payment method for the sale record
+    # Try to find a "Credit" payment method, or use the first active payment method as fallback
+    final_payment_method_id = primary_payment_method_id
+    if final_payment_method_id is None and sale_in.customer_name:
+        # Look for a "Credit" payment method
+        credit_method = session.exec(
+            select(PaymentMethod)
+            .where(PaymentMethod.name.ilike("%credit%"))
+            .where(PaymentMethod.is_active == True)
+            .limit(1)
+        ).first()
+        
+        if credit_method:
+            final_payment_method_id = credit_method.id
+        else:
+            # Fallback: use first active payment method
+            fallback_method = session.exec(
+                select(PaymentMethod)
+                .where(PaymentMethod.is_active == True)
+                .limit(1)
+            ).first()
+            if fallback_method:
+                final_payment_method_id = fallback_method.id
+    
+    # If still no payment method found, raise error (shouldn't happen if payment methods exist)
+    if final_payment_method_id is None:
+        raise HTTPException(
+            status_code=400,
+            detail="No payment method available. Please configure at least one active payment method in the system."
+        )
+    
     # Create sale with primary payment method (for backward compatibility)
     # IMPORTANT: created_by_id must be the currently authenticated user (from JWT token)
     # This ensures the sale is correctly attributed to the person who made it
@@ -439,7 +473,7 @@ def create_sale_with_multiple_payments(
         quantity=sale_in.quantity,
         unit_price=Decimal(str(sale_in.unit_price)),
         total_amount=calculated_total,
-        payment_method_id=primary_payment_method_id,
+        payment_method_id=final_payment_method_id,
         customer_name=sale_in.customer_name,
         notes=sale_in.notes,
         created_by_id=current_user.id  # This is the authenticated user from the JWT token
@@ -456,23 +490,24 @@ def create_sale_with_multiple_payments(
         session.flush()  # Flush to get sale.id without committing
         session.refresh(sale)
         
-        # Create payment records
-        for payment_data in sale_in.payments:
-            try:
-                payment_method_id = uuid.UUID(payment_data.payment_method_id)
-            except (ValueError, AttributeError):
-                raise HTTPException(status_code=400, detail=f"Invalid payment method ID: {payment_data.payment_method_id}")
-            
-            amount = Decimal(str(payment_data.amount))
-            reference_number = payment_data.reference_number
-            
-            sale_payment = SalePayment(
-                sale_id=sale.id,
-                payment_method_id=payment_method_id,
-                amount=amount,
-                reference_number=reference_number
-            )
-            session.add(sale_payment)
+        # Create payment records (only if payments were provided)
+        if sale_in.payments and len(sale_in.payments) > 0:
+            for payment_data in sale_in.payments:
+                try:
+                    payment_method_id = uuid.UUID(payment_data.payment_method_id)
+                except (ValueError, AttributeError):
+                    raise HTTPException(status_code=400, detail=f"Invalid payment method ID: {payment_data.payment_method_id}")
+                
+                amount = Decimal(str(payment_data.amount))
+                reference_number = payment_data.reference_number
+                
+                sale_payment = SalePayment(
+                    sale_id=sale.id,
+                    payment_method_id=payment_method_id,
+                    amount=amount,
+                    reference_number=reference_number
+                )
+                session.add(sale_payment)
         
         session.commit()
         session.refresh(sale)

@@ -1,0 +1,70 @@
+<mjml>
+  <mj-head>
+    <mj-title>Low Stock Notification</mj-title>
+    <mj-font name="Ubuntu" href="https://fonts.googleapis.com/css?family=Ubuntu:300,400,500,700" />
+  </mj-head>
+  <mj-body background-color="#fafbfc">
+    <mj-section background-color="#ffffff">
+      <mj-column>
+        <!-- Header -->
+        <mj-text font-size="20px" color="#333333" font-family="Ubuntu, Helvetica, Arial, sans-serif" padding="35px">
+          {{ project_name }} - Low Stock Alert
+        </mj-text>
+
+        <!-- Greeting -->
+        <mj-text font-size="16px" color="#555555" font-family="Arial, Helvetica, sans-serif" padding="10px 25px">
+          <span>Hello {{ username }},</span>
+        </mj-text>
+
+        <!-- Product Alert -->
+        <mj-text font-size="16px" color="#555555" font-family="Arial, Helvetica, sans-serif" padding="10px 25px">
+          Product <strong>{{ product_name }}</strong> is running low on stock.
+        </mj-text>
+
+        <!-- Stock Details Box -->
+        <mj-text font-size="14px" color="#555555" font-family="Arial, Helvetica, sans-serif" align="center" padding="20px 25px" background-color="#fff3e0">
+          <strong>Current Stock:</strong> {{ current_stock }}<br/>
+          <strong>Reorder Level:</strong> {{ reorder_level }}<br/>
+          {% if product_category %}
+          <strong>Category:</strong> {{ product_category }}
+          {% endif %}
+        </mj-text>
+
+        <!-- Warning Message -->
+        {% if current_stock == 0 %}
+        <mj-text font-size="16px" color="#d32f2f" font-family="Arial, Helvetica, sans-serif" padding="20px 25px" align="center">
+          <strong>⚠️ CRITICAL: Product is OUT OF STOCK</strong>
+        </mj-text>
+        {% else %}
+        <mj-text font-size="16px" color="#ff9800" font-family="Arial, Helvetica, sans-serif" padding="20px 25px" align="center">
+          <strong>⚠️ WARNING: Stock level is below reorder point</strong>
+        </mj-text>
+        {% endif %}
+
+        <!-- Action Button -->
+        <mj-button background-color="#009688" color="#ffffff" font-size="18px" font-family="Ubuntu, Helvetica, Arial, sans-serif" href="{{ link }}" border-radius="8px" padding="15px 30px">
+          View Product Details
+        </mj-button>
+
+        <!-- Recommendations -->
+        <mj-text font-size="14px" color="#555555" font-family="Arial, Helvetica, sans-serif" padding="20px 25px">
+          <strong>Recommended Actions:</strong>
+          <ul style="margin: 10px 0; padding-left: 20px;">
+            <li>Review current demand and sales trends</li>
+            <li>Contact suppliers for restocking</li>
+            <li>Update reorder levels if needed</li>
+            <li>Consider alternative products if restocking is delayed</li>
+          </ul>
+        </mj-text>
+
+        <!-- Footer Note -->
+        <mj-text font-size="12px" color="#999999" font-family="Arial, Helvetica, sans-serif" padding="20px 25px" align="center">
+          This is an automated notification from your inventory management system.
+        </mj-text>
+
+        <!-- Divider -->
+        <mj-divider border-color="#cccccc" border-width="2px" />
+      </mj-column>
+    </mj-section>
+  </mj-body>
+</mjml>

@@ -24,6 +24,12 @@ from app.models import (
     SupplierProductReorder,
     User,
 )
+from app.utils import (
+    generate_debt_reminder_email,
+    generate_reorder_alert_email,
+    generate_low_stock_notification_email,
+    send_email,
+)
 
 
 def send_debt_reminder_emails():
@@ -94,20 +100,40 @@ def send_debt_reminder_emails():
                 
                 total_overdue = sum(debt.balance for debt in debts)
                 
-                # TODO: Integrate with email service
-                # For now, just create a reminder log
-                email_subject = f"Overdue Payments: {supplier.name} - {len(debts)} debt(s)"
-                email_body = f"""
-                Supplier: {supplier.name}
-                Total Overdue: {debts[0].currency} {total_overdue}
-                Number of Debts: {len(debts)}
-                
-                Details:
-                """
-                
+                # Prepare debt details for email template
+                debt_details = []
                 for debt in debts:
                     days_overdue = (datetime.now(timezone.utc) - debt.due_date).days
-                    email_body += f"\n- Invoice: {debt.invoice_number or 'N/A'}, Amount: {debt.balance}, {days_overdue} days overdue"
+                    debt_details.append({
+                        "invoice_number": debt.invoice_number or "N/A",
+                        "balance": str(debt.balance),
+                        "currency": debt.currency,
+                        "days_overdue": days_overdue,
+                    })
+                
+                # Generate and send email using template
+                try:
+                    email_data = generate_debt_reminder_email(
+                        email_to=admin.email,
+                        username=admin.username or admin.email,
+                        supplier_name=supplier.name,
+                        total_overdue=str(total_overdue),
+                        currency=debts[0].currency,
+                        debt_count=len(debts),
+                        debts=debt_details,
+                    )
+                    
+                    send_email(
+                        email_to=admin.email,
+                        subject=email_data.subject,
+                        html_content=email_data.html_content,
+                    )
+                    
+                    email_status = "sent"
+                    print(f"✓ Sent reminder to {admin.email} for {supplier.name} ({len(debts)} debts)")
+                except Exception as e:
+                    email_status = "failed"
+                    print(f"✗ Failed to send email to {admin.email}: {e}")
                 
                 # Create reminder log
                 log = ReminderLog.model_validate(
@@ -115,9 +141,9 @@ def send_debt_reminder_emails():
                         reminder_setting_id=setting.id,
                         user_id=admin.id,
                         sent_to_email=admin.email,
-                        status="sent",  # Would be "sent" or "failed" after actual email
+                        status=email_status,
                         items_included=len(debts),
-                        subject_line=email_subject,
+                        subject_line=email_data.subject if email_status == "sent" else f"Failed: Overdue Payments - {supplier.name}",
                         extra_data={"supplier_id": supplier_id, "total_overdue": str(total_overdue)},
                     )
                 )
@@ -127,8 +153,6 @@ def send_debt_reminder_emails():
                 setting.last_sent_at = datetime.now(timezone.utc)
                 setting.next_send_at = calculate_next_send(setting)
                 session.add(setting)
-                
-                print(f"✓ Sent reminder to {admin.email} for {supplier.name} ({len(debts)} debts)")
         
         session.commit()
         print(f"Debt reminder job completed. Processed {len(debts_by_supplier)} suppliers")
@@ -139,6 +163,7 @@ def send_reorder_alerts():
     Send alerts for products below reorder level.
     
     Runs daily at 9 AM.
+    Groups low-stock products and sends one summary email to admin users.
     Tracks consecutive alerts and stops after max_consecutive_alerts.
     """
     print(f"[{datetime.now()}] Running reorder alert job...")
@@ -158,6 +183,7 @@ def send_reorder_alerts():
         
         alerts_sent = 0
         alerts_skipped = 0
+        products_to_alert = []
         
         for product in low_stock_products:
             # Check if we've reached max consecutive alerts
@@ -172,6 +198,13 @@ def send_reorder_alerts():
                 ).total_seconds() / 3600
                 if hours_since_last < 24:
                     continue
+            
+            # Add to alert list
+            products_to_alert.append({
+                "name": product.name,
+                "current_stock": product.current_stock,
+                "reorder_level": product.reorder_level,
+            })
             
             # Create notification for admin users
             crud.create_notification_for_admins(
@@ -194,6 +227,30 @@ def send_reorder_alerts():
             session.add(product)
             
             alerts_sent += 1
+        
+        # Send consolidated email to admin users
+        if products_to_alert:
+            admin_statement = select(User).where(User.role == "admin")
+            admin_users = session.exec(admin_statement).all()
+            
+            for admin in admin_users:
+                try:
+                    email_data = generate_reorder_alert_email(
+                        email_to=admin.email,
+                        username=admin.username or admin.email,
+                        products=products_to_alert,
+                        product_count=len(products_to_alert),
+                    )
+                    
+                    send_email(
+                        email_to=admin.email,
+                        subject=email_data.subject,
+                        html_content=email_data.html_content,
+                    )
+                    
+                    print(f"✓ Sent reorder alert to {admin.email} ({len(products_to_alert)} products)")
+                except Exception as e:
+                    print(f"✗ Failed to send reorder alert to {admin.email}: {e}")
         
         session.commit()
         print(f"Reorder alert job completed. Sent: {alerts_sent}, Skipped: {alerts_skipped}")

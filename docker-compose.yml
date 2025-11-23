@@ -106,6 +106,8 @@ services:
       - POSTGRES_USER=${POSTGRES_USER?Variable not set}
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD?Variable not set}
       - SENTRY_DSN=${SENTRY_DSN}
+    volumes:
+      - supervisor-logs:/var/log/supervisor
 
     healthcheck:
       test:
@@ -166,6 +168,7 @@ services:
       - traefik.http.routers.${STACK_NAME?Variable not set}-frontend-http.middlewares=https-redirect
 volumes:
   app-db-data:
+  supervisor-logs:
 
 networks:
   traefik-public:

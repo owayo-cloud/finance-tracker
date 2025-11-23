@@ -1,0 +1,20 @@
+[Unit]
+Description=WiseManPalace Background Job Scheduler
+After=network.target postgresql.service
+
+[Service]
+Type=simple
+User=www-data
+Group=www-data
+WorkingDirectory=/var/www/wiseman-pub-prj/backend
+Environment="PATH=/var/www/wiseman-pub-prj/backend/.venv/bin"
+ExecStart=/var/www/wiseman-pub-prj/backend/.venv/bin/python /var/www/wiseman-pub-prj/backend/scheduler.py
+Restart=always
+RestartSec=10
+
+# Logging
+StandardOutput=append:/var/log/wiseman/scheduler.log
+StandardError=append:/var/log/wiseman/scheduler_error.log
+
+[Install]
+WantedBy=multi-user.target

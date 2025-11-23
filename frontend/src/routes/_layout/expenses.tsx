@@ -18,7 +18,7 @@ import {
   Skeleton,
   createListCollection,
 } from "@chakra-ui/react"
-import { createFileRoute } from "@tanstack/react-router"
+import { createFileRoute, Link } from "@tanstack/react-router"
 import { useQuery } from "@tanstack/react-query"
 import { useState } from "react"
 import { FiPlus, FiX, FiCalendar, FiTag } from "react-icons/fi"
@@ -100,6 +100,7 @@ function Expenses() {
 
   const expenses = expensesData?.data || []
   const categories = categoriesData?.data || []
+  const hasNoCategories = categories.length === 0
   type SummaryType = {
     total_amount: number
     count: number
@@ -140,8 +141,8 @@ function Expenses() {
   }
 
   return (
-    <Container maxW="full" py={6}>
-      <VStack gap={6} align="stretch">
+    <Container maxW="full" py={6} position="relative">
+      <VStack gap={6} align="stretch" filter={hasNoCategories ? "blur(4px)" : "none"} pointerEvents={hasNoCategories ? "none" : "auto"}>
         {/* Header */}
         <Flex justify="space-between" align="center" flexWrap="wrap" gap={4}>
           <VStack align="start" gap={1}>
@@ -326,6 +327,48 @@ function Expenses() {
           }}
         />
       </VStack>
+
+      {/* No Categories Overlay */}
+      {hasNoCategories && (
+        <Box
+          position="fixed"
+          top="50%"
+          left="50%"
+          transform="translate(-50%, -50%)"
+          zIndex={1000}
+          bg="bg.surface"
+          p={8}
+          borderRadius="xl"
+          border="2px solid"
+          borderColor="border.card"
+          boxShadow="2xl"
+          textAlign="center"
+          maxW="500px"
+          w="90%"
+        >
+          <VStack gap={4}>
+            <FiTag size={48} color="var(--chakra-colors-text-secondary)" />
+            <Heading size="lg" color={{ base: "#ffffff", _light: "#111827" }}>
+              No Expense Categories
+            </Heading>
+            <Text color={{ base: "#9ca3af", _light: "#6b7280" }} fontSize="md">
+              You need to create at least one expense category before you can add expenses.
+            </Text>
+            <Link to="/expense-categories">
+              <Button
+                bg={{ base: "#009688", _light: "#009688" }}
+                color="white"
+                _hover={{ bg: { base: "#00796b", _light: "#00796b" } }}
+                size="lg"
+                mt={2}
+              >
+                <FiPlus style={{ marginRight: "8px" }} />
+                Create Expense Category
+              </Button>
+            </Link>
+          </VStack>
+        </Box>
+      )}
     </Container>
   )
 }

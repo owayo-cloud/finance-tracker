@@ -292,6 +292,158 @@ export type FixRowRequest = {
     };
 };
 
+export type GRNCreate = {
+    supplier_id: string;
+    transporter_id?: (string | null);
+    transaction_date?: string;
+    goods_receipt_date?: string;
+    shipping_address?: (string | null);
+    delivery_number?: (string | null);
+    delivery_date?: (string | null);
+    consignment_number?: (string | null);
+    consignment_date?: (string | null);
+    batch_number?: (string | null);
+    driver_name?: (string | null);
+    vehicle_reg_number?: (string | null);
+    department?: (string | null);
+    section?: (string | null);
+    currency?: string;
+    total_amount?: (number | string);
+    is_approved?: boolean;
+    approved_at?: (string | null);
+    approved_by_id?: (string | null);
+    payment_type?: string;
+    credit_terms?: (string | null);
+    requires_approval?: boolean;
+    creates_debt?: boolean;
+    notes?: (string | null);
+    items?: Array<GRNItemCreate>;
+};
+
+export type GRNItemCreate = {
+    grn_id?: (string | null);
+    product_id: string;
+    order_quantity?: (number | string);
+    pending_quantity?: (number | string);
+    received_quantity: (number | string);
+    lpo_number?: (string | null);
+    ledger_account?: (string | null);
+    is_promo?: boolean;
+    unit_price?: (number | string | null);
+    total_price?: (number | string | null);
+    notes?: (string | null);
+};
+
+export type GRNItemPublic = {
+    grn_id: string;
+    product_id: string;
+    order_quantity?: string;
+    pending_quantity?: string;
+    received_quantity: string;
+    lpo_number?: (string | null);
+    ledger_account?: (string | null);
+    is_promo?: boolean;
+    unit_price?: (string | null);
+    total_price?: (string | null);
+    notes?: (string | null);
+    id: string;
+    product_name?: (string | null);
+    product_code?: (string | null);
+};
+
+export type GRNPublic = {
+    supplier_id: string;
+    transporter_id?: (string | null);
+    transaction_date?: string;
+    goods_receipt_date?: string;
+    shipping_address?: (string | null);
+    delivery_number?: (string | null);
+    delivery_date?: (string | null);
+    consignment_number?: (string | null);
+    consignment_date?: (string | null);
+    batch_number?: (string | null);
+    driver_name?: (string | null);
+    vehicle_reg_number?: (string | null);
+    department?: (string | null);
+    section?: (string | null);
+    currency?: string;
+    total_amount?: string;
+    is_approved?: boolean;
+    approved_at?: (string | null);
+    approved_by_id?: (string | null);
+    payment_type?: string;
+    credit_terms?: (string | null);
+    requires_approval?: boolean;
+    creates_debt?: boolean;
+    notes?: (string | null);
+    id: string;
+    grn_number: string;
+    created_at: string;
+    supplier_name?: (string | null);
+    transporter_name?: (string | null);
+    items_count?: number;
+};
+
+export type GRNPublicWithItems = {
+    supplier_id: string;
+    transporter_id?: (string | null);
+    transaction_date?: string;
+    goods_receipt_date?: string;
+    shipping_address?: (string | null);
+    delivery_number?: (string | null);
+    delivery_date?: (string | null);
+    consignment_number?: (string | null);
+    consignment_date?: (string | null);
+    batch_number?: (string | null);
+    driver_name?: (string | null);
+    vehicle_reg_number?: (string | null);
+    department?: (string | null);
+    section?: (string | null);
+    currency?: string;
+    total_amount?: string;
+    is_approved?: boolean;
+    approved_at?: (string | null);
+    approved_by_id?: (string | null);
+    payment_type?: string;
+    credit_terms?: (string | null);
+    requires_approval?: boolean;
+    creates_debt?: boolean;
+    notes?: (string | null);
+    id: string;
+    grn_number: string;
+    created_at: string;
+    supplier_name?: (string | null);
+    transporter_name?: (string | null);
+    items_count?: number;
+    items?: Array<GRNItemPublic>;
+};
+
+export type GRNsPublic = {
+    data: Array<GRNPublic>;
+    count: number;
+};
+
+export type GRNUpdate = {
+    supplier_id?: (string | null);
+    transporter_id?: (string | null);
+    transaction_date?: (string | null);
+    goods_receipt_date?: (string | null);
+    shipping_address?: (string | null);
+    delivery_number?: (string | null);
+    delivery_date?: (string | null);
+    consignment_number?: (string | null);
+    consignment_date?: (string | null);
+    batch_number?: (string | null);
+    driver_name?: (string | null);
+    vehicle_reg_number?: (string | null);
+    department?: (string | null);
+    section?: (string | null);
+    currency?: (string | null);
+    total_amount?: (number | string | null);
+    is_approved?: (boolean | null);
+    notes?: (string | null);
+};
+
 export type HTTPValidationError = {
     detail?: Array<ValidationError>;
 };
@@ -344,6 +496,30 @@ export type MultiPaymentSaleCreate = {
 export type NewPassword = {
     token: string;
     new_password: string;
+};
+
+export type NotificationPublic = {
+    user_id: string;
+    notification_type: string;
+    title: string;
+    message: string;
+    priority?: string;
+    is_read?: boolean;
+    read_at?: (string | null);
+    link_url?: (string | null);
+    link_text?: (string | null);
+    extra_data?: ({
+    [key: string]: unknown;
+} | null);
+    expires_at?: (string | null);
+    id: string;
+    created_at: string;
+};
+
+export type NotificationsPublic = {
+    data: Array<NotificationPublic>;
+    count: number;
+    unread_count?: number;
 };
 
 /**
@@ -411,6 +587,8 @@ export type ProductCreate = {
     selling_price: (number | string);
     current_stock?: number;
     reorder_level?: (number | null);
+    reorder_quantity?: (number | string | null);
+    enable_reorder_alerts?: boolean;
     category_id: string;
     status_id: string;
     image_id?: (string | null);
@@ -423,6 +601,8 @@ export type ProductPublic = {
     selling_price: string;
     current_stock?: number;
     reorder_level?: (number | null);
+    reorder_quantity?: (string | null);
+    enable_reorder_alerts?: boolean;
     category_id: string;
     status_id: string;
     image_id?: (string | null);
@@ -451,9 +631,80 @@ export type ProductUpdate = {
     selling_price?: (number | string | null);
     current_stock?: (number | null);
     reorder_level?: (number | null);
+    reorder_quantity?: (number | string | null);
+    enable_reorder_alerts?: (boolean | null);
     category_id?: (string | null);
     status_id?: (string | null);
     image_id?: (string | null);
+};
+
+export type ReminderLogPublic = {
+    reminder_setting_id?: (string | null);
+    user_id: string;
+    sent_to_email: string;
+    sent_at?: string;
+    status: string;
+    error_message?: (string | null);
+    items_included?: number;
+    subject_line?: (string | null);
+    extra_data?: ({
+    [key: string]: unknown;
+} | null);
+    id: string;
+    created_at: string;
+};
+
+export type ReminderLogsPublic = {
+    data: Array<ReminderLogPublic>;
+    count: number;
+};
+
+export type ReminderSettingCreate = {
+    user_id: string;
+    reminder_type: string;
+    is_enabled?: boolean;
+    frequency: string;
+    send_time?: string;
+    send_days?: ({
+    [key: string]: unknown;
+} | null);
+    filter_criteria?: ({
+    [key: string]: unknown;
+} | null);
+};
+
+export type ReminderSettingPublic = {
+    user_id: string;
+    reminder_type: string;
+    is_enabled?: boolean;
+    frequency: string;
+    send_time?: string;
+    send_days?: ({
+    [key: string]: unknown;
+} | null);
+    filter_criteria?: ({
+    [key: string]: unknown;
+} | null);
+    last_sent_at?: (string | null);
+    next_send_at?: (string | null);
+    id: string;
+};
+
+export type ReminderSettingsPublic = {
+    data: Array<ReminderSettingPublic>;
+    count: number;
+};
+
+export type ReminderSettingUpdate = {
+    is_enabled?: (boolean | null);
+    frequency?: (string | null);
+    send_time?: (string | null);
+    send_days?: ({
+    [key: string]: unknown;
+} | null);
+    filter_criteria?: ({
+    [key: string]: unknown;
+} | null);
 };
 
 export type SaleCreate = {
@@ -630,9 +881,195 @@ export type StockSummary = {
     products: Array<StockItem>;
 };
 
+export type SupplierCreate = {
+    name: string;
+    contact_person?: (string | null);
+    email?: (string | null);
+    phone?: (string | null);
+    address?: (string | null);
+    credit_limit?: (number | string);
+    current_credit_used?: (number | string);
+    is_active?: boolean;
+};
+
+export type SupplierDebtCreate = {
+    supplier_id: string;
+    grn_id: string;
+    total_amount: (number | string);
+    payment_terms: string;
+    credit_period_days?: (number | null);
+    invoice_number?: (string | null);
+    invoice_date?: (string | null);
+    due_date?: (string | null);
+    currency?: string;
+    notes?: (string | null);
+};
+
+export type SupplierDebtInstallmentCreate = {
+    supplier_debt_id: string;
+    installment_number: number;
+    installment_amount: (number | string);
+    due_date: string;
+    notes?: (string | null);
+};
+
+export type SupplierDebtInstallmentPublic = {
+    supplier_debt_id: string;
+    installment_number: number;
+    installment_amount: string;
+    due_date: string;
+    amount_paid?: string;
+    balance: string;
+    status?: string;
+    notes?: (string | null);
+    id: string;
+};
+
+export type SupplierDebtInstallmentsPublic = {
+    data: Array<SupplierDebtInstallmentPublic>;
+    count: number;
+};
+
+export type SupplierDebtPaymentCreate = {
+    supplier_debt_id: string;
+    installment_id?: (string | null);
+    payment_amount: (number | string);
+    payment_date?: string;
+    payment_method_id: string;
+    payment_reference?: (string | null);
+    notes?: (string | null);
+};
+
+export type SupplierDebtPaymentPublic = {
+    supplier_debt_id: string;
+    installment_id?: (string | null);
+    payment_amount: string;
+    payment_date?: string;
+    payment_method_id: string;
+    payment_reference?: (string | null);
+    notes?: (string | null);
+    id: string;
+    payment_method: PaymentMethodPublic;
+};
+
+export type SupplierDebtPublic = {
+    supplier_id: string;
+    grn_id: string;
+    total_amount: string;
+    amount_paid?: string;
+    balance: string;
+    payment_terms: string;
+    credit_period_days?: (number | null);
+    invoice_number?: (string | null);
+    invoice_date?: string;
+    due_date: string;
+    status?: string;
+    is_overdue?: boolean;
+    days_overdue?: number;
+    currency?: string;
+    notes?: (string | null);
+    id: string;
+    created_at: string;
+    supplier_name?: (string | null);
+    grn_number?: (string | null);
+};
+
+export type SupplierDebtPublicWithDetails = {
+    supplier_id: string;
+    grn_id: string;
+    total_amount: string;
+    amount_paid?: string;
+    balance: string;
+    payment_terms: string;
+    credit_period_days?: (number | null);
+    invoice_number?: (string | null);
+    invoice_date?: string;
+    due_date: string;
+    status?: string;
+    is_overdue?: boolean;
+    days_overdue?: number;
+    currency?: string;
+    notes?: (string | null);
+    id: string;
+    created_at: string;
+    supplier_name?: (string | null);
+    grn_number?: (string | null);
+    installments?: Array<SupplierDebtInstallmentPublic>;
+    payments?: Array<SupplierDebtPaymentPublic>;
+};
+
+export type SupplierDebtsPublic = {
+    data: Array<SupplierDebtPublic>;
+    count: number;
+};
+
+export type SupplierDebtUpdate = {
+    payment_terms?: (string | null);
+    invoice_number?: (string | null);
+    due_date?: (string | null);
+    status?: (string | null);
+    notes?: (string | null);
+};
+
+export type SupplierPublic = {
+    name: string;
+    contact_person?: (string | null);
+    email?: (string | null);
+    phone?: (string | null);
+    address?: (string | null);
+    credit_limit?: string;
+    current_credit_used?: string;
+    is_active?: boolean;
+    id: string;
+};
+
+export type SuppliersPublic = {
+    data: Array<SupplierPublic>;
+    count: number;
+};
+
+export type SupplierUpdate = {
+    name?: (string | null);
+    contact_person?: (string | null);
+    email?: (string | null);
+    phone?: (string | null);
+    address?: (string | null);
+    is_active?: (boolean | null);
+};
+
 export type Token = {
     access_token: string;
     token_type?: string;
+};
+
+export type TransporterCreate = {
+    name: string;
+    contact_person?: (string | null);
+    phone?: (string | null);
+    vehicle_registration?: (string | null);
+    is_active?: boolean;
+};
+
+export type TransporterPublic = {
+    name: string;
+    contact_person?: (string | null);
+    phone?: (string | null);
+    vehicle_registration?: (string | null);
+    is_active?: boolean;
+    id: string;
+};
+
+export type TransportersPublic = {
+    data: Array<TransporterPublic>;
+    count: number;
+};
+
+export type TransporterUpdate = {
+    name?: (string | null);
+    contact_person?: (string | null);
+    phone?: (string | null);
+    vehicle_registration?: (string | null);
+    is_active?: (boolean | null);
 };
 
 export type UpdatePassword = {
@@ -911,6 +1348,117 @@ export type ExpensesGetExpenseSummaryData = {
 
 export type ExpensesGetExpenseSummaryResponse = (unknown);
 
+export type GrnReadSuppliersData = {
+    isActive?: (boolean | null);
+    limit?: number;
+    search?: (string | null);
+    skip?: number;
+};
+
+export type GrnReadSuppliersResponse = (SuppliersPublic);
+
+export type GrnCreateSupplierData = {
+    requestBody: SupplierCreate;
+};
+
+export type GrnCreateSupplierResponse = (SupplierPublic);
+
+export type GrnReadSupplierData = {
+    supplierId: string;
+};
+
+export type GrnReadSupplierResponse = (SupplierPublic);
+
+export type GrnUpdateSupplierData = {
+    requestBody: SupplierUpdate;
+    supplierId: string;
+};
+
+export type GrnUpdateSupplierResponse = (SupplierPublic);
+
+export type GrnDeleteSupplierData = {
+    supplierId: string;
+};
+
+export type GrnDeleteSupplierResponse = (unknown);
+
+export type GrnReadTransportersData = {
+    isActive?: (boolean | null);
+    limit?: number;
+    search?: (string | null);
+    skip?: number;
+};
+
+export type GrnReadTransportersResponse = (TransportersPublic);
+
+export type GrnCreateTransporterData = {
+    requestBody: TransporterCreate;
+};
+
+export type GrnCreateTransporterResponse = (TransporterPublic);
+
+export type GrnReadTransporterData = {
+    transporterId: string;
+};
+
+export type GrnReadTransporterResponse = (TransporterPublic);
+
+export type GrnUpdateTransporterData = {
+    requestBody: TransporterUpdate;
+    transporterId: string;
+};
+
+export type GrnUpdateTransporterResponse = (TransporterPublic);
+
+export type GrnDeleteTransporterData = {
+    transporterId: string;
+};
+
+export type GrnDeleteTransporterResponse = (unknown);
+
+export type GrnReadGrnsData = {
+    endDate?: (string | null);
+    isApproved?: (boolean | null);
+    limit?: number;
+    search?: (string | null);
+    skip?: number;
+    startDate?: (string | null);
+    supplierId?: (string | null);
+};
+
+export type GrnReadGrnsResponse = (GRNsPublic);
+
+export type GrnCreateGrnData = {
+    requestBody: GRNCreate;
+};
+
+export type GrnCreateGrnResponse = (GRNPublicWithItems);
+
+export type GrnReadGrnData = {
+    grnId: string;
+};
+
+export type GrnReadGrnResponse = (GRNPublicWithItems);
+
+export type GrnUpdateGrnData = {
+    grnId: string;
+    requestBody: GRNUpdate;
+};
+
+export type GrnUpdateGrnResponse = (GRNPublicWithItems);
+
+export type GrnDeleteGrnData = {
+    grnId: string;
+};
+
+export type GrnDeleteGrnResponse = (unknown);
+
+export type GrnApproveGrnData = {
+    grnId: string;
+};
+
+export type GrnApproveGrnResponse = (GRNPublicWithItems);
+
 export type LoginLoginAccessTokenData = {
     formData: Body_login_login_access_token;
 };
@@ -964,6 +1512,38 @@ export type MediaListMediaData = {
 
 export type MediaListMediaResponse = (Array<MediaPublic>);
 
+export type NotificationsListNotificationsData = {
+    isRead?: (boolean | null);
+    limit?: number;
+    notificationType?: (string | null);
+    priority?: (string | null);
+    skip?: number;
+};
+
+export type NotificationsListNotificationsResponse = (NotificationsPublic);
+
+export type NotificationsGetUnreadCountResponse = ({
+    [key: string]: (number);
+});
+
+export type NotificationsMarkAsReadData = {
+    notificationId: string;
+};
+
+export type NotificationsMarkAsReadResponse = (NotificationPublic);
+
+export type NotificationsMarkAllAsReadResponse = (Message);
+
+export type NotificationsDeleteNotificationData = {
+    notificationId: string;
+};
+
+export type NotificationsDeleteNotificationResponse = (Message);
+
+export type NotificationsGetNotificationTypesResponse = ({
+    [key: string]: Array<(string)>;
+});
+
 export type PrivateCreateUserData = {
     requestBody: PrivateUserCreate;
 };
@@ -1009,6 +1589,49 @@ export type ProductsDeleteProductData = {
 
 export type ProductsDeleteProductResponse = ({
     [key: string]: (string);
+});
+
+export type RemindersListReminderSettingsResponse = (ReminderSettingsPublic);
+
+export type RemindersCreateReminderSettingData = {
+    requestBody: ReminderSettingCreate;
+};
+
+export type RemindersCreateReminderSettingResponse = (ReminderSettingPublic);
+
+export type RemindersGetReminderSettingData = {
+    settingId: string;
+};
+
+export type RemindersGetReminderSettingResponse = (ReminderSettingPublic);
+
+export type RemindersUpdateReminderSettingData = {
+    requestBody: ReminderSettingUpdate;
+    settingId: string;
+};
+
+export type RemindersUpdateReminderSettingResponse = (ReminderSettingPublic);
+
+export type RemindersDeleteReminderSettingData = {
+    settingId: string;
+};
+
+export type RemindersDeleteReminderSettingResponse = (Message);
+
+export type RemindersListReminderLogsData = {
+    limit?: number;
+    skip?: number;
+    status?: (string | null);
+};
+
+export type RemindersListReminderLogsResponse = (ReminderLogsPublic);
+
+export type RemindersGetReminderStatisticsResponse = ({
+    [key: string]: unknown;
+});
+
+export type RemindersGetReminderTypesResponse = ({
+    [key: string]: Array<(string)>;
 });
 
 export type SalesReadPaymentMethodsData = {
@@ -1205,6 +1828,69 @@ export type StockEntriesDeleteStockEntryData = {
 export type StockEntriesDeleteStockEntryResponse = ({
     [key: string]: (string);
 });
+
+export type SupplierDebtsListSupplierDebtsData = {
+    endDate?: (string | null);
+    isOverdue?: (boolean | null);
+    limit?: number;
+    skip?: number;
+    startDate?: (string | null);
+    status?: (string | null);
+    supplierId?: (string | null);
+};
+
+export type SupplierDebtsListSupplierDebtsResponse = (SupplierDebtsPublic);
+
+export type SupplierDebtsCreateSupplierDebtData = {
+    requestBody: SupplierDebtCreate;
+};
+
+export type SupplierDebtsCreateSupplierDebtResponse = (SupplierDebtPublic);
+
+export type SupplierDebtsGetSummaryResponse = ({
+    [key: string]: unknown;
+});
+
+export type SupplierDebtsGetAgingReportData = {
+    supplierId?: (string | null);
+};
+
+export type SupplierDebtsGetAgingReportResponse = (Array<{
+    [key: string]: unknown;
+}>);
+
+export type SupplierDebtsGetSupplierDebtData = {
+    debtId: string;
+};
+
+export type SupplierDebtsGetSupplierDebtResponse = (SupplierDebtPublicWithDetails);
+
+export type SupplierDebtsUpdateSupplierDebtData = {
+    debtId: string;
+    requestBody: SupplierDebtUpdate;
+};
+
+export type SupplierDebtsUpdateSupplierDebtResponse = (SupplierDebtPublic);
+
+export type SupplierDebtsRecordPaymentData = {
+    debtId: string;
+    requestBody: SupplierDebtPaymentCreate;
+};
+
+export type SupplierDebtsRecordPaymentResponse = (SupplierDebtPaymentPublic);
+
+export type SupplierDebtsListInstallmentsData = {
+    debtId: string;
+};
+
+export type SupplierDebtsListInstallmentsResponse = (SupplierDebtInstallmentsPublic);
+
+export type SupplierDebtsCreateInstallmentsData = {
+    debtId: string;
+    requestBody: Array<SupplierDebtInstallmentCreate>;
+};
+
+export type SupplierDebtsCreateInstallmentsResponse = (SupplierDebtInstallmentsPublic);
 
 export type UsersReadUsersData = {
     limit?: number;

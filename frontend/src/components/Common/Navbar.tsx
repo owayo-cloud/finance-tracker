@@ -8,6 +8,7 @@ import { getUserInitials } from "@/utils"
 import { MenuContent, MenuItem, MenuRoot, MenuTrigger } from "../ui/menu"
 import { FiLogOut, FiUser } from "react-icons/fi"
 import { ColorModeButton } from "../ui/color-mode"
+import NotificationBell from "./NotificationBell"
 
 interface NavbarProps {
   onMenuClick?: () => void
@@ -253,7 +254,7 @@ function Navbar({ onMenuClick, sidebarCollapsed = false, isPOSMode = false }: Na
       </HStack>
 
       {/* Center Section: Search Bar - Hidden in POS mode */}
-      {!isPOSMode && (
+      {/* {!isPOSMode && (
         <Box flex="1" maxW="400px" mx={4} display={{ base: "none", md: "block" }}>
           <Input
             placeholder="Search products"
@@ -271,7 +272,7 @@ function Navbar({ onMenuClick, sidebarCollapsed = false, isPOSMode = false }: Na
             py={2}
           />
         </Box>
-      )}
+      )} */}
 
       {/* Right Section: Icons and User - Hidden in POS mode */}
       {!isPOSMode && (
@@ -314,29 +315,8 @@ function Navbar({ onMenuClick, sidebarCollapsed = false, isPOSMode = false }: Na
             />
           </Box>
 
-          {/* Bell Icon with Notification */}
-          <Box position="relative" display="inline-flex" alignItems="center" justifyContent="center">
-            <IconButton
-              variant="ghost"
-              aria-label="Notifications"
-              color={{ base: "#ffffff", _light: "#1a1d29" }}
-              _hover={{ bg: { base: "rgba(255, 255, 255, 0.05)", _light: "rgba(0, 0, 0, 0.05)" } }}
-              size="sm"
-            >
-              <FiBell fontSize="18px" />
-            </IconButton>
-            <Box
-              position="absolute"
-              top="4px"
-              right="4px"
-              w="8px"
-              h="8px"
-              borderRadius="full"
-              bg="#ef4444"
-              border="none"
-              zIndex={1}
-            />
-          </Box>
+          {/* Notification Bell Component */}
+          <NotificationBell variant="desktop" />
 
           {/* User Profile */}
           <MenuRoot>

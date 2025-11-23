@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router"
-import { Box } from "@chakra-ui/react"
+import { Box, Button } from "@chakra-ui/react"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { useState, useMemo, useEffect } from "react"
 
@@ -32,6 +32,8 @@ function Sales() {
   const [searchQuery, setSearchQuery] = useState("")
   const [cart, setCart] = useState<CartItem[]>([])
   const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false)
+  const [isProcessingPayment, setIsProcessingPayment] = useState(false) // Prevent double-saving
+  const [isCustomerPanelOpen, setIsCustomerPanelOpen] = useState(false) // Mobile: customer panel collapsed by default
   const [isRecentReceiptsModalOpen, setIsRecentReceiptsModalOpen] = useState(false)
   const [isReceiptPreviewModalOpen, setIsReceiptPreviewModalOpen] = useState(false)
   const [isCreditNoteModalOpen, setIsCreditNoteModalOpen] = useState(false)
@@ -297,6 +299,13 @@ function Sales() {
 
   // Process payment with multiple payment methods
   const processPayment = async (payments: Record<string, { amount: number; refNo?: string }>) => {
+    // Prevent double-saving
+    if (isProcessingPayment) {
+      console.log("Payment already processing, ignoring duplicate request")
+      return
+    }
+    
+    setIsProcessingPayment(true)
     try {
       // Note: Stock validation is handled by the backend endpoint
       // No need to validate here as it causes unnecessary API calls and potential CORS issues
@@ -334,11 +343,8 @@ function Sales() {
           paymentArray[largestPaymentIndex].amount += adjustment
         }
       } else {
-        // Customer selected: allow partial payment (debt will be created)
-        if (totalPaid <= 0) {
-          showToast.showErrorToast("Please enter at least one payment amount")
-          return
-        }
+        // Customer selected: allow partial or zero payment (entire amount can be debt)
+        // No minimum payment required - zero payment means full amount becomes debt
         // If payment exceeds total, that's fine (change will be given)
       }
       
@@ -501,6 +507,8 @@ function Sales() {
       const errorMessage = error?.message || error?.detail || "Failed to complete sale. Please check your connection and try again."
       showToast.showErrorToast(errorMessage)
       throw error
+    } finally {
+      setIsProcessingPayment(false)
     }
   }
 
@@ -603,7 +611,7 @@ function Sales() {
   }
 
   return (
-    <Box h="100%" bg="bg.canvas" display="flex" flexDirection="column" overflow="hidden">
+    <Box h="100%" bg="bg.canvas" display="flex" flexDirection="column" overflow={{ base: "auto", lg: "hidden" }}>
       <ActionButtons
         onLogout={logout}
         onReset={resetSale}
@@ -638,7 +646,7 @@ function Sales() {
         })) : []}
         onSave={handleSave}
         onSaveAndPrint={handleSaveAndPrint}
-        isProcessing={createSale.isPending}
+        isProcessing={isProcessingPayment || createSale.isPending}
         isLoadingPaymentMethods={isLoadingPaymentMethods}
         paymentMethodsError={paymentMethodsError}
         customerName={customerName || undefined}
@@ -646,9 +654,26 @@ function Sales() {
       />
 
       {/* Main Content Area */}
-      <Box display="flex" flex={1} overflow="hidden" minH={0} flexDirection={{ base: "column", lg: "row" }}>
-        {/* Left Panel - Products Table */}
-        <Box flex={1} display="flex" flexDirection="column" bg="bg.canvas" minW={0} overflow="hidden">
+      <Box 
+        display="flex" 
+        flex={1} 
+        overflow={{ base: "visible", lg: "hidden" }} 
+        minH={0} 
+        flexDirection={{ base: "column", lg: "row" }}
+        position="relative"
+      >
+        {/* Left Panel - Products Table (Prioritized on mobile) */}
+        <Box 
+          flex={1} 
+          display="flex" 
+          flexDirection="column" 
+          bg="bg.canvas" 
+          minW={0} 
+          overflow="hidden"
+          order={{ base: 1, lg: 0 }} // Show first on mobile
+          minH={{ base: isCustomerPanelOpen ? "50vh" : "70vh", lg: "auto" }} // Adjust height based on panel state
+          maxH={{ base: isCustomerPanelOpen ? "50vh" : "none", lg: "none" }} // Limit height when panel is open
+        >
           <ReceiptDetails
             receiptDate={receiptDate}
             receiptDateValue={receiptDateValue}
@@ -671,38 +696,83 @@ function Sales() {
             searchResults={searchProducts.data}
             cartTotal={cartTotal}
           />
-          </Box>
+        </Box>
 
-        <CustomerPanel
-          activeTab={activeTab}
-          onTabChange={setActiveTab}
-          customerName={customerName}
-          customerTel={customerTel}
-          customerBalance={customerBalance}
-          remarks={remarks}
-          customerPin={customerPin}
-          onCustomerNameChange={setCustomerName}
-          onCustomerTelChange={setCustomerTel}
-          onCustomerBalanceChange={setCustomerBalance}
-          onRemarksChange={setRemarks}
-          onCustomerPinChange={setCustomerPin}
-          onSelectCustomer={() => setIsCustomerSearchModalOpen(true)}
-          onNewCustomer={() => setIsNewCustomerModalOpen(true)}
-          onClearCustomer={clearCustomer}
-          suspendedSales={suspendedSales}
-          selectedSaleId={selectedSaleId}
-          onSelectSale={setSelectedSaleId}
-          onResumeSale={resumeSale}
-          onViewReceipt={() => setIsRecentReceiptsModalOpen(true)}
-          selectedReceiptId={selectedReceiptId}
-          onPreviewReceipt={() => {
-            if (selectedReceiptId) {
-              setIsReceiptPreviewModalOpen(true)
-            } else {
-              showToast.showErrorToast("Please select a receipt first")
-            }
-          }}
-        />
+        {/* Customer Panel - Collapsible on mobile */}
+        <Box
+          data-customer-panel
+          display={{ base: isCustomerPanelOpen ? "flex" : "none", lg: "flex" }}
+          flexDirection="column"
+          w={{ base: "100%", lg: "400px" }}
+          flexShrink={0}
+          order={{ base: 2, lg: 0 }}
+          maxH={{ base: "50vh", lg: "none" }} // Limit height on mobile
+          overflowY={{ base: "auto", lg: "hidden" }} // Allow scrolling on mobile
+          position={{ base: "relative", lg: "static" }}
+        >
+          <CustomerPanel
+            activeTab={activeTab}
+            onTabChange={setActiveTab}
+            customerName={customerName}
+            customerTel={customerTel}
+            customerBalance={customerBalance}
+            remarks={remarks}
+            customerPin={customerPin}
+            onCustomerNameChange={setCustomerName}
+            onCustomerTelChange={setCustomerTel}
+            onCustomerBalanceChange={setCustomerBalance}
+            onRemarksChange={setRemarks}
+            onCustomerPinChange={setCustomerPin}
+            onSelectCustomer={() => setIsCustomerSearchModalOpen(true)}
+            onNewCustomer={() => setIsNewCustomerModalOpen(true)}
+            onClearCustomer={clearCustomer}
+            suspendedSales={suspendedSales}
+            selectedSaleId={selectedSaleId}
+            onSelectSale={setSelectedSaleId}
+            onResumeSale={resumeSale}
+            onViewReceipt={() => setIsRecentReceiptsModalOpen(true)}
+            selectedReceiptId={selectedReceiptId}
+            onPreviewReceipt={() => {
+              if (selectedReceiptId) {
+                setIsReceiptPreviewModalOpen(true)
+              } else {
+                showToast.showErrorToast("Please select a receipt first")
+              }
+            }}
+          />
+        </Box>
+        
+        {/* Mobile: Toggle button for customer panel */}
+        <Box
+          display={{ base: "block", lg: "none" }}
+          position="fixed"
+          bottom="80px"
+          right="20px"
+          zIndex={10}
+        >
+          <Button
+            onClick={() => {
+              setIsCustomerPanelOpen(!isCustomerPanelOpen)
+              // Scroll to customer panel when opening
+              if (!isCustomerPanelOpen) {
+                setTimeout(() => {
+                  const customerPanel = document.querySelector('[data-customer-panel]')
+                  if (customerPanel) {
+                    customerPanel.scrollIntoView({ behavior: 'smooth', block: 'start' })
+                  }
+                }, 100)
+              }
+            }}
+            bg="#14b8a6"
+            color="white"
+            borderRadius="full"
+            size="lg"
+            boxShadow="lg"
+            _hover={{ bg: "#0d9488" }}
+          >
+            {isCustomerPanelOpen ? "Hide Customer" : "Show Customer"}
+          </Button>
+        </Box>
       </Box>
                     
       {/* Footer */}

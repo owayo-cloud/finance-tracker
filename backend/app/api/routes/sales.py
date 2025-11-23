@@ -14,7 +14,8 @@ from app.models import (
     Product, PaymentMethod, PaymentMethodPublic, PaymentMethodsPublic,
     PaymentMethodCreate, PaymentMethodUpdate,
     SalePayment, SalePaymentCreate, SalePaymentPublic,
-    User, ProductPublic
+    User, ProductPublic,
+    Debt, DebtCreate
 )
 
 
@@ -475,6 +476,46 @@ def create_sale_with_multiple_payments(
         
         session.commit()
         session.refresh(sale)
+        
+        # Create debt if customer is provided and payment is less than total
+        if sale.customer_name and total_payment_amount < calculated_total:
+            debt_amount = calculated_total - total_payment_amount
+            
+            # Get customer contact from sale if available
+            customer_contact = None
+            if sale_in.customer_name:
+                # Try to find existing debt for this customer to get contact
+                existing_debt = session.exec(
+                    select(Debt)
+                    .where(Debt.customer_name == sale_in.customer_name)
+                    .where(Debt.customer_contact.isnot(None))
+                    .limit(1)
+                ).first()
+                if existing_debt:
+                    customer_contact = existing_debt.customer_contact
+            
+            # Create debt record
+            debt = Debt(
+                customer_name=sale.customer_name,
+                customer_contact=customer_contact,
+                sale_id=sale.id,
+                amount=debt_amount,
+                amount_paid=Decimal("0"),
+                balance=debt_amount,
+                debt_date=datetime.now(timezone.utc),
+                status="pending",
+                notes=f"Credit from sale #{sale.id}",
+                created_by_id=current_user.id
+            )
+            
+            session.add(debt)
+            try:
+                session.commit()
+            except Exception as e:
+                session.rollback()
+                # Don't fail the sale if debt creation fails, just log it
+                print(f"Warning: Failed to create debt record: {str(e)}")
+        
     except Exception as e:
         session.rollback()
         raise HTTPException(

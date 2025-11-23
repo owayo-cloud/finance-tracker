@@ -19,7 +19,7 @@ import {
   DialogCloseTrigger,
 } from "@/components/ui/dialog"
 import { useQuery } from "@tanstack/react-query"
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { FiSearch, FiCalendar, FiFilter, FiLink, FiChevronLeft, FiChevronRight, FiEye } from "react-icons/fi"
 import { SalesService } from "@/client"
 import { formatCurrency } from "./utils"
@@ -53,6 +53,12 @@ export function RecentReceiptsModal({
   const [page, setPage] = useState(1)
   const [pageSize, setPageSize] = useState(50)
   const [selectedReceiptId, setSelectedReceiptId] = useState<string | null>(null)
+  // Default to today's date
+  const getTodayDate = () => {
+    const today = new Date()
+    return today.toISOString().split('T')[0]
+  }
+  
   const [dateFilter, setDateFilter] = useState<string>(() => {
     const today = new Date()
     const day = today.getDate().toString().padStart(2, '0')
@@ -60,17 +66,34 @@ export function RecentReceiptsModal({
     const year = today.getFullYear()
     return `${day}/${month}/${year}`
   })
-  const [dateFilterValue, setDateFilterValue] = useState<string>(() => {
-    return new Date().toISOString().split('T')[0]
-  })
+  const [dateFilterValue, setDateFilterValue] = useState<string>(() => getTodayDate())
   const [salesRepFilter, setSalesRepFilter] = useState<string>("")
   const [searchQuery, setSearchQuery] = useState<string>("")
 
+  // Reset to today when modal opens
+  useEffect(() => {
+    if (isOpen) {
+      const today = getTodayDate()
+      const todayDate = new Date(today)
+      const day = todayDate.getDate().toString().padStart(2, '0')
+      const month = todayDate.toLocaleString('en-US', { month: 'short' })
+      const year = todayDate.getFullYear()
+      setDateFilter(`${day}/${month}/${year}`)
+      setDateFilterValue(today)
+      setPage(1) // Reset to first page
+    }
+  }, [isOpen])
+
+  // Use date filter in query - default to today
+  const selectedDate = dateFilterValue || getTodayDate()
+  
   const { data, isLoading } = useQuery({
-    queryKey: ["recent-receipts", page, pageSize],
+    queryKey: ["recent-receipts", page, pageSize, selectedDate],
     queryFn: () => SalesService.readSales({
       skip: (page - 1) * pageSize,
       limit: pageSize,
+      startDate: selectedDate, // Filter by selected date
+      endDate: selectedDate,    // Same date for single day filter
     }),
     enabled: isOpen,
   })
@@ -109,6 +132,16 @@ export function RecentReceiptsModal({
       const year = date.getFullYear()
       setDateFilter(`${day}/${month}/${year}`)
       setDateFilterValue(e.target.value)
+      setPage(1) // Reset to first page when date changes
+    } else {
+      // If cleared, reset to today
+      const today = new Date()
+      const day = today.getDate().toString().padStart(2, '0')
+      const month = today.toLocaleString('en-US', { month: 'short' })
+      const year = today.getFullYear()
+      setDateFilter(`${day}/${month}/${year}`)
+      setDateFilterValue(getTodayDate())
+      setPage(1)
     }
   }
 

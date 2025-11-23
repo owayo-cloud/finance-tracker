@@ -12,7 +12,6 @@ import {
   DialogTitle,
   DialogBody,
   DialogFooter,
-  DialogCloseTrigger,
   DialogActionTrigger,
 } from "@/components/ui/dialog"
 import { Field } from "@/components/ui/field"
@@ -65,14 +64,21 @@ export function NewCustomerModal({
       balance: 0,
     },
   })
+  
+  // Debug: Log form state changes
+  console.log("Form state:", { errors, isValid })
 
   const onSubmit: SubmitHandler<NewCustomerForm> = async (data) => {
+    console.log("=== onSubmit called ===")
+    console.log("Form data:", data)
     try {
       setIsSubmitting(true)
       
       const customerName = data.name.trim()
       const customerTel = data.tel.trim()
       const initialBalance = data.balance || 0
+      
+      console.log("Creating customer with:", { customerName, customerTel, initialBalance })
       
       // Create debt entry via API (this creates the customer account)
       const token = localStorage.getItem("access_token") || ""
@@ -81,16 +87,25 @@ export function NewCustomerModal({
       // Create debt entry to establish customer account
       // If balance is 0, create a minimal paid debt to establish the account
       // If balance > 0, create an actual debt
+      const amount = initialBalance > 0 ? initialBalance : 0.01
+      const amountPaid = initialBalance > 0 ? 0 : 0.01
+      const calculatedBalance = amount - amountPaid // Should be 0 if initialBalance is 0
+      
+      console.log("Debt calculation:", { amount, amountPaid, calculatedBalance, initialBalance })
+      
+      // Backend calculates balance automatically, so we don't need to send it
       const debtData = {
         customer_name: customerName,
         customer_contact: customerTel || undefined,
-        amount: initialBalance > 0 ? initialBalance : 0.01, // Minimum amount of 0.01 (required by API)
-        amount_paid: initialBalance > 0 ? 0 : 0.01, // If balance is 0, mark as paid
-        balance: initialBalance, // This will be 0 if initialBalance is 0
+        amount: amount,
+        amount_paid: amountPaid,
+        // balance is calculated by backend as amount - amount_paid
         notes: initialBalance > 0 
           ? `Initial customer account with balance of ${initialBalance}` 
           : "Initial customer account creation (zero balance)",
       }
+      
+      console.log("Sending debt data to API:", debtData)
       
       const response = await fetch(`${apiBase}/api/v1/debts/`, {
         method: "POST",
@@ -103,10 +118,15 @@ export function NewCustomerModal({
       
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({ detail: "Failed to create customer" }))
-        throw new Error(errorData.detail || "Failed to create customer")
+        console.error("Failed to create debt:", response.status, errorData)
+        throw new Error(errorData.detail || `Failed to create customer: ${response.status}`)
       }
       
       const createdDebt = await response.json()
+      console.log("Customer created, debt response:", createdDebt)
+      console.log("Debt customer_name:", createdDebt.customer_name)
+      console.log("Debt balance:", createdDebt.balance)
+      console.log("Debt status:", createdDebt.status)
       
       const customer: Customer = {
         name: customerName,
@@ -114,11 +134,58 @@ export function NewCustomerModal({
         balance: parseFloat(createdDebt.balance?.toString() || "0"),
       }
       
-      // Invalidate debts query to refresh customer list
-      queryClient.invalidateQueries({ queryKey: ["debts-for-customers"] })
+      // Invalidate all customer queries (including those with search params)
+      await queryClient.invalidateQueries({ queryKey: ["customers"], exact: false })
+      await queryClient.invalidateQueries({ queryKey: ["debts-for-customers"] })
+      
+      // Verify the debt was created by checking the debts API
+      try {
+        const verifyResponse = await fetch(`${apiBase}/api/v1/debts/?customer_name=${encodeURIComponent(customerName)}&limit=10`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        })
+        if (verifyResponse.ok) {
+          const verifyData = await verifyResponse.json()
+          console.log("Verification - Debts found for customer:", verifyData.data?.length || 0)
+          if (verifyData.data && verifyData.data.length > 0) {
+            console.log("Verification - First debt:", verifyData.data[0])
+          }
+        }
+      } catch (e) {
+        console.error("Failed to verify debt creation:", e)
+      }
+      
+      // Test customers API directly
+      try {
+        await new Promise(resolve => setTimeout(resolve, 300))
+        const customersTestResponse = await fetch(`${apiBase}/api/v1/customers/?limit=1000`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        })
+        if (customersTestResponse.ok) {
+          const customersTestData = await customersTestResponse.json()
+          console.log("Direct customers API test - Found:", customersTestData.data?.length || 0, "customers")
+          const foundCustomer = customersTestData.data?.find((c: any) => 
+            c.name?.toLowerCase().trim() === customerName.toLowerCase().trim()
+          )
+          if (foundCustomer) {
+            console.log("Direct customers API test - Customer found:", foundCustomer)
+          } else {
+            console.log("Direct customers API test - Customer NOT found in list")
+            console.log("All customer names:", customersTestData.data?.map((c: any) => c.name))
+          }
+        }
+      } catch (e) {
+        console.error("Failed to test customers API:", e)
+      }
+      
+      // Small delay to ensure backend has processed the creation
+      await new Promise(resolve => setTimeout(resolve, 200))
       
       // Trigger custom event to update customer search modal in same window
-      window.dispatchEvent(new CustomEvent("customerCreated"))
+      window.dispatchEvent(new CustomEvent("customerCreated", { detail: { customerName } }))
       
       showSuccessToast("Customer created successfully")
       onSave(customer)
@@ -152,7 +219,13 @@ export function NewCustomerModal({
       onOpenChange={({ open }) => !open && handleClose()}
     >
       <DialogContent>
-        <form onSubmit={handleSubmit(onSubmit)}>
+        <form onSubmit={(e) => {
+          console.log("Form submit event triggered")
+          console.log("Form errors:", errors)
+          handleSubmit(onSubmit, (errors) => {
+            console.log("Form validation failed:", errors)
+          })(e)
+        }}>
           <DialogHeader>
             <DialogTitle>New Customer (Credit Account)</DialogTitle>
           </DialogHeader>
@@ -227,21 +300,21 @@ export function NewCustomerModal({
           </DialogBody>
           <DialogFooter>
             <Flex gap={2} w="full" justify="flex-end">
-              <DialogCloseTrigger asChild>
-                <Button variant="outline" onClick={handleClose}>Cancel</Button>
-              </DialogCloseTrigger>
-              <DialogActionTrigger asChild>
-                <Button
-                  type="submit"
-                  bg="#14b8a6"
-                  color="white"
-                  _hover={{ bg: "#0d9488" }}
-                  disabled={!isValid || isSubmitting}
-                  loading={isSubmitting}
-                >
-                  Create Customer
-                </Button>
-              </DialogActionTrigger>
+              <Button variant="outline" onClick={handleClose}>Cancel</Button>
+              <Button
+                type="submit"
+                bg="#14b8a6"
+                color="white"
+                _hover={{ bg: "#0d9488" }}
+                disabled={!isValid || isSubmitting}
+                loading={isSubmitting}
+                onClick={(e) => {
+                  console.log("Submit button clicked, isValid:", isValid, "isSubmitting:", isSubmitting)
+                  // Let the form handle submission
+                }}
+              >
+                Create Customer
+              </Button>
             </Flex>
           </DialogFooter>
         </form>

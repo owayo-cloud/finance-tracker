@@ -64,7 +64,7 @@ importers:
         specifier: 0.73.0
         version: 0.73.0(typescript@5.9.3)
       '@playwright/test':
-        specifier: ^1.55.0
+        specifier: ^1.56.1
         version: 1.56.1
       '@tanstack/router-devtools':
         specifier: ^1.131.42

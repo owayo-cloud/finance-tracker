@@ -78,3 +78,30 @@ jobs:
         run: uv run bash scripts/lint.sh
         working-directory: backend
 
+  coverage-preview:
+    name: Coverage Preview
+    needs: test-backend
+    runs-on: ubuntu-latest
+    if: ${{ needs.test-backend.result == 'success' }}
+    steps:
+      - name: Download coverage artifact
+        uses: actions/download-artifact@v5
+        with:
+          name: coverage-html
+          path: backend/htmlcov
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.10"
+      - name: Install smokeshow
+        run: pip install smokeshow
+      - name: Publish preview link
+        run: smokeshow upload backend/htmlcov
+        env:
+          SMOKESHOW_GITHUB_STATUS_DESCRIPTION: Coverage {coverage-percentage}
+          SMOKESHOW_GITHUB_COVERAGE_THRESHOLD: 90
+          SMOKESHOW_GITHUB_CONTEXT: coverage
+          SMOKESHOW_GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SMOKESHOW_GITHUB_PR_HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+          SMOKESHOW_AUTH_KEY: ${{ secrets.SMOKESHOW_AUTH_KEY }}
+

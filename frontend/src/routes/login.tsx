@@ -1,4 +1,4 @@
-import { Box, Card, Container, Image, Input, Text, VStack, Heading } from "@chakra-ui/react"
+import { Box, Card, Container, Input, Text, VStack, Heading } from "@chakra-ui/react"
 import {
   createFileRoute,
   Link as RouterLink,
@@ -13,7 +13,7 @@ import { Field } from "@/components/ui/field"
 import { InputGroup } from "@/components/ui/input-group"
 import { PasswordInput } from "@/components/ui/password-input"
 import useAuth, { isLoggedIn } from "@/hooks/useAuth"
-import Logo from "/assets/images/favicon.png"
+import BrandMark from "@/components/Common/BrandMark"
 import { passwordRules } from "../utils"
 
 export const Route = createFileRoute("/login")({
@@ -85,27 +85,7 @@ function Login() {
               <VStack gap={6} align="stretch">
                 {/* Logo and Title */}
                 <VStack gap={4}>
-                  <Box
-                    display="flex"
-                    alignItems="center"
-                    justifyContent="center"
-                    w={20}
-                    h={20}
-                    borderRadius="xl"
-                    bg="rgba(0, 150, 136, 0.1)"
-                    border="2px solid"
-                    borderColor="rgba(0, 150, 136, 0.3)"
-                    boxShadow="0 0 20px rgba(0, 150, 136, 0.2)"
-                  >
-                    <Image
-                      src={Logo}
-                      alt="Finance Tracker"
-                      height="auto"
-                      maxW="12"
-                      maxH="12"
-                      objectFit="contain"
-                    />
-                  </Box>
+                  <BrandMark w={24} h={24} fontSize="xl" />
                   <VStack gap={1}>
                     <Heading
                       size="lg"
@@ -117,7 +97,7 @@ function Login() {
                         backgroundClip: "text",
                       }}
                     >
-                      Finance Tracker
+                      WiseManPalace
                     </Heading>
                     <Text
                       fontSize="sm"
@@ -174,15 +154,6 @@ function Login() {
                   Log In
                 </Button>
 
-                {/* Sign Up Link */}
-                <Box textAlign="center">
-                  <Text fontSize="sm" color="text.secondary">
-                    Don't have an account?{" "}
-                    <RouterLink to="/signup" className="main-link">
-                      Sign Up
-                    </RouterLink>
-                  </Text>
-                </Box>
               </VStack>
             </Box>
           </Card.Body>

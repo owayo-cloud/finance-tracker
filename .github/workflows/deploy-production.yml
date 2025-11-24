@@ -1,32 +1,112 @@
 name: Deploy to Production
 
 on:
-  release:
+  push:
+    branches:
+      - main
+      - master
+  workflow_dispatch: # Allow manual triggering
+  workflow_run:
+    workflows: ["CI"]
     types:
-      - published
+      - completed
+    branches:
+      - main
+      - master
 
 jobs:
   deploy:
     # Do not deploy in the main repository, only in user projects
-    if: github.repository_owner != 'fastapi'
-    runs-on:
-      - self-hosted
-      - production
-    env:
-      ENVIRONMENT: production
-      DOMAIN: ${{ secrets.DOMAIN_PRODUCTION }}
-      STACK_NAME: ${{ secrets.STACK_NAME_PRODUCTION }}
-      SECRET_KEY: ${{ secrets.SECRET_KEY }}
-      FIRST_SUPERUSER: ${{ secrets.FIRST_SUPERUSER }}
-      FIRST_SUPERUSER_PASSWORD: ${{ secrets.FIRST_SUPERUSER_PASSWORD }}
-      SMTP_HOST: ${{ secrets.SMTP_HOST }}
-      SMTP_USER: ${{ secrets.SMTP_USER }}
-      SMTP_PASSWORD: ${{ secrets.SMTP_PASSWORD }}
-      EMAILS_FROM_EMAIL: ${{ secrets.EMAILS_FROM_EMAIL }}
-      POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
-      SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
+    # Only deploy if CI workflow completed successfully (when triggered by workflow_run)
+    if: |
+      github.repository_owner != 'fastapi' &&
+      (github.event_name == 'workflow_dispatch' || 
+       github.event_name == 'push' || 
+       (github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success'))
+    runs-on: ubuntu-latest
     steps:
-      - name: Checkout
+      - name: Checkout code
         uses: actions/checkout@v5
-      - run: docker compose -f docker-compose.yml --project-name ${{ secrets.STACK_NAME_PRODUCTION }} build
-      - run: docker compose -f docker-compose.yml --project-name ${{ secrets.STACK_NAME_PRODUCTION }} up -d
+
+      - name: Setup SSH
+        uses: webfactory/ssh-agent@v0.9.0
+        with:
+          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+
+      - name: Add server to known hosts
+        run: |
+          ssh-keyscan -H ${{ secrets.SERVER_HOST }} >> ~/.ssh/known_hosts
+
+      - name: Deploy to production server
+        env:
+          SERVER_USER: ${{ secrets.SERVER_USER }}
+          SERVER_HOST: ${{ secrets.SERVER_HOST }}
+          APP_DIR: ${{ secrets.APP_DIR || '/root/code/finance-tracker' }}
+        run: |
+          ssh ${SERVER_USER}@${SERVER_HOST} << ENDSSH
+            set -e
+            cd ${APP_DIR}
+            
+            # Pull latest code from GitHub
+            git fetch origin
+            git reset --hard origin/main || git reset --hard origin/master
+            
+            # Set environment variables
+            export DOMAIN=${{ secrets.DOMAIN_PRODUCTION }}
+            export STACK_NAME=${{ secrets.STACK_NAME_PRODUCTION }}
+            export ENVIRONMENT=production
+            export FRONTEND_HOST=${{ secrets.FRONTEND_HOST }}
+            export BACKEND_CORS_ORIGINS=${{ secrets.BACKEND_CORS_ORIGINS }}
+            export SECRET_KEY=${{ secrets.SECRET_KEY }}
+            export FIRST_SUPERUSER=${{ secrets.FIRST_SUPERUSER }}
+            export FIRST_SUPERUSER_PASSWORD=${{ secrets.FIRST_SUPERUSER_PASSWORD }}
+            export SMTP_HOST=${{ secrets.SMTP_HOST }}
+            export SMTP_USER=${{ secrets.SMTP_USER }}
+            export SMTP_PASSWORD=${{ secrets.SMTP_PASSWORD }}
+            export EMAILS_FROM_EMAIL=${{ secrets.EMAILS_FROM_EMAIL }}
+            export POSTGRES_SERVER=db
+            export POSTGRES_PORT=${{ secrets.POSTGRES_PORT || '5432' }}
+            export POSTGRES_DB=${{ secrets.POSTGRES_DB || 'app' }}
+            export POSTGRES_USER=${{ secrets.POSTGRES_USER || 'postgres' }}
+            export POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }}
+            export SENTRY_DSN=${{ secrets.SENTRY_DSN || '' }}
+            export DOCKER_IMAGE_BACKEND=${{ secrets.DOCKER_IMAGE_BACKEND || 'finance-tracker-backend' }}
+            export DOCKER_IMAGE_FRONTEND=${{ secrets.DOCKER_IMAGE_FRONTEND || 'finance-tracker-frontend' }}
+            export TAG=latest
+            
+            # Build and restart services
+            echo "Building Docker images..."
+            docker compose -f docker-compose.yml build
+            
+            echo "Starting services..."
+            docker compose -f docker-compose.yml up -d
+            
+            # Restart supervisor processes in backend container
+            echo "Restarting supervisor processes..."
+            BACKEND_CONTAINER=$(docker compose ps -q backend)
+            if [ ! -z "$BACKEND_CONTAINER" ]; then
+              docker exec $BACKEND_CONTAINER supervisorctl restart all || true
+            fi
+            
+            echo "Deployment completed successfully!"
+            
+            # Show service status
+            docker compose ps
+          ENDSSH
+
+      - name: Verify deployment
+        env:
+          SERVER_USER: ${{ secrets.SERVER_USER }}
+          SERVER_HOST: ${{ secrets.SERVER_HOST }}
+          APP_DIR: ${{ secrets.APP_DIR || '/root/code/finance-tracker' }}
+        run: |
+          ssh ${SERVER_USER}@${SERVER_HOST} << ENDSSH
+            cd ${APP_DIR}
+            echo "Checking service health..."
+            docker compose ps
+            echo "Checking backend health..."
+            BACKEND_CONTAINER=$(docker compose ps -q backend)
+            if [ ! -z "$BACKEND_CONTAINER" ]; then
+              docker exec $BACKEND_CONTAINER supervisorctl status || true
+            fi
+          ENDSSH

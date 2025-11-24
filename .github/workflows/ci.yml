@@ -1,0 +1,80 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+      - master
+      - develop
+  pull_request:
+    branches:
+      - main
+      - master
+      - develop
+
+jobs:
+  test-backend:
+    name: Test Backend
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.10"
+      - name: Install uv
+        uses: astral-sh/setup-uv@v7
+        with:
+          version: "0.4.15"
+          enable-cache: true
+      - run: docker compose down -v --remove-orphans
+      - run: docker compose up -d db mailcatcher
+      - name: Migrate DB
+        run: uv run bash scripts/prestart.sh
+        working-directory: backend
+      - name: Run tests
+        run: uv run bash scripts/tests-start.sh "Coverage for ${{ github.sha }}"
+        working-directory: backend
+      - run: docker compose down -v --remove-orphans
+      - name: Store coverage files
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-html
+          path: backend/htmlcov
+          include-hidden-files: true
+
+  test-docker-compose:
+    name: Test Docker Compose
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+      - run: docker compose build
+      - run: docker compose down -v --remove-orphans
+      - run: docker compose up -d --wait backend frontend adminer
+      - name: Test backend is up
+        run: curl -f http://localhost:8000/api/v1/utils/health-check || exit 1
+      - name: Test frontend is up
+        run: curl -f http://localhost:5173 || exit 1
+      - run: docker compose down -v --remove-orphans
+
+  lint-backend:
+    name: Lint Backend
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.10"
+      - name: Install uv
+        uses: astral-sh/setup-uv@v7
+        with:
+          version: "0.4.15"
+          enable-cache: true
+      - name: Run linting
+        run: uv run bash scripts/lint.sh
+        working-directory: backend
+

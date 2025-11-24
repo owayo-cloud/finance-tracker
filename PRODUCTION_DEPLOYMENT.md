@@ -462,11 +462,171 @@ docker compose exec -T db psql -U postgres app < backup_file.sql
 - [ ] Enabled Cloudflare proxy (optional but recommended)
 - [ ] Set up monitoring/alerting (optional)
 
+## Step 10: Set Up CI/CD with GitHub Actions
+
+### 10.1 Generate SSH Key for Deployment
+
+On your **local machine**, generate an SSH key pair for GitHub Actions:
+
+```bash
+ssh-keygen -t ed25519 -C "github-actions-deploy" -f ~/.ssh/github_actions_deploy
+```
+
+This creates two files:
+- `~/.ssh/github_actions_deploy` (private key - add to GitHub secrets)
+- `~/.ssh/github_actions_deploy.pub` (public key - add to server)
+
+### 10.2 Add Public Key to Linode Server
+
+Copy the public key to your Linode server:
+
+```bash
+# From your local machine
+ssh-copy-id -i ~/.ssh/github_actions_deploy.pub root@YOUR_LINODE_IP
+```
+
+Or manually add it:
+
+```bash
+# On the server
+mkdir -p ~/.ssh
+nano ~/.ssh/authorized_keys
+# Paste the public key content from ~/.ssh/github_actions_deploy.pub
+chmod 600 ~/.ssh/authorized_keys
+chmod 700 ~/.ssh
+```
+
+### 10.3 Set Up GitHub Repository
+
+1. **Initialize Git repository** (if not already done):
+
+```bash
+cd /root/code/finance-tracker
+git init
+git remote add origin https://github.com/YOUR_USERNAME/finance-tracker.git
+# Or use SSH: git remote add origin git@github.com:YOUR_USERNAME/finance-tracker.git
+```
+
+2. **Push your code to GitHub**:
+
+```bash
+git add .
+git commit -m "Initial commit"
+git branch -M main
+git push -u origin main
+```
+
+### 10.4 Configure GitHub Secrets
+
+Go to your GitHub repository → **Settings** → **Secrets and variables** → **Actions** → **New repository secret**
+
+Add the following secrets:
+
+#### Required Secrets:
+
+| Secret Name | Description | Example |
+|------------|-------------|---------|
+| `SSH_PRIVATE_KEY` | Private SSH key for server access | Contents of `~/.ssh/github_actions_deploy` |
+| `SERVER_USER` | SSH username for server | `root` |
+| `SERVER_HOST` | Server IP address or hostname | `YOUR_LINODE_IP` or `yourdomain.com` |
+| `DOMAIN_PRODUCTION` | Your production domain | `wiseman-palace.co.ke` |
+| `STACK_NAME_PRODUCTION` | Docker stack name | `wiseman-palace-production` |
+| `SECRET_KEY` | Backend secret key | Generated secure key |
+| `FIRST_SUPERUSER` | Admin email | `admin@wiseman-palace.co.ke` |
+| `FIRST_SUPERUSER_PASSWORD` | Admin password | Secure password |
+| `POSTGRES_PASSWORD` | Database password | Generated secure password |
+| `POSTGRES_USER` | Database user | `postgres` |
+| `POSTGRES_DB` | Database name | `app` |
+| `POSTGRES_PORT` | Database port | `5432` |
+| `SMTP_HOST` | SMTP server | `smtp.gmail.com` |
+| `SMTP_USER` | SMTP username | Your email |
+| `SMTP_PASSWORD` | SMTP password | Your email password or app password |
+| `EMAILS_FROM_EMAIL` | From email address | `noreply@wiseman-palace.co.ke` |
+
+#### Optional Secrets:
+
+| Secret Name | Description | Default |
+|------------|-------------|---------|
+| `APP_DIR` | Application directory on server | `/root/code/finance-tracker` |
+| `FRONTEND_HOST` | Frontend URL | `https://dashboard.${DOMAIN}` |
+| `BACKEND_CORS_ORIGINS` | CORS origins | Auto-generated from domain |
+| `DOCKER_IMAGE_BACKEND` | Backend image name | `finance-tracker-backend` |
+| `DOCKER_IMAGE_FRONTEND` | Frontend image name | `finance-tracker-frontend` |
+| `SENTRY_DSN` | Sentry DSN (optional) | Empty |
+
+### 10.5 How CI/CD Works
+
+The CI/CD pipeline is configured in `.github/workflows/`:
+
+1. **CI Workflow** (`.github/workflows/ci.yml`):
+   - Runs on every push and pull request
+   - Tests backend code
+   - Tests Docker Compose setup
+   - Lints backend code
+
+2. **Deploy Workflow** (`.github/workflows/deploy-production.yml`):
+   - Runs on push to `main` or `master` branch
+   - Can be manually triggered via GitHub Actions UI
+   - Connects to your Linode server via SSH
+   - Pulls latest code from GitHub
+   - Rebuilds Docker images
+   - Restarts services
+   - Verifies deployment
+
+### 10.6 Enable Deployment After Tests
+
+To ensure deployment only happens after tests pass, edit `.github/workflows/deploy-production.yml`:
+
+```yaml
+jobs:
+  deploy:
+    needs: [test-backend, test-docker-compose]  # Uncomment this line
+```
+
+### 10.7 Test the CI/CD Pipeline
+
+1. Make a small change to your code
+2. Commit and push to GitHub:
+   ```bash
+   git add .
+   git commit -m "Test CI/CD pipeline"
+   git push origin main
+   ```
+3. Go to **Actions** tab in GitHub to see the workflow running
+4. Once deployment completes, verify your changes are live
+
+### 10.8 Troubleshooting CI/CD
+
+#### SSH Connection Issues
+
+```bash
+# Test SSH connection manually
+ssh -i ~/.ssh/github_actions_deploy root@YOUR_LINODE_IP
+
+# Check SSH key permissions
+chmod 600 ~/.ssh/github_actions_deploy
+```
+
+#### Deployment Fails
+
+- Check GitHub Actions logs for error messages
+- Verify all secrets are set correctly
+- Ensure server has enough disk space: `df -h`
+- Check Docker is running on server: `docker ps`
+
+#### Services Not Restarting
+
+```bash
+# On server, manually restart
+cd /root/code/finance-tracker
+docker compose restart
+```
+
 ## Next Steps
 
 1. Set up automated backups
 2. Configure monitoring (e.g., Sentry)
-3. Set up CI/CD pipeline (see deployment.md for GitHub Actions)
+3. Set up CI/CD pipeline ✅ (Completed above)
 4. Configure log rotation
 5. Set up health checks and alerts
 

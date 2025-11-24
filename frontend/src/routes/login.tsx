@@ -60,20 +60,26 @@ function Login() {
       display="flex"
       alignItems="center"
       justifyContent="center"
-      bg={{ base: "bg.canvas", _light: "bg.canvas" }}
+      bg={{
+        base: "linear-gradient(135deg, #0f172a 0%, #111827 40%, #1f1b2e 100%)",
+        _light: "linear-gradient(135deg, #f8fafc 0%, #dbeafe 45%, #ede9fe 100%)",
+      }}
       p={4}
     >
       <Container maxW="md" w="full">
         <Card.Root
           variant="outline"
-          bg={{ base: "rgba(15, 20, 30, 0.7)", _light: "rgba(255, 255, 255, 0.95)" }}
+          bg={{ base: "rgba(15, 20, 30, 0.85)", _light: "rgba(255, 255, 255, 0.97)" }}
           backdropFilter="blur(20px) saturate(180%)"
           border="1px solid"
-          borderColor={{ base: "rgba(0, 150, 136, 0.3)", _light: "rgba(0, 150, 136, 0.2)" }}
+          borderColor={{
+            base: "rgba(96, 165, 250, 0.35)",
+            _light: "rgba(148, 163, 184, 0.35)",
+          }}
           borderRadius="2xl"
-          boxShadow={{ 
-            base: "0 10px 40px rgba(0, 0, 0, 0.4), 0 0 1px rgba(0, 150, 136, 0.3)", 
-            _light: "0 10px 40px rgba(0, 0, 0, 0.1), 0 0 1px rgba(0, 150, 136, 0.2)" 
+          boxShadow={{
+            base: "0 25px 60px rgba(0, 0, 0, 0.65), 0 0 20px rgba(168, 85, 247, 0.2)",
+            _light: "0 15px 35px rgba(15, 23, 42, 0.12)",
           }}
         >
           <Card.Body p={{ base: 6, md: 8 }}>
@@ -85,13 +91,20 @@ function Login() {
               <VStack gap={6} align="stretch">
                 {/* Logo and Title */}
                 <VStack gap={4}>
-                  <BrandMark w={24} h={24} fontSize="xl" />
+                  <BrandMark
+                    w={24}
+                    h={24}
+                    fontSize="xl"
+                    bg="linear-gradient(135deg, rgba(20, 184, 166, 0.25), rgba(96, 165, 250, 0.25), rgba(168, 85, 247, 0.25))"
+                    borderColor="rgba(96, 165, 250, 0.45)"
+                    boxShadow="0 20px 35px rgba(0, 0, 0, 0.35)"
+                  />
                   <VStack gap={1}>
                     <Heading
                       size="lg"
                       fontWeight="bold"
                       css={{
-                        background: "linear-gradient(to right, #009688, #00bcd4)",
+                        background: "linear-gradient(120deg, #14b8a6 0%, #60a5fa 55%, #a855f7 100%)",
                         WebkitBackgroundClip: "text",
                         WebkitTextFillColor: "transparent",
                         backgroundClip: "text",
@@ -101,7 +114,7 @@ function Login() {
                     </Heading>
                     <Text
                       fontSize="sm"
-                      color="text.secondary"
+                      color={{ base: "#94a3b8", _light: "#475569" }}
                     >
                       Sign in to your account
                     </Text>
@@ -138,7 +151,13 @@ function Login() {
                 {/* Forgot Password */}
                 <Box textAlign="right">
                   <RouterLink to="/recover-password" className="main-link">
-                    <Text fontSize="sm">Forgot Password?</Text>
+                    <Text
+                      fontSize="sm"
+                      fontWeight="600"
+                      color={{ base: "#60a5fa", _light: "#2563eb" }}
+                    >
+                      Forgot Password?
+                    </Text>
                   </RouterLink>
                 </Box>
 
@@ -150,9 +169,30 @@ function Login() {
                   size="lg"
                   w="full"
                   colorPalette="teal"
+                  bgGradient="linear-gradient(120deg, #14b8a6 0%, #60a5fa 60%, #a855f7 100%)"
+                  color="white"
+                  _hover={{
+                    bgGradient: "linear-gradient(120deg, #0d9488 0%, #3b82f6 60%, #9333ea 100%)",
+                    opacity: 0.95,
+                  }}
+                  _active={{
+                    bgGradient: "linear-gradient(120deg, #0f766e 0%, #1d4ed8 60%, #7e22ce 100%)",
+                  }}
                 >
                   Log In
                 </Button>
+
+                {/* Sign Up Link */}
+                <Box textAlign="center">
+                  <Text fontSize="sm" color={{ base: "#e2e8f0", _light: "#475569" }}>
+                    Don't have an account?{" "}
+                    <RouterLink to="/signup" className="main-link">
+                      <Text as="span" fontWeight="600" color={{ base: "#a855f7", _light: "#7c3aed" }}>
+                        Sign Up
+                      </Text>
+                    </RouterLink>
+                  </Text>
+                </Box>
 
               </VStack>
             </Box>

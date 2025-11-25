@@ -374,7 +374,6 @@ function InstructionsStage({ onContinue }: InstructionsStageProps) {
       showSuccessToast("Template downloaded successfully!")
     } catch (error) {
       showErrorToast("Failed to download template")
-      console.error("Download error:", error)
     }
   }
 
@@ -595,7 +594,7 @@ function UploadStage({ onFileUploaded }: UploadStageProps) {
       clearInterval(interval)
       setUploadProgress(100)
     } catch (error) {
-      console.error("Upload error:", error)
+      // Upload error handled by showErrorToast
     } finally {
       setIsUploading(false)
       setUploadProgress(0)

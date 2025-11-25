@@ -152,10 +152,10 @@ export function CreditNoteModal({
                     },
                   })}
                   placeholder="Enter customer name"
-                  bg={{ base: "#1a1d29", _light: "#ffffff" }}
-                  borderColor={{ base: "rgba(255, 255, 255, 0.1)", _light: "#e5e7eb" }}
-                  color={{ base: "#ffffff", _light: "#1a1d29" }}
-                  _focus={{ borderColor: "#14b8a6", boxShadow: "0 0 0 1px #14b8a6" }}
+                  bg="input.bg"
+                  borderColor="input.border"
+                  color="text.primary"
+                  _focus={{ borderColor: "input.focus.border", boxShadow: "input.focus.shadow" }}
                 />
               </Field>
               <Field
@@ -177,10 +177,10 @@ export function CreditNoteModal({
                     valueAsNumber: true,
                   })}
                   placeholder="0.00"
-                  bg={{ base: "#1a1d29", _light: "#ffffff" }}
-                  borderColor={{ base: "rgba(255, 255, 255, 0.1)", _light: "#e5e7eb" }}
-                  color={{ base: "#ffffff", _light: "#1a1d29" }}
-                  _focus={{ borderColor: "#14b8a6", boxShadow: "0 0 0 1px #14b8a6" }}
+                  bg="input.bg"
+                  borderColor="input.border"
+                  color="text.primary"
+                  _focus={{ borderColor: "input.focus.border", boxShadow: "input.focus.shadow" }}
                 />
               </Field>
               <Field
@@ -198,10 +198,10 @@ export function CreditNoteModal({
                     },
                   })}
                   placeholder="e.g., Product return, Refund, Adjustment"
-                  bg={{ base: "#1a1d29", _light: "#ffffff" }}
-                  borderColor={{ base: "rgba(255, 255, 255, 0.1)", _light: "#e5e7eb" }}
-                  color={{ base: "#ffffff", _light: "#1a1d29" }}
-                  _focus={{ borderColor: "#14b8a6", boxShadow: "0 0 0 1px #14b8a6" }}
+                  bg="input.bg"
+                  borderColor="input.border"
+                  color="text.primary"
+                  _focus={{ borderColor: "input.focus.border", boxShadow: "input.focus.shadow" }}
                 />
               </Field>
               <Field
@@ -218,10 +218,10 @@ export function CreditNoteModal({
                   })}
                   rows={3}
                   placeholder="Additional notes (optional)"
-                  bg={{ base: "#1a1d29", _light: "#ffffff" }}
-                  borderColor={{ base: "rgba(255, 255, 255, 0.1)", _light: "#e5e7eb" }}
-                  color={{ base: "#ffffff", _light: "#1a1d29" }}
-                  _focus={{ borderColor: "#14b8a6", boxShadow: "0 0 0 1px #14b8a6" }}
+                  bg="input.bg"
+                  borderColor="input.border"
+                  color="text.primary"
+                  _focus={{ borderColor: "input.focus.border", boxShadow: "input.focus.shadow" }}
                 />
               </Field>
             </VStack>
@@ -232,9 +232,9 @@ export function CreditNoteModal({
               <DialogActionTrigger asChild>
                 <Button
                   type="submit"
-                  bg="#14b8a6"
+                  bg="brand.primary"
                   color="white"
-                  _hover={{ bg: "#0d9488" }}
+                  _hover={{ bg: "brand.primary.hover" }}
                   disabled={!isValid || isSubmitting}
                   loading={isSubmitting}
                 >

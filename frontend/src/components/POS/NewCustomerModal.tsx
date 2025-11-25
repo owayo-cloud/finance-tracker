@@ -63,21 +63,14 @@ export function NewCustomerModal({
       balance: 0,
     },
   })
-  
-  // Debug: Log form state changes
-  console.log("Form state:", { errors, isValid })
 
   const onSubmit: SubmitHandler<NewCustomerForm> = async (data) => {
-    console.log("=== onSubmit called ===")
-    console.log("Form data:", data)
     try {
       setIsSubmitting(true)
       
       const customerName = data.name.trim()
       const customerTel = data.tel.trim()
       const initialBalance = data.balance || 0
-      
-      console.log("Creating customer with:", { customerName, customerTel, initialBalance })
       
       // Create debt entry via API (this creates the customer account)
       const token = localStorage.getItem("access_token") || ""
@@ -88,9 +81,6 @@ export function NewCustomerModal({
       // If balance > 0, create an actual debt
       const amount = initialBalance > 0 ? initialBalance : 0.01
       const amountPaid = initialBalance > 0 ? 0 : 0.01
-      const calculatedBalance = amount - amountPaid // Should be 0 if initialBalance is 0
-      
-      console.log("Debt calculation:", { amount, amountPaid, calculatedBalance, initialBalance })
       
       // Backend calculates balance automatically, so we don't need to send it
       const debtData = {
@@ -104,8 +94,6 @@ export function NewCustomerModal({
           : "Initial customer account creation (zero balance)",
       }
       
-      console.log("Sending debt data to API:", debtData)
-      
       const response = await fetch(`${apiBase}/api/v1/debts/`, {
         method: "POST",
         headers: {
@@ -117,15 +105,10 @@ export function NewCustomerModal({
       
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({ detail: "Failed to create customer" }))
-        console.error("Failed to create debt:", response.status, errorData)
         throw new Error(errorData.detail || `Failed to create customer: ${response.status}`)
       }
       
       const createdDebt = await response.json()
-      console.log("Customer created, debt response:", createdDebt)
-      console.log("Debt customer_name:", createdDebt.customer_name)
-      console.log("Debt balance:", createdDebt.balance)
-      console.log("Debt status:", createdDebt.status)
       
       const customer: Customer = {
         name: customerName,
@@ -144,40 +127,8 @@ export function NewCustomerModal({
             Authorization: `Bearer ${token}`,
           },
         })
-        if (verifyResponse.ok) {
-          const verifyData = await verifyResponse.json()
-          console.log("Verification - Debts found for customer:", verifyData.data?.length || 0)
-          if (verifyData.data && verifyData.data.length > 0) {
-            console.log("Verification - First debt:", verifyData.data[0])
-          }
-        }
       } catch (e) {
-        console.error("Failed to verify debt creation:", e)
-      }
-      
-      // Test customers API directly
-      try {
-        await new Promise(resolve => setTimeout(resolve, 300))
-        const customersTestResponse = await fetch(`${apiBase}/api/v1/customers/?limit=1000`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        })
-        if (customersTestResponse.ok) {
-          const customersTestData = await customersTestResponse.json()
-          console.log("Direct customers API test - Found:", customersTestData.data?.length || 0, "customers")
-          const foundCustomer = customersTestData.data?.find((c: any) => 
-            c.name?.toLowerCase().trim() === customerName.toLowerCase().trim()
-          )
-          if (foundCustomer) {
-            console.log("Direct customers API test - Customer found:", foundCustomer)
-          } else {
-            console.log("Direct customers API test - Customer NOT found in list")
-            console.log("All customer names:", customersTestData.data?.map((c: any) => c.name))
-          }
-        }
-      } catch (e) {
-        console.error("Failed to test customers API:", e)
+        // Verification failed, but continue anyway
       }
       
       // Small delay to ensure backend has processed the creation
@@ -191,7 +142,6 @@ export function NewCustomerModal({
       reset()
       onClose()
     } catch (error: any) {
-      console.error("New customer error:", error)
       showErrorToast(error.message || "Failed to create customer")
     } finally {
       setIsSubmitting(false)
@@ -218,13 +168,7 @@ export function NewCustomerModal({
       onOpenChange={({ open }) => !open && handleClose()}
     >
       <DialogContent>
-        <form onSubmit={(e) => {
-          console.log("Form submit event triggered")
-          console.log("Form errors:", errors)
-          handleSubmit(onSubmit, (errors) => {
-            console.log("Form validation failed:", errors)
-          })(e)
-        }}>
+        <form onSubmit={handleSubmit(onSubmit)}>
           <DialogHeader>
             <DialogTitle>New Customer (Credit Account)</DialogTitle>
           </DialogHeader>
@@ -307,10 +251,6 @@ export function NewCustomerModal({
                 _hover={{ bg: "#0d9488" }}
                 disabled={!isValid || isSubmitting}
                 loading={isSubmitting}
-                onClick={() => {
-                  console.log("Submit button clicked, isValid:", isValid, "isSubmitting:", isSubmitting)
-                  // Let the form handle submission
-                }}
               >
                 Create Customer
               </Button>

@@ -24,14 +24,14 @@ export function ReceiptDetails({
 }: ReceiptDetailsProps) {
   return (
     <Box
-      bg={{ base: "#1a1d29", _light: "#ffffff" }}
+      bg="bg.canvas"
       borderBottom="1px solid"
-      borderColor={{ base: "rgba(255, 255, 255, 0.08)", _light: "#e5e7eb" }}
+      borderColor="border.card"
       p={{ base: 3, md: 4 }}
     >
       <Flex gap={4} alignItems="center" flexWrap="wrap">
         <HStack gap={2} alignItems="center">
-          <Text fontSize="sm" fontWeight="medium" color={{ base: "#ffffff", _light: "#1a1d29" }}>
+          <Text fontSize="sm" fontWeight="medium" color="text.primary">
             Receipt Date *
           </Text>
           <Input
@@ -40,33 +40,33 @@ export function ReceiptDetails({
             onChange={(e) => onReceiptDateChange(e.target.value)}
             onFocus={onReceiptDateFocus}
             onBlur={onReceiptDateBlur}
-            bg={{ base: "#1a1d29", _light: "#ffffff" }}
-            borderColor={{ base: "rgba(255, 255, 255, 0.1)", _light: "#e5e7eb" }}
-            color={{ base: "#ffffff", _light: "#1a1d29" }}
+            bg="input.bg"
+            borderColor="input.border"
+            color="text.primary"
             size="sm"
             w={{ base: "120px", md: "150px" }}
             borderRadius="md"
           />
         </HStack>
         <HStack gap={2} alignItems="center">
-          <Text fontSize="sm" fontWeight="medium" color={{ base: "#ffffff", _light: "#1a1d29" }}>
+          <Text fontSize="sm" fontWeight="medium" color="text.primary">
             Pricelist Name
           </Text>
           <Input
             type="text"
             value={pricelist}
             onChange={(e) => onPricelistChange(e.target.value)}
-            bg={{ base: "#1a1d29", _light: "#ffffff" }}
-            borderColor={{ base: "rgba(255, 255, 255, 0.1)", _light: "#e5e7eb" }}
-            color={{ base: "#ffffff", _light: "#1a1d29" }}
+            bg="input.bg"
+            borderColor="input.border"
+            color="text.primary"
             border="1px solid"
             size="sm"
             w={{ base: "100px", md: "120px" }}
             borderRadius="md"
-            _focus={{ borderColor: "#14b8a6", boxShadow: "0 0 0 1px #14b8a6" }}
+            _focus={{ borderColor: "input.focus.border", boxShadow: "input.focus.shadow" }}
           />
         </HStack>
-        <Button bg="#3b82f6" color="white" _hover={{ bg: "#2563eb" }} fontWeight="600" size="sm" onClick={onSearch}>
+        <Button bg="brand.secondary" color="white" _hover={{ bg: "brand.secondary.hover" }} fontWeight="600" size="sm" onClick={onSearch}>
           <Icon as={FiSearch} mr={2} />
           Search
         </Button>

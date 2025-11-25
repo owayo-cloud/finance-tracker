@@ -35,7 +35,6 @@ if (typeof window !== "undefined") {
     }
   } catch (error) {
     // If localStorage is not available, use defaults
-    console.warn("Could not access localStorage for auto-refresh settings:", error)
   }
 }
 
@@ -67,11 +66,10 @@ export const useAutoRefresh = (defaultInterval?: number) => {
           })
         } catch (err) {
           // Ignore errors for individual queries
-          console.warn("Error updating query defaults:", err)
         }
       })
     } catch (error) {
-      console.error("Error in useAutoRefresh effect:", error)
+      // Failed to update auto-refresh settings - silently continue
     }
   }, [enabled, interval, defaultInterval, queryClient])
 

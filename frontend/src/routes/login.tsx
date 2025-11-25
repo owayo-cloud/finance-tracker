@@ -64,7 +64,7 @@ function Login() {
         base: "linear-gradient(135deg, #0f172a 0%, #111827 40%, #1f1b2e 100%)",
         _light: "linear-gradient(135deg, #f8fafc 0%, #dbeafe 45%, #ede9fe 100%)",
       }}
-      p={4}
+      p={{ base: 4, md: 6 }}
     >
       <Container maxW="md" w="full">
         <Card.Root
@@ -114,7 +114,7 @@ function Login() {
                     </Heading>
                     <Text
                       fontSize="sm"
-                      color={{ base: "#94a3b8", _light: "#475569" }}
+                      color="text.secondary"
                     >
                       Sign in to your account
                     </Text>
@@ -154,7 +154,7 @@ function Login() {
                     <Text
                       fontSize="sm"
                       fontWeight="600"
-                      color={{ base: "#60a5fa", _light: "#2563eb" }}
+                      color="text.link"
                     >
                       Forgot Password?
                     </Text>
@@ -162,7 +162,7 @@ function Login() {
                 </Box>
 
                 {/* Submit Button */}
-                <Button 
+                  <Button 
                   variant="solid" 
                   type="submit" 
                   loading={isSubmitting} 
@@ -176,7 +176,7 @@ function Login() {
                     opacity: 0.95,
                   }}
                   _active={{
-                    bgGradient: "linear-gradient(120deg, #0f766e 0%, #1d4ed8 60%, #7e22ce 100%)",
+                    transform: "scale(0.98)",
                   }}
                 >
                   Log In
@@ -184,10 +184,10 @@ function Login() {
 
                 {/* Sign Up Link */}
                 <Box textAlign="center">
-                  <Text fontSize="sm" color={{ base: "#e2e8f0", _light: "#475569" }}>
+                  <Text fontSize="sm" color="text.secondary">
                     Don't have an account?{" "}
                     <RouterLink to="/signup" className="main-link">
-                      <Text as="span" fontWeight="600" color={{ base: "#a855f7", _light: "#7c3aed" }}>
+                      <Text as="span" fontWeight="600" color="text.link">
                         Sign Up
                       </Text>
                     </RouterLink>

@@ -22,9 +22,6 @@ const handleApiError = (error: Error) => {
   if (error instanceof ApiError) {
     // Handle authentication errors (401 - Unauthorized)
     if (error.status === 401) {
-      const errDetail = (error.body as any)?.detail
-      const errorMessage = errDetail || "Your session has expired. Please log in again."
-      
       // Clear authentication state
       localStorage.removeItem("access_token")
       
@@ -36,7 +33,6 @@ const handleApiError = (error: Error) => {
     // Handle forbidden errors (403 - Forbidden)
     if (error.status === 403) {
       const errDetail = (error.body as any)?.detail
-      let errorMessage = errDetail || "Access denied. You don't have permission to perform this action."
       
       // Check if it's an authentication issue disguised as 403
       // Backend returns 403 for "Could not validate credentials" which is actually an auth issue
@@ -46,7 +42,6 @@ const handleApiError = (error: Error) => {
         errDetail === "Could not validate credentials" ||
         errDetail?.includes("validate credentials")
       ) {
-        errorMessage = "Your session has expired. Please log in again."
         localStorage.removeItem("access_token")
         window.location.href = "/login"
       } else {

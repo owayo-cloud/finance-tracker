@@ -73,7 +73,7 @@ export function CustomerSearchModal({
   // Listen for customer created event
   useEffect(() => {
     if (isOpen) {
-      const handleCustomerCreated = async (event: Event) => {
+      const handleCustomerCreated = async () => {
         // Small delay to ensure backend has processed the creation
         await new Promise(resolve => setTimeout(resolve, 300))
         // Force refetch with fresh data

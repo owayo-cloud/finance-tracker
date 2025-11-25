@@ -10,7 +10,7 @@ interface PendingDebtsTableProps {
 
 export function PendingDebtsTable({ isMounted }: PendingDebtsTableProps) {
   // Fetch pending debts (status: pending, partial, overdue)
-  const { data: debtsData, isLoading, error } = useQuery({
+  const { data: debtsData, isLoading } = useQuery({
     queryKey: ["pending-debts"],
     queryFn: () => DebtsService.readDebts({ 
       skip: 0, 

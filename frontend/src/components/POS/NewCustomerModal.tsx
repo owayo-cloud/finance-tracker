@@ -122,7 +122,7 @@ export function NewCustomerModal({
       
       // Verify the debt was created by checking the debts API
       try {
-        const verifyResponse = await fetch(`${apiBase}/api/v1/debts/?customer_name=${encodeURIComponent(customerName)}&limit=10`, {
+        await fetch(`${apiBase}/api/v1/debts/?customer_name=${encodeURIComponent(customerName)}&limit=10`, {
           headers: {
             Authorization: `Bearer ${token}`,
           },

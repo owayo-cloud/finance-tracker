@@ -41,9 +41,6 @@ def get_customers(
     This endpoint aggregates customer information from both debts and sales tables,
     calculating total balances and finding the most recent sale date.
     """
-    # Debug: Check total debts in database
-    total_debts = session.exec(select(func.count()).select_from(Debt)).one()
-    print(f"[Customers API] Total debts in database: {total_debts}")
     
     # Build base query to get unique customer names from debts
     # Use a subquery approach to get the most recent contact for each customer
@@ -71,8 +68,6 @@ def get_customers(
     debt_results = session.exec(debt_customers_query).all()
     sale_results = session.exec(last_sale_query).all()
     
-    # Debug logging
-    print(f"[Customers API] Found {len(debt_results)} customers from debts")
     if debt_results:
         print(f"[Customers API] First debt result: {debt_results[0]}")
     
@@ -147,8 +142,6 @@ def get_customers(
     # Convert to list and apply search filter
     customers = list(customer_map.values())
     
-    # Debug logging
-    print(f"[Customers API] Total customers before filtering: {len(customers)}")
     if customers:
         print(f"[Customers API] First customer: {customers[0].name}, balance: {customers[0].balance}")
     

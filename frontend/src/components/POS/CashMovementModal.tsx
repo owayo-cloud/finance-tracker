@@ -93,7 +93,6 @@ export function CashMovementModal({
       onClose()
       onSuccess?.()
     } catch (error: any) {
-      console.error("Cash movement error:", error)
       showErrorToast("Failed to record cash movement")
     } finally {
       setIsSubmitting(false)

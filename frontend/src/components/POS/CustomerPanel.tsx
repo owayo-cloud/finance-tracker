@@ -61,26 +61,26 @@ export function CustomerPanel({
     <Box
       w={{ base: "100%", lg: "400px" }}
       flexShrink={0}
-      bg={{ base: "#1a1d29", _light: "#ffffff" }}
+      bg="bg.canvas"
       borderLeft={{ base: "none", lg: "1px solid" }}
       borderTop={{ base: "1px solid", lg: "none" }}
-      borderColor={{ base: "rgba(255, 255, 255, 0.08)", _light: "#e5e7eb" }}
+      borderColor="border.card"
       display="flex"
       flexDirection="column"
       overflow="hidden"
     >
       {/* Tabs */}
-      <Flex borderBottom="1px solid" borderColor={{ base: "rgba(255, 255, 255, 0.08)", _light: "#e5e7eb" }}>
+      <Flex borderBottom="1px solid" borderColor="border.card">
         <Button
           onClick={() => onTabChange("customer")}
           flex={1}
           borderRadius={0}
-          bg={activeTab === "customer" ? "#14b8a6" : "transparent"}
-          color={activeTab === "customer" ? "white" : { base: "#9ca3af", _light: "#6b7280" }}
+          bg={activeTab === "customer" ? "brand.primary" : "transparent"}
+          color={activeTab === "customer" ? "white" : "text.muted"}
           fontWeight="medium"
           size="sm"
           py={3}
-          _hover={{ bg: activeTab === "customer" ? "#0d9488" : { base: "rgba(255, 255, 255, 0.05)", _light: "#f3f4f6" } }}
+          _hover={{ bg: activeTab === "customer" ? "brand.primary.hover" : { base: "rgba(255, 255, 255, 0.05)", _light: "#f3f4f6" } }}
         >
           Attach Customer
         </Button>
@@ -88,12 +88,12 @@ export function CustomerPanel({
           onClick={() => onTabChange("suspended")}
           flex={1}
           borderRadius={0}
-          bg={activeTab === "suspended" ? "#14b8a6" : "transparent"}
-          color={activeTab === "suspended" ? "white" : { base: "#9ca3af", _light: "#6b7280" }}
+          bg={activeTab === "suspended" ? "brand.primary" : "transparent"}
+          color={activeTab === "suspended" ? "white" : "text.muted"}
           fontWeight="medium"
           size="sm"
           py={3}
-          _hover={{ bg: activeTab === "suspended" ? "#0d9488" : { base: "rgba(255, 255, 255, 0.05)", _light: "#f3f4f6" } }}
+          _hover={{ bg: activeTab === "suspended" ? "brand.primary.hover" : { base: "rgba(255, 255, 255, 0.05)", _light: "#f3f4f6" } }}
         >
           Suspended
         </Button>
@@ -105,10 +105,10 @@ export function CustomerPanel({
           {/* Customer Action Buttons */}
           <Grid templateColumns={isAdmin ? "repeat(3, 1fr)" : "repeat(2, 1fr)"} gap={2} mb={4}>
             <Button
-              bg="#3b82f6"
+              bg="brand.secondary"
               color="white"
               size="sm"
-              _hover={{ bg: "#2563eb" }}
+              _hover={{ bg: "brand.secondary.hover" }}
               fontWeight="600"
               fontSize="xs"
               whiteSpace="nowrap"
@@ -120,10 +120,10 @@ export function CustomerPanel({
             </Button>
             {isAdmin && (
               <Button
-                bg="#3b82f6"
+                bg="brand.secondary"
                 color="white"
                 size="sm"
-                _hover={{ bg: "#2563eb" }}
+                _hover={{ bg: "brand.secondary.hover" }}
                 fontWeight="600"
                 fontSize="xs"
                 whiteSpace="nowrap"
@@ -142,11 +142,11 @@ export function CustomerPanel({
               </Button>
             )}
             <Button
-              bg="#3b82f6"
+              bg="brand.secondary"
               color="white"
               size="sm"
               onClick={onClearCustomer}
-              _hover={{ bg: "#2563eb" }}
+              _hover={{ bg: "brand.secondary.hover" }}
               fontWeight="600"
               fontSize="xs"
               whiteSpace="nowrap"
@@ -160,7 +160,7 @@ export function CustomerPanel({
           {/* Customer Details */}
           <Stack gap={3} mb={4}>
             <Box>
-              <Text fontSize="sm" mb={1} fontWeight="500" color={{ base: "#ffffff", _light: "#1a1d29" }}>
+              <Text fontSize="sm" mb={1} fontWeight="500" color="text.primary">
                 Name:
               </Text>
               <Input
@@ -170,15 +170,15 @@ export function CustomerPanel({
                 bg="transparent"
                 border="none"
                 borderBottom="1px solid"
-                borderColor={{ base: "rgba(255, 255, 255, 0.2)", _light: "#d1d5db" }}
+                borderColor="border.default"
                 borderRadius={0}
-                color={{ base: "#ffffff", _light: "#1a1d29" }}
+                color="text.primary"
                 px={1}
                 _focus={{ borderBottomColor: "#22d3ee", boxShadow: "none" }}
               />
             </Box>
             <Box>
-              <Text fontSize="sm" mb={1} fontWeight="500" color={{ base: "#ffffff", _light: "#1a1d29" }}>
+              <Text fontSize="sm" mb={1} fontWeight="500" color="text.primary">
                 Tel:
               </Text>
               <Input
@@ -188,15 +188,15 @@ export function CustomerPanel({
                 bg="transparent"
                 border="none"
                 borderBottom="1px solid"
-                borderColor={{ base: "rgba(255, 255, 255, 0.2)", _light: "#d1d5db" }}
+                borderColor="border.default"
                 borderRadius={0}
-                color={{ base: "#ffffff", _light: "#1a1d29" }}
+                color="text.primary"
                 px={1}
                 _focus={{ borderBottomColor: "#22d3ee", boxShadow: "none" }}
               />
             </Box>
             <Box>
-              <Text fontSize="sm" mb={1} fontWeight="500" color={{ base: "#ffffff", _light: "#1a1d29" }}>
+              <Text fontSize="sm" mb={1} fontWeight="500" color="text.primary">
                 Balance:
               </Text>
               <Input
@@ -207,9 +207,9 @@ export function CustomerPanel({
                 bg="transparent"
                 border="none"
                 borderBottom="1px solid"
-                borderColor={{ base: "rgba(255, 255, 255, 0.2)", _light: "#d1d5db" }}
+                borderColor="border.default"
                 borderRadius={0}
-                color={{ base: "#ffffff", _light: "#1a1d29" }}
+                color="text.primary"
                 px={1}
                 _focus={{ borderBottomColor: "#22d3ee", boxShadow: "none" }}
               />
@@ -219,7 +219,7 @@ export function CustomerPanel({
           {/* Remarks and Customer PIN */}
           <Stack gap={3} mb={4}>
             <Box>
-              <Text fontSize="sm" mb={1} fontWeight="500" color={{ base: "#ffffff", _light: "#1a1d29" }}>
+              <Text fontSize="sm" mb={1} fontWeight="500" color="text.primary">
                 REMARKS/CUSTOMER NAME:
               </Text>
               <Input
@@ -229,15 +229,15 @@ export function CustomerPanel({
                 bg="transparent"
                 border="none"
                 borderBottom="1px solid"
-                borderColor={{ base: "rgba(255, 255, 255, 0.2)", _light: "#d1d5db" }}
+                borderColor="border.default"
                 borderRadius={0}
-                color={{ base: "#ffffff", _light: "#1a1d29" }}
+                color="text.primary"
                 px={1}
                 _focus={{ borderBottomColor: "#22d3ee", boxShadow: "none" }}
               />
             </Box>
             <Box>
-              <Text fontSize="sm" mb={1} fontWeight="500" color={{ base: "#ffffff", _light: "#1a1d29" }}>
+              <Text fontSize="sm" mb={1} fontWeight="500" color="text.primary">
                 CUSTOMER PIN:
               </Text>
               <Input
@@ -248,9 +248,9 @@ export function CustomerPanel({
                 bg="transparent"
                 border="none"
                 borderBottom="1px solid"
-                borderColor={{ base: "rgba(255, 255, 255, 0.2)", _light: "#d1d5db" }}
+                borderColor="border.default"
                 borderRadius={0}
-                color={{ base: "#ffffff", _light: "#1a1d29" }}
+                color="text.primary"
                 px={1}
                 _focus={{ borderBottomColor: "#22d3ee", boxShadow: "none" }}
               />
@@ -262,10 +262,10 @@ export function CustomerPanel({
             <Text
               as="button"
               fontSize="0.875rem"
-              color="#14b8a6"
+              color="brand.primary"
               cursor="pointer"
               onClick={onViewReceipt}
-              _hover={{ textDecoration: "underline", color: "#0d9488" }}
+              _hover={{ textDecoration: "underline", color: "brand.primary.hover" }}
             >
               View Receipt
             </Text>
@@ -275,16 +275,16 @@ export function CustomerPanel({
               w="60px"
               textAlign="center"
               size="sm"
-              bg={{ base: "#1a1d29", _light: "#ffffff" }}
-              borderColor={{ base: "rgba(255, 255, 255, 0.1)", _light: "#e5e7eb" }}
-              color={{ base: "#ffffff", _light: "#1a1d29" }}
+              bg="input.bg"
+              borderColor="input.border"
+              color="text.primary"
               borderRadius="md"
             />
             <Button 
-              bg="#14b8a6" 
+              bg="brand.primary" 
               color="white" 
               size="sm" 
-              _hover={{ bg: "#0d9488" }} 
+              _hover={{ bg: "brand.primary.hover" }} 
               fontWeight="600"
               onClick={onPreviewReceipt}
               disabled={!selectedReceiptId}
@@ -313,7 +313,7 @@ export function CustomerPanel({
                 {suspendedSales.length === 0 ? (
                   <Table.Row>
                     <Table.Cell colSpan={5} textAlign="center" py={8}>
-                      <Text color={{ base: "#9ca3af", _light: "#6b7280" }}>No records found.</Text>
+                      <Text color="text.muted">No records found.</Text>
                     </Table.Cell>
                   </Table.Row>
                 ) : (
@@ -353,14 +353,14 @@ export function CustomerPanel({
             <Box
               p={{ base: 3, md: 4 }}
               borderTop="1px solid"
-              borderColor={{ base: "rgba(255, 255, 255, 0.08)", _light: "#e5e7eb" }}
+              borderColor="border.card"
               bg={{ base: "rgba(20, 184, 166, 0.1)", _light: "rgba(20, 184, 166, 0.05)" }}
             >
               <Button
                 w="full"
-                bg="#14b8a6"
+                bg="brand.primary"
                 color="white"
-                _hover={{ bg: "#0d9488" }}
+                _hover={{ bg: "brand.primary.hover" }}
                 onClick={() => {
                   onResumeSale(selectedSaleId)
                   onTabChange("customer")
@@ -376,10 +376,10 @@ export function CustomerPanel({
           <Box
             p={{ base: 3, md: 4 }}
             borderTop="1px solid"
-            borderColor={{ base: "rgba(255, 255, 255, 0.08)", _light: "#e5e7eb" }}
+            borderColor="border.card"
           >
             <Flex justify="space-between" alignItems="center" mb={4} flexWrap="wrap" gap={2}>
-              <Text fontSize="sm" color={{ base: "#9ca3af", _light: "#6b7280" }}>
+              <Text fontSize="sm" color="text.muted">
                 Showing {suspendedSales.length > 0 ? "0" : "0"} - {suspendedSales.length > 0 ? "0" : "0"} out of {suspendedSales.length}
               </Text>
               <HStack gap={2} flexWrap="wrap">
@@ -408,7 +408,7 @@ export function CustomerPanel({
             {/* Remarks and PIN in Suspended Tab */}
             <Stack gap={3}>
               <Box>
-                <Text fontSize="sm" mb={1} fontWeight="500" color={{ base: "#ffffff", _light: "#1a1d29" }}>
+                <Text fontSize="sm" mb={1} fontWeight="500" color="text.primary">
                   REMARKS/CUSTOMER NAME:
                 </Text>
                 <Input
@@ -418,15 +418,15 @@ export function CustomerPanel({
                   bg="transparent"
                   border="none"
                   borderBottom="1px solid"
-                  borderColor={{ base: "rgba(255, 255, 255, 0.2)", _light: "#d1d5db" }}
+                  borderColor="border.default"
                   borderRadius={0}
-                  color={{ base: "#ffffff", _light: "#1a1d29" }}
+                  color="text.primary"
                   px={1}
                   _focus={{ borderBottomColor: "#22d3ee", boxShadow: "none" }}
                 />
               </Box>
               <Box>
-                <Text fontSize="sm" mb={1} fontWeight="500" color={{ base: "#ffffff", _light: "#1a1d29" }}>
+                <Text fontSize="sm" mb={1} fontWeight="500" color="text.primary">
                   CUSTOMER PIN:
                 </Text>
                 <Input
@@ -437,9 +437,9 @@ export function CustomerPanel({
                   bg="transparent"
                   border="none"
                   borderBottom="1px solid"
-                  borderColor={{ base: "rgba(255, 255, 255, 0.2)", _light: "#d1d5db" }}
+                  borderColor="border.default"
                   borderRadius={0}
-                  color={{ base: "#ffffff", _light: "#1a1d29" }}
+                  color="text.primary"
                   px={1}
                   _focus={{ borderBottomColor: "#22d3ee", boxShadow: "none" }}
                 />

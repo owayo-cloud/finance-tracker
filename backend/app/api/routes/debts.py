@@ -36,7 +36,8 @@ def read_debts(
     """
     Retrieve debts with optional filters.
     """
-    conditions = []
+    from sqlalchemy.sql import ColumnElement
+    conditions: list[ColumnElement[bool]] = []
     
     if customer_name:
         conditions.append(Debt.customer_name.ilike(f"%{customer_name}%"))
@@ -45,7 +46,7 @@ def read_debts(
         # Support multiple statuses separated by comma
         status_list = [s.strip() for s in status.split(",") if s.strip()]
         if len(status_list) == 1:
-            conditions.append(Debt.status == status_list[0])
+            conditions.append(Debt.status == status_list[0])  # type: ignore[arg-type]
         elif len(status_list) > 1:
             # Use col() for proper SQLAlchemy column reference
             conditions.append(col(Debt.status).in_(status_list))
@@ -53,14 +54,14 @@ def read_debts(
     if start_date:
         try:
             start_dt = datetime.fromisoformat(start_date.replace("Z", "+00:00"))
-            conditions.append(Debt.debt_date >= start_dt)
+            conditions.append(Debt.debt_date >= start_dt)  # type: ignore[arg-type]
         except ValueError:
             raise HTTPException(status_code=400, detail="Invalid start_date format")
     
     if end_date:
         try:
             end_dt = datetime.fromisoformat(end_date.replace("Z", "+00:00"))
-            conditions.append(Debt.debt_date <= end_dt)
+            conditions.append(Debt.debt_date <= end_dt)  # type: ignore[arg-type]
         except ValueError:
             raise HTTPException(status_code=400, detail="Invalid end_date format")
     

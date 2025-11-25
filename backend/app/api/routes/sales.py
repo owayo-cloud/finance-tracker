@@ -7,6 +7,7 @@ from fastapi import APIRouter, HTTPException, Query
 from pydantic import BaseModel
 from sqlmodel import func, select, and_, or_
 from sqlalchemy.orm import selectinload
+from sqlalchemy.sql import ColumnElement
 
 from app.api.deps import AdminUser, CurrentUser, SessionDep
 from app.core.logging_config import get_logger
@@ -129,14 +130,14 @@ def search_products_for_sale(
     search_pattern = f"%{q}%"
     
     # Base query - only active products with stock
-    conditions = [
+    conditions: list[ColumnElement[bool]] = [
         Product.name.ilike(search_pattern),
-        Product.current_stock > 0
+        Product.current_stock > 0  # type: ignore[arg-type]
     ]
     
     # Add category filter if provided
     if category_id:
-        conditions.append(Product.category_id == category_id)
+        conditions.append(Product.category_id == category_id)  # type: ignore[arg-type]
     
     statement = (
         select(Product)
@@ -623,29 +624,29 @@ def read_sales(
     )
     
     # Apply filters
-    conditions = []
+    conditions: list[ColumnElement[bool]] = []
     
     # Cashiers only see their own sales (unless admin/superuser)
     if not current_user.is_superuser:
-        conditions.append(Sale.created_by_id == current_user.id)
+        conditions.append(Sale.created_by_id == current_user.id)  # type: ignore[arg-type]
         count_statement = count_statement.where(Sale.created_by_id == current_user.id)
     
     if product_id:
-        conditions.append(Sale.product_id == product_id)
+        conditions.append(Sale.product_id == product_id)  # type: ignore[arg-type]
     
     if payment_method_id:
-        conditions.append(Sale.payment_method_id == payment_method_id)
+        conditions.append(Sale.payment_method_id == payment_method_id)  # type: ignore[arg-type]
     
     if start_date:
-        conditions.append(Sale.sale_date >= start_date)
+        conditions.append(Sale.sale_date >= start_date)  # type: ignore[arg-type]
     
     if end_date:
-        conditions.append(Sale.sale_date <= end_date)
+        conditions.append(Sale.sale_date <= end_date)  # type: ignore[arg-type]
     
     # Category filter requires joining with Product
     if category_id:
         statement = statement.join(Product, Sale.product_id == Product.id)
-        conditions.append(Product.category_id == category_id)
+        conditions.append(Product.category_id == category_id)  # type: ignore[arg-type]
     
     if conditions:
         statement = statement.where(and_(*conditions))
@@ -671,10 +672,10 @@ def get_today_sales_summary(
     today = date.today()
     
     # Filter by current user unless admin
-    conditions = [cast(Sale.sale_date, Date) == today]
+    conditions: list[ColumnElement[bool]] = [cast(Sale.sale_date, Date) == today]  # type: ignore[arg-type]
     
     if not current_user.is_superuser:
-        conditions.append(Sale.created_by_id == current_user.id)
+        conditions.append(Sale.created_by_id == current_user.id)  # type: ignore[arg-type]
     
     # Total sales and amount
     total_statement = (

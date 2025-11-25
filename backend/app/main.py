@@ -87,7 +87,7 @@ async def lifespan(app: FastAPI) -> Any:
 
 if settings.SENTRY_DSN and settings.ENVIRONMENT != "local":
     try:
-        import sentry_sdk  # type: ignore[import-untyped]
+        import sentry_sdk  # type: ignore[import]
         sentry_sdk.init(dsn=str(settings.SENTRY_DSN), enable_tracing=True)
         logger.info("Sentry initialized")
     except ImportError:

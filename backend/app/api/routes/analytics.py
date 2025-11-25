@@ -7,6 +7,7 @@ from pydantic import BaseModel
 from sqlmodel import func, select, and_, or_
 from sqlalchemy import cast, Date
 from sqlalchemy.orm import selectinload
+from sqlalchemy.sql import ColumnElement
 
 from app.api.deps import CurrentUser, SessionDep
 from app.models import Sale, Expense, Product, ProductStatus, PaymentMethod, User
@@ -48,17 +49,17 @@ def get_sales_summary(
     """
     Get sales summary with totals, averages, and breakdowns by payment method and cashier.
     """
-    conditions = []
+    conditions: list[ColumnElement[bool]] = []
     
     # Apply date filters
     if start_date:
-        conditions.append(cast(Sale.sale_date, Date) >= start_date)
+        conditions.append(cast(Sale.sale_date, Date) >= start_date)  # type: ignore[arg-type]
     if end_date:
-        conditions.append(cast(Sale.sale_date, Date) <= end_date)
+        conditions.append(cast(Sale.sale_date, Date) <= end_date)  # type: ignore[arg-type]
     
     # Cashiers only see their own sales
     if not current_user.is_superuser:
-        conditions.append(Sale.created_by_id == current_user.id)
+        conditions.append(Sale.created_by_id == current_user.id)  # type: ignore[arg-type]
     
     # Base query for totals
     base_query = select(Sale)
@@ -244,11 +245,11 @@ def get_balance_sheet(
     cash_and_receivables = sales_summary.total_amount
     
     # Get expenses total
-    expense_conditions = []
+    expense_conditions: list[ColumnElement[bool]] = []
     if start_date:
-        expense_conditions.append(cast(Expense.expense_date, Date) >= start_date)
+        expense_conditions.append(cast(Expense.expense_date, Date) >= start_date)  # type: ignore[arg-type]
     if end_date:
-        expense_conditions.append(cast(Expense.expense_date, Date) <= end_date)
+        expense_conditions.append(cast(Expense.expense_date, Date) <= end_date)  # type: ignore[arg-type]
     
     expense_query: Any = select(func.sum(Expense.amount))
     if expense_conditions:

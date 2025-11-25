@@ -4,6 +4,7 @@ import uuid
 from fastapi import APIRouter, HTTPException
 from sqlmodel import func, select, and_
 from sqlalchemy.orm import selectinload
+from sqlalchemy.sql import ColumnElement
 
 from app.api.deps import AdminUser, CurrentUser, SessionDep
 from app.crud import product as product_crud
@@ -75,25 +76,25 @@ def read_products(
     count_statement = select(func.count()).select_from(Product)
 
     # Apply filters
-    conditions = []
-
+    conditions: list[ColumnElement[bool]] = []
+    
     if name:
         name_condition = Product.name.ilike(f"%{name}%")
         conditions.append(name_condition)
-
+    
     if category_id:
         try:
             category_uuid = uuid.UUID(category_id)
             category_condition = Product.category_id == category_uuid
-            conditions.append(category_condition)
+            conditions.append(category_condition)  # type: ignore[arg-type]
         except ValueError:
             raise HTTPException(status_code=400, detail="Invalid category_id format")
-
+    
     if status_id:
         try:
             status_uuid = uuid.UUID(status_id)
             status_condition = Product.status_id == status_uuid
-            conditions.append(status_condition)
+            conditions.append(status_condition)  # type: ignore[arg-type]
         except ValueError:
             raise HTTPException(status_code=400, detail="Invalid status_id format")
 

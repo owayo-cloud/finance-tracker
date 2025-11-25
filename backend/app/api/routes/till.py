@@ -7,6 +7,7 @@ from fastapi import APIRouter, HTTPException, Query
 from sqlmodel import func, select, and_, or_
 from sqlalchemy.orm import selectinload
 from sqlalchemy import cast, Date
+from sqlalchemy.sql import ColumnElement
 
 from app.api.deps import CurrentUser, SessionDep, AdminUser
 from app.api.utils.till_utils import get_current_open_shift
@@ -31,16 +32,16 @@ def get_last_closed_shift(session: SessionDep) -> Optional[TillShift]:
     return session.exec(statement).first()
 
 
-def calculate_system_counts(session: SessionDep, till_shift: TillShift) -> dict:
+def calculate_system_counts(session: SessionDep, till_shift: TillShift) -> dict[str, Any]:
     """Calculate system counts for all payment methods from sales during the shift"""
     # Get all sales during this shift
-    conditions = [
-        Sale.sale_date >= till_shift.opening_time,
-        Sale.created_by_id == till_shift.opened_by_id
+    conditions: list[ColumnElement[bool]] = [
+        Sale.sale_date >= till_shift.opening_time,  # type: ignore[arg-type]
+        Sale.created_by_id == till_shift.opened_by_id  # type: ignore[arg-type]
     ]
     
     if till_shift.closing_time:
-        conditions.append(Sale.sale_date <= till_shift.closing_time)
+        conditions.append(Sale.sale_date <= till_shift.closing_time)  # type: ignore[arg-type]
     
     # Get all payment methods
     payment_methods = session.exec(select(PaymentMethod).where(PaymentMethod.is_active == True)).all()
@@ -397,7 +398,7 @@ def get_cashier_variances(
         .order_by(CashierVariance.created_at.desc())
     )
     
-    conditions = []
+    conditions: list[ColumnElement[bool]] = []
     
     if cashier_id:
         conditions.append(CashierVariance.cashier_id == cashier_id)
@@ -474,15 +475,15 @@ def get_till_shifts(
         .order_by(TillShift.opening_time.desc())
     )
     
-    conditions = []
+    conditions: list[ColumnElement[bool]] = []
     
     # Cashiers see only their own shifts
     if not current_user.is_superuser:
-        conditions.append(TillShift.opened_by_id == current_user.id)
+        conditions.append(TillShift.opened_by_id == current_user.id)  # type: ignore[arg-type]
         count_statement = count_statement.where(TillShift.opened_by_id == current_user.id)
     
     if status:
-        conditions.append(TillShift.status == status)
+        conditions.append(TillShift.status == status)  # type: ignore[arg-type]
         count_statement = count_statement.where(TillShift.status == status)
     
     if conditions:

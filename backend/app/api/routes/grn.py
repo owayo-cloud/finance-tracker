@@ -5,6 +5,7 @@ import uuid
 from fastapi import APIRouter, HTTPException, Query
 from sqlalchemy import and_, func, or_
 from sqlalchemy.orm import selectinload
+from sqlalchemy.sql import ColumnElement
 from sqlmodel import select
 
 from app.api.deps import AdminUser, CurrentUser, SessionDep
@@ -50,7 +51,7 @@ def read_suppliers(
     statement = select(Supplier)
     
     # Apply filters
-    filters = []
+    filters: list[ColumnElement[bool]] = []
     if search:
         search_filter = or_(
             Supplier.name.ilike(f"%{search}%"),
@@ -59,7 +60,7 @@ def read_suppliers(
         filters.append(search_filter)
     
     if is_active is not None:
-        filters.append(Supplier.is_active == is_active)
+        filters.append(Supplier.is_active == is_active)  # type: ignore[arg-type]
     
     if filters:
         statement = statement.where(and_(*filters))
@@ -185,7 +186,7 @@ def read_transporters(
     statement = select(Transporter)
     
     # Apply filters
-    filters = []
+    filters: list[ColumnElement[bool]] = []
     if search:
         search_filter = or_(
             Transporter.name.ilike(f"%{search}%"),
@@ -194,7 +195,7 @@ def read_transporters(
         filters.append(search_filter)
     
     if is_active is not None:
-        filters.append(Transporter.is_active == is_active)
+        filters.append(Transporter.is_active == is_active)  # type: ignore[arg-type]
     
     if filters:
         statement = statement.where(and_(*filters))
@@ -326,7 +327,7 @@ def read_grns(
     )
     
     # Apply filters
-    filters = []
+    filters: list[ColumnElement[bool]] = []
     if search:
         search_filter = or_(
             GRN.grn_number.ilike(f"%{search}%"),
@@ -336,16 +337,16 @@ def read_grns(
         filters.append(search_filter)
     
     if supplier_id:
-        filters.append(GRN.supplier_id == supplier_id)
+        filters.append(GRN.supplier_id == supplier_id)  # type: ignore[arg-type]
     
     if is_approved is not None:
-        filters.append(GRN.is_approved == is_approved)
+        filters.append(GRN.is_approved == is_approved)  # type: ignore[arg-type]
     
     if start_date:
-        filters.append(GRN.goods_receipt_date >= start_date)
+        filters.append(GRN.goods_receipt_date >= start_date)  # type: ignore[arg-type]
     
     if end_date:
-        filters.append(GRN.goods_receipt_date <= end_date)
+        filters.append(GRN.goods_receipt_date <= end_date)  # type: ignore[arg-type]
     
     if filters:
         statement = statement.where(and_(*filters))

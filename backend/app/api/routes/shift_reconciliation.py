@@ -6,6 +6,7 @@ from decimal import Decimal
 from fastapi import APIRouter, HTTPException, Query
 from sqlmodel import func, select, and_
 from sqlalchemy.orm import selectinload
+from sqlalchemy.sql import ColumnElement
 
 from app.api.deps import AdminUser, CurrentUser, SessionDep
 from app.models import (
@@ -61,18 +62,18 @@ def read_shift_reconciliations(
         .order_by(ShiftReconciliation.shift_date.desc())
     )
     
-    conditions = []
+    conditions: list[ColumnElement[bool]] = []
     
     # Cashiers only see their own reconciliations
     if not current_user.is_superuser:
-        conditions.append(ShiftReconciliation.created_by_id == current_user.id)
+        conditions.append(ShiftReconciliation.created_by_id == current_user.id)  # type: ignore[arg-type]
         count_statement = count_statement.where(ShiftReconciliation.created_by_id == current_user.id)
     
     if start_date:
-        conditions.append(ShiftReconciliation.shift_date >= start_date)
+        conditions.append(ShiftReconciliation.shift_date >= start_date)  # type: ignore[arg-type]
     
     if end_date:
-        conditions.append(ShiftReconciliation.shift_date <= end_date)
+        conditions.append(ShiftReconciliation.shift_date <= end_date)  # type: ignore[arg-type]
     
     if conditions:
         statement = statement.where(and_(*conditions))
@@ -172,14 +173,14 @@ def get_current_cash_summary(
         }
     
     # Build conditions
-    conditions = [
-        cast(Sale.sale_date, Date) >= start_date,
-        cast(Sale.sale_date, Date) <= end_date
+    conditions: list[ColumnElement[bool]] = [
+        cast(Sale.sale_date, Date) >= start_date,  # type: ignore[arg-type]
+        cast(Sale.sale_date, Date) <= end_date  # type: ignore[arg-type]
     ]
     
     # Cashiers only see their own sales
     if not current_user.is_superuser:
-        conditions.append(Sale.created_by_id == current_user.id)
+        conditions.append(Sale.created_by_id == current_user.id)  # type: ignore[arg-type]
     
     # Cash sales
     cash_conditions = conditions + [Sale.payment_method_id == cash_pm.id]

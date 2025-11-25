@@ -21,7 +21,7 @@ from datetime import datetime, timezone
 from decimal import Decimal, InvalidOperation
 from pathlib import Path
 from typing import Any, Optional
-import openpyxl  # type: ignore[import-untyped]  # For Excel file parsing
+import openpyxl  # type: ignore[import]  # For Excel file parsing
 
 from fastapi import APIRouter, HTTPException, UploadFile, File, BackgroundTasks
 from fastapi.responses import StreamingResponse

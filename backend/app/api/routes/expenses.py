@@ -6,6 +6,7 @@ from decimal import Decimal
 from fastapi import APIRouter, HTTPException, Query
 from sqlmodel import func, select, and_, or_, desc
 from sqlalchemy.orm import selectinload
+from sqlalchemy.sql import ColumnElement
 
 from app.api.deps import AdminUser, CurrentUser, SessionDep
 from app.models import (
@@ -192,16 +193,16 @@ def read_expenses(
     count_statement = select(func.count()).select_from(Expense)
     
     # Apply filters
-    conditions = []
+    conditions: list[ColumnElement[bool]] = []
     
     if category_id:
-        conditions.append(Expense.category_id == category_id)
+        conditions.append(Expense.category_id == category_id)  # type: ignore[arg-type]
     
     if start_date:
-        conditions.append(Expense.expense_date >= datetime.combine(start_date, datetime.min.time()).replace(tzinfo=datetime.now().astimezone().tzinfo))
+        conditions.append(Expense.expense_date >= datetime.combine(start_date, datetime.min.time()).replace(tzinfo=datetime.now().astimezone().tzinfo))  # type: ignore[arg-type]
     
     if end_date:
-        conditions.append(Expense.expense_date <= datetime.combine(end_date, datetime.max.time()).replace(tzinfo=datetime.now().astimezone().tzinfo))
+        conditions.append(Expense.expense_date <= datetime.combine(end_date, datetime.max.time()).replace(tzinfo=datetime.now().astimezone().tzinfo))  # type: ignore[arg-type]
     
     if search:
         search_condition = Expense.description.ilike(f"%{search}%")
@@ -360,16 +361,16 @@ def get_expense_summary(
     statement = select(Expense)
     
     # Apply filters
-    conditions = []
+    conditions: list[ColumnElement[bool]] = []
     
     if category_id:
-        conditions.append(Expense.category_id == category_id)
+        conditions.append(Expense.category_id == category_id)  # type: ignore[arg-type]
     
     if start_date:
-        conditions.append(Expense.expense_date >= datetime.combine(start_date, datetime.min.time()).replace(tzinfo=datetime.now().astimezone().tzinfo))
+        conditions.append(Expense.expense_date >= datetime.combine(start_date, datetime.min.time()).replace(tzinfo=datetime.now().astimezone().tzinfo))  # type: ignore[arg-type]
     
     if end_date:
-        conditions.append(Expense.expense_date <= datetime.combine(end_date, datetime.max.time()).replace(tzinfo=datetime.now().astimezone().tzinfo))
+        conditions.append(Expense.expense_date <= datetime.combine(end_date, datetime.max.time()).replace(tzinfo=datetime.now().astimezone().tzinfo))  # type: ignore[arg-type]
     
     if conditions:
         combined_conditions = and_(*conditions)

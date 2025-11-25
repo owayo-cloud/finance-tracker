@@ -38,31 +38,31 @@ export function ActionButtons({
 }: ActionButtonsProps) {
   return (
     <Box
-      bg={{ base: "#1a1d29", _light: "#ffffff" }}
+      bg="bg.canvas"
       borderBottom="1px solid"
-      borderColor={{ base: "rgba(255, 255, 255, 0.08)", _light: "#e5e7eb" }}
+      borderColor="border.card"
       px={{ base: 4, md: 6 }}
       py={3}
     >
       <Flex gap={2} flexWrap="wrap" alignItems="center">
         <Link to="/">
-          <Button bg="#3b82f6" color="white" _hover={{ bg: "#2563eb" }} size="sm">
+          <Button bg="brand.secondary" color="white" _hover={{ bg: "brand.secondary.hover" }} size="sm">
             <Icon as={FiHome} mr={2} />
             Dashboard
           </Button>
         </Link>
-        <Button bg="#ef4444" color="white" _hover={{ bg: "#dc2626" }} size="sm" onClick={onLogout}>
+        <Button bg="button.danger" color="white" _hover={{ bg: "button.danger.hover" }} size="sm" onClick={onLogout}>
           <Icon as={FiLogOut} mr={2} />
           Logout
         </Button>
-        <Button bg="#f59e0b" color="white" _hover={{ bg: "#d97706" }} size="sm" onClick={onReset}>
+        <Button bg="button.warning" color="white" _hover={{ bg: "button.warning.hover" }} size="sm" onClick={onReset}>
           <Icon as={FiRefreshCw} mr={2} />
           Reset
         </Button>
         <Button 
-          bg="#14b8a6" 
+          bg="brand.primary" 
           color="white" 
-          _hover={{ bg: "#0d9488" }} 
+          _hover={{ bg: "brand.primary.hover" }} 
           size="sm"
           onClick={onCreditNote}
         >
@@ -70,9 +70,9 @@ export function ActionButtons({
           Add Credit Note (F2)
         </Button>
         <Button 
-          bg="#14b8a6" 
+          bg="brand.primary" 
           color="white" 
-          _hover={{ bg: "#0d9488" }} 
+          _hover={{ bg: "brand.primary.hover" }} 
           size="sm"
           onClick={onCashMovement}
         >
@@ -80,9 +80,9 @@ export function ActionButtons({
           Cash Movement (F1)
         </Button>
         <Button
-          bg="#14b8a6"
+          bg="brand.primary"
           color="white"
-          _hover={{ bg: "#0d9488" }}
+          _hover={{ bg: "brand.primary.hover" }}
           size="sm"
           onClick={onSuspendSale}
           disabled={cartLength === 0}
@@ -91,9 +91,9 @@ export function ActionButtons({
           Suspend Sale (F3)
         </Button>
         <Button
-          bg="#14b8a6"
+          bg="brand.primary"
           color="white"
-          _hover={{ bg: "#0d9488" }}
+          _hover={{ bg: "brand.primary.hover" }}
           size="sm"
           onClick={onResumeSale}
           disabled={!selectedSaleId}
@@ -102,9 +102,9 @@ export function ActionButtons({
           Resume Sale (F4)
         </Button>
         <Button
-          bg="#22c55e"
+          bg="button.success"
           color="white"
-          _hover={{ bg: "#16a34a" }}
+          _hover={{ bg: "button.success.hover" }}
           size="sm"
           onClick={onCompleteSale}
           disabled={cartLength === 0}

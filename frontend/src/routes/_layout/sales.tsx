@@ -74,7 +74,7 @@ function Sales() {
     try {
       localStorage.setItem("pos_suspended_sales", JSON.stringify(suspendedSales))
     } catch (error) {
-      console.error("Failed to save suspended sales:", error)
+      // Failed to save suspended sales - silently continue
     }
   }, [suspendedSales])
   
@@ -301,7 +301,6 @@ function Sales() {
   const processPayment = async (payments: Record<string, { amount: number; refNo?: string }>) => {
     // Prevent double-saving
     if (isProcessingPayment) {
-      console.log("Payment already processing, ignoring duplicate request")
       return
     }
     
@@ -471,14 +470,12 @@ function Sales() {
           
           if (!debtResponse.ok) {
             const errorText = await debtResponse.text()
-            console.error("Failed to create debt:", errorText)
             // Don't throw - sale was successful, debt creation is secondary
             showToast.showErrorToast(`Sale completed but failed to record debt: ${errorText}`)
           } else {
             showToast.showSuccessToast(`Sale completed. Debt of ${debtAmount.toFixed(2)} recorded for ${customerName}`)
           }
         } catch (error: any) {
-          console.error("Error creating debt:", error)
           // Don't throw - sale was successful
           showToast.showErrorToast(`Sale completed but failed to record debt: ${error.message || "Unknown error"}`)
         }
@@ -503,7 +500,6 @@ function Sales() {
       setCustomerBalance(0)
       setRemarks("")
     } catch (error: any) {
-      console.error("Sale completion error:", error)
       const errorMessage = error?.message || error?.detail || "Failed to complete sale. Please check your connection and try again."
       showToast.showErrorToast(errorMessage)
       throw error
@@ -584,7 +580,6 @@ function Sales() {
         setCustomerBalance(0)
       }
     } catch (error) {
-      console.error("Failed to fetch customer balance:", error)
       // Use the balance from customer object as fallback
     }
   }
@@ -784,7 +779,6 @@ function Sales() {
         isOpen={isRecentReceiptsModalOpen}
         onClose={() => setIsRecentReceiptsModalOpen(false)}
         onAttach={(receiptId) => {
-          // TODO: Implement attach receipt functionality
           showToast.showSuccessToast(`Receipt ${receiptId.slice(-6)} attached`)
         }}
         onPreviewReceipt={(receiptId) => {

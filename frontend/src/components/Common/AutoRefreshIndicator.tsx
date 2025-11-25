@@ -16,7 +16,7 @@ const AutoRefreshIndicator = ({ interval, onToggle }: AutoRefreshIndicatorProps)
       toggle()
       onToggle?.()
     } catch (error) {
-      console.error("Error toggling page auto-refresh:", error)
+      // Failed to toggle page auto-refresh - silently continue
     }
   }
 

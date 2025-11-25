@@ -167,17 +167,17 @@ const UserInformation = () => {
             {/* User Info */}
             <VStack align="start" gap={2} flex={1}>
               <VStack align="start" gap={1}>
-                <Text fontSize="xl" fontWeight="700" color={{ base: "#ffffff", _light: "#1a1d29" }}>
+                <Text fontSize="xl" fontWeight="700" color="text.primary">
                   {currentUser?.full_name || "User"}
                 </Text>
                 {getRoleBadge()}
               </VStack>
-              <Text fontSize="sm" color={{ base: "#9ca3af", _light: "#6b7280" }}>
+              <Text fontSize="sm" color="text.muted">
                 {currentUser?.email}
               </Text>
               {currentUser?.username && (
                 <HStack gap={1}>
-                  <Text fontSize="sm" color={{ base: "#9ca3af", _light: "#6b7280" }}>
+                  <Text fontSize="sm" color="text.muted">
                     @{currentUser.username}
                   </Text>
                 </HStack>
@@ -195,7 +195,7 @@ const UserInformation = () => {
           borderColor="border.card"
           boxShadow={{ base: "0 2px 4px rgba(0, 0, 0, 0.2)", _light: "0 1px 3px rgba(0, 0, 0, 0.1)" }}
         >
-          <Heading size="sm" mb={4} color={{ base: "#ffffff", _light: "#1a1d29" }}>
+          <Heading size="sm" mb={4} color="text.primary">
             Edit Profile
           </Heading>
           <Box as="form" onSubmit={handleSubmit(onSubmit)}>
@@ -220,7 +220,7 @@ const UserInformation = () => {
                     <Text
                       fontSize="md"
                       py={2}
-                      color={!currentUser?.full_name ? "gray.500" : { base: "#ffffff", _light: "#1a1d29" }}
+                      color={!currentUser?.full_name ? "text.muted" : "text.primary"}
                     >
                       {currentUser?.full_name || "Not set"}
                     </Text>
@@ -252,7 +252,7 @@ const UserInformation = () => {
                   />
                 ) : (
                   <HStack gap={2}>
-                    <Text fontSize="md" py={2} color={{ base: "#ffffff", _light: "#1a1d29" }}>
+                    <Text fontSize="md" py={2} color="text.primary">
                       {currentUser?.email}
                     </Text>
                   </HStack>
@@ -262,10 +262,10 @@ const UserInformation = () => {
               {currentUser?.username && (
                 <Field label="Username">
                   <HStack gap={2}>
-                    <Text fontSize="md" py={2} color={{ base: "#9ca3af", _light: "#6b7280" }}>
+                    <Text fontSize="md" py={2} color="text.muted">
                       @{currentUser.username}
                     </Text>
-                    <Text fontSize="xs" color={{ base: "#6b7280", _light: "#9ca3af" }}>
+                    <Text fontSize="xs" color="text.muted">
                       (Cannot be changed)
                     </Text>
                   </HStack>

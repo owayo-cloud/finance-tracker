@@ -18,14 +18,14 @@ export function DashboardHeader({ userName, isMounted }: DashboardHeaderProps) {
         <Heading 
           size="xl" 
           fontWeight="700"
-          color={{ base: "#ffffff", _light: "#1a1d29" }}
+          color="text.primary"
           mb={1}
         >
           Dashboard
         </Heading>
         <Text 
           fontSize="sm" 
-          color={{ base: "#9ca3af", _light: "#6b7280" }}
+          color="text.muted"
           fontWeight="500"
         >
           Welcome back, {userName || "user"}

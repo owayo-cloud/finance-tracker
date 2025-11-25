@@ -6,6 +6,7 @@ Scheduled jobs for:
 2. Reorder level alerts (daily at 9 AM)
 3. Notification cleanup (weekly)
 """
+import logging
 from datetime import datetime, timedelta, timezone
 from decimal import Decimal
 
@@ -13,6 +14,7 @@ from sqlmodel import Session, select
 
 from app import crud
 from app.core.db import engine
+from app.core.logging_config import setup_logging, get_logger
 from app.models import (
     Notification,
     Product,
@@ -31,6 +33,10 @@ from app.utils import (
     send_email,
 )
 
+# Setup logging for background services
+setup_logging(level=logging.INFO)
+logger = get_logger(__name__)
+
 
 def send_debt_reminder_emails():
     """
@@ -39,7 +45,7 @@ def send_debt_reminder_emails():
     Runs daily at 8 AM.
     Groups debts by supplier and sends one email per supplier.
     """
-    print(f"[{datetime.now()}] Running debt reminder job...")
+    logger.info("Running debt reminder job...")
     
     with Session(engine) as session:
         # Get all admin users with supplier_debt_alerts enabled
@@ -51,7 +57,7 @@ def send_debt_reminder_emails():
         admin_users = session.exec(admin_statement).all()
         
         if not admin_users:
-            print("No admin users opted in for debt reminders")
+            logger.info("No admin users opted in for debt reminders")
             return
         
         # Get overdue debts
@@ -63,7 +69,7 @@ def send_debt_reminder_emails():
         overdue_debts = session.exec(debt_statement).all()
         
         if not overdue_debts:
-            print("No overdue debts found")
+            logger.info("No overdue debts found")
             return
         
         # Group debts by supplier
@@ -130,10 +136,10 @@ def send_debt_reminder_emails():
                     )
                     
                     email_status = "sent"
-                    print(f"✓ Sent reminder to {admin.email} for {supplier.name} ({len(debts)} debts)")
+                    logger.info(f"Sent reminder to {admin.email} for {supplier.name} ({len(debts)} debts)")
                 except Exception as e:
                     email_status = "failed"
-                    print(f"✗ Failed to send email to {admin.email}: {e}")
+                    logger.error(f"Failed to send email to {admin.email}: {e}", exc_info=True)
                 
                 # Create reminder log
                 log = ReminderLog.model_validate(
@@ -155,7 +161,7 @@ def send_debt_reminder_emails():
                 session.add(setting)
         
         session.commit()
-        print(f"Debt reminder job completed. Processed {len(debts_by_supplier)} suppliers")
+        logger.info(f"Debt reminder job completed. Processed {len(debts_by_supplier)} suppliers")
 
 
 def send_reorder_alerts():
@@ -166,7 +172,7 @@ def send_reorder_alerts():
     Groups low-stock products and sends one summary email to admin users.
     Tracks consecutive alerts and stops after max_consecutive_alerts.
     """
-    print(f"[{datetime.now()}] Running reorder alert job...")
+    logger.info("Running reorder alert job...")
     
     with Session(engine) as session:
         # Get products with reorder alerts enabled
@@ -178,7 +184,7 @@ def send_reorder_alerts():
         low_stock_products = session.exec(product_statement).all()
         
         if not low_stock_products:
-            print("No products below reorder level")
+            logger.info("No products below reorder level")
             return
         
         alerts_sent = 0
@@ -248,12 +254,12 @@ def send_reorder_alerts():
                         html_content=email_data.html_content,
                     )
                     
-                    print(f"✓ Sent reorder alert to {admin.email} ({len(products_to_alert)} products)")
+                    logger.info(f"Sent reorder alert to {admin.email} ({len(products_to_alert)} products)")
                 except Exception as e:
-                    print(f"✗ Failed to send reorder alert to {admin.email}: {e}")
+                    logger.error(f"Failed to send reorder alert to {admin.email}: {e}", exc_info=True)
         
         session.commit()
-        print(f"Reorder alert job completed. Sent: {alerts_sent}, Skipped: {alerts_skipped}")
+        logger.info(f"Reorder alert job completed. Sent: {alerts_sent}, Skipped: {alerts_skipped}")
 
 
 def cleanup_old_notifications():
@@ -263,11 +269,11 @@ def cleanup_old_notifications():
     Runs weekly (Sunday at midnight).
     Keeps unread notifications indefinitely.
     """
-    print(f"[{datetime.now()}] Running notification cleanup job...")
+    logger.info("Running notification cleanup job...")
     
     with Session(engine) as session:
         deleted_count = crud.delete_old_notifications(session=session, days=30)
-        print(f"Notification cleanup completed. Deleted {deleted_count} old notifications")
+        logger.info(f"Notification cleanup completed. Deleted {deleted_count} old notifications")
 
 
 def should_send_today(setting: ReminderSetting) -> bool:
@@ -321,11 +327,11 @@ def run_scheduled_jobs():
     import sys
     
     if len(sys.argv) < 2:
-        print("Usage: python -m app.background_services <job_name>")
-        print("Available jobs:")
-        print("  - debt_reminders")
-        print("  - reorder_alerts")
-        print("  - notification_cleanup")
+        logger.error("Usage: python -m app.background_services <job_name>")
+        logger.error("Available jobs:")
+        logger.error("  - debt_reminders")
+        logger.error("  - reorder_alerts")
+        logger.error("  - notification_cleanup")
         return
     
     job_name = sys.argv[1]
@@ -337,7 +343,7 @@ def run_scheduled_jobs():
     elif job_name == "notification_cleanup":
         cleanup_old_notifications()
     else:
-        print(f"Unknown job: {job_name}")
+        logger.error(f"Unknown job: {job_name}")
 
 
 if __name__ == "__main__":

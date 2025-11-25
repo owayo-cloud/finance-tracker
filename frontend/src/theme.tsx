@@ -27,7 +27,23 @@ export const system = createSystem(defaultConfig, {
     tokens: {
       colors: {
         ui: {
-          main: { value: "#009688" },
+          main: { value: "#14b8a6" },
+          "main.hover": { value: "#0d9488" },
+          "main.active": { value: "#0f766e" },
+          "main.light": { value: "#5eead4" },
+          "main.dark": { value: "#134e4a" },
+        },
+        // Primary brand colors (Teal/Cyan theme)
+        brand: {
+          primary: { value: "#14b8a6" },
+          "primary.hover": { value: "#0d9488" },
+          "primary.active": { value: "#0f766e" },
+          "primary.light": { value: "#5eead4" },
+          "primary.dark": { value: "#134e4a" },
+          secondary: { value: "#60a5fa" },
+          "secondary.hover": { value: "#3b82f6" },
+          accent: { value: "#a855f7" },
+          "accent.hover": { value: "#9333ea" },
         },
       },
     },
@@ -40,6 +56,129 @@ export const system = createSystem(defaultConfig, {
               _light: "{colors.gray.50}",
               _dark: "{colors.gray.900}",
             },
+          },
+        },
+        // Primary brand color tokens
+        "brand.primary": {
+          value: {
+            base: "#14b8a6",
+            _light: "#14b8a6",
+            _dark: "#14b8a6",
+          },
+        },
+        "brand.primary.hover": {
+          value: {
+            base: "#0d9488",
+            _light: "#0d9488",
+            _dark: "#0d9488",
+          },
+        },
+        "brand.primary.active": {
+          value: {
+            base: "#0f766e",
+            _light: "#0f766e",
+            _dark: "#0f766e",
+          },
+        },
+        // Button colors
+        "button.primary": {
+          value: {
+            base: "#14b8a6",
+            _light: "#14b8a6",
+            _dark: "#14b8a6",
+          },
+        },
+        "button.primary.hover": {
+          value: {
+            base: "#0d9488",
+            _light: "#0d9488",
+            _dark: "#0d9488",
+          },
+        },
+        "button.success": {
+          value: {
+            base: "#22c55e",
+            _light: "#22c55e",
+            _dark: "#22c55e",
+          },
+        },
+        "button.success.hover": {
+          value: {
+            base: "#16a34a",
+            _light: "#16a34a",
+            _dark: "#16a34a",
+          },
+        },
+        "button.danger": {
+          value: {
+            base: "#ef4444",
+            _light: "#ef4444",
+            _dark: "#ef4444",
+          },
+        },
+        "button.danger.hover": {
+          value: {
+            base: "#dc2626",
+            _light: "#dc2626",
+            _dark: "#dc2626",
+          },
+        },
+        "button.warning": {
+          value: {
+            base: "#f59e0b",
+            _light: "#f59e0b",
+            _dark: "#f59e0b",
+          },
+        },
+        "button.warning.hover": {
+          value: {
+            base: "#d97706",
+            _light: "#d97706",
+            _dark: "#d97706",
+          },
+        },
+        // Gradient colors
+        "gradient.primary": {
+          value: {
+            base: "linear-gradient(120deg, #14b8a6 0%, #60a5fa 60%, #a855f7 100%)",
+            _light: "linear-gradient(120deg, #14b8a6 0%, #60a5fa 60%, #a855f7 100%)",
+            _dark: "linear-gradient(120deg, #14b8a6 0%, #60a5fa 60%, #a855f7 100%)",
+          },
+        },
+        "gradient.primary.hover": {
+          value: {
+            base: "linear-gradient(120deg, #0d9488 0%, #3b82f6 60%, #9333ea 100%)",
+            _light: "linear-gradient(120deg, #0d9488 0%, #3b82f6 60%, #9333ea 100%)",
+            _dark: "linear-gradient(120deg, #0d9488 0%, #3b82f6 60%, #9333ea 100%)",
+          },
+        },
+        "gradient.canvas": {
+          value: {
+            base: "linear-gradient(135deg, #0f172a 0%, #111827 40%, #1f1b2e 100%)",
+            _light: "linear-gradient(135deg, #f8fafc 0%, #dbeafe 45%, #ede9fe 100%)",
+            _dark: "linear-gradient(135deg, #0f172a 0%, #111827 40%, #1f1b2e 100%)",
+          },
+        },
+        // Text colors for brand
+        "text.brand": {
+          value: {
+            base: "#14b8a6",
+            _light: "#14b8a6",
+            _dark: "#14b8a6",
+          },
+        },
+        "text.link": {
+          value: {
+            base: "#60a5fa",
+            _light: "#2563eb",
+            _dark: "#60a5fa",
+          },
+        },
+        "text.muted": {
+          value: {
+            base: "#9ca3af",
+            _light: "#6b7280",
+            _dark: "#9ca3af",
           },
         },
         // Text colors
@@ -114,6 +253,20 @@ export const system = createSystem(defaultConfig, {
             base: "rgba(255, 255, 255, 0.1)",
             _light: "#e5e7eb",
             _dark: "rgba(255, 255, 255, 0.1)",
+          },
+        },
+        "input.focus.border": {
+          value: {
+            base: "#14b8a6",
+            _light: "#14b8a6",
+            _dark: "#14b8a6",
+          },
+        },
+        "input.focus.shadow": {
+          value: {
+            base: "0 0 0 1px #14b8a6",
+            _light: "0 0 0 1px #14b8a6",
+            _dark: "0 0 0 1px #14b8a6",
           },
         },
         // Table colors

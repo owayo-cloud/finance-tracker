@@ -82,7 +82,6 @@ services:
             - .venv
         - path: ./backend/pyproject.toml
           action: rebuild
-    # TODO: remove once coverage is done locally
     volumes:
       - ./backend:/app
       - ./backend/htmlcov:/app/htmlcov

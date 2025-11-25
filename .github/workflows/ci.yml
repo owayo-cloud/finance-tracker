@@ -97,7 +97,12 @@ jobs:
       - name: Install smokeshow
         run: pip install smokeshow
       - name: Publish preview link
-        run: smokeshow upload backend/htmlcov
+        run: |
+          if [ -z "$SMOKESHOW_AUTH_KEY" ]; then
+            echo "SMOKESHOW_AUTH_KEY not set, skipping coverage upload"
+            exit 0
+          fi
+          smokeshow upload backend/htmlcov
         env:
           SMOKESHOW_GITHUB_STATUS_DESCRIPTION: Coverage {coverage-percentage}
           SMOKESHOW_GITHUB_COVERAGE_THRESHOLD: 90

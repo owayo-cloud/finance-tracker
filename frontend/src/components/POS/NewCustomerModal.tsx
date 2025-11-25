@@ -63,7 +63,7 @@ export function NewCustomerModal({
       balance: 0,
     },
   })
-
+  
   const onSubmit: SubmitHandler<NewCustomerForm> = async (data) => {
     try {
       setIsSubmitting(true)

@@ -29,7 +29,7 @@ export const usePageVisits = () => {
 
       localStorage.setItem(VISIT_TRACKING_KEY, JSON.stringify(visits))
     } catch (error) {
-      console.error("Error tracking page visit:", error)
+      // Failed to track page visit - silently continue
     }
   }
 
@@ -40,7 +40,6 @@ export const usePageVisits = () => {
       const stored = localStorage.getItem(VISIT_TRACKING_KEY)
       return stored ? JSON.parse(stored) : {}
     } catch (error) {
-      console.error("Error getting page visits:", error)
       return {}
     }
   }
@@ -87,7 +86,7 @@ export const useTrackPageVisit = (path: string) => {
 
         localStorage.setItem(VISIT_TRACKING_KEY, JSON.stringify(visits))
       } catch (error) {
-        console.error("Error tracking page visit:", error)
+        // Failed to track page visit - silently continue
       }
     }
   }, [path])

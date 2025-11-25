@@ -758,12 +758,12 @@ function Sales() {
                 }, 100)
               }
             }}
-            bg="#14b8a6"
+            bg="brand.primary"
             color="white"
             borderRadius="full"
             size="lg"
             boxShadow="lg"
-            _hover={{ bg: "#0d9488" }}
+            _hover={{ bg: "brand.primary.hover" }}
           >
             {isCustomerPanelOpen ? "Hide Customer" : "Show Customer"}
           </Button>
@@ -771,7 +771,7 @@ function Sales() {
       </Box>
                     
       {/* Footer */}
-      <Box py={2} textAlign="right" px={{ base: 4, md: 6 }} fontSize="xs" color={{ base: "#9ca3af", _light: "#6b7280" }}>
+      <Box py={2} textAlign="right" px={{ base: 4, md: 6 }} fontSize="xs" color="text.muted">
         ©Anchor Core : Developed by NBS
           </Box>
 

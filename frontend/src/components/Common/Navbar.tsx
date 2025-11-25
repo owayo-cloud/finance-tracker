@@ -28,7 +28,7 @@ function Navbar({ onMenuClick, sidebarCollapsed = false, isPOSMode = false }: Na
         justify="space-between"
         position="sticky"
         align="center"
-        bg={{ base: "#1a1d29", _light: "#ffffff" }}
+        bg="bg.canvas"
         w="100%"
         top={0}
         px={4}
@@ -42,7 +42,7 @@ function Navbar({ onMenuClick, sidebarCollapsed = false, isPOSMode = false }: Na
           <IconButton
             variant="ghost"
             aria-label="Menu"
-            color={{ base: "#ffffff", _light: "#1a1d29" }}
+            color="text.primary"
             _hover={{ bg: { base: "rgba(255, 255, 255, 0.1)", _light: "rgba(0, 0, 0, 0.05)" } }}
             size="sm"
             onClick={onMenuClick}
@@ -107,7 +107,7 @@ function Navbar({ onMenuClick, sidebarCollapsed = false, isPOSMode = false }: Na
         justify="space-between"
         position="sticky"
         align="center"
-        bg={{ base: "#1a1d29", _light: "#ffffff" }}
+        bg="bg.canvas"
         w="100%"
         top={0}
         px={isPOSMode ? 4 : 6}
@@ -139,7 +139,7 @@ function Navbar({ onMenuClick, sidebarCollapsed = false, isPOSMode = false }: Na
                 <Text 
                   fontSize={isPOSMode ? "sm" : (sidebarCollapsed ? "xs" : "sm")}
                   fontWeight="800" 
-                  color={{ base: "#14b8a6", _light: "#0d9488" }}
+                  color="brand.primary"
                   letterSpacing="0px"
                   lineHeight="1"
                 >
@@ -148,7 +148,7 @@ function Navbar({ onMenuClick, sidebarCollapsed = false, isPOSMode = false }: Na
                 <Text 
                   fontSize={isPOSMode ? "sm" : (sidebarCollapsed ? "xs" : "sm")}
                   fontWeight="800" 
-                  color={{ base: "#60a5fa", _light: "#3b82f6" }}
+                  color="brand.secondary"
                   letterSpacing="0px"
                   lineHeight="1"
                 >
@@ -157,7 +157,7 @@ function Navbar({ onMenuClick, sidebarCollapsed = false, isPOSMode = false }: Na
                 <Text 
                   fontSize={isPOSMode ? "sm" : (sidebarCollapsed ? "xs" : "sm")}
                   fontWeight="800" 
-                  color={{ base: "#a855f7", _light: "#9333ea" }}
+                  color="brand.accent"
                   letterSpacing="0px"
                   lineHeight="1"
                 >
@@ -180,7 +180,7 @@ function Navbar({ onMenuClick, sidebarCollapsed = false, isPOSMode = false }: Na
                   <Text 
                     fontSize="lg" 
                     fontWeight="700" 
-                    color={{ base: "#14b8a6", _light: "#0d9488" }}
+                    color="brand.primary"
                     letterSpacing="0.5px"
                   >
                     W
@@ -188,7 +188,7 @@ function Navbar({ onMenuClick, sidebarCollapsed = false, isPOSMode = false }: Na
                   <Text 
                     fontSize="lg" 
                     fontWeight="700" 
-                    color={{ base: "#ffffff", _light: "#1a1d29" }}
+                    color="text.primary"
                     letterSpacing="0.5px"
                   >
                     ise
@@ -196,7 +196,7 @@ function Navbar({ onMenuClick, sidebarCollapsed = false, isPOSMode = false }: Na
                   <Text 
                     fontSize="lg" 
                     fontWeight="700" 
-                    color={{ base: "#60a5fa", _light: "#3b82f6" }}
+                    color="brand.secondary"
                     letterSpacing="0.5px"
                   >
                     M
@@ -204,7 +204,7 @@ function Navbar({ onMenuClick, sidebarCollapsed = false, isPOSMode = false }: Na
                   <Text 
                     fontSize="lg" 
                     fontWeight="700" 
-                    color={{ base: "#ffffff", _light: "#1a1d29" }}
+                    color="text.primary"
                     letterSpacing="0.5px"
                   >
                     an
@@ -212,7 +212,7 @@ function Navbar({ onMenuClick, sidebarCollapsed = false, isPOSMode = false }: Na
                   <Text 
                     fontSize="lg" 
                     fontWeight="700" 
-                    color={{ base: "#a855f7", _light: "#9333ea" }}
+                    color="brand.accent"
                     letterSpacing="0.5px"
                   >
                     P
@@ -220,7 +220,7 @@ function Navbar({ onMenuClick, sidebarCollapsed = false, isPOSMode = false }: Na
                   <Text 
                     fontSize="lg" 
                     fontWeight="700" 
-                    color={{ base: "#ffffff", _light: "#1a1d29" }}
+                    color="text.primary"
                     letterSpacing="0.5px"
                   >
                     alace
@@ -229,7 +229,7 @@ function Navbar({ onMenuClick, sidebarCollapsed = false, isPOSMode = false }: Na
                   <Text 
                     fontSize="xs" 
                     fontWeight="500" 
-                    color={{ base: "#9ca3af", _light: "#6b7280" }} 
+                    color="text.muted" 
                     letterSpacing="0.3px"
                     textTransform="uppercase"
                   >
@@ -262,7 +262,7 @@ function Navbar({ onMenuClick, sidebarCollapsed = false, isPOSMode = false }: Na
             border="1px solid"
             borderColor={{ base: "rgba(255, 255, 255, 0.1)", _light: "#e5e7eb" }}
             borderRadius="md"
-            color={{ base: "#ffffff", _light: "#1a1d29" }}
+            color="text.primary"
             _placeholder={{ color: { base: "#6b7280", _light: "#9ca3af" } }}
             _focus={{
               borderColor: { base: "rgba(255, 255, 255, 0.2)", _light: "#14b8a6" },

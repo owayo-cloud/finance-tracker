@@ -53,7 +53,7 @@ const ChangePassword = () => {
 
   return (
     <Box maxW="md">
-      <Heading size="sm" mb={4} color={{ base: "#ffffff", _light: "#1a1d29" }}>
+      <Heading size="sm" mb={4} color="text.primary">
         Change Password
       </Heading>
       <Box
@@ -102,9 +102,9 @@ const ChangePassword = () => {
                       <Icon
                         as={FiCheck}
                         fontSize="xs"
-                        color={req.met ? "#22c55e" : { base: "#64748b", _light: "#94a3b8" }}
+                        color={req.met ? "button.success" : "text.muted"}
                       />
-                      <Text fontSize="xs" color={{ base: "#9ca3af", _light: "#6b7280" }}>
+                      <Text fontSize="xs" color="text.muted">
                         {req.text}
                       </Text>
                     </HStack>

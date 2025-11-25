@@ -173,7 +173,7 @@ export function NewCustomerModal({
             <DialogTitle>New Customer (Credit Account)</DialogTitle>
           </DialogHeader>
           <DialogBody>
-            <Text mb={4} color={{ base: "#9ca3af", _light: "#6b7280" }} fontSize="sm">
+            <Text mb={4} color="text.muted" fontSize="sm">
               Create a new credit customer account. This customer will be able to make purchases on credit.
             </Text>
             <VStack gap={4}>
@@ -192,10 +192,10 @@ export function NewCustomerModal({
                     },
                   })}
                   placeholder="Enter customer name"
-                  bg={{ base: "#1a1d29", _light: "#ffffff" }}
-                  borderColor={{ base: "rgba(255, 255, 255, 0.1)", _light: "#e5e7eb" }}
-                  color={{ base: "#ffffff", _light: "#1a1d29" }}
-                  _focus={{ borderColor: "#14b8a6", boxShadow: "0 0 0 1px #14b8a6" }}
+                  bg="input.bg"
+                  borderColor="input.border"
+                  color="text.primary"
+                  _focus={{ borderColor: "input.focus.border", boxShadow: "input.focus.shadow" }}
                 />
               </Field>
               <Field
@@ -211,10 +211,10 @@ export function NewCustomerModal({
                     },
                   })}
                   placeholder="Enter phone number"
-                  bg={{ base: "#1a1d29", _light: "#ffffff" }}
-                  borderColor={{ base: "rgba(255, 255, 255, 0.1)", _light: "#e5e7eb" }}
-                  color={{ base: "#ffffff", _light: "#1a1d29" }}
-                  _focus={{ borderColor: "#14b8a6", boxShadow: "0 0 0 1px #14b8a6" }}
+                  bg="input.bg"
+                  borderColor="input.border"
+                  color="text.primary"
+                  _focus={{ borderColor: "input.focus.border", boxShadow: "input.focus.shadow" }}
                 />
               </Field>
               <Field
@@ -233,10 +233,10 @@ export function NewCustomerModal({
                     },
                   })}
                   placeholder="0.00"
-                  bg={{ base: "#1a1d29", _light: "#ffffff" }}
-                  borderColor={{ base: "rgba(255, 255, 255, 0.1)", _light: "#e5e7eb" }}
-                  color={{ base: "#ffffff", _light: "#1a1d29" }}
-                  _focus={{ borderColor: "#14b8a6", boxShadow: "0 0 0 1px #14b8a6" }}
+                  bg="input.bg"
+                  borderColor="input.border"
+                  color="text.primary"
+                  _focus={{ borderColor: "input.focus.border", boxShadow: "input.focus.shadow" }}
                 />
               </Field>
             </VStack>
@@ -246,9 +246,9 @@ export function NewCustomerModal({
               <Button variant="outline" onClick={handleClose}>Cancel</Button>
               <Button
                 type="submit"
-                bg="#14b8a6"
+                bg="brand.primary"
                 color="white"
-                _hover={{ bg: "#0d9488" }}
+                _hover={{ bg: "brand.primary.hover" }}
                 disabled={!isValid || isSubmitting}
                 loading={isSubmitting}
               >

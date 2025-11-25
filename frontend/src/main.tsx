@@ -28,9 +28,6 @@ const handleApiError = (error: Error) => {
       // Clear authentication state
       localStorage.removeItem("access_token")
       
-      // Show user-friendly message before redirect
-      console.warn("Authentication error:", errorMessage)
-      
       // Redirect to login page
       window.location.href = "/login"
       return
@@ -53,10 +50,7 @@ const handleApiError = (error: Error) => {
         localStorage.removeItem("access_token")
         window.location.href = "/login"
       } else {
-        // For genuine permission issues, log the error
-        console.error("Permission denied:", errorMessage)
-        
-        // Optionally redirect to home or show a message
+        // For genuine permission issues, optionally redirect to home or show a message
         // For now, we'll let the component handle displaying the error
         // but we could redirect to home if needed:
         // window.location.href = "/"

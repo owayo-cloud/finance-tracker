@@ -2049,7 +2049,7 @@
           "sales"
         ],
         "summary": "Create Sale",
-        "description": "Create a new sale and update product stock.\nThis is an atomic operation - both sale creation and stock update happen together.\n\nBusiness Rules:\n- Product must exist and be active\n- Product must have sufficient stock (real-time check)\n- Stock is automatically decremented\n- Sale amount is calculated from product selling price \u00d7 quantity\n- Each sale is tracked to the cashier who created it (current_user)",
+        "description": "Create a new sale and update product stock.\nThis is an atomic operation - both sale creation and stock update happen together.\n\nBusiness Rules:\n- Till must be open (POS lock)\n- Product must exist and be active\n- Product must have sufficient stock (real-time check)\n- Stock is automatically decremented\n- Sale amount is calculated from product selling price \u00d7 quantity\n- Each sale is tracked to the cashier who created it (current_user)",
         "operationId": "sales-create_sale",
         "security": [
           {
@@ -2247,7 +2247,7 @@
           "sales"
         ],
         "summary": "Create Sale With Multiple Payments",
-        "description": "Create a sale with multiple payment methods.\nThis allows splitting a single sale across multiple payment methods (e.g., cash + MPESA).\n\nBusiness Rules:\n- Product must exist and be active\n- Product must have sufficient stock\n- Sum of all payment amounts must equal total_amount\n- Each payment can have an optional reference number\n- Sale is attributed to the currently authenticated user (current_user)",
+        "description": "Create a sale with multiple payment methods.\nThis allows splitting a single sale across multiple payment methods (e.g., cash + MPESA).\n\nBusiness Rules:\n- Till must be open (POS lock)\n- Product must exist and be active\n- Product must have sufficient stock\n- Sum of all payment amounts must equal total_amount\n- Each payment can have an optional reference number\n- Sale is attributed to the currently authenticated user (current_user)",
         "operationId": "sales-create_sale_with_multiple_payments",
         "requestBody": {
           "content": {
@@ -6627,6 +6627,462 @@
         }
       }
     },
+    "/api/v1/till/open": {
+      "post": {
+        "tags": [
+          "till"
+        ],
+        "summary": "Open Till",
+        "description": "Open a new till shift.\n- Cashiers must open till before making sales\n- Shift type alternates (Day/Night)\n- Only one till can be open at a time",
+        "operationId": "till-open_till",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TillShiftCreate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TillShiftPublic"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ]
+      }
+    },
+    "/api/v1/till/current": {
+      "get": {
+        "tags": [
+          "till"
+        ],
+        "summary": "Get Current Till",
+        "description": "Get the currently open till shift",
+        "operationId": "till-get_current_till",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TillShiftPublic"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ]
+      }
+    },
+    "/api/v1/till/status": {
+      "get": {
+        "tags": [
+          "till"
+        ],
+        "summary": "Get Till Status",
+        "description": "Check if till is open (for POS lock)",
+        "operationId": "till-get_till_status",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "type": "object",
+                  "title": "Response Till-Get Till Status"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ]
+      }
+    },
+    "/api/v1/till/close": {
+      "post": {
+        "tags": [
+          "till"
+        ],
+        "summary": "Close Till",
+        "description": "Close the current till shift.\n- Only the cashier who opened it can close it (unless admin)\n- Calculates system counts automatically",
+        "operationId": "till-close_till",
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "closing_cash_float",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "string",
+                  "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$"
+                }
+              ],
+              "description": "Closing cash float amount",
+              "title": "Closing Cash Float"
+            },
+            "description": "Closing cash float amount"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TillShiftPublic"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/till/system-counts": {
+      "get": {
+        "tags": [
+          "till"
+        ],
+        "summary": "Get System Counts",
+        "description": "Get system counts (auto-calculated) for the current open shift.\nReturns amounts by payment method based on recorded sales.",
+        "operationId": "till-get_system_counts",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "type": "object",
+                  "title": "Response Till-Get System Counts"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ]
+      }
+    },
+    "/api/v1/till/reconcile": {
+      "post": {
+        "tags": [
+          "till"
+        ],
+        "summary": "Reconcile Shift",
+        "description": "Reconcile a closed shift.\n- Creates shift reconciliation record\n- Records payment method reconciliations\n- Calculates variances\n- Creates cashier variance record if any variance exists",
+        "operationId": "till-reconcile_shift",
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "notes",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Notes"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": true,
+                "title": "Physical Counts"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true,
+                  "title": "Response Till-Reconcile Shift"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/till/variances": {
+      "get": {
+        "tags": [
+          "till"
+        ],
+        "summary": "Get Cashier Variances",
+        "description": "Get cashier variance report.\nShows all variances (shortages and overages) by cashier.",
+        "operationId": "till-get_cashier_variances",
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "skip",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 0,
+              "default": 0,
+              "title": "Skip"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 1000,
+              "default": 100,
+              "title": "Limit"
+            }
+          },
+          {
+            "name": "cashier_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Filter by cashier ID",
+              "title": "Cashier Id"
+            },
+            "description": "Filter by cashier ID"
+          },
+          {
+            "name": "start_date",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "date"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Filter from this date",
+              "title": "Start Date"
+            },
+            "description": "Filter from this date"
+          },
+          {
+            "name": "end_date",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "date"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Filter until this date",
+              "title": "End Date"
+            },
+            "description": "Filter until this date"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CashierVariancesPublic"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/till": {
+      "get": {
+        "tags": [
+          "till"
+        ],
+        "summary": "Get Till Shifts",
+        "description": "Get list of till shifts",
+        "operationId": "till-get_till_shifts",
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "skip",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 0,
+              "default": 0,
+              "title": "Skip"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 1000,
+              "default": 100,
+              "title": "Limit"
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Filter by status: open, closed, reconciled",
+              "title": "Status"
+            },
+            "description": "Filter by status: open, closed, reconciled"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TillShiftsPublic"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/private/users/": {
       "post": {
         "tags": [
@@ -7123,6 +7579,117 @@
         ],
         "title": "CashierBreakdown"
       },
+      "CashierVariancePublic": {
+        "properties": {
+          "till_shift_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Till Shift Id"
+          },
+          "cashier_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Cashier Id"
+          },
+          "total_variance": {
+            "type": "string",
+            "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d{0,2}0*$",
+            "title": "Total Variance"
+          },
+          "variance_type": {
+            "type": "string",
+            "maxLength": 20,
+            "title": "Variance Type"
+          },
+          "notes": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 2000
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Notes"
+          },
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "cashier_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Cashier Name"
+          },
+          "shift_type": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Shift Type"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "till_shift_id",
+          "cashier_id",
+          "total_variance",
+          "variance_type",
+          "id",
+          "created_at"
+        ],
+        "title": "CashierVariancePublic"
+      },
+      "CashierVariancesPublic": {
+        "properties": {
+          "data": {
+            "items": {
+              "$ref": "#/components/schemas/CashierVariancePublic"
+            },
+            "type": "array",
+            "title": "Data"
+          },
+          "count": {
+            "type": "integer",
+            "title": "Count"
+          },
+          "total_shortage": {
+            "type": "string",
+            "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d{0,2}0*$",
+            "title": "Total Shortage",
+            "default": "0"
+          },
+          "total_overage": {
+            "type": "string",
+            "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d{0,2}0*$",
+            "title": "Total Overage",
+            "default": "0"
+          }
+        },
+        "type": "object",
+        "required": [
+          "data",
+          "count"
+        ],
+        "title": "CashierVariancesPublic"
+      },
       "ColumnMappingRequest": {
         "properties": {
           "session_id": {
@@ -7394,22 +7961,16 @@
             "title": "Amount Paid",
             "default": "0"
           },
-          "balance": {
+          "debt_date": {
             "anyOf": [
               {
-                "type": "number",
-                "minimum": 0.0
+                "type": "string",
+                "format": "date-time"
               },
               {
-                "type": "string",
-                "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d{0,2}0*$"
+                "type": "null"
               }
             ],
-            "title": "Balance"
-          },
-          "debt_date": {
-            "type": "string",
-            "format": "date-time",
             "title": "Debt Date"
           },
           "due_date": {
@@ -7423,12 +7984,6 @@
               }
             ],
             "title": "Due Date"
-          },
-          "status": {
-            "type": "string",
-            "maxLength": 50,
-            "title": "Status",
-            "default": "pending"
           },
           "notes": {
             "anyOf": [
@@ -7446,10 +8001,10 @@
         "type": "object",
         "required": [
           "customer_name",
-          "amount",
-          "balance"
+          "amount"
         ],
-        "title": "DebtCreate"
+        "title": "DebtCreate",
+        "description": "Create a new debt. Balance is calculated automatically from amount - amount_paid."
       },
       "DebtPaymentCreate": {
         "properties": {
@@ -7662,6 +8217,16 @@
             "type": "string",
             "format": "uuid",
             "title": "Id"
+          },
+          "sale": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/SalePublic"
+              },
+              {
+                "type": "null"
+              }
+            ]
           }
         },
         "type": "object",
@@ -13096,6 +13661,222 @@
           "count"
         ],
         "title": "SuppliersPublic"
+      },
+      "TillShiftCreate": {
+        "properties": {
+          "shift_type": {
+            "type": "string",
+            "maxLength": 20,
+            "title": "Shift Type"
+          },
+          "opening_cash_float": {
+            "anyOf": [
+              {
+                "type": "number",
+                "minimum": 0.0
+              },
+              {
+                "type": "string",
+                "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d{0,2}0*$"
+              }
+            ],
+            "title": "Opening Cash Float"
+          },
+          "opening_balance": {
+            "anyOf": [
+              {
+                "type": "number",
+                "minimum": 0.0
+              },
+              {
+                "type": "string",
+                "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d{0,2}0*$"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Opening Balance"
+          },
+          "notes": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Notes"
+          }
+        },
+        "type": "object",
+        "required": [
+          "shift_type",
+          "opening_cash_float"
+        ],
+        "title": "TillShiftCreate",
+        "description": "Create a new till shift"
+      },
+      "TillShiftPublic": {
+        "properties": {
+          "shift_type": {
+            "type": "string",
+            "maxLength": 20,
+            "title": "Shift Type"
+          },
+          "opening_cash_float": {
+            "type": "string",
+            "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d{0,2}0*$",
+            "title": "Opening Cash Float"
+          },
+          "opening_balance": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d{0,2}0*$"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Opening Balance"
+          },
+          "opening_time": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Opening Time"
+          },
+          "closing_time": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Closing Time"
+          },
+          "closing_cash_float": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d{0,2}0*$"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Closing Cash Float"
+          },
+          "status": {
+            "type": "string",
+            "maxLength": 20,
+            "title": "Status",
+            "default": "open"
+          },
+          "notes": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 2000
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Notes"
+          },
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "opened_by_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Opened By Id"
+          },
+          "closed_by_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Closed By Id"
+          },
+          "opened_by_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Opened By Name"
+          },
+          "closed_by_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Closed By Name"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Updated At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "shift_type",
+          "opening_cash_float",
+          "id",
+          "opened_by_id",
+          "closed_by_id",
+          "created_at",
+          "updated_at"
+        ],
+        "title": "TillShiftPublic",
+        "description": "Public model for till shift"
+      },
+      "TillShiftsPublic": {
+        "properties": {
+          "data": {
+            "items": {
+              "$ref": "#/components/schemas/TillShiftPublic"
+            },
+            "type": "array",
+            "title": "Data"
+          },
+          "count": {
+            "type": "integer",
+            "title": "Count"
+          }
+        },
+        "type": "object",
+        "required": [
+          "data",
+          "count"
+        ],
+        "title": "TillShiftsPublic"
       },
       "Token": {
         "properties": {

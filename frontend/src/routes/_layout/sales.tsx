@@ -1,9 +1,10 @@
-import { createFileRoute } from "@tanstack/react-router"
-import { Box, Button } from "@chakra-ui/react"
+import { createFileRoute, Link } from "@tanstack/react-router"
+import { Box, Button, VStack, Heading, Text } from "@chakra-ui/react"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { useState, useMemo, useEffect } from "react"
+import { FiLock } from "react-icons/fi"
 
-import { SalesService, type ProductPublic, OpenAPI } from "../../client"
+import { SalesService, TillService, type ProductPublic, OpenAPI } from "../../client"
 import useCustomToast from "../../hooks/useCustomToast"
 import useAuth from "../../hooks/useAuth"
 import { ActionButtons } from "@/components/POS/ActionButtons"
@@ -18,6 +19,7 @@ import { CashMovementModal } from "@/components/POS/CashMovementModal"
 import { CustomerSearchModal } from "@/components/POS/CustomerSearchModal"
 import { NewCustomerModal } from "@/components/POS/NewCustomerModal"
 import { CartItem, SuspendedSale } from "@/components/POS/types"
+
 
 export const Route = createFileRoute("/_layout/sales")({
   component: Sales,
@@ -140,6 +142,35 @@ function Sales() {
     window.addEventListener("keydown", handleKeyDown)
     return () => window.removeEventListener("keydown", handleKeyDown)
   }, [selectedSaleId, suspendedSales, cart, customerName, customerTel, customerBalance, receiptDate, pricelist, remarks, showToast])
+
+  // Check till status
+  const { data: tillStatus, isLoading: isLoadingTillStatus, refetch: refetchTillStatus } = useQuery({
+    queryKey: ["till-status"],
+    queryFn: async () => {
+      try {
+        return await TillService.getTillStatus()
+      } catch (error: any) {
+        // If 404 or any error, return closed status
+        if (error?.status === 404) {
+          return { is_open: false }
+        }
+        return { is_open: false }
+      }
+    },
+    refetchInterval: 5000, // Check every 5 seconds
+  })
+
+  // Refetch till status when window regains focus (user returns from shift-reconciliation)
+  useEffect(() => {
+    const handleFocus = () => {
+      refetchTillStatus()
+    }
+    window.addEventListener("focus", handleFocus)
+    return () => window.removeEventListener("focus", handleFocus)
+  }, [refetchTillStatus])
+
+  const isTillOpen = tillStatus?.is_open === true
+  const hasNoTill = !isLoadingTillStatus && !isTillOpen
 
   // Fetch payment methods
   const { data: paymentMethods, isLoading: isLoadingPaymentMethods, error: paymentMethodsError } = useQuery({
@@ -611,7 +642,14 @@ function Sales() {
   }
 
   return (
-    <Box h="100%" bg="bg.canvas" display="flex" flexDirection="column" overflow={{ base: "auto", lg: "hidden" }}>
+    <Box h="100%" bg="bg.canvas" display="flex" flexDirection="column" overflow={{ base: "auto", lg: "hidden" }} position="relative">
+      <Box
+        filter={hasNoTill ? "blur(4px)" : "none"}
+        pointerEvents={hasNoTill ? "none" : "auto"}
+        flex={1}
+        display="flex"
+        flexDirection="column"
+      >
       <ActionButtons
         onLogout={logout}
         onReset={resetSale}
@@ -834,6 +872,49 @@ function Sales() {
         onClose={() => setIsNewCustomerModalOpen(false)}
         onSave={handleNewCustomerSave}
       />
-          </Box>
+      </Box>
+
+      {/* No Till Overlay */}
+      {hasNoTill && (
+        <Box
+          position="fixed"
+          top="50%"
+          left="50%"
+          transform="translate(-50%, -50%)"
+          zIndex={1000}
+          bg="bg.surface"
+          p={8}
+          borderRadius="xl"
+          border="2px solid"
+          borderColor="border.card"
+          boxShadow="2xl"
+          textAlign="center"
+          maxW="500px"
+          w="90%"
+        >
+          <VStack gap={4}>
+            <FiLock size={48} color="var(--chakra-colors-text-secondary)" />
+            <Heading size="lg" color={{ base: "#ffffff", _light: "#111827" }}>
+              Till Not Open
+            </Heading>
+            <Text color={{ base: "#9ca3af", _light: "#6b7280" }} fontSize="md">
+              You need to open a till before you can process sales.
+            </Text>
+            <Link to="/shift-reconciliation">
+              <Button
+                bg={{ base: "#009688", _light: "#009688" }}
+                color="white"
+                _hover={{ bg: { base: "#00796b", _light: "#00796b" } }}
+                size="lg"
+                mt={2}
+              >
+                <FiLock style={{ marginRight: "8px" }} />
+                Open Till
+              </Button>
+            </Link>
+          </VStack>
+        </Box>
+      )}
+    </Box>
   )
 }

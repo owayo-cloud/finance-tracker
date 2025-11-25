@@ -133,10 +133,10 @@ export function CashMovementModal({
                   onValueChange={(e) => setValue("type", e.value[0] as "in" | "out", { shouldValidate: true })}
                 >
                   <SelectTrigger
-                    bg={{ base: "#1a1d29", _light: "#ffffff" }}
-                    borderColor={{ base: "rgba(255, 255, 255, 0.1)", _light: "#e5e7eb" }}
-                    color={{ base: "#ffffff", _light: "#1a1d29" }}
-                    _focus={{ borderColor: "#14b8a6", boxShadow: "0 0 0 1px #14b8a6" }}
+                    bg="input.bg"
+                    borderColor="input.border"
+                    color="text.primary"
+                    _focus={{ borderColor: "input.focus.border", boxShadow: "input.focus.shadow" }}
                   >
                     <SelectValueText placeholder="Select type" />
                   </SelectTrigger>
@@ -220,9 +220,9 @@ export function CashMovementModal({
               <DialogActionTrigger asChild>
                 <Button
                   type="submit"
-                  bg="#14b8a6"
+                  bg="brand.primary"
                   color="white"
-                  _hover={{ bg: "#0d9488" }}
+                  _hover={{ bg: "brand.primary.hover" }}
                   disabled={!isValid || isSubmitting}
                   loading={isSubmitting}
                 >

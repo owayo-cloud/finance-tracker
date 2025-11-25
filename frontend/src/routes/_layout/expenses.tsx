@@ -148,19 +148,19 @@ function Expenses() {
           <VStack align="start" gap={1}>
             <Heading
               size="lg"
-              color={{ base: "#e5e7eb", _light: "#111827" }}
+              color="text.primary"
             >
               Expenses
             </Heading>
-            <Text color={{ base: "#9ca3af", _light: "#6b7280" }} fontSize="sm">
+            <Text color="text.muted" fontSize="sm">
               Track and manage your business expenses
             </Text>
           </VStack>
           <Button
             onClick={() => setIsAddDialogOpen(true)}
-            bg={{ base: "#009688", _light: "#009688" }}
+            bg="brand.primary"
             color="white"
-            _hover={{ bg: { base: "#00796b", _light: "#00796b" } }}
+            _hover={{ bg: "brand.primary.hover" }}
           >
             <FiPlus style={{ marginRight: "8px" }} />
             Add Expense
@@ -351,7 +351,7 @@ function Expenses() {
             <Heading size="lg" color={{ base: "#ffffff", _light: "#111827" }}>
               No Expense Categories
             </Heading>
-            <Text color={{ base: "#9ca3af", _light: "#6b7280" }} fontSize="md">
+            <Text color="text.muted" fontSize="md">
               You need to create at least one expense category before you can add expenses.
             </Text>
             <Link to="/expense-categories">

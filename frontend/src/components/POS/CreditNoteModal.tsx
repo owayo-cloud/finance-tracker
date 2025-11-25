@@ -107,7 +107,6 @@ export function CreditNoteModal({
       onClose()
       onSuccess?.()
     } catch (error: any) {
-      console.error("Credit note error:", error)
       const errorMessage = error?.message || error?.detail || "Failed to create credit note"
       showErrorToast(errorMessage)
       handleError(error as ApiError)

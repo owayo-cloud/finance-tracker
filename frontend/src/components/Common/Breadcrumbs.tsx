@@ -80,9 +80,9 @@ function Breadcrumbs() {
                   as="span"
                   display="inline-flex"
                   alignItems="center"
-                  color={{ base: "#60a5fa", _light: "#2563eb" }}
+                  color="text.link"
                   _hover={{
-                    color: { base: "#93c5fd", _light: "#3b82f6" },
+                    color: "brand.secondary",
                   }}
                   transition="color 0.2s"
                 >
@@ -95,7 +95,7 @@ function Breadcrumbs() {
                 {isLast ? (
                   <Text
                     fontWeight="600"
-                    color={{ base: "#e5e7eb", _light: "#111827" }}
+                    color="text.primary"
                   >
                     {item.label}
                   </Text>

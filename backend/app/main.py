@@ -1,7 +1,7 @@
 import logging
 import time
 from contextlib import asynccontextmanager
-from typing import Any, Callable
+from typing import Any, Callable, cast
 
 from fastapi import FastAPI, Request
 from fastapi.routing import APIRoute
@@ -54,7 +54,7 @@ class LoggingMiddleware(BaseHTTPMiddleware):
                 f"Time: {process_time:.3f}s"
             )
             
-            return response
+            return cast(Response, response)
         except Exception as e:
             process_time = time.time() - start_time
             logger.error(

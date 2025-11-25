@@ -30,7 +30,7 @@ const ModuleCard = ({
       _hover={{
         shadow: disabled ? "none" : "md",
         transform: disabled ? "none" : "translateY(-2px)",
-        borderColor: disabled ? "border.card" : { base: "rgba(59, 130, 246, 0.4)", _light: "#3b82f6" },
+        borderColor: disabled ? "border.card" : "brand.secondary",
         bg: disabled ? undefined : "bg.elevated",
       }}
       transition="all 0.2s"
@@ -69,7 +69,7 @@ const ModuleCard = ({
             </Text>
             <Text 
               fontSize="sm"
-              color={{ base: "gray.400", _light: "gray.600" }}
+              color="text.muted"
               lineClamp={1}
             >
               {description}

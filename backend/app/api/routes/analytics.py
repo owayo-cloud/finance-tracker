@@ -250,7 +250,7 @@ def get_balance_sheet(
     if end_date:
         expense_conditions.append(cast(Expense.expense_date, Date) <= end_date)
     
-    expense_query = select(func.sum(Expense.amount))
+    expense_query: Any = select(func.sum(Expense.amount))
     if expense_conditions:
         expense_query = expense_query.where(and_(*expense_conditions))
     
@@ -331,7 +331,7 @@ def get_dashboard_stats(
     yesterday_revenue = yesterday_sales.total_amount
     
     # Get current month expenses
-    current_expense_query = select(func.sum(Expense.amount)).where(
+    current_expense_query: Any = select(func.sum(Expense.amount)).where(
         and_(
             cast(Expense.expense_date, Date) >= first_day_of_month,
             cast(Expense.expense_date, Date) <= today
@@ -341,7 +341,7 @@ def get_dashboard_stats(
     current_month_expenses = float(current_expense_total)
     
     # Get previous month expenses
-    previous_expense_query = select(func.sum(Expense.amount)).where(
+    previous_expense_query: Any = select(func.sum(Expense.amount)).where(
         and_(
             cast(Expense.expense_date, Date) >= first_day_of_last_month,
             cast(Expense.expense_date, Date) <= last_day_of_last_month

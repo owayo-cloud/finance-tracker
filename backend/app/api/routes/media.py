@@ -8,8 +8,10 @@ from sqlmodel import select
 
 from app.api.deps import AdminUser, SessionDep
 from app.core.config import settings
+from app.core.logging_config import get_logger
 from app.models import Media, MediaCreate, MediaPublic
 
+logger = get_logger(__name__)
 
 router = APIRouter(prefix="/media", tags=["media"])
 
@@ -154,7 +156,7 @@ def delete_media(
             os.remove(file_path)
         except Exception as e:
             # Log error but continue with database deletion
-            print(f"Failed to delete file: {e}")
+            logger.warning(f"Failed to delete file: {e}")
     
     # Delete from database
     session.delete(media)

@@ -8,12 +8,14 @@ from sqlmodel import func, select, and_, or_, col
 from sqlalchemy.orm import selectinload
 
 from app.api.deps import AdminUser, CurrentUser, SessionDep
+from app.core.logging_config import get_logger
 from app.models import (
     Debt, DebtCreate, DebtUpdate, DebtPublic, DebtsPublic,
     DebtPayment, DebtPaymentCreate, DebtPaymentPublic, DebtPaymentsPublic,
     PaymentMethod, Sale
 )
 
+logger = get_logger(__name__)
 
 router = APIRouter(prefix="/debts", tags=["debts"])
 
@@ -142,11 +144,11 @@ def create_debt(
         return debt
     except ValueError as e:
         # Handle validation errors from the model
-        print(f"[Debts API] Validation error: {str(e)}")
+        logger.warning(f"Validation error creating debt: {str(e)}")
         raise HTTPException(status_code=422, detail=f"Validation error: {str(e)}")
     except Exception as e:
         # Handle any other errors
-        print(f"[Debts API] Error creating debt: {type(e).__name__}: {str(e)}")
+        logger.error(f"Error creating debt: {type(e).__name__}: {str(e)}", exc_info=True)
         session.rollback()
         raise HTTPException(status_code=500, detail=f"Failed to create debt: {str(e)}")
 

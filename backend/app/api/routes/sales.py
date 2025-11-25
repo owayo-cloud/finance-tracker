@@ -9,6 +9,7 @@ from sqlmodel import func, select, and_, or_
 from sqlalchemy.orm import selectinload
 
 from app.api.deps import AdminUser, CurrentUser, SessionDep
+from app.core.logging_config import get_logger
 from app.models import (
     Sale, SaleCreate, SaleUpdate, SalePublic, SalesPublic,
     Product, PaymentMethod, PaymentMethodPublic, PaymentMethodsPublic,
@@ -18,6 +19,7 @@ from app.models import (
     Debt, DebtCreate
 )
 
+logger = get_logger(__name__)
 
 router = APIRouter(prefix="/sales", tags=["sales"])
 
@@ -549,7 +551,7 @@ def create_sale_with_multiple_payments(
             except Exception as e:
                 session.rollback()
                 # Don't fail the sale if debt creation fails, just log it
-                print(f"Warning: Failed to create debt record: {str(e)}")
+                logger.warning(f"Failed to create debt record: {str(e)}")
         
     except Exception as e:
         session.rollback()

@@ -1,12 +1,14 @@
 import logging
 import time
 from contextlib import asynccontextmanager
+from typing import Any, Callable
 
 from fastapi import FastAPI, Request
 from fastapi.routing import APIRoute
 from fastapi.responses import JSONResponse
 from starlette.middleware.cors import CORSMiddleware
 from starlette.middleware.base import BaseHTTPMiddleware
+from starlette.responses import Response
 
 from app.api.main import api_router
 from app.core.config import settings
@@ -24,7 +26,7 @@ def custom_generate_unique_id(route: APIRoute) -> str:
 class LoggingMiddleware(BaseHTTPMiddleware):
     """Middleware to log HTTP requests and responses"""
     
-    async def dispatch(self, request: Request, call_next):
+    async def dispatch(self, request: Request, call_next: Callable[[Request], Any]) -> Response:
         start_time = time.time()
         
         # Log request
@@ -64,7 +66,7 @@ class LoggingMiddleware(BaseHTTPMiddleware):
 
 
 @asynccontextmanager
-async def lifespan(app: FastAPI):
+async def lifespan(app: FastAPI) -> Any:
     """Lifespan context manager for startup and shutdown events"""
     # Startup
     logger.info("=" * 60)
@@ -85,7 +87,7 @@ async def lifespan(app: FastAPI):
 
 if settings.SENTRY_DSN and settings.ENVIRONMENT != "local":
     try:
-        import sentry_sdk
+        import sentry_sdk  # type: ignore[import-untyped]
         sentry_sdk.init(dsn=str(settings.SENTRY_DSN), enable_tracing=True)
         logger.info("Sentry initialized")
     except ImportError:
@@ -113,7 +115,7 @@ app.add_middleware(LoggingMiddleware)
 
 # Add global exception handler to ensure CORS headers on errors
 @app.exception_handler(Exception)
-async def global_exception_handler(request: Request, exc: Exception):
+async def global_exception_handler(request: Request, exc: Exception) -> JSONResponse:
     """Ensure CORS headers are included in error responses"""
     logger.error(f"Global exception handler: {exc}", exc_info=True)
     origin = request.headers.get("origin")

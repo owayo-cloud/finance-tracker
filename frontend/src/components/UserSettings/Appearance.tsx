@@ -23,7 +23,7 @@ const Appearance = () => {
 
   return (
     <Box maxW="md">
-      <Heading size="sm" mb={4} color={{ base: "#ffffff", _light: "#1a1d29" }}>
+      <Heading size="sm" mb={4} color="text.primary">
         Appearance
       </Heading>
       <Box
@@ -45,8 +45,8 @@ const Appearance = () => {
               return (
                 <HStack key={value} gap={3}>
                   <Radio value={value} />
-                  <Icon as={IconComponent} fontSize="md" color={{ base: "#9ca3af", _light: "#6b7280" }} />
-                  <Text fontSize="sm" color={{ base: "#ffffff", _light: "#1a1d29" }} textTransform="capitalize">
+                  <Icon as={IconComponent} fontSize="md" color="text.muted" />
+                  <Text fontSize="sm" color="text.primary" textTransform="capitalize">
                     {value === "system" ? "System" : value === "light" ? "Light Mode" : "Dark Mode"}
                   </Text>
                 </HStack>

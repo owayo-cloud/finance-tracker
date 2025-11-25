@@ -90,18 +90,19 @@ def get_customers(
         .distinct()
     )
     debt_contacts = session.exec(debt_contacts_query).all()
-    contact_map = {row.customer_name.lower().strip(): row.customer_contact for row in debt_contacts if row.customer_contact}
+    # Row objects support attribute access for selected columns
+    contact_map: dict[str, str] = {row.customer_name.lower().strip(): row.customer_contact for row in debt_contacts if row.customer_contact}  # type: ignore[attr-defined]
     
     # Process debt results
     for row in debt_results:
-        customer_name = row.customer_name
+        customer_name = row.customer_name  # type: ignore[attr-defined]
         if not customer_name:
             continue
             
         key = customer_name.lower().strip()
-        balance = float(row.total_balance or Decimal("0"))
+        balance = float(row.total_balance or Decimal("0"))  # type: ignore[attr-defined]
         contact = contact_map.get(key, "")
-        last_debt_date = row.last_debt_date
+        last_debt_date = row.last_debt_date  # type: ignore[attr-defined]
         
         customer_map[key] = CustomerSummary(
             name=customer_name,
@@ -111,7 +112,7 @@ def get_customers(
         )
     
     # Process sale results to update last sale date and add customers not in debts
-    sale_map = {row.customer_name.lower().strip(): row.last_sale_date for row in sale_results if row.customer_name}
+    sale_map: dict[str, datetime] = {row.customer_name.lower().strip(): row.last_sale_date for row in sale_results if row.customer_name}  # type: ignore[attr-defined]
     
     for key, last_sale_date in sale_map.items():
         if key in customer_map:
@@ -126,8 +127,8 @@ def get_customers(
             # Add customer from sales who doesn't have debts
             # Find the original customer name (case-sensitive)
             original_name = next(
-                (row.customer_name for row in sale_results 
-                 if row.customer_name and row.customer_name.lower().strip() == key),
+                (row.customer_name for row in sale_results  # type: ignore[attr-defined]
+                 if row.customer_name and row.customer_name.lower().strip() == key),  # type: ignore[attr-defined]
                 None
             )
             if original_name:

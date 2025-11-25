@@ -134,10 +134,10 @@ export function CustomerSearchModal({
                   placeholder="Customer/Tel"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  bg={{ base: "#1a1d29", _light: "#ffffff" }}
-                  borderColor={{ base: "rgba(255, 255, 255, 0.1)", _light: "#e5e7eb" }}
-                  color={{ base: "#ffffff", _light: "#1a1d29" }}
-                  _focus={{ borderColor: "#14b8a6", boxShadow: "0 0 0 1px #14b8a6" }}
+                  bg="input.bg"
+                  borderColor="input.border"
+                  color="text.primary"
+                  _focus={{ borderColor: "input.focus.border", boxShadow: "input.focus.shadow" }}
                   onKeyDown={(e) => {
                     if (e.key === "Enter") {
                       handleFind()
@@ -146,9 +146,9 @@ export function CustomerSearchModal({
                   flex={1}
                 />
                 <Button
-                  bg="#14b8a6"
+                  bg="brand.primary"
                   color="white"
-                  _hover={{ bg: "#0d9488" }}
+                  _hover={{ bg: "brand.primary.hover" }}
                   onClick={handleFind}
                   flexShrink={0}
                 >
@@ -164,13 +164,13 @@ export function CustomerSearchModal({
               overflowY="auto"
               overflowX="auto"
               border="1px solid"
-              borderColor={{ base: "rgba(255, 255, 255, 0.1)", _light: "#e5e7eb" }}
+              borderColor="border.default"
               borderRadius="md"
               p={4}
             >
               {filteredCustomers.length === 0 ? (
                 <Box p={8} textAlign="center">
-                  <Text color={{ base: "#9ca3af", _light: "#6b7280" }}>
+                  <Text color="text.muted">
                     {searchQuery ? "No customers found" : "No customers available"}
                   </Text>
                 </Box>
@@ -193,10 +193,10 @@ export function CustomerSearchModal({
                       <Button
                         key={`${customer.name}-${index}`}
                         onClick={() => handleSelectCustomer(customer)}
-                        bg={isNegative ? "#ef4444" : "#6366f1"}
+                        bg={isNegative ? "button.danger" : "brand.accent"}
                         color="white"
                         _hover={{ 
-                          bg: isNegative ? "#dc2626" : "#4f46e5",
+                          bg: isNegative ? "button.danger.hover" : "brand.accent.hover",
                           transform: "scale(1.02)",
                         }}
                         h="auto"

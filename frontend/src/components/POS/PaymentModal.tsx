@@ -57,8 +57,6 @@ export function PaymentModal({
   customerName,
   customerBalance = 0,
 }: PaymentModalProps) {
-  // Debug: Log customer info when modal opens
-  console.log("[PaymentModal] Props:", { customerName, customerBalance, totalAmount, isOpen })
   const [paymentAmounts, setPaymentAmounts] = useState<Record<string, number>>({})
   const [paymentRefs, setPaymentRefs] = useState<Record<string, string>>({})
   const [selectedMethods, setSelectedMethods] = useState<Record<string, boolean>>({})
@@ -91,14 +89,10 @@ export function PaymentModal({
     
     if (!hasCustomer) {
       // No customer: require full payment (allow small rounding differences)
-      const isSufficient = totalPaid >= totalAmount - 0.01
-      console.log("[PaymentModal] No customer - Full payment required:", { totalPaid, totalAmount, isSufficient })
-      return isSufficient
+      return totalPaid >= totalAmount - 0.01
     } else {
       // Customer selected: allow partial or zero payment (entire amount can be debt)
-      const isSufficient = totalPaid >= 0
-      console.log("[PaymentModal] Customer selected - Partial/zero payment allowed:", { customerName, totalPaid, totalAmount, isSufficient })
-      return isSufficient
+      return totalPaid >= 0
     }
   }, [totalPaid, totalAmount, customerName])
 

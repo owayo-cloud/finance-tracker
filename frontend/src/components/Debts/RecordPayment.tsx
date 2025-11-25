@@ -285,7 +285,6 @@ export default function RecordPayment({
               )}
 
               {/* Payment Method - Note: payment_method_id is required but not implemented in this component */}
-              {/* TODO: Add payment method selection */}
 
               {/* Notes */}
               <Box>

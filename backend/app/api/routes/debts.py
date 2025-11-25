@@ -103,9 +103,6 @@ def create_debt(
         # Calculate balance (backend always recalculates to ensure accuracy)
         balance = debt_in.amount - debt_in.amount_paid
         
-        # Debug logging
-        print(f"[Debts API] Creating debt: customer={debt_in.customer_name}, amount={debt_in.amount}, amount_paid={debt_in.amount_paid}, calculated_balance={balance}")
-        
         # Determine status
         if balance <= 0:
             status = "paid"
@@ -141,9 +138,6 @@ def create_debt(
         session.add(debt)
         session.commit()
         session.refresh(debt)
-        
-        # Debug logging
-        print(f"[Debts API] Created debt successfully: id={debt.id}, customer={debt.customer_name}, balance={debt.balance}, status={debt.status}")
         
         return debt
     except ValueError as e:

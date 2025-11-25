@@ -8,8 +8,10 @@ type OptionsType = {
   exact?: boolean
 }
 
+const usernamePlaceholder = "Username or Email"
+
 const fillForm = async (page: Page, email: string, password: string) => {
-  await page.getByPlaceholder("Email").fill(email)
+  await page.getByPlaceholder(usernamePlaceholder, { exact: true }).fill(email)
   await page.getByPlaceholder("Password", { exact: true }).fill(password)
 }
 
@@ -27,7 +29,7 @@ const verifyInput = async (
 test("Inputs are visible, empty and editable", async ({ page }) => {
   await page.goto("/login")
 
-  await verifyInput(page, "Email")
+  await verifyInput(page, usernamePlaceholder, { exact: true })
   await verifyInput(page, "Password", { exact: true })
 })
 

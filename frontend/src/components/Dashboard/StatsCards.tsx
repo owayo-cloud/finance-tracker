@@ -70,13 +70,13 @@ export function StatsCards({ isMounted }: StatsCardsProps) {
         >
           <HStack justify="space-between" mb={2} align="start">
             <VStack align="start" gap={0}>
-              <Text fontSize="xs" color={{ base: "#9ca3af", _light: "#6b7280" }} fontWeight="500" textTransform="uppercase" letterSpacing="0.5px">
+              <Text fontSize="xs" color="text.muted" fontWeight="500" textTransform="uppercase" letterSpacing="0.5px">
                 Net profit
               </Text>
               <Text 
                 fontSize="2xl" 
                 fontWeight="700"
-                color={{ base: "#ffffff", _light: "#1a1d29" }}
+                color="text.primary"
                 mt={1}
               >
                 {formatCurrency(currentNetProfit)}
@@ -84,14 +84,14 @@ export function StatsCards({ isMounted }: StatsCardsProps) {
             </VStack>
             <Icon 
               as={currentNetProfit >= 0 ? FiArrowUp : FiArrowDown} 
-              color={currentNetProfit >= 0 ? "#22c55e" : "#ef4444"} 
+              color={currentNetProfit >= 0 ? "button.success" : "button.danger"} 
               fontSize="lg" 
             />
           </HStack>
           <HStack gap={1}>
             <Text 
               fontSize="xs" 
-              color={potentialGrowthChange >= 0 ? "#22c55e" : "#ef4444"} 
+              color={potentialGrowthChange >= 0 ? "button.success" : "button.danger"} 
               fontWeight="600"
             >
               {potentialGrowthChange >= 0 ? "+" : ""}{potentialGrowthChange.toFixed(1)}%
@@ -120,13 +120,13 @@ export function StatsCards({ isMounted }: StatsCardsProps) {
         >
           <HStack justify="space-between" mb={2} align="start">
             <VStack align="start" gap={0}>
-              <Text fontSize="xs" color={{ base: "#9ca3af", _light: "#6b7280" }} fontWeight="500" textTransform="uppercase" letterSpacing="0.5px">
+              <Text fontSize="xs" color="text.muted" fontWeight="500" textTransform="uppercase" letterSpacing="0.5px">
                 Revenue current
               </Text>
               <Text 
                 fontSize="2xl" 
                 fontWeight="700"
-                color={{ base: "#ffffff", _light: "#1a1d29" }}
+                color="text.primary"
                 mt={1}
               >
                 {formatCurrency(currentMonthRevenue)}
@@ -134,14 +134,14 @@ export function StatsCards({ isMounted }: StatsCardsProps) {
             </VStack>
             <Icon 
               as={revenueChange >= 0 ? FiArrowUp : FiArrowDown} 
-              color={revenueChange >= 0 ? "#22c55e" : "#ef4444"} 
+              color={revenueChange >= 0 ? "button.success" : "button.danger"} 
               fontSize="lg" 
             />
           </HStack>
           <HStack gap={1}>
             <Text 
               fontSize="xs" 
-              color={revenueChange >= 0 ? "#22c55e" : "#ef4444"} 
+              color={revenueChange >= 0 ? "button.success" : "button.danger"} 
               fontWeight="600"
             >
               {revenueChange >= 0 ? "+" : ""}{revenueChange.toFixed(1)}%
@@ -170,13 +170,13 @@ export function StatsCards({ isMounted }: StatsCardsProps) {
         >
           <HStack justify="space-between" mb={2} align="start">
             <VStack align="start" gap={0}>
-              <Text fontSize="xs" color={{ base: "#9ca3af", _light: "#6b7280" }} fontWeight="500" textTransform="uppercase" letterSpacing="0.5px">
+              <Text fontSize="xs" color="text.muted" fontWeight="500" textTransform="uppercase" letterSpacing="0.5px">
                 Daily Income
               </Text>
               <Text 
                 fontSize="2xl" 
                 fontWeight="700"
-                color={{ base: "#ffffff", _light: "#1a1d29" }}
+                color="text.primary"
                 mt={1}
               >
                 {formatCurrency(todayRevenue)}
@@ -184,14 +184,14 @@ export function StatsCards({ isMounted }: StatsCardsProps) {
             </VStack>
             <Icon 
               as={dailyIncomeChange >= 0 ? FiArrowUp : FiArrowDown} 
-              color={dailyIncomeChange >= 0 ? "#22c55e" : "#ef4444"} 
+              color={dailyIncomeChange >= 0 ? "button.success" : "button.danger"} 
               fontSize="lg" 
             />
           </HStack>
           <HStack gap={1}>
             <Text 
               fontSize="xs" 
-              color={dailyIncomeChange >= 0 ? "#22c55e" : "#ef4444"} 
+              color={dailyIncomeChange >= 0 ? "button.success" : "button.danger"} 
               fontWeight="600"
             >
               {dailyIncomeChange >= 0 ? "+" : ""}{dailyIncomeChange.toFixed(1)}%
@@ -220,13 +220,13 @@ export function StatsCards({ isMounted }: StatsCardsProps) {
         >
           <HStack justify="space-between" mb={2} align="start">
             <VStack align="start" gap={0}>
-              <Text fontSize="xs" color={{ base: "#9ca3af", _light: "#6b7280" }} fontWeight="500" textTransform="uppercase" letterSpacing="0.5px">
+              <Text fontSize="xs" color="text.muted" fontWeight="500" textTransform="uppercase" letterSpacing="0.5px">
                 Expense current
               </Text>
               <Text 
                 fontSize="2xl" 
                 fontWeight="700"
-                color={{ base: "#ffffff", _light: "#1a1d29" }}
+                color="text.primary"
                 mt={1}
               >
                 {formatCurrency(totalExpenses)}
@@ -234,14 +234,14 @@ export function StatsCards({ isMounted }: StatsCardsProps) {
             </VStack>
             <Icon 
               as={expenseChange >= 0 ? FiArrowUp : FiArrowDown} 
-              color={expenseChange >= 0 ? "#ef4444" : "#22c55e"} 
+              color={expenseChange >= 0 ? "button.danger" : "button.success"} 
               fontSize="lg" 
             />
           </HStack>
           <HStack gap={1}>
             <Text 
               fontSize="xs" 
-              color={expenseChange >= 0 ? "#ef4444" : "#22c55e"} 
+              color={expenseChange >= 0 ? "button.danger" : "button.success"} 
               fontWeight="600"
             >
               {expenseChange >= 0 ? "+" : ""}{expenseChange.toFixed(1)}%

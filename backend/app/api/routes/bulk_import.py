@@ -21,7 +21,7 @@ from datetime import datetime, timezone
 from decimal import Decimal, InvalidOperation
 from pathlib import Path
 from typing import Any, Optional
-import openpyxl  # For Excel file parsing
+import openpyxl  # type: ignore[import-untyped]  # For Excel file parsing
 
 from fastapi import APIRouter, HTTPException, UploadFile, File, BackgroundTasks
 from fastapi.responses import StreamingResponse
@@ -58,7 +58,7 @@ SUPPORTED_FORMATS = ["csv", "xlsx"]
 CHUNK_SIZE = 50  # Process in chunks for progress updates
 
 # In-memory storage for session data (in production, use Redis or database)
-import_sessions_data: dict[str, dict] = {}
+import_sessions_data: dict[str, dict[str, Any]] = {}
 
 
 # ==================== HELPER FUNCTIONS ====================

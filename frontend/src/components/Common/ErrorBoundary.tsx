@@ -35,8 +35,7 @@ class ErrorBoundary extends Component<Props, State> {
   }
 
   componentDidCatch(error: Error, errorInfo: any) {
-    // Log error details
-    console.error("Error caught by boundary:", error, errorInfo)
+    // Error caught by boundary - set state to show error UI
 
     // Handle API errors specifically
     if (error instanceof ApiError) {

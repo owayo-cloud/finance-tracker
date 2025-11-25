@@ -12,6 +12,7 @@ from app.crud import grn as grn_crud, supplier as supplier_crud, transporter as 
 from app.models import (
     GRN,
     GRNCreate,
+    GRNItem,
     GRNPublic,
     GRNPublicWithItems,
     GRNsPublic,
@@ -456,7 +457,7 @@ def read_grn(
         .options(
             selectinload(GRN.supplier),
             selectinload(GRN.transporter),
-            selectinload(GRN.items).selectinload(GRN.items.property.mapper.class_.product),
+            selectinload(GRN.items).selectinload(GRNItem.product),
         )
     )
     grn = session.exec(statement).first()
@@ -551,7 +552,7 @@ def approve_grn(
         .where(GRN.id == grn_id)
         .options(
             selectinload(GRN.supplier),
-            selectinload(GRN.items).selectinload(GRN.items.property.mapper.class_.product),
+            selectinload(GRN.items).selectinload(GRNItem.product),
         )
     )
     grn = session.exec(statement).first()

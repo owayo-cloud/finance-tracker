@@ -51,16 +51,16 @@ export function PendingDebtsTable({ isMounted }: PendingDebtsTableProps) {
     >
       <Box 
         p={6} 
-        bg={{ base: "#1a1d29", _light: "#ffffff" }}
+        bg="bg.surface"
         borderRadius="lg" 
         border="1px solid"
-        borderColor={{ base: "rgba(255, 255, 255, 0.08)", _light: "#e5e7eb" }}
+        borderColor="border.card"
         boxShadow={{ base: "0 2px 4px rgba(0, 0, 0, 0.2)", _light: "0 1px 3px rgba(0, 0, 0, 0.1)" }}
       >
         <Heading 
           size="md" 
           fontWeight="600"
-          color={{ base: "#ffffff", _light: "#1a1d29" }}
+          color="text.primary"
           mb={4}
         >
           Pending Customer Debts
@@ -70,22 +70,22 @@ export function PendingDebtsTable({ isMounted }: PendingDebtsTableProps) {
           <Table.Root variant="outline" size="sm">
             <Table.Header>
               <Table.Row>
-                <Table.ColumnHeader color={{ base: "#9ca3af", _light: "#6b7280" }} fontWeight="600" fontSize="xs" textTransform="uppercase" letterSpacing="0.5px">
+                <Table.ColumnHeader color="text.muted" fontWeight="600" fontSize="xs" textTransform="uppercase" letterSpacing="0.5px">
                   Customer Name
                 </Table.ColumnHeader>
-                <Table.ColumnHeader color={{ base: "#9ca3af", _light: "#6b7280" }} fontWeight="600" fontSize="xs" textTransform="uppercase" letterSpacing="0.5px">
+                <Table.ColumnHeader color="text.muted" fontWeight="600" fontSize="xs" textTransform="uppercase" letterSpacing="0.5px">
                   Product
                 </Table.ColumnHeader>
-                <Table.ColumnHeader color={{ base: "#9ca3af", _light: "#6b7280" }} fontWeight="600" fontSize="xs" textTransform="uppercase" letterSpacing="0.5px">
+                <Table.ColumnHeader color="text.muted" fontWeight="600" fontSize="xs" textTransform="uppercase" letterSpacing="0.5px">
                   Amount Owed
                 </Table.ColumnHeader>
-                <Table.ColumnHeader color={{ base: "#9ca3af", _light: "#6b7280" }} fontWeight="600" fontSize="xs" textTransform="uppercase" letterSpacing="0.5px">
+                <Table.ColumnHeader color="text.muted" fontWeight="600" fontSize="xs" textTransform="uppercase" letterSpacing="0.5px">
                   Debt Date
                 </Table.ColumnHeader>
-                <Table.ColumnHeader color={{ base: "#9ca3af", _light: "#6b7280" }} fontWeight="600" fontSize="xs" textTransform="uppercase" letterSpacing="0.5px">
+                <Table.ColumnHeader color="text.muted" fontWeight="600" fontSize="xs" textTransform="uppercase" letterSpacing="0.5px">
                   Due Date
                 </Table.ColumnHeader>
-                <Table.ColumnHeader color={{ base: "#9ca3af", _light: "#6b7280" }} fontWeight="600" fontSize="xs" textTransform="uppercase" letterSpacing="0.5px">
+                <Table.ColumnHeader color="text.muted" fontWeight="600" fontSize="xs" textTransform="uppercase" letterSpacing="0.5px">
                   Status
                 </Table.ColumnHeader>
               </Table.Row>
@@ -94,7 +94,7 @@ export function PendingDebtsTable({ isMounted }: PendingDebtsTableProps) {
               {isLoading ? (
                 <Table.Row>
                   <Table.Cell colSpan={6} textAlign="center" py={8}>
-                    <Text fontSize="sm" color={{ base: "#9ca3af", _light: "#6b7280" }}>
+                    <Text fontSize="sm" color="text.muted">
                       Loading debts...
                     </Text>
                   </Table.Cell>
@@ -103,7 +103,7 @@ export function PendingDebtsTable({ isMounted }: PendingDebtsTableProps) {
                 <Table.Row>
                   <Table.Cell colSpan={6} textAlign="center" py={8}>
                     <VStack gap={2}>
-                      <Text fontSize="sm" color={{ base: "#9ca3af", _light: "#6b7280" }}>
+                      <Text fontSize="sm" color="text.muted">
                         No pending debts
                       </Text>
                     </VStack>
@@ -115,19 +115,19 @@ export function PendingDebtsTable({ isMounted }: PendingDebtsTableProps) {
                   const productName = (debt as any).sale?.product?.name || debt.notes || "N/A"
                   return (
                     <Table.Row key={debt.id}>
-                      <Table.Cell color={{ base: "#ffffff", _light: "#1a1d29" }}>
+                      <Table.Cell color="text.primary">
                         {debt.customer_name || "N/A"}
                       </Table.Cell>
-                      <Table.Cell color={{ base: "#ffffff", _light: "#1a1d29" }} fontSize="sm">
+                      <Table.Cell color="text.primary" fontSize="sm">
                         {productName}
                       </Table.Cell>
-                      <Table.Cell color={{ base: "#ffffff", _light: "#1a1d29" }} fontWeight="medium">
+                      <Table.Cell color="text.primary" fontWeight="medium">
                         {formatCurrency(parseFloat(debt.balance?.toString() || "0"))}
                       </Table.Cell>
-                      <Table.Cell color={{ base: "#9ca3af", _light: "#6b7280" }} fontSize="sm">
+                      <Table.Cell color="text.muted" fontSize="sm">
                         {debt.debt_date ? format(new Date(debt.debt_date), "MMM dd, yyyy") : "N/A"}
                       </Table.Cell>
-                      <Table.Cell color={{ base: "#9ca3af", _light: "#6b7280" }} fontSize="sm">
+                      <Table.Cell color="text.muted" fontSize="sm">
                         {debt.due_date ? format(new Date(debt.due_date), "MMM dd, yyyy") : "N/A"}
                       </Table.Cell>
                       <Table.Cell>

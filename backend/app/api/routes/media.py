@@ -110,7 +110,7 @@ async def upload_image(
 
 
 @router.get("/serve/{media_id}")
-async def serve_image(media_id: uuid_lib.UUID, session: SessionDep) -> Any:
+async def serve_image(media_id: uuid_lib.UUID, session: SessionDep) -> Any:  # type: ignore[return]
     """
     Serve an uploaded image.
     """

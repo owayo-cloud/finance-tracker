@@ -54,15 +54,9 @@ export function CustomerSearchModal({
         cache: "no-store", // Prevent caching to ensure fresh data
       })
       if (!response.ok) {
-        console.error("Failed to fetch customers:", response.statusText)
         return null
       }
       const data = await response.json()
-      console.log("Fetched customers:", data?.data?.length || 0, "customers")
-      console.log("Customers data:", data)
-      if (data?.data && data.data.length > 0) {
-        console.log("First customer:", data.data[0])
-      }
       return data
     },
     enabled: isOpen,
@@ -80,14 +74,10 @@ export function CustomerSearchModal({
   useEffect(() => {
     if (isOpen) {
       const handleCustomerCreated = async (event: Event) => {
-        const customEvent = event as CustomEvent
-        console.log("Customer created event received:", customEvent.detail)
         // Small delay to ensure backend has processed the creation
         await new Promise(resolve => setTimeout(resolve, 300))
         // Force refetch with fresh data
-        console.log("Refetching customers...")
-        const result = await refetchCustomers()
-        console.log("Refetch result:", result.data?.data?.length || 0, "customers found")
+        await refetchCustomers()
       }
       window.addEventListener("customerCreated", handleCustomerCreated)
       return () => {

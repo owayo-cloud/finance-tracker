@@ -20,21 +20,14 @@ export function PendingDebtsTable({ isMounted }: PendingDebtsTableProps) {
   })
 
   const debts = debtsData?.data || []
-  console.log("[PendingDebtsTable] Raw debts data:", debtsData)
-  console.log("[PendingDebtsTable] Debts array:", debts)
-  console.log("[PendingDebtsTable] Debts count:", debts.length)
   
   // Filter to only show debts with balance > 0 (actual pending debts)
   const pendingDebts = debts
     .filter(d => {
       const balance = parseFloat(d.balance?.toString() || "0")
-      const isPending = balance > 0 && (d.status === "pending" || d.status === "partial" || d.status === "overdue")
-      console.log(`[PendingDebtsTable] Debt ${d.id}: customer=${d.customer_name}, balance=${balance}, status=${d.status}, isPending=${isPending}`)
-      return isPending
+      return balance > 0 && (d.status === "pending" || d.status === "partial" || d.status === "overdue")
     })
     .slice(0, 10) // Show top 10
-    
-  console.log("[PendingDebtsTable] Fetched debts:", debts.length, "Pending:", pendingDebts.length, "Error:", error)
 
   const getStatusColor = (status: string) => {
     switch (status) {

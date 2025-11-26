@@ -42,10 +42,16 @@ jobs:
           SERVER_USER: ${{ secrets.SERVER_USER }}
           SERVER_HOST: ${{ secrets.SERVER_HOST }}
           APP_DIR: ${{ secrets.APP_DIR }}
+          GIT_REPOSITORY: ${{ github.repository }}
         run: |
           ssh ${SERVER_USER}@${SERVER_HOST} << ENDSSH
             set -e
             APP_DIR_PATH="${APP_DIR:-/root/code/finance-tracker}"
+            if [ ! -d "\${APP_DIR_PATH}/.git" ]; then
+              echo "Repository not found on server. Cloning fresh copy..."
+              rm -rf "\${APP_DIR_PATH}"
+              git clone "https://github.com/${GIT_REPOSITORY}.git" "\${APP_DIR_PATH}"
+            fi
             cd "\${APP_DIR_PATH}"
             
             # Pull latest code from GitHub

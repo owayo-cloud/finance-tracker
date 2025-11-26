@@ -1,8 +1,9 @@
-import os
 from logging.config import fileConfig
+from typing import Any, Mapping
 
 from alembic import context
 from sqlalchemy import engine_from_config, pool
+from sqlmodel import SQLModel
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
@@ -10,7 +11,8 @@ config = context.config
 
 # Interpret the config file for Python logging.
 # This line sets up loggers basically.
-fileConfig(config.config_file_name)
+if config.config_file_name:
+    fileConfig(config.config_file_name)
 
 # add your model's MetaData object here
 # for 'autogenerate' support
@@ -18,8 +20,8 @@ fileConfig(config.config_file_name)
 # target_metadata = mymodel.Base.metadata
 # target_metadata = None
 
-from app.models import SQLModel  # noqa
-from app.core.config import settings # noqa
+from app import models  # noqa: F401
+from app.core.config import settings  # noqa: E402
 
 target_metadata = SQLModel.metadata
 
@@ -29,11 +31,11 @@ target_metadata = SQLModel.metadata
 # ... etc.
 
 
-def get_url():
+def get_url() -> str:
     return str(settings.SQLALCHEMY_DATABASE_URI)
 
 
-def run_migrations_offline():
+def run_migrations_offline() -> None:
     """Run migrations in 'offline' mode.
 
     This configures the context with just a URL
@@ -54,7 +56,7 @@ def run_migrations_offline():
         context.run_migrations()
 
 
-def run_migrations_online():
+def run_migrations_online() -> None:
     """Run migrations in 'online' mode.
 
     In this scenario we need to create an Engine
@@ -62,9 +64,12 @@ def run_migrations_online():
 
     """
     configuration = config.get_section(config.config_ini_section)
-    configuration["sqlalchemy.url"] = get_url()
+    if configuration is None:
+        raise RuntimeError("Alembic configuration section is missing.")
+    config_dict: dict[str, Any] = dict(configuration)
+    config_dict["sqlalchemy.url"] = get_url()
     connectable = engine_from_config(
-        configuration,
+        config_dict,
         prefix="sqlalchemy.",
         poolclass=pool.NullPool,
     )

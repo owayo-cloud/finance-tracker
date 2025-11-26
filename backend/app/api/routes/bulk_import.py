@@ -63,7 +63,7 @@ import_sessions_data: dict[str, dict[str, Any]] = {}
 
 # ==================== HELPER FUNCTIONS ====================
 
-def parse_csv_file(file_content: bytes, filename: str) -> tuple[list[str], list[dict]]:
+def parse_csv_file(file_content: bytes, filename: str) -> tuple[list[str], list[dict[str, str]]]:
     """Parse CSV file and return columns and rows."""
     try:
         # Try UTF-8 first
@@ -96,7 +96,7 @@ def parse_csv_file(file_content: bytes, filename: str) -> tuple[list[str], list[
     return columns, rows
 
 
-def parse_excel_file(file_content: bytes, filename: str) -> tuple[list[str], list[dict]]:
+def parse_excel_file(file_content: bytes, filename: str) -> tuple[list[str], list[dict[str, str]]]:
     """Parse Excel (XLSX) file and return columns and rows."""
     try:
         workbook = openpyxl.load_workbook(io.BytesIO(file_content), read_only=True, data_only=True)

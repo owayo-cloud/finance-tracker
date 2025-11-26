@@ -3,7 +3,7 @@ from typing import Any
 import uuid
 
 from fastapi import APIRouter, HTTPException, Query
-from sqlalchemy import and_, func, or_
+from sqlalchemy import and_, func, or_, desc
 from sqlalchemy.orm import selectinload
 from sqlalchemy.sql import ColumnElement
 from sqlmodel import select
@@ -356,7 +356,7 @@ def read_grns(
     count = session.exec(count_statement).one()
     
     # Apply pagination and ordering (newest first)
-    statement = statement.order_by(GRN.created_at.desc()).offset(skip).limit(limit)
+    statement = statement.order_by(desc(GRN.created_at)).offset(skip).limit(limit)
     grns = session.exec(statement).all()
     
     # Add computed fields

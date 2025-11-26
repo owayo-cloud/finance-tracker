@@ -4,9 +4,9 @@ from datetime import datetime, date, timezone
 from decimal import Decimal
 
 from fastapi import APIRouter, HTTPException, Query
-from sqlmodel import func, select, and_, or_
+from sqlmodel import func, select, and_, or_, col
 from sqlalchemy.orm import selectinload
-from sqlalchemy import cast, Date
+from sqlalchemy import cast, Date, desc
 from sqlalchemy.sql import ColumnElement
 
 from app.api.deps import CurrentUser, SessionDep, AdminUser
@@ -26,8 +26,8 @@ def get_last_closed_shift(session: SessionDep) -> Optional[TillShift]:
     """Get the last closed shift to determine next shift type"""
     statement = (
         select(TillShift)
-        .where(TillShift.status.in_(["closed", "reconciled"]))
-        .order_by(TillShift.closing_time.desc())
+        .where(col(TillShift.status).in_(["closed", "reconciled"]))
+        .order_by(desc(col(TillShift.closing_time)))
     )
     return session.exec(statement).first()
 
@@ -36,39 +36,34 @@ def calculate_system_counts(session: SessionDep, till_shift: TillShift) -> dict[
     """Calculate system counts for all payment methods from sales during the shift"""
     # Get all sales during this shift
     conditions: list[ColumnElement[bool]] = [
-        Sale.sale_date >= till_shift.opening_time,  # type: ignore[arg-type]
-        Sale.created_by_id == till_shift.opened_by_id  # type: ignore[arg-type]
+        col(Sale.sale_date) >= till_shift.opening_time,
+        col(Sale.created_by_id) == till_shift.opened_by_id,
     ]
     
     if till_shift.closing_time:
-        conditions.append(Sale.sale_date <= till_shift.closing_time)  # type: ignore[arg-type]
+        conditions.append(col(Sale.sale_date) <= till_shift.closing_time)
     
     # Get all payment methods
     payment_methods = session.exec(select(PaymentMethod).where(PaymentMethod.is_active == True)).all()
     
-    system_counts = {}
+    system_counts: dict[str, dict[str, Any]] = {}
     for pm in payment_methods:
         # Get sales with this payment method (including multi-payment)
         pm_conditions = conditions.copy()
         
         # Check both primary payment method and SalePayment records
-        pm_sales_statement = (
-            select(func.sum(Sale.total_amount))
-            .where(
-                and_(*pm_conditions, Sale.payment_method_id == pm.id)
+        primary_total = session.exec(
+            select(func.sum(Sale.total_amount)).where(
+                and_(*pm_conditions, col(Sale.payment_method_id) == pm.id)
             )
-        )
-        primary_total = session.exec(pm_sales_statement).first() or Decimal(0)
+        ).first() or Decimal(0)
         
         # Get multi-payment amounts
-        multi_payment_statement = (
+        multi_total = session.exec(
             select(func.sum(SalePayment.amount))
-            .join(Sale, SalePayment.sale_id == Sale.id)
-            .where(
-                and_(*pm_conditions, SalePayment.payment_method_id == pm.id)
-            )
-        )
-        multi_total = session.exec(multi_payment_statement).first() or Decimal(0)
+            .join(Sale, col(SalePayment.sale_id) == col(Sale.id))
+            .where(and_(*pm_conditions, col(SalePayment.payment_method_id) == pm.id))
+        ).first() or Decimal(0)
         
         system_counts[str(pm.id)] = {
             "payment_method_id": pm.id,
@@ -262,7 +257,7 @@ def reconcile_shift(
     *,
     session: SessionDep,
     current_user: CurrentUser,
-    physical_counts: dict,  # {payment_method_id: amount}
+    physical_counts: dict[str, Any],  # {payment_method_id: amount}
     notes: Optional[str] = None
 ) -> Any:
     """
@@ -390,25 +385,24 @@ def get_cashier_variances(
     statement = (
         select(CashierVariance)
         .options(
-            selectinload(CashierVariance.cashier),
-            selectinload(CashierVariance.till_shift)
+            selectinload(CashierVariance.cashier),  # type: ignore[arg-type]
+            selectinload(CashierVariance.till_shift),  # type: ignore[arg-type]
         )
         .offset(skip)
         .limit(limit)
-        .order_by(CashierVariance.created_at.desc())
+        .order_by(desc(col(CashierVariance.created_at)))
     )
     
     conditions: list[ColumnElement[bool]] = []
     
     if cashier_id:
-        conditions.append(CashierVariance.cashier_id == cashier_id)
-        count_statement = count_statement.where(CashierVariance.cashier_id == cashier_id)
+        conditions.append(col(CashierVariance.cashier_id) == cashier_id)
     
     if start_date:
-        conditions.append(cast(CashierVariance.created_at, Date) >= start_date)
+        conditions.append(cast(col(CashierVariance.created_at), Date) >= start_date)
     
     if end_date:
-        conditions.append(cast(CashierVariance.created_at, Date) <= end_date)
+        conditions.append(cast(col(CashierVariance.created_at), Date) <= end_date)
     
     if conditions:
         statement = statement.where(and_(*conditions))
@@ -418,14 +412,14 @@ def get_cashier_variances(
     variances = session.exec(statement).all()
     
     # Calculate totals
-    shortage_statement = (
+    shortage_statement: Any = (
         select(func.sum(CashierVariance.total_variance))
         .where(CashierVariance.variance_type == "shortage")
     )
     if conditions:
         shortage_statement = shortage_statement.where(and_(*conditions))
     
-    overage_statement = (
+    overage_statement: Any = (
         select(func.sum(CashierVariance.total_variance))
         .where(CashierVariance.variance_type == "overage")
     )
@@ -467,12 +461,12 @@ def get_till_shifts(
     statement = (
         select(TillShift)
         .options(
-            selectinload(TillShift.opened_by),
-            selectinload(TillShift.closed_by)
+            selectinload(TillShift.opened_by),  # type: ignore[arg-type]
+            selectinload(TillShift.closed_by),  # type: ignore[arg-type]
         )
         .offset(skip)
         .limit(limit)
-        .order_by(TillShift.opening_time.desc())
+        .order_by(desc(col(TillShift.opening_time)))
     )
     
     conditions: list[ColumnElement[bool]] = []

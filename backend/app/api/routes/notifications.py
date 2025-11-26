@@ -52,7 +52,7 @@ def list_notifications(
         statement = statement.where(Notification.priority == priority)
     
     # Order by created_at desc (newest first)
-    statement = statement.order_by(Notification.created_at.desc())
+    statement = statement.order_by(desc(Notification.created_at))
     
     # Get total count
     count_statement = select(func.count()).select_from(statement.subquery())

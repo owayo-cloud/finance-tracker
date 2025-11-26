@@ -17,7 +17,7 @@ branch_labels = None
 depends_on = None
 
 
-def upgrade():
+def upgrade() -> None:
     # Add username column (nullable initially, then we can make it unique after data migration if needed)
     op.add_column('user', sa.Column('username', sqlmodel.sql.sqltypes.AutoString(length=100), nullable=True))
     op.create_index(op.f('ix_user_username'), 'user', ['username'], unique=True)
@@ -26,7 +26,7 @@ def upgrade():
     op.add_column('user', sa.Column('is_auditor', sa.Boolean(), nullable=False, server_default='false'))
 
 
-def downgrade():
+def downgrade() -> None:
     # Remove is_auditor column
     op.drop_column('user', 'is_auditor')
     

@@ -4,6 +4,7 @@ from typing import Any
 from fastapi import APIRouter, HTTPException, Query
 from sqlmodel import func, select, or_
 from sqlalchemy.orm import selectinload
+from sqlalchemy import desc
 
 from app.api.deps import AdminUser, CurrentUser, SessionDep
 from app.models import (
@@ -86,7 +87,7 @@ def read_stock_entries(
         )
         .offset(skip)
         .limit(limit)
-        .order_by(StockEntry.entry_date.desc())
+        .order_by(desc(StockEntry.entry_date))
     )
     
     if product_id:

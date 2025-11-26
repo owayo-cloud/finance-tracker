@@ -6,6 +6,7 @@ from decimal import Decimal
 from fastapi import APIRouter, HTTPException, Query
 from sqlmodel import func, select, and_, or_, col
 from sqlalchemy.orm import selectinload
+from sqlalchemy import desc
 
 from app.api.deps import AdminUser, CurrentUser, SessionDep
 from app.core.logging_config import get_logger
@@ -78,7 +79,7 @@ def read_debts(
     )
     if conditions:
         statement = statement.where(and_(*conditions))
-    statement = statement.order_by(Debt.debt_date.desc()).offset(skip).limit(limit)
+    statement = statement.order_by(desc(Debt.debt_date)).offset(skip).limit(limit)
     
     debts = session.exec(statement).all()
     
@@ -344,7 +345,7 @@ def read_debt_payments(
         .options(
             selectinload(DebtPayment.payment_method)
         )
-        .order_by(DebtPayment.payment_date.desc())
+        .order_by(desc(DebtPayment.payment_date))
         .offset(skip)
         .limit(limit)
     )

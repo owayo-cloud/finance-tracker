@@ -6,7 +6,7 @@ from pydantic import EmailStr, field_validator, model_validator
 from sqlmodel import Field, Relationship, SQLModel, Column
 from sqlalchemy import JSON
 
-from typing import Optional, TYPE_CHECKING
+from typing import Optional, TYPE_CHECKING, Any
 
 if TYPE_CHECKING:
     from uuid import UUID
@@ -36,7 +36,7 @@ class UserRegister(SQLModel):
 
 # Properties to receive via API on update, all are optional
 class UserUpdate(SQLModel):
-    email: Optional[EmailStr] = Field(default=None, max_length=255)  # type: ignore
+    email: Optional[EmailStr] = Field(default=None, max_length=255)
     username: Optional[str] = Field(default=None, max_length=100)
     is_active: Optional[bool] = None
     is_superuser: Optional[bool] = None
@@ -64,7 +64,7 @@ class User(UserBase, table=True):
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
     
     # Notification preferences
-    notification_preferences: Optional[dict] = Field(
+    notification_preferences: Optional[dict[str, Any]] = Field(
         default={"email": True, "in_app": True}, 
         sa_column=Column(JSON)
     )
@@ -1021,8 +1021,8 @@ class ImportRowStatus(str):
 class ImportRow(SQLModel):
     """Represents a single row in the bulk import."""
     row_number: int
-    data: dict  # Raw data from uploaded file
-    mapped_data: Optional[dict] = None  # Data after column mapping
+    data: dict[str, Any]  # Raw data from uploaded file
+    mapped_data: Optional[dict[str, Any]] = None  # Data after column mapping
     errors: list[ValidationError] = []
     warnings: list[str] = []
     is_duplicate: bool = False
@@ -1039,8 +1039,8 @@ class BulkImportSessionBase(SQLModel):
     duplicate_rows: int = Field(default=0, ge=0)
     imported_rows: int = Field(default=0, ge=0)
     status: str = Field(default="uploaded", max_length=50)  # uploaded, mapped, validated, importing, completed, failed
-    column_mapping: Optional[dict] = None  # Maps uploaded columns to system fields
-    import_options: Optional[dict] = None  # Tags, status, notes etc.
+    column_mapping: Optional[dict[str, Any]] = None  # Maps uploaded columns to system fields
+    import_options: Optional[dict[str, Any]] = None  # Tags, status, notes etc.
     duplicate_action: str = Field(default="skip", max_length=20)  # skip, update, create
     
 
@@ -1050,8 +1050,8 @@ class BulkImportSessionCreate(SQLModel):
     
 
 class BulkImportSessionUpdate(SQLModel):
-    column_mapping: Optional[dict] = None
-    import_options: Optional[dict] = None
+    column_mapping: Optional[dict[str, Any]] = None
+    import_options: Optional[dict[str, Any]] = None
     duplicate_action: Optional[str] = None
     status: Optional[str] = None
     valid_rows: Optional[int] = None
@@ -1070,8 +1070,8 @@ class BulkImportSession(BulkImportSessionBase, table=True):
     completed_at: Optional[datetime] = None
     
     # Override dict fields to use JSON column type
-    column_mapping: Optional[dict] = Field(default=None, sa_column=Column(JSON))
-    import_options: Optional[dict] = Field(default=None, sa_column=Column(JSON))
+    column_mapping: Optional[dict[str, Any]] = Field(default=None, sa_column=Column(JSON))
+    import_options: Optional[dict[str, Any]] = Field(default=None, sa_column=Column(JSON))
     
 
 class BulkImportSessionPublic(BulkImportSessionBase):
@@ -1079,7 +1079,7 @@ class BulkImportSessionPublic(BulkImportSessionBase):
     created_at: datetime
     completed_at: Optional[datetime] = None
     columns: Optional[list[str]] = None  # CSV column headers
-    auto_mapping: Optional[dict] = None  # Auto-detected column mappings
+    auto_mapping: Optional[dict[str, str]] = None  # Auto-detected column mappings
     
     model_config = {"from_attributes": True}
 
@@ -1087,7 +1087,7 @@ class BulkImportSessionPublic(BulkImportSessionBase):
 class ColumnMappingRequest(SQLModel):
     """Request model for column mapping."""
     session_id: uuid.UUID
-    column_mapping: dict  # e.g., {"Product Name": "name", "Selling Price": "selling_price"}
+    column_mapping: dict[str, str]  # e.g., {"Product Name": "name", "Selling Price": "selling_price"}
     default_category_id: Optional[uuid.UUID] = None
     default_status_id: Optional[uuid.UUID] = None
 
@@ -1116,7 +1116,7 @@ class FixRowRequest(SQLModel):
     """Request to fix a specific row."""
     session_id: uuid.UUID
     row_number: int
-    updated_data: dict
+    updated_data: dict[str, Any]
 
 
 class BulkImportFinalRequest(SQLModel):
@@ -1148,8 +1148,8 @@ class BulkImportResult(SQLModel):
     duplicate_count: int
     total_processed: int
     duration_seconds: float
-    imported_product_ids: list[uuid.UUID] = []
-    errors: list[dict] = []  # Detailed error information
+    imported_product_ids: list[uuid.UUID] = Field(default_factory=list)
+    errors: list[dict[str, Any]] = Field(default_factory=list)  # Detailed error information
 
 
 # ==================== SUPPLIER MODELS ====================
@@ -1379,7 +1379,7 @@ class GRNItemBase(SQLModel):
 
 
 class GRNItemCreate(GRNItemBase):
-    grn_id: Optional[uuid.UUID] = None  # Will be set when creating GRN
+    grn_id: Optional[uuid.UUID] = Field(default=None)  # type: ignore[assignment]
 
 
 class GRNItemUpdate(SQLModel):
@@ -1628,7 +1628,7 @@ class NotificationBase(SQLModel):
     read_at: Optional[datetime] = None
     link_url: Optional[str] = Field(default=None, max_length=500)
     link_text: Optional[str] = Field(default=None, max_length=100)
-    extra_data: Optional[dict] = Field(default=None, sa_column=Column(JSON))
+    extra_data: Optional[dict[str, Any]] = Field(default=None, sa_column=Column(JSON))
     expires_at: Optional[datetime] = None
     
     @field_validator('priority')
@@ -1648,7 +1648,7 @@ class NotificationCreate(SQLModel):
     priority: str = Field(default="info", max_length=20)
     link_url: Optional[str] = None
     link_text: Optional[str] = None
-    extra_data: Optional[dict] = None
+    extra_data: Optional[dict[str, Any]] = None
 
 
 class NotificationUpdate(SQLModel):
@@ -1684,8 +1684,8 @@ class ReminderSettingBase(SQLModel):
     is_enabled: bool = Field(default=True)
     frequency: str = Field(max_length=20)  # daily, weekly, monthly, custom
     send_time: str = Field(default="09:00:00", max_length=8)  # HH:MM:SS format
-    send_days: Optional[dict] = Field(default=None, sa_column=Column(JSON))  # For weekly: {"days": ["Monday", "Friday"]}
-    filter_criteria: Optional[dict] = Field(default=None, sa_column=Column(JSON))  # e.g., {"min_amount": 1000}
+    send_days: Optional[dict[str, Any]] = Field(default=None, sa_column=Column(JSON))  # For weekly: {"days": ["Monday", "Friday"]}
+    filter_criteria: Optional[dict[str, Any]] = Field(default=None, sa_column=Column(JSON))  # e.g., {"min_amount": 1000}
     last_sent_at: Optional[datetime] = None
     next_send_at: Optional[datetime] = None
 
@@ -1696,16 +1696,16 @@ class ReminderSettingCreate(SQLModel):
     is_enabled: bool = Field(default=True)
     frequency: str = Field(max_length=20)
     send_time: str = Field(default="09:00:00", max_length=8)
-    send_days: Optional[dict] = None
-    filter_criteria: Optional[dict] = None
+    send_days: Optional[dict[str, Any]] = None
+    filter_criteria: Optional[dict[str, Any]] = None
 
 
 class ReminderSettingUpdate(SQLModel):
     is_enabled: Optional[bool] = None
     frequency: Optional[str] = None
     send_time: Optional[str] = None
-    send_days: Optional[dict] = None
-    filter_criteria: Optional[dict] = None
+    send_days: Optional[dict[str, Any]] = None
+    filter_criteria: Optional[dict[str, Any]] = None
 
 
 class ReminderSetting(ReminderSettingBase, table=True):
@@ -1739,7 +1739,7 @@ class ReminderLogBase(SQLModel):
     error_message: Optional[str] = Field(default=None, max_length=2000)
     items_included: int = Field(default=0)
     subject_line: Optional[str] = Field(default=None, max_length=500)
-    extra_data: Optional[dict] = Field(default=None, sa_column=Column(JSON))
+    extra_data: Optional[dict[str, Any]] = Field(default=None, sa_column=Column(JSON))
 
 
 class ReminderLogCreate(SQLModel):
@@ -1750,7 +1750,7 @@ class ReminderLogCreate(SQLModel):
     error_message: Optional[str] = None
     items_included: int = 0
     subject_line: Optional[str] = None
-    extra_data: Optional[dict] = None
+    extra_data: Optional[dict[str, Any]] = None
 
 
 class ReminderLog(ReminderLogBase, table=True):

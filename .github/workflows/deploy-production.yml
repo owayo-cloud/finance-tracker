@@ -41,11 +41,12 @@ jobs:
         env:
           SERVER_USER: ${{ secrets.SERVER_USER }}
           SERVER_HOST: ${{ secrets.SERVER_HOST }}
-          APP_DIR: ${{ secrets.APP_DIR || '/root/code/finance-tracker' }}
+          APP_DIR: ${{ secrets.APP_DIR }}
         run: |
           ssh ${SERVER_USER}@${SERVER_HOST} << ENDSSH
             set -e
-            cd ${APP_DIR}
+            APP_DIR_PATH="${APP_DIR:-/root/code/finance-tracker}"
+            cd "\${APP_DIR_PATH}"
             
             # Pull latest code from GitHub
             git fetch origin
@@ -98,10 +99,11 @@ jobs:
         env:
           SERVER_USER: ${{ secrets.SERVER_USER }}
           SERVER_HOST: ${{ secrets.SERVER_HOST }}
-          APP_DIR: ${{ secrets.APP_DIR || '/root/code/finance-tracker' }}
+          APP_DIR: ${{ secrets.APP_DIR }}
         run: |
           ssh ${SERVER_USER}@${SERVER_HOST} << ENDSSH
-            cd ${APP_DIR}
+            APP_DIR_PATH="${APP_DIR:-/root/code/finance-tracker}"
+            cd "\${APP_DIR_PATH}"
             echo "Checking service health..."
             docker compose ps
             echo "Checking backend health..."

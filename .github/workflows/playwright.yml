@@ -69,8 +69,7 @@ jobs:
     - run: npm ci
       working-directory: frontend
     - run: uv run bash scripts/generate-client.sh
-      env:
-        VIRTUAL_ENV: backend/.venv
+      working-directory: backend
     - run: docker compose build
     - run: docker compose down -v --remove-orphans
     - name: Run Playwright tests
@@ -107,8 +106,13 @@ jobs:
         pattern: blob-report-*
         merge-multiple: true
     - name: Merge into HTML Report
-      run: npx playwright merge-reports --reporter html ./all-blob-reports
       working-directory: frontend
+      run: |
+        if [ -d ./all-blob-reports ] && [ "$(ls -A ./all-blob-reports)" ]; then
+          npx playwright merge-reports --reporter html ./all-blob-reports
+        else
+          echo "No blob reports found to merge. Skipping HTML report generation."
+        fi
     - name: Upload HTML report
       uses: actions/upload-artifact@v4
       with:

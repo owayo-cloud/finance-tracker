@@ -3,7 +3,6 @@ from datetime import datetime, timezone
 from typing import Any, Generic, TypeVar
 
 from sqlalchemy import func
-from sqlalchemy.orm import selectinload
 from sqlmodel import Session, select
 
 from app.core.security import get_password_hash, verify_password
@@ -27,6 +26,7 @@ from app.models import (
     UserCreate,
     UserUpdate,
 )
+from app.utils.sqlalchemy_helpers import qload, qload_chain
 
 
 def create_user(*, session: Session, user_create: UserCreate) -> User:
@@ -113,9 +113,9 @@ class CRUDProduct(CRUDBase[Product, ProductCreate, ProductUpdate]):
             select(Product)
             .where(Product.id == db_obj.id)
             .options(
-                selectinload(Product.category),
-                selectinload(Product.status),
-                selectinload(Product.image),
+                qload(Product.category),
+                qload(Product.status),
+                qload(Product.image),
             )
         )
         refreshed_obj = db.exec(statement).one()
@@ -133,9 +133,9 @@ class CRUDProduct(CRUDBase[Product, ProductCreate, ProductUpdate]):
             select(Product)
             .where(Product.id == db_obj.id)
             .options(
-                selectinload(Product.category),
-                selectinload(Product.status),
-                selectinload(Product.image),
+                qload(Product.category),
+                qload(Product.status),
+                qload(Product.image),
             )
         )
         refreshed_obj = db.exec(statement).one()
@@ -265,9 +265,9 @@ class CRUDGRN(CRUDBase[GRN, GRNCreate, GRNUpdate]):
             select(GRN)
             .where(GRN.id == db_obj.id)
             .options(
-                selectinload(GRN.supplier),
-                selectinload(GRN.transporter),
-                selectinload(GRN.items).selectinload(GRNItem.product),
+                qload(GRN.supplier),
+                qload(GRN.transporter),
+                qload_chain(GRN.items, GRNItem.product),
             )
         )
         refreshed_obj = db.exec(statement).one()
@@ -300,9 +300,9 @@ class CRUDGRN(CRUDBase[GRN, GRNCreate, GRNUpdate]):
             select(GRN)
             .where(GRN.id == db_obj.id)
             .options(
-                selectinload(GRN.supplier),
-                selectinload(GRN.transporter),
-                selectinload(GRN.items).selectinload(GRNItem.product),
+                qload(GRN.supplier),
+                qload(GRN.transporter),
+                qload_chain(GRN.items, GRNItem.product),
             )
         )
         refreshed_obj = db.exec(statement).one()

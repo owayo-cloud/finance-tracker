@@ -42,18 +42,27 @@ jobs:
           SERVER_USER: ${{ secrets.SERVER_USER }}
           SERVER_HOST: ${{ secrets.SERVER_HOST }}
           APP_DIR: ${{ secrets.APP_DIR }}
+          REPO_DEPLOY_KEY: ${{ secrets.REPO_DEPLOY_KEY || '' }}
           GIT_REPOSITORY: ${{ github.repository }}
         run: |
           ssh ${SERVER_USER}@${SERVER_HOST} << ENDSSH
             set -e
             APP_DIR_PATH="${APP_DIR:-/root/code/finance-tracker}"
             if [ ! -d "\${APP_DIR_PATH}/.git" ]; then
-              echo "Repository not found on server. Cloning fresh copy via SSH..."
+              echo "Repository not found on server. Cloning fresh copy..."
               rm -rf "\${APP_DIR_PATH}"
               mkdir -p "\${APP_DIR_PATH}"
-              mkdir -p ~/.ssh
-              ssh-keyscan -H github.com >> ~/.ssh/known_hosts
-              git clone "git@github.com:${GIT_REPOSITORY}.git" "\${APP_DIR_PATH}"
+              if [ -n "${REPO_DEPLOY_KEY}" ]; then
+                echo "Using deploy key for SSH clone..."
+                mkdir -p ~/.ssh
+                echo "${REPO_DEPLOY_KEY}" > ~/.ssh/github_deploy_key
+                chmod 600 ~/.ssh/github_deploy_key
+                ssh-keyscan -H github.com >> ~/.ssh/known_hosts
+                GIT_SSH_COMMAND="ssh -i ~/.ssh/github_deploy_key -o StrictHostKeyChecking=yes" git clone "git@github.com:${GIT_REPOSITORY}.git" "\${APP_DIR_PATH}"
+              else
+                echo "No deploy key provided - attempting HTTPS clone (requires public repo or PAT in URL)..."
+                git clone "https://github.com/${GIT_REPOSITORY}.git" "\${APP_DIR_PATH}"
+              fi
             fi
             cd "\${APP_DIR_PATH}"
             

@@ -5,7 +5,6 @@ from decimal import Decimal
 
 from fastapi import APIRouter, HTTPException, Query
 from sqlmodel import func, select, and_, or_, desc
-from sqlalchemy.orm import selectinload
 from sqlalchemy.sql import ColumnElement
 
 from app.api.deps import AdminUser, CurrentUser, SessionDep
@@ -14,6 +13,7 @@ from app.models import (
     ExpenseCategory, ExpenseCategoryCreate, ExpenseCategoryUpdate, ExpenseCategoryPublic, ExpenseCategoriesPublic,
     User, UserPublic
 )
+from app.utils.sqlalchemy_helpers import qload
 
 
 router = APIRouter(prefix="/expenses", tags=["expenses"])
@@ -185,8 +185,8 @@ def read_expenses(
     """
     # Build base query
     statement = select(Expense).options(
-        selectinload(Expense.category),
-        selectinload(Expense.created_by)
+        qload(Expense.category),
+        qload(Expense.created_by),
     )
     
     # Build count query
@@ -251,7 +251,7 @@ def create_expense(
     # Load relationships
     expense = session.exec(
         select(Expense)
-        .options(selectinload(Expense.category), selectinload(Expense.created_by))
+        .options(qload(Expense.category), qload(Expense.created_by))
         .where(Expense.id == expense.id)
     ).first()
     
@@ -270,7 +270,7 @@ def read_expense(
     """
     expense = session.exec(
         select(Expense)
-        .options(selectinload(Expense.category), selectinload(Expense.created_by))
+        .options(qload(Expense.category), qload(Expense.created_by))
         .where(Expense.id == expense_id)
     ).first()
     
@@ -318,7 +318,7 @@ def update_expense(
     # Load relationships
     expense = session.exec(
         select(Expense)
-        .options(selectinload(Expense.category), selectinload(Expense.created_by))
+        .options(qload(Expense.category), qload(Expense.created_by))
         .where(Expense.id == expense.id)
     ).first()
     

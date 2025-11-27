@@ -138,7 +138,7 @@ REPO_PAT                 → (optional, Personal Access Token for repo access)
 ### 6. Testing the Pipeline
 
 #### Test CI (Development)
-1. Create a feature branch:
+1. Create a feature branch to test:
    ```bash
    git checkout -b feature/test-ci
    ```

@@ -44,6 +44,7 @@ jobs:
     - run: uv sync
       working-directory: backend
     - run: uv run bash scripts/generate-client.sh
+      working-directory: backend
       env:
         VIRTUAL_ENV: backend/.venv
         SECRET_KEY: just-for-generating-client

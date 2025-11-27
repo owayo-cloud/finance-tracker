@@ -10,6 +10,7 @@ Scheduled jobs for:
 import logging
 from datetime import datetime, timedelta, timezone
 
+from sqlalchemy import and_
 from sqlmodel import Session, select
 
 from app import crud
@@ -49,7 +50,7 @@ def send_debt_reminder_emails():
         admin_statement = (
             select(User)
             .where(User.role == "admin")
-            .where(User.receives_supplier_debt_alerts is True)
+            .where(User.receives_supplier_debt_alerts.is_(True))
         )
         admin_users = session.exec(admin_statement).all()
 
@@ -60,7 +61,7 @@ def send_debt_reminder_emails():
         # Get overdue debts
         debt_statement = (
             select(SupplierDebt)
-            .where(SupplierDebt.is_overdue is True)
+            .where(SupplierDebt.is_overdue.is_(True))
             .where(SupplierDebt.status != "paid")
         )
         overdue_debts = session.exec(debt_statement).all()
@@ -84,7 +85,7 @@ def send_debt_reminder_emails():
                 select(ReminderSetting)
                 .where(ReminderSetting.user_id == admin.id)
                 .where(ReminderSetting.reminder_type == "supplier_debt_overdue")
-                .where(ReminderSetting.is_enabled is True)
+                .where(ReminderSetting.is_enabled.is_(True))
             )
             setting = session.exec(setting_statement).first()
 
@@ -186,14 +187,12 @@ def send_reorder_alerts():
 
     with Session(engine) as session:
         # Get products with reorder alerts enabled
-        from sqlalchemy import and_
-
         product_statement = (
             select(Product)
-            .where(Product.enable_reorder_alerts is True)
+            .where(Product.enable_reorder_alerts.is_(True))
             .where(
                 and_(
-                    Product.reorder_level.isnot(None),
+                    Product.reorder_level.is_not(None),
                     Product.current_stock <= Product.reorder_level,  # type: ignore[operator]
                 )
             )

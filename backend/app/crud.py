@@ -397,11 +397,11 @@ def create_notification_for_admins(
 
     # Filter based on notification type
     if "supplier_debt" in notification_type:
-        statement = statement.where(User.receives_supplier_debt_alerts is True)
+        statement = statement.where(User.receives_supplier_debt_alerts.is_(True))
     elif "reorder" in notification_type:
-        statement = statement.where(User.receives_reorder_alerts is True)
+        statement = statement.where(User.receives_reorder_alerts.is_(True))
     elif "grn_approval" in notification_type:
-        statement = statement.where(User.receives_grn_approval_requests is True)
+        statement = statement.where(User.receives_grn_approval_requests.is_(True))
 
     admin_users = session.exec(statement).all()
 
@@ -457,7 +457,7 @@ def delete_old_notifications(*, session: Session, days: int = 30) -> int:
 
     statement = (
         select(Notification)
-        .where(Notification.is_read is True)
+        .where(Notification.is_read.is_(True))
         .where(Notification.created_at < cutoff_date)
     )
     old_notifications = session.exec(statement).all()

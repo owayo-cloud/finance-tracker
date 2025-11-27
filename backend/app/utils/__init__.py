@@ -22,10 +22,13 @@ class EmailData:
     subject: str
 
 
+BASE_PATH = Path(__file__).resolve().parent.parent
+EMAIL_TEMPLATE_DIR = BASE_PATH / "email-templates" / "build"
+
+
 def render_email_template(*, template_name: str, context: dict[str, Any]) -> str:
-    template_str = (
-        Path(__file__).parent / "email-templates" / "build" / template_name
-    ).read_text()
+    template_path = EMAIL_TEMPLATE_DIR / template_name
+    template_str = template_path.read_text()
     html_content = Template(template_str).render(context)
     return html_content
 
@@ -202,3 +205,19 @@ def verify_password_reset_token(token: str) -> str | None:
         return str(decoded_token["sub"])
     except InvalidTokenError:
         return None
+
+
+__all__ = [
+    "EmailData",
+    "generate_debt_reminder_email",
+    "generate_low_stock_notification_email",
+    "generate_new_account_email",
+    "generate_password_reset_token",
+    "generate_reorder_alert_email",
+    "generate_reset_password_email",
+    "generate_test_email",
+    "render_email_template",
+    "send_email",
+    "verify_password_reset_token",
+]
+

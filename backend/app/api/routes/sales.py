@@ -51,13 +51,13 @@ def read_payment_methods(
     count_statement = (
         select(func.count())
         .select_from(PaymentMethod)
-        .where(PaymentMethod.is_active is True)
+        .where(PaymentMethod.is_active.is_(True))
     )
     count = session.exec(count_statement).one()
 
     statement = (
         select(PaymentMethod)
-        .where(PaymentMethod.is_active is True)
+        .where(PaymentMethod.is_active.is_(True))
         .offset(skip)
         .limit(limit)
         .order_by(PaymentMethod.name)
@@ -476,7 +476,7 @@ def create_sale_with_multiple_payments(
         credit_method = session.exec(
             select(PaymentMethod)
             .where(PaymentMethod.name.ilike("%credit%"))
-            .where(PaymentMethod.is_active is True)
+            .where(PaymentMethod.is_active.is_(True))
             .limit(1)
         ).first()
 
@@ -485,7 +485,7 @@ def create_sale_with_multiple_payments(
         else:
             # Fallback: use first active payment method
             fallback_method = session.exec(
-                select(PaymentMethod).where(PaymentMethod.is_active is True).limit(1)
+                select(PaymentMethod).where(PaymentMethod.is_active.is_(True)).limit(1)
             ).first()
             if fallback_method:
                 final_payment_method_id = fallback_method.id

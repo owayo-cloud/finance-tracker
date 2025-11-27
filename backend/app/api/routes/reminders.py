@@ -280,7 +280,7 @@ def get_reminder_statistics(
         select(func.count())
         .select_from(ReminderSetting)
         .where(ReminderSetting.user_id == current_user.id)
-        .where(ReminderSetting.is_enabled is True)
+        .where(ReminderSetting.is_enabled.is_(True))
     )
     active_settings_count = session.exec(active_settings_statement).one() or 0
 

@@ -163,9 +163,9 @@ def get_current_cash_summary(
 
     # Find cash payment method
     cash_pm = session.exec(
-        select(PaymentMethod).where(
-            PaymentMethod.name.ilike("%cash%"), PaymentMethod.is_active is True
-        )
+        select(PaymentMethod)
+        .where(PaymentMethod.name.ilike("%cash%"))
+        .where(PaymentMethod.is_active.is_(True))
     ).first()
 
     if not cash_pm:

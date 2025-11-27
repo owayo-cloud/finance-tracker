@@ -54,7 +54,7 @@ def calculate_system_counts(
 
     # Get all payment methods
     payment_methods = session.exec(
-        select(PaymentMethod).where(PaymentMethod.is_active is True)
+        select(PaymentMethod).where(PaymentMethod.is_active.is_(True))
     ).all()
 
     system_counts: dict[str, dict[str, Any]] = {}

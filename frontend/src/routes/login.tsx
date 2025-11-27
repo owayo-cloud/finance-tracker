@@ -12,6 +12,7 @@ import {
   Link as RouterLink,
   redirect,
 } from "@tanstack/react-router"
+import { useState } from "react"
 import { type SubmitHandler, useForm } from "react-hook-form"
 import { FiLock, FiUser } from "react-icons/fi"
 
@@ -22,7 +23,7 @@ import { Field } from "@/components/ui/field"
 import { InputGroup } from "@/components/ui/input-group"
 import { PasswordInput } from "@/components/ui/password-input"
 import useAuth, { isLoggedIn } from "@/hooks/useAuth"
-import { passwordRules } from "../utils"
+import { emailPattern, passwordRules } from "../utils"
 
 export const Route = createFileRoute("/login")({
   component: Login,
@@ -36,7 +37,8 @@ export const Route = createFileRoute("/login")({
 })
 
 function Login() {
-  const { loginMutation, error, resetError } = useAuth()
+  const { loginMutation, resetError } = useAuth()
+  const [formError, setFormError] = useState<string | null>(null)
   const {
     register,
     handleSubmit,
@@ -54,11 +56,12 @@ function Login() {
     if (isSubmitting) return
 
     resetError()
+    setFormError(null)
 
     try {
       await loginMutation.mutateAsync(data)
     } catch {
-      // error is handled by useAuth hook
+      setFormError("Incorrect email or password")
     }
   }
 
@@ -131,12 +134,21 @@ function Login() {
                 <VStack gap={4} align="stretch">
                   <Field
                     invalid={!!errors.username}
-                    errorText={errors.username?.message || !!error}
+                    errorText={errors.username?.message}
                   >
                     <InputGroup w="100%" startElement={<FiUser />}>
                       <Input
                         {...register("username", {
                           required: "Username or email is required",
+                          validate: (value) => {
+                            if (!value.includes("@")) {
+                              return true
+                            }
+                            return (
+                              emailPattern.value.test(value) ||
+                              emailPattern.message
+                            )
+                          },
                         })}
                         placeholder="Username or Email"
                         type="text"
@@ -184,6 +196,16 @@ function Login() {
                 >
                   Log In
                 </Button>
+                {formError && (
+                  <Text
+                    role="alert"
+                    fontSize="sm"
+                    color="red.500"
+                    textAlign="center"
+                  >
+                    {formError}
+                  </Text>
+                )}
 
                 {/* Sign Up Link */}
                 <Box textAlign="center">

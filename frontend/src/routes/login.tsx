@@ -140,15 +140,9 @@ function Login() {
                       <Input
                         {...register("username", {
                           required: "Username or email is required",
-                          validate: (value) => {
-                            if (!value.includes("@")) {
-                              return true
-                            }
-                            return (
-                              emailPattern.value.test(value) ||
-                              emailPattern.message
-                            )
-                          },
+                          validate: (value) =>
+                            emailPattern.value.test(value) ||
+                            emailPattern.message,
                         })}
                         placeholder="Username or Email"
                         type="text"

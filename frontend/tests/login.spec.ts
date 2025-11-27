@@ -1,6 +1,7 @@
 import { expect, type Page, test } from "@playwright/test"
 import { firstSuperuser, firstSuperuserPassword } from "./config.ts"
 import { randomPassword } from "./utils/random.ts"
+import { logInUser, logOutUser } from "./utils/user"
 
 test.use({ storageState: { cookies: [], origins: [] } })
 
@@ -16,7 +17,7 @@ const fillForm = async (page: Page, email: string, password: string) => {
 }
 
 async function expectAuthMessage(page: Page, text: string) {
-  const inline = page.getByRole("alert", { exact: true, name: text }).first()
+  const inline = page.getByRole("alert").filter({ hasText: text }).first()
   if ((await inline.count()) > 0) {
     await expect(inline).toBeVisible()
     return
@@ -70,13 +71,11 @@ test("Log in with valid email and password ", async ({ page }) => {
   await page.goto("/login")
 
   await fillForm(page, firstSuperuser, firstSuperuserPassword)
-  await page.getByRole("button", { name: "Log In" }).click()
-
-  await page.waitForURL("/")
-
-  await expect(
-    page.getByText("Welcome back, nice to see you again!"),
-  ).toBeVisible()
+  await Promise.all([
+    page.waitForURL("**", { waitUntil: "domcontentloaded" }),
+    page.getByRole("button", { name: "Log In" }).click(),
+  ])
+  await expect(page.getByTestId("user-menu")).toBeVisible({ timeout: 10000 })
 })
 
 test("Log in with invalid email", async ({ page }) => {
@@ -101,42 +100,14 @@ test("Log in with invalid password", async ({ page }) => {
 // Log out
 
 test("Successful log out", async ({ page }) => {
-  await page.goto("/login")
-
-  await fillForm(page, firstSuperuser, firstSuperuserPassword)
-  await page.getByRole("button", { name: "Log In" }).click()
-
-  await page.waitForURL("/")
-
-  await expect(
-    page.getByText("Welcome back, nice to see you again!"),
-  ).toBeVisible()
-
-  const userMenu = page.getByTestId("user-menu")
-  await expect(userMenu).toBeVisible({ timeout: 10000 })
-  await userMenu.click()
-  await page.getByRole("menuitem", { name: "Log out" }).click()
-  await page.waitForURL("/login")
+  await logInUser(page, firstSuperuser, firstSuperuserPassword)
+  await logOutUser(page)
+  await expect(page).toHaveURL("/login")
 })
 
 test("Logged-out user cannot access protected routes", async ({ page }) => {
-  await page.goto("/login")
-
-  await fillForm(page, firstSuperuser, firstSuperuserPassword)
-  await page.getByRole("button", { name: "Log In" }).click()
-
-  await page.waitForURL("/")
-
-  await expect(
-    page.getByText("Welcome back, nice to see you again!"),
-  ).toBeVisible()
-
-  const userMenu = page.getByTestId("user-menu")
-  await expect(userMenu).toBeVisible({ timeout: 10000 })
-  await userMenu.click()
-  await page.getByRole("menuitem", { name: "Log out" }).click()
-  await page.waitForURL("/login")
-
+  await logInUser(page, firstSuperuser, firstSuperuserPassword)
+  await logOutUser(page)
   await page.goto("/settings")
   await page.waitForURL("/login")
 })

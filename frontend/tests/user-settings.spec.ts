@@ -9,6 +9,7 @@ const tabs = ["My profile", "Password", "Appearance"]
 // User Information
 
 test("My profile tab is active by default", async ({ page }) => {
+  await logInUser(page, firstSuperuser, firstSuperuserPassword)
   await page.goto("/settings")
   await expect(page.getByRole("tab", { name: "My profile" })).toHaveAttribute(
     "aria-selected",
@@ -17,6 +18,7 @@ test("My profile tab is active by default", async ({ page }) => {
 })
 
 test("All tabs are visible", async ({ page }) => {
+  await logInUser(page, firstSuperuser, firstSuperuserPassword)
   await page.goto("/settings")
   for (const tab of tabs) {
     await expect(page.getByRole("tab", { name: tab })).toBeVisible()
@@ -233,6 +235,7 @@ test.describe("Change password with invalid data", () => {
 // Appearance
 
 test("Appearance tab is visible", async ({ page }) => {
+  await logInUser(page, firstSuperuser, firstSuperuserPassword)
   await page.goto("/settings")
   await page.getByRole("tab", { name: "Appearance" }).click()
   await expect(page.getByLabel("Appearance")).toBeVisible()
@@ -241,6 +244,7 @@ test("Appearance tab is visible", async ({ page }) => {
 test("User can switch from light mode to dark mode and vice versa", async ({
   page,
 }) => {
+  await logInUser(page, firstSuperuser, firstSuperuserPassword)
   await page.goto("/settings")
   await page.getByRole("tab", { name: "Appearance" }).click()
 
@@ -287,6 +291,7 @@ test("User can switch from light mode to dark mode and vice versa", async ({
 })
 
 test("Selected mode is preserved across sessions", async ({ page }) => {
+  await logInUser(page, firstSuperuser, firstSuperuserPassword)
   await page.goto("/settings")
   await page.getByRole("tab", { name: "Appearance" }).click()
 

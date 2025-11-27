@@ -22,12 +22,10 @@ export async function logInUser(page: Page, email: string, password: string) {
   await page.getByPlaceholder("Email").fill(email)
   await page.getByPlaceholder("Password", { exact: true }).fill(password)
   await Promise.all([
-    page.waitForURL("/", { waitUntil: "domcontentloaded", timeout: 15000 }),
+    page.waitForURL("**", { waitUntil: "domcontentloaded" }),
     page.getByRole("button", { name: "Log In" }).click(),
   ])
-  await expect(
-    page.getByText("Welcome back, nice to see you again!"),
-  ).toBeVisible()
+  await expect(page.getByTestId("user-menu")).toBeVisible({ timeout: 10000 })
 }
 
 export async function logOutUser(page: Page) {

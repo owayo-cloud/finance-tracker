@@ -1,15 +1,29 @@
-import { Box, Container, Heading, Text, VStack, HStack, Tabs, Alert } from "@chakra-ui/react"
-import { createFileRoute } from "@tanstack/react-router"
-import { useState, useMemo } from "react"
+import {
+  Alert,
+  Box,
+  Container,
+  Heading,
+  HStack,
+  Tabs,
+  Text,
+  VStack,
+} from "@chakra-ui/react"
 import { useQuery } from "@tanstack/react-query"
-import { FiBarChart2, FiFileText, FiLayers, FiAlertCircle } from "react-icons/fi"
-import { SalesService, ExpensesService } from "@/client"
-import { DateFilters } from "@/components/Reports/DateFilters"
-import { SummaryCards } from "@/components/Reports/SummaryCards"
-import { SalesBreakdown } from "@/components/Reports/SalesBreakdown"
-import { ExpensesBreakdown } from "@/components/Reports/ExpensesBreakdown"
+import { createFileRoute } from "@tanstack/react-router"
+import { useMemo, useState } from "react"
+import {
+  FiAlertCircle,
+  FiBarChart2,
+  FiFileText,
+  FiLayers,
+} from "react-icons/fi"
+import { ExpensesService, SalesService } from "@/client"
 import { BalanceSheet } from "@/components/Reports/BalanceSheet"
+import { DateFilters } from "@/components/Reports/DateFilters"
+import { ExpensesBreakdown } from "@/components/Reports/ExpensesBreakdown"
+import { SalesBreakdown } from "@/components/Reports/SalesBreakdown"
 import { StockReport } from "@/components/Reports/StockReport"
+import { SummaryCards } from "@/components/Reports/SummaryCards"
 
 export const Route = createFileRoute("/_layout/reports")({
   component: Reports,
@@ -20,9 +34,11 @@ function Reports() {
   const firstDayOfMonth = new Date(today.getFullYear(), today.getMonth(), 1)
 
   const [startDate, setStartDate] = useState<string>(
-    firstDayOfMonth.toISOString().split("T")[0]
+    firstDayOfMonth.toISOString().split("T")[0],
   )
-  const [endDate, setEndDate] = useState<string>(today.toISOString().split("T")[0])
+  const [endDate, setEndDate] = useState<string>(
+    today.toISOString().split("T")[0],
+  )
   const [activeTab, setActiveTab] = useState<string>("overview")
 
   // Fetch sales summary from backend
@@ -37,11 +53,14 @@ function Reports() {
       const apiBase = import.meta.env.VITE_API_URL || ""
       const startParam = startDate ? `&start_date=${startDate}` : ""
       const endParam = endDate ? `&end_date=${endDate}` : ""
-      const response = await fetch(`${apiBase}/api/v1/analytics/sales-summary?${startParam}${endParam}`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
+      const response = await fetch(
+        `${apiBase}/api/v1/analytics/sales-summary?${startParam}${endParam}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
         },
-      })
+      )
       if (!response.ok) {
         throw new Error("Failed to fetch sales summary")
       }
@@ -50,10 +69,7 @@ function Reports() {
   })
 
   // Fetch sales data for breakdown components (still needed for detailed views)
-  const {
-    data: salesData,
-    isLoading: salesDataLoading,
-  } = useQuery({
+  const { data: salesData, isLoading: salesDataLoading } = useQuery({
     queryKey: ["sales-report", startDate, endDate],
     queryFn: () =>
       SalesService.readSales({
@@ -100,11 +116,14 @@ function Reports() {
     queryFn: async () => {
       const token = localStorage.getItem("access_token") || ""
       const apiBase = import.meta.env.VITE_API_URL || ""
-      const response = await fetch(`${apiBase}/api/v1/analytics/stock-summary`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
+      const response = await fetch(
+        `${apiBase}/api/v1/analytics/stock-summary`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
         },
-      })
+      )
       if (!response.ok) {
         throw new Error("Failed to fetch stock summary")
       }
@@ -120,11 +139,14 @@ function Reports() {
       const apiBase = import.meta.env.VITE_API_URL || ""
       const startParam = startDate ? `&start_date=${startDate}` : ""
       const endParam = endDate ? `&end_date=${endDate}` : ""
-      const response = await fetch(`${apiBase}/api/v1/analytics/balance-sheet?${startParam}${endParam}`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
+      const response = await fetch(
+        `${apiBase}/api/v1/analytics/balance-sheet?${startParam}${endParam}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
         },
-      })
+      )
       if (!response.ok) {
         throw new Error("Failed to fetch balance sheet")
       }
@@ -135,13 +157,17 @@ function Reports() {
   // Calculate net profit
   const netProfit = useMemo(() => {
     if (!salesSummary || !expenseSummary) return null
-    const expenseTotal = typeof expenseSummary === 'object' && expenseSummary !== null && 'total_amount' in expenseSummary
-      ? parseFloat((expenseSummary as any).total_amount?.toString() || "0")
-      : 0
+    const expenseTotal =
+      typeof expenseSummary === "object" &&
+      expenseSummary !== null &&
+      "total_amount" in expenseSummary
+        ? parseFloat((expenseSummary as any).total_amount?.toString() || "0")
+        : 0
     return salesSummary.total_amount - expenseTotal
   }, [salesSummary, expenseSummary])
 
-  const isLoading = salesLoading || salesDataLoading || expensesLoading || productsLoading
+  const isLoading =
+    salesLoading || salesDataLoading || expensesLoading || productsLoading
 
   const handleRefresh = () => {
     refetchSales()
@@ -159,7 +185,8 @@ function Reports() {
               Reports & Analytics
             </Heading>
             <Text fontSize="md" color="fg.muted">
-              Comprehensive financial reports, stock inventory, and business insights
+              Comprehensive financial reports, stock inventory, and business
+              insights
             </Text>
           </Box>
 
@@ -183,7 +210,10 @@ function Reports() {
           />
 
           {/* Tabs */}
-          <Tabs.Root value={activeTab} onValueChange={(e) => setActiveTab(e.value)}>
+          <Tabs.Root
+            value={activeTab}
+            onValueChange={(e) => setActiveTab(e.value)}
+          >
             <Tabs.List>
               <Tabs.Trigger value="overview">
                 <HStack gap={2}>
@@ -214,16 +244,18 @@ function Reports() {
                       salesSummary={{
                         totalAmount: salesSummary.total_amount,
                         paymentMethodBreakdown: Object.fromEntries(
-                          salesSummary.payment_method_breakdown.map((pm: any) => [
-                            pm.payment_method,
-                            { count: pm.count, amount: pm.amount }
-                          ])
+                          salesSummary.payment_method_breakdown.map(
+                            (pm: any) => [
+                              pm.payment_method,
+                              { count: pm.count, amount: pm.amount },
+                            ],
+                          ),
                         ),
                         cashierBreakdown: Object.fromEntries(
                           salesSummary.cashier_breakdown.map((c: any) => [
                             c.cashier_name,
-                            { count: c.count, amount: c.amount }
-                          ])
+                            { count: c.count, amount: c.amount },
+                          ]),
                         ),
                       }}
                       salesData={salesData.data}
@@ -235,16 +267,14 @@ function Reports() {
                   {expenseSummary &&
                   expensesData?.data &&
                   typeof expenseSummary === "object" &&
-                  expenseSummary !== null
-                    ? (
-                        <ExpensesBreakdown
-                          expenseSummary={expenseSummary as any}
-                          expensesData={expensesData.data as any[]}
-                          startDate={startDate}
-                          endDate={endDate}
-                        />
-                      )
-                    : null}
+                  expenseSummary !== null ? (
+                    <ExpensesBreakdown
+                      expenseSummary={expenseSummary as any}
+                      expensesData={expensesData.data as any[]}
+                      startDate={startDate}
+                      endDate={endDate}
+                    />
+                  ) : null}
                 </VStack>
               </Tabs.Content>
 
@@ -255,7 +285,8 @@ function Reports() {
                     balanceSheet={{
                       assets: {
                         inventory: balanceSheet.assets.inventory,
-                        cashAndReceivables: balanceSheet.assets.cash_and_receivables,
+                        cashAndReceivables:
+                          balanceSheet.assets.cash_and_receivables,
                         total: balanceSheet.assets.total,
                       },
                       liabilities: {
@@ -282,23 +313,25 @@ function Reports() {
               {/* Stock Report Tab */}
               <Tabs.Content value="stock">
                 {stockSummary ? (
-                  <StockReport stockSummary={{
-                    totalProducts: stockSummary.total_products,
-                    totalInventoryValue: stockSummary.total_inventory_value,
-                    lowStockCount: stockSummary.low_stock_count,
-                    outOfStockCount: stockSummary.out_of_stock_count,
-                    products: stockSummary.products.map((p: any) => ({
-                      id: p.id,
-                      name: p.name,
-                      category: p.category,
-                      currentStock: p.current_stock,
-                      buyingPrice: p.buying_price,
-                      sellingPrice: p.selling_price,
-                      inventoryValue: p.inventory_value,
-                      reorderLevel: p.reorder_level,
-                      status: p.status,
-                    })),
-                  }} />
+                  <StockReport
+                    stockSummary={{
+                      totalProducts: stockSummary.total_products,
+                      totalInventoryValue: stockSummary.total_inventory_value,
+                      lowStockCount: stockSummary.low_stock_count,
+                      outOfStockCount: stockSummary.out_of_stock_count,
+                      products: stockSummary.products.map((p: any) => ({
+                        id: p.id,
+                        name: p.name,
+                        category: p.category,
+                        currentStock: p.current_stock,
+                        buyingPrice: p.buying_price,
+                        sellingPrice: p.selling_price,
+                        inventoryValue: p.inventory_value,
+                        reorderLevel: p.reorder_level,
+                        status: p.status,
+                      })),
+                    }}
+                  />
                 ) : (
                   <Alert.Root status="info">
                     <Alert.Indicator>

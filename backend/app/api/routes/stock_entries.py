@@ -2,28 +2,33 @@ import uuid
 from typing import Any
 
 from fastapi import APIRouter, HTTPException, Query
-from sqlmodel import func, select, or_
-from sqlalchemy.orm import selectinload
 from sqlalchemy import desc
+from sqlalchemy.orm import selectinload
+from sqlmodel import func, or_, select
 
 from app.api.deps import AdminUser, CurrentUser, SessionDep
 from app.models import (
-    Product, StockEntry, StockEntryCreate, StockEntryPublic, 
-    StockEntriesPublic, StockEntryUpdate, ProductPublic
+    Product,
+    ProductPublic,
+    StockEntriesPublic,
+    StockEntry,
+    StockEntryCreate,
+    StockEntryPublic,
+    StockEntryUpdate,
 )
-
 
 router = APIRouter(prefix="/stock-entries", tags=["stock-entries"])
 
 
 # ==================== FAST PRODUCT SEARCH ====================
 
+
 @router.get("/search-products", response_model=list[ProductPublic])
 def search_products_for_stock_entry(
     session: SessionDep,
     current_user: CurrentUser,
     q: str = Query(..., min_length=1, description="Search query"),
-    limit: int = Query(50, le=100, description="Maximum results to return")
+    limit: int = Query(50, le=100, description="Maximum results to return"),
 ) -> Any:
     """
     Blazingly fast product search for stock entry.
@@ -31,10 +36,10 @@ def search_products_for_stock_entry(
     Returns products with all relationships loaded.
     """
     from app.models import ProductCategory
-    
+
     # Build search pattern for case-insensitive search
     search_pattern = f"%{q}%"
-    
+
     statement = (
         select(Product)
         .join(Product.category)
@@ -42,22 +47,23 @@ def search_products_for_stock_entry(
         .where(
             or_(
                 Product.name.ilike(search_pattern),
-                ProductCategory.name.ilike(search_pattern)
+                ProductCategory.name.ilike(search_pattern),
             )
         )
         .options(
             selectinload(Product.category),
             selectinload(Product.status),
-            selectinload(Product.image)
+            selectinload(Product.image),
         )
         .limit(limit)
     )
-    
+
     products = session.exec(statement).all()
     return products
 
 
 # ==================== STOCK ENTRIES CRUD ====================
+
 
 @router.get("/", response_model=StockEntriesPublic)
 def read_stock_entries(
@@ -65,7 +71,7 @@ def read_stock_entries(
     current_user: CurrentUser,
     skip: int = 0,
     limit: int = 100,
-    product_id: uuid.UUID | None = None
+    product_id: uuid.UUID | None = None,
 ) -> Any:
     """
     Retrieve stock entries.
@@ -74,9 +80,9 @@ def read_stock_entries(
     count_statement = select(func.count()).select_from(StockEntry)
     if product_id:
         count_statement = count_statement.where(StockEntry.product_id == product_id)
-    
+
     count = session.exec(count_statement).one()
-    
+
     statement = (
         select(StockEntry)
         .options(
@@ -89,10 +95,10 @@ def read_stock_entries(
         .limit(limit)
         .order_by(desc(StockEntry.entry_date))
     )
-    
+
     if product_id:
         statement = statement.where(StockEntry.product_id == product_id)
-    
+
     entries = session.exec(statement).all()
     return StockEntriesPublic(data=entries, count=count)
 
@@ -106,35 +112,32 @@ def create_stock_entry(
     """
     # Validate product exists and lock row to prevent race conditions
     product = session.exec(
-        select(Product)
-        .where(Product.id == entry_in.product_id)
-        .with_for_update()
+        select(Product).where(Product.id == entry_in.product_id).with_for_update()
     ).first()
     if not product:
         raise HTTPException(status_code=404, detail="Product not found")
-    
+
     # Create stock entry
     db_obj = StockEntry.model_validate(
         entry_in, update={"created_by_id": admin_user.id}
     )
-    
+
     # Update product current_stock based on closing_stock (atomic operation)
     product.current_stock = entry_in.closing_stock
-    
+
     # Save both operations in single transaction
     session.add(db_obj)
     session.add(product)
-    
+
     try:
         session.commit()
         session.refresh(db_obj)
     except Exception as e:
         session.rollback()
         raise HTTPException(
-            status_code=500,
-            detail=f"Failed to create stock entry: {str(e)}"
+            status_code=500, detail=f"Failed to create stock entry: {str(e)}"
         )
-    
+
     # Load relationships for response
     statement = (
         select(StockEntry)
@@ -147,7 +150,7 @@ def create_stock_entry(
         )
     )
     refreshed_obj = session.exec(statement).one()
-    
+
     return refreshed_obj
 
 
@@ -169,10 +172,10 @@ def read_stock_entry(
         )
     )
     entry = session.exec(statement).first()
-    
+
     if not entry:
         raise HTTPException(status_code=404, detail="Stock entry not found")
-    
+
     return entry
 
 
@@ -182,7 +185,7 @@ def update_stock_entry(
     session: SessionDep,
     admin_user: AdminUser,
     id: uuid.UUID,
-    entry_in: StockEntryUpdate
+    entry_in: StockEntryUpdate,
 ) -> Any:
     """
     Update a stock entry.
@@ -190,34 +193,31 @@ def update_stock_entry(
     entry = session.get(StockEntry, id)
     if not entry:
         raise HTTPException(status_code=404, detail="Stock entry not found")
-    
+
     # Update entry
     entry_data = entry_in.model_dump(exclude_unset=True)
     entry.sqlmodel_update(entry_data)
-    
+
     # Update product current_stock if closing_stock was updated (atomic operation)
     if entry_in.closing_stock is not None:
         product = session.exec(
-            select(Product)
-            .where(Product.id == entry.product_id)
-            .with_for_update()
+            select(Product).where(Product.id == entry.product_id).with_for_update()
         ).first()
         if product:
             product.current_stock = entry_in.closing_stock
             session.add(product)
-    
+
     session.add(entry)
-    
+
     try:
         session.commit()
         session.refresh(entry)
     except Exception as e:
         session.rollback()
         raise HTTPException(
-            status_code=500,
-            detail=f"Failed to update stock entry: {str(e)}"
+            status_code=500, detail=f"Failed to update stock entry: {str(e)}"
         )
-    
+
     # Load relationships for response
     statement = (
         select(StockEntry)
@@ -230,7 +230,7 @@ def update_stock_entry(
         )
     )
     refreshed_obj = session.exec(statement).one()
-    
+
     return refreshed_obj
 
 
@@ -244,7 +244,7 @@ def delete_stock_entry(
     entry = session.get(StockEntry, id)
     if not entry:
         raise HTTPException(status_code=404, detail="Stock entry not found")
-    
+
     session.delete(entry)
     session.commit()
     return {"message": "Stock entry deleted successfully"}

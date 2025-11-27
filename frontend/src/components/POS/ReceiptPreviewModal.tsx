@@ -1,21 +1,14 @@
+import { Box, Button, HStack, Table, Text, VStack } from "@chakra-ui/react"
+import { useQuery } from "@tanstack/react-query"
+import { OpenAPI, SalesService } from "@/client"
 import {
-  Box,
-  Button,
-  Text,
-  HStack,
-  Table,
-  VStack,
-} from "@chakra-ui/react"
-import {
-  DialogRoot,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
   DialogBody,
   DialogCloseTrigger,
+  DialogContent,
+  DialogHeader,
+  DialogRoot,
+  DialogTitle,
 } from "@/components/ui/dialog"
-import { useQuery } from "@tanstack/react-query"
-import { SalesService, OpenAPI } from "@/client"
 import { formatCurrency } from "./utils"
 
 interface ReceiptPreviewModalProps {
@@ -26,12 +19,12 @@ interface ReceiptPreviewModalProps {
 
 function formatDate(dateString: string): string {
   const date = new Date(dateString)
-  const day = date.getDate().toString().padStart(2, '0')
-  const month = date.toLocaleString('en-US', { month: 'short' })
+  const day = date.getDate().toString().padStart(2, "0")
+  const month = date.toLocaleString("en-US", { month: "short" })
   const year = date.getFullYear()
-  const hours = date.getHours().toString().padStart(2, '0')
-  const minutes = date.getMinutes().toString().padStart(2, '0')
-  const seconds = date.getSeconds().toString().padStart(2, '0')
+  const hours = date.getHours().toString().padStart(2, "0")
+  const minutes = date.getMinutes().toString().padStart(2, "0")
+  const seconds = date.getSeconds().toString().padStart(2, "0")
   return `${day}/${month}/${year} ${hours}:${minutes}:${seconds}`
 }
 
@@ -59,7 +52,7 @@ export function ReceiptPreviewModal({
           headers: {
             Authorization: `Bearer ${token}`,
           },
-        }
+        },
       )
       if (!response.ok) return []
       return response.json()
@@ -100,21 +93,82 @@ export function ReceiptPreviewModal({
             ) : receipt ? (
               <>
                 {/* Receipt Header */}
-                <Box p={6} bg={{ base: "#1a1d29", _light: "#ffffff" }} borderBottom="2px solid" borderColor="#14b8a6">
+                <Box
+                  p={6}
+                  bg={{ base: "#1a1d29", _light: "#ffffff" }}
+                  borderBottom="2px solid"
+                  borderColor="#14b8a6"
+                >
                   <VStack gap={2} align="center">
-                    <Text fontSize="2xl" fontWeight="bold" color="#14b8a6" letterSpacing="wide">
+                    <Text
+                      fontSize="2xl"
+                      fontWeight="bold"
+                      color="#14b8a6"
+                      letterSpacing="wide"
+                    >
                       WISEMAN PALACE
                     </Text>
-                    <Box w="full" borderTop="1px solid" borderColor={{ base: "rgba(255, 255, 255, 0.1)", _light: "#e5e7eb" }} pt={2} mt={1}>
-                      <VStack gap={1.5} align="center" fontSize="xs" color={{ base: "#9ca3af", _light: "#6b7280" }}>
-                        <Text fontWeight="medium">Receipt No: <Text as="span" fontWeight="bold" color={{ base: "#ffffff", _light: "#1a1d29" }}>{receipt.id.slice(-6)}</Text></Text>
+                    <Box
+                      w="full"
+                      borderTop="1px solid"
+                      borderColor={{
+                        base: "rgba(255, 255, 255, 0.1)",
+                        _light: "#e5e7eb",
+                      }}
+                      pt={2}
+                      mt={1}
+                    >
+                      <VStack
+                        gap={1.5}
+                        align="center"
+                        fontSize="xs"
+                        color={{ base: "#9ca3af", _light: "#6b7280" }}
+                      >
+                        <Text fontWeight="medium">
+                          Receipt No:{" "}
+                          <Text
+                            as="span"
+                            fontWeight="bold"
+                            color={{ base: "#ffffff", _light: "#1a1d29" }}
+                          >
+                            {receipt.id.slice(-6)}
+                          </Text>
+                        </Text>
                         <Text>Date: {formatDate(receipt.sale_date)}</Text>
                         {(receipt as any).created_by && (
-                          <Text>Cashier: <Text as="span" fontWeight="medium" color={{ base: "#ffffff", _light: "#1a1d29" }}>{(receipt as any).created_by.full_name || (receipt as any).created_by.username || "Unknown"}</Text></Text>
+                          <Text>
+                            Cashier:{" "}
+                            <Text
+                              as="span"
+                              fontWeight="medium"
+                              color={{ base: "#ffffff", _light: "#1a1d29" }}
+                            >
+                              {(receipt as any).created_by.full_name ||
+                                (receipt as any).created_by.username ||
+                                "Unknown"}
+                            </Text>
+                          </Text>
                         )}
                         {receipt.notes && (
-                          <Text mt={1} pt={2} borderTop="1px solid" borderColor={{ base: "rgba(255, 255, 255, 0.1)", _light: "#e5e7eb" }} w="full" textAlign="center">
-                            Remarks: <Text as="span" fontWeight="medium" color={{ base: "#ffffff", _light: "#1a1d29" }}>{receipt.notes}</Text>
+                          <Text
+                            mt={1}
+                            pt={2}
+                            borderTop="1px solid"
+                            borderColor={{
+                              base: "rgba(255, 255, 255, 0.1)",
+                              _light: "#e5e7eb",
+                            }}
+                            w="full"
+                            textAlign="center"
+                          >
+                            Remarks:{" "}
+                            <Text
+                              as="span"
+                              fontWeight="medium"
+                              color={{ base: "#ffffff", _light: "#1a1d29" }}
+                            >
+                              {receipt.notes}
+                            </Text>
                           </Text>
                         )}
                       </VStack>
@@ -123,75 +177,244 @@ export function ReceiptPreviewModal({
                 </Box>
 
                 {/* Receipt Items */}
-                <Box flex={1} overflowY="auto" p={6} bg={{ base: "rgba(255, 255, 255, 0.02)", _light: "#f9fafb" }}>
+                <Box
+                  flex={1}
+                  overflowY="auto"
+                  p={6}
+                  bg={{ base: "rgba(255, 255, 255, 0.02)", _light: "#f9fafb" }}
+                >
                   <Table.Root size="sm" variant="outline">
                     <Table.Header>
                       <Table.Row bg={{ base: "#14b8a6", _light: "#e0f2fe" }}>
-                        <Table.ColumnHeader color="white" fontWeight="bold" textAlign="left">Product</Table.ColumnHeader>
-                        <Table.ColumnHeader color="white" fontWeight="bold" textAlign="center">Qty</Table.ColumnHeader>
-                        <Table.ColumnHeader color="white" fontWeight="bold" textAlign="right">Unit Price</Table.ColumnHeader>
-                        <Table.ColumnHeader color="white" fontWeight="bold" textAlign="right">Total</Table.ColumnHeader>
+                        <Table.ColumnHeader
+                          color="white"
+                          fontWeight="bold"
+                          textAlign="left"
+                        >
+                          Product
+                        </Table.ColumnHeader>
+                        <Table.ColumnHeader
+                          color="white"
+                          fontWeight="bold"
+                          textAlign="center"
+                        >
+                          Qty
+                        </Table.ColumnHeader>
+                        <Table.ColumnHeader
+                          color="white"
+                          fontWeight="bold"
+                          textAlign="right"
+                        >
+                          Unit Price
+                        </Table.ColumnHeader>
+                        <Table.ColumnHeader
+                          color="white"
+                          fontWeight="bold"
+                          textAlign="right"
+                        >
+                          Total
+                        </Table.ColumnHeader>
                       </Table.Row>
                     </Table.Header>
                     <Table.Body>
-                      <Table.Row _hover={{ bg: { base: "rgba(20, 184, 166, 0.1)", _light: "#f0f9ff" } }}>
-                        <Table.Cell fontWeight="medium" color={{ base: "#ffffff", _light: "#1a1d29" }}>{receipt.product.name}</Table.Cell>
-                        <Table.Cell color={{ base: "#ffffff", _light: "#1a1d29" }} textAlign="center">{receipt.quantity}</Table.Cell>
-                        <Table.Cell color={{ base: "#ffffff", _light: "#1a1d29" }} textAlign="right">Ksh {formatCurrency(unitPrice)}</Table.Cell>
-                        <Table.Cell fontWeight="bold" color={{ base: "#ffffff", _light: "#1a1d29" }} textAlign="right">Ksh {formatCurrency(totalAmount)}</Table.Cell>
+                      <Table.Row
+                        _hover={{
+                          bg: {
+                            base: "rgba(20, 184, 166, 0.1)",
+                            _light: "#f0f9ff",
+                          },
+                        }}
+                      >
+                        <Table.Cell
+                          fontWeight="medium"
+                          color={{ base: "#ffffff", _light: "#1a1d29" }}
+                        >
+                          {receipt.product.name}
+                        </Table.Cell>
+                        <Table.Cell
+                          color={{ base: "#ffffff", _light: "#1a1d29" }}
+                          textAlign="center"
+                        >
+                          {receipt.quantity}
+                        </Table.Cell>
+                        <Table.Cell
+                          color={{ base: "#ffffff", _light: "#1a1d29" }}
+                          textAlign="right"
+                        >
+                          Ksh {formatCurrency(unitPrice)}
+                        </Table.Cell>
+                        <Table.Cell
+                          fontWeight="bold"
+                          color={{ base: "#ffffff", _light: "#1a1d29" }}
+                          textAlign="right"
+                        >
+                          Ksh {formatCurrency(totalAmount)}
+                        </Table.Cell>
                       </Table.Row>
                     </Table.Body>
                   </Table.Root>
                 </Box>
 
                 {/* Receipt Summary */}
-                <Box p={6} bg={{ base: "#1a1d29", _light: "#ffffff" }} borderTop="2px solid" borderColor="#14b8a6">
+                <Box
+                  p={6}
+                  bg={{ base: "#1a1d29", _light: "#ffffff" }}
+                  borderTop="2px solid"
+                  borderColor="#14b8a6"
+                >
                   <VStack gap={3} align="stretch" fontSize="sm">
                     <VStack gap={1.5} align="stretch">
                       <HStack justify="space-between" py={1}>
-                        <Text fontWeight="medium" color={{ base: "#d1d5db", _light: "#6b7280" }}>Subtotal:</Text>
-                        <Text fontWeight="medium" color={{ base: "#ffffff", _light: "#1a1d29" }}>Ksh {formatCurrency(netTotal)}</Text>
+                        <Text
+                          fontWeight="medium"
+                          color={{ base: "#d1d5db", _light: "#6b7280" }}
+                        >
+                          Subtotal:
+                        </Text>
+                        <Text
+                          fontWeight="medium"
+                          color={{ base: "#ffffff", _light: "#1a1d29" }}
+                        >
+                          Ksh {formatCurrency(netTotal)}
+                        </Text>
                       </HStack>
                       <HStack justify="space-between" py={1}>
-                        <Text fontWeight="medium" color={{ base: "#d1d5db", _light: "#6b7280" }}>VAT ({vatRate}%):</Text>
-                        <Text fontWeight="medium" color={{ base: "#ffffff", _light: "#1a1d29" }}>Ksh {formatCurrency(vatAmount)}</Text>
+                        <Text
+                          fontWeight="medium"
+                          color={{ base: "#d1d5db", _light: "#6b7280" }}
+                        >
+                          VAT ({vatRate}%):
+                        </Text>
+                        <Text
+                          fontWeight="medium"
+                          color={{ base: "#ffffff", _light: "#1a1d29" }}
+                        >
+                          Ksh {formatCurrency(vatAmount)}
+                        </Text>
                       </HStack>
                     </VStack>
-                    <Box borderTop="2px solid" borderColor="#14b8a6" pt={3} mt={1}>
+                    <Box
+                      borderTop="2px solid"
+                      borderColor="#14b8a6"
+                      pt={3}
+                      mt={1}
+                    >
                       <HStack justify="space-between">
-                        <Text fontWeight="bold" fontSize="lg" color="#14b8a6">Total:</Text>
-                        <Text fontWeight="bold" fontSize="lg" color="#14b8a6">Ksh {formatCurrency(totalAmount)}</Text>
+                        <Text fontWeight="bold" fontSize="lg" color="#14b8a6">
+                          Total:
+                        </Text>
+                        <Text fontWeight="bold" fontSize="lg" color="#14b8a6">
+                          Ksh {formatCurrency(totalAmount)}
+                        </Text>
                       </HStack>
                     </Box>
                     {/* Payment Methods */}
-                    <Box mt={2} pt={3} borderTop="1px solid" borderColor={{ base: "rgba(255, 255, 255, 0.1)", _light: "#e5e7eb" }}>
-                      <Text fontWeight="bold" mb={2} fontSize="sm" color={{ base: "#ffffff", _light: "#1a1d29" }}>Payment Methods:</Text>
+                    <Box
+                      mt={2}
+                      pt={3}
+                      borderTop="1px solid"
+                      borderColor={{
+                        base: "rgba(255, 255, 255, 0.1)",
+                        _light: "#e5e7eb",
+                      }}
+                    >
+                      <Text
+                        fontWeight="bold"
+                        mb={2}
+                        fontSize="sm"
+                        color={{ base: "#ffffff", _light: "#1a1d29" }}
+                      >
+                        Payment Methods:
+                      </Text>
                       {salePayments && salePayments.length > 0 ? (
                         <VStack gap={2} align="stretch">
                           {salePayments.map((payment: any) => {
-                            const cashMethod = payment.payment_method?.name?.toUpperCase().includes("CASH")
+                            const cashMethod = payment.payment_method?.name
+                              ?.toUpperCase()
+                              .includes("CASH")
                             const cashAmount = parseFloat(payment.amount || "0")
-                            const change = cashMethod && cashAmount > totalAmount ? cashAmount - totalAmount : 0
-                            
+                            const change =
+                              cashMethod && cashAmount > totalAmount
+                                ? cashAmount - totalAmount
+                                : 0
+
                             return (
-                              <Box key={payment.id} p={2} bg={{ base: "rgba(255, 255, 255, 0.05)", _light: "#f9fafb" }} borderRadius="md">
-                                <HStack justify="space-between" mb={payment.reference_number || change > 0 ? 1 : 0}>
-                                  <Text fontSize="sm" fontWeight="medium" color={{ base: "#ffffff", _light: "#1a1d29" }}>
+                              <Box
+                                key={payment.id}
+                                p={2}
+                                bg={{
+                                  base: "rgba(255, 255, 255, 0.05)",
+                                  _light: "#f9fafb",
+                                }}
+                                borderRadius="md"
+                              >
+                                <HStack
+                                  justify="space-between"
+                                  mb={
+                                    payment.reference_number || change > 0
+                                      ? 1
+                                      : 0
+                                  }
+                                >
+                                  <Text
+                                    fontSize="sm"
+                                    fontWeight="medium"
+                                    color={{
+                                      base: "#ffffff",
+                                      _light: "#1a1d29",
+                                    }}
+                                  >
                                     {payment.payment_method?.name || "Unknown"}:
                                   </Text>
-                                  <Text fontSize="sm" fontWeight="bold" color={{ base: "#ffffff", _light: "#1a1d29" }}>
-                                    Ksh {formatCurrency(parseFloat(payment.amount || "0"))}
+                                  <Text
+                                    fontSize="sm"
+                                    fontWeight="bold"
+                                    color={{
+                                      base: "#ffffff",
+                                      _light: "#1a1d29",
+                                    }}
+                                  >
+                                    Ksh{" "}
+                                    {formatCurrency(
+                                      parseFloat(payment.amount || "0"),
+                                    )}
                                   </Text>
                                 </HStack>
                                 {payment.reference_number && (
-                                  <Text fontSize="xs" color={{ base: "#9ca3af", _light: "#6b7280" }} mt={1}>
+                                  <Text
+                                    fontSize="xs"
+                                    color={{
+                                      base: "#9ca3af",
+                                      _light: "#6b7280",
+                                    }}
+                                    mt={1}
+                                  >
                                     Ref: {payment.reference_number}
                                   </Text>
                                 )}
                                 {change > 0 && (
-                                  <HStack justify="space-between" mt={2} pt={2} borderTop="1px solid" borderColor={{ base: "rgba(255, 255, 255, 0.1)", _light: "#e5e7eb" }}>
-                                    <Text fontSize="sm" fontWeight="bold" color="#22c55e">Change:</Text>
-                                    <Text fontSize="sm" fontWeight="bold" color="#22c55e">
+                                  <HStack
+                                    justify="space-between"
+                                    mt={2}
+                                    pt={2}
+                                    borderTop="1px solid"
+                                    borderColor={{
+                                      base: "rgba(255, 255, 255, 0.1)",
+                                      _light: "#e5e7eb",
+                                    }}
+                                  >
+                                    <Text
+                                      fontSize="sm"
+                                      fontWeight="bold"
+                                      color="#22c55e"
+                                    >
+                                      Change:
+                                    </Text>
+                                    <Text
+                                      fontSize="sm"
+                                      fontWeight="bold"
+                                      color="#22c55e"
+                                    >
                                       Ksh {formatCurrency(change)}
                                     </Text>
                                   </HStack>
@@ -201,12 +424,27 @@ export function ReceiptPreviewModal({
                           })}
                         </VStack>
                       ) : (
-                        <Box p={2} bg={{ base: "rgba(255, 255, 255, 0.05)", _light: "#f9fafb" }} borderRadius="md">
+                        <Box
+                          p={2}
+                          bg={{
+                            base: "rgba(255, 255, 255, 0.05)",
+                            _light: "#f9fafb",
+                          }}
+                          borderRadius="md"
+                        >
                           <HStack justify="space-between">
-                            <Text fontSize="sm" fontWeight="medium" color={{ base: "#ffffff", _light: "#1a1d29" }}>
+                            <Text
+                              fontSize="sm"
+                              fontWeight="medium"
+                              color={{ base: "#ffffff", _light: "#1a1d29" }}
+                            >
                               {receipt.payment_method.name}:
                             </Text>
-                            <Text fontSize="sm" fontWeight="bold" color={{ base: "#ffffff", _light: "#1a1d29" }}>
+                            <Text
+                              fontSize="sm"
+                              fontWeight="bold"
+                              color={{ base: "#ffffff", _light: "#1a1d29" }}
+                            >
                               Ksh {formatCurrency(totalAmount)}
                             </Text>
                           </HStack>
@@ -215,16 +453,44 @@ export function ReceiptPreviewModal({
                     </Box>
                     {/* Remarks Section */}
                     {receipt.notes && (
-                      <Box mt={3} pt={3} borderTop="1px solid" borderColor={{ base: "rgba(255, 255, 255, 0.1)", _light: "#e5e7eb" }}>
-                        <Text fontWeight="bold" mb={1} fontSize="sm" color={{ base: "#ffffff", _light: "#1a1d29" }}>Remarks:</Text>
-                        <Text fontSize="sm" color={{ base: "#d1d5db", _light: "#6b7280" }}>{receipt.notes}</Text>
+                      <Box
+                        mt={3}
+                        pt={3}
+                        borderTop="1px solid"
+                        borderColor={{
+                          base: "rgba(255, 255, 255, 0.1)",
+                          _light: "#e5e7eb",
+                        }}
+                      >
+                        <Text
+                          fontWeight="bold"
+                          mb={1}
+                          fontSize="sm"
+                          color={{ base: "#ffffff", _light: "#1a1d29" }}
+                        >
+                          Remarks:
+                        </Text>
+                        <Text
+                          fontSize="sm"
+                          color={{ base: "#d1d5db", _light: "#6b7280" }}
+                        >
+                          {receipt.notes}
+                        </Text>
                       </Box>
                     )}
                   </VStack>
                 </Box>
 
                 {/* Action Buttons */}
-                <Box p={4} bg={{ base: "rgba(255, 255, 255, 0.02)", _light: "#f9fafb" }} borderTop="1px solid" borderColor={{ base: "rgba(255, 255, 255, 0.1)", _light: "#e5e7eb" }}>
+                <Box
+                  p={4}
+                  bg={{ base: "rgba(255, 255, 255, 0.02)", _light: "#f9fafb" }}
+                  borderTop="1px solid"
+                  borderColor={{
+                    base: "rgba(255, 255, 255, 0.1)",
+                    _light: "#e5e7eb",
+                  }}
+                >
                   <HStack gap={2} justify="flex-end">
                     <Button
                       size="sm"
@@ -314,27 +580,44 @@ export function ReceiptPreviewModal({
                                     <span>Ksh ${formatCurrency(totalAmount)}</span>
                                   </div>
                                 </div>
-                                ${salePayments && salePayments.length > 0 ? `
+                                ${
+                                  salePayments && salePayments.length > 0
+                                    ? `
                                   <div class="payment-methods">
                                     <h3>Payment Methods:</h3>
-                                    ${salePayments.map((payment: any) => {
-                                      const cashMethod = payment.payment_method?.name?.toUpperCase().includes("CASH")
-                                      const cashAmount = parseFloat(payment.amount || "0")
-                                      const change = cashMethod && cashAmount > totalAmount ? cashAmount - totalAmount : 0
-                                      return `
+                                    ${salePayments
+                                      .map((payment: any) => {
+                                        const cashMethod =
+                                          payment.payment_method?.name
+                                            ?.toUpperCase()
+                                            .includes("CASH")
+                                        const cashAmount = parseFloat(
+                                          payment.amount || "0",
+                                        )
+                                        const change =
+                                          cashMethod && cashAmount > totalAmount
+                                            ? cashAmount - totalAmount
+                                            : 0
+                                        return `
                                         <div class="payment-item">
                                           <span>${payment.payment_method?.name || "Unknown"}:</span>
                                           <span>Ksh ${formatCurrency(cashAmount)}</span>
                                         </div>
                                         ${payment.reference_number ? `<div style="font-size: 10px; color: #666; margin-left: 10px; margin-top: 2px;">Ref: ${payment.reference_number}</div>` : ""}
-                                        ${change > 0 ? `<div class="payment-item change-item">
+                                        ${
+                                          change > 0
+                                            ? `<div class="payment-item change-item">
                                           <span>Change:</span>
                                           <span>Ksh ${formatCurrency(change)}</span>
-                                        </div>` : ""}
+                                        </div>`
+                                            : ""
+                                        }
                                       `
-                                    }).join("")}
+                                      })
+                                      .join("")}
                                   </div>
-                                ` : `
+                                `
+                                    : `
                                   <div class="payment-methods">
                                     <h3>Payment Methods:</h3>
                                     <div class="payment-item">
@@ -342,11 +625,16 @@ export function ReceiptPreviewModal({
                                       <span>Ksh ${formatCurrency(totalAmount)}</span>
                                     </div>
                                   </div>
-                                `}
-                                ${receipt.notes ? `<div style="margin-top: 15px; padding-top: 15px; border-top: 1px solid #ddd;">
+                                `
+                                }
+                                ${
+                                  receipt.notes
+                                    ? `<div style="margin-top: 15px; padding-top: 15px; border-top: 1px solid #ddd;">
                                   <div style="font-weight: bold; font-size: 13px; color: #333; margin-bottom: 5px;">Remarks:</div>
                                   <div style="font-size: 12px; color: #666;">${receipt.notes}</div>
-                                </div>` : ""}
+                                </div>`
+                                    : ""
+                                }
                                 <div class="footer">
                                   <p>Thank you for your business!</p>
                                   <p>©Anchor Core : Developed by NBS</p>
@@ -370,9 +658,17 @@ export function ReceiptPreviewModal({
                     <Button
                       size="sm"
                       variant="outline"
-                      borderColor={{ base: "rgba(255, 255, 255, 0.1)", _light: "#e5e7eb" }}
+                      borderColor={{
+                        base: "rgba(255, 255, 255, 0.1)",
+                        _light: "#e5e7eb",
+                      }}
                       color={{ base: "#ffffff", _light: "#1a1d29" }}
-                      _hover={{ bg: { base: "rgba(255, 255, 255, 0.05)", _light: "#f3f4f6" } }}
+                      _hover={{
+                        bg: {
+                          base: "rgba(255, 255, 255, 0.05)",
+                          _light: "#f3f4f6",
+                        },
+                      }}
                       onClick={onClose}
                     >
                       Close
@@ -391,4 +687,3 @@ export function ReceiptPreviewModal({
     </DialogRoot>
   )
 }
-

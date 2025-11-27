@@ -1,5 +1,18 @@
-import { Card, Grid, Skeleton, VStack, HStack, Text, Box } from "@chakra-ui/react"
-import { FiDollarSign, FiTrendingUp, FiTrendingDown, FiPackage } from "react-icons/fi"
+import {
+  Box,
+  Card,
+  Grid,
+  HStack,
+  Skeleton,
+  Text,
+  VStack,
+} from "@chakra-ui/react"
+import {
+  FiDollarSign,
+  FiPackage,
+  FiTrendingDown,
+  FiTrendingUp,
+} from "react-icons/fi"
 import { formatCurrency } from "./utils"
 
 interface SummaryCardsProps {
@@ -59,8 +72,8 @@ export function SummaryCards({
           bg="bg.surface"
           borderColor="border.card"
           borderWidth="1px"
-          _hover={{ 
-            transform: "translateY(-4px)", 
+          _hover={{
+            transform: "translateY(-4px)",
             shadow: "lg",
             borderColor: { base: "rgba(59, 130, 246, 0.4)", _light: "#3b82f6" },
           }}
@@ -80,7 +93,8 @@ export function SummaryCards({
                 Ksh {formatCurrency(salesSummary.totalAmount)}
               </Text>
               <Text fontSize="xs" color="fg.muted">
-                {salesSummary.totalSales} sales • {salesSummary.totalItems} items
+                {salesSummary.totalSales} sales • {salesSummary.totalItems}{" "}
+                items
               </Text>
             </VStack>
           </Card.Body>
@@ -93,8 +107,8 @@ export function SummaryCards({
           bg="bg.surface"
           borderColor="border.card"
           borderWidth="1px"
-          _hover={{ 
-            transform: "translateY(-4px)", 
+          _hover={{
+            transform: "translateY(-4px)",
             shadow: "lg",
             borderColor: { base: "rgba(59, 130, 246, 0.4)", _light: "#3b82f6" },
           }}
@@ -112,7 +126,9 @@ export function SummaryCards({
               </HStack>
               <Text fontSize="3xl" fontWeight="bold">
                 Ksh{" "}
-                {formatCurrency(parseFloat(expenseSummary.total_amount?.toString() || "0"))}
+                {formatCurrency(
+                  parseFloat(expenseSummary.total_amount?.toString() || "0"),
+                )}
               </Text>
               <Text fontSize="xs" color="fg.muted">
                 {expenseSummary.count} transactions
@@ -128,8 +144,8 @@ export function SummaryCards({
           bg="bg.surface"
           borderColor="border.card"
           borderWidth="1px"
-          _hover={{ 
-            transform: "translateY(-4px)", 
+          _hover={{
+            transform: "translateY(-4px)",
             shadow: "lg",
             borderColor: { base: "rgba(59, 130, 246, 0.4)", _light: "#3b82f6" },
           }}
@@ -174,8 +190,8 @@ export function SummaryCards({
           bg="bg.surface"
           borderColor="border.card"
           borderWidth="1px"
-          _hover={{ 
-            transform: "translateY(-4px)", 
+          _hover={{
+            transform: "translateY(-4px)",
             shadow: "lg",
             borderColor: { base: "rgba(59, 130, 246, 0.4)", _light: "#3b82f6" },
           }}
@@ -204,4 +220,3 @@ export function SummaryCards({
     </Grid>
   )
 }
-

@@ -1,34 +1,30 @@
 import {
+  // @ts-expect-error - used in JSX
+  Box,
   Button,
+  createListCollection,
   DialogActionTrigger,
   DialogTitle,
-  Input,
-  Text,
-  VStack,
   HStack,
-  // @ts-ignore - used in JSX
-  Box,
-  SimpleGrid,
+  Icon,
+  Input,
   SelectContent,
   SelectItem,
   SelectRoot,
   SelectTrigger,
   SelectValueText,
+  SimpleGrid,
+  Text,
   Textarea,
-  createListCollection,
-  // @ts-ignore - used in JSX
-  Image,
-  // @ts-ignore - used in JSX
-  IconButton,
-  Icon,
+  VStack,
 } from "@chakra-ui/react"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
-import { useEffect, useState, useMemo, useRef } from "react"
+import { useEffect, useMemo, useRef, useState } from "react"
 import { type SubmitHandler, useForm } from "react-hook-form"
-// @ts-ignore - used in JSX
-import { FaPlus, FaTimes, FaInfoCircle } from "react-icons/fa"
+// @ts-expect-error - used in JSX
+import { FaInfoCircle, FaPlus } from "react-icons/fa"
 
-import { type ProductCreate, ProductsService, MediaService } from "@/client"
+import { MediaService, type ProductCreate, ProductsService } from "@/client"
 import type { ApiError } from "@/client/core/ApiError"
 import useCustomToast from "@/hooks/useCustomToast"
 import { handleError } from "@/utils"
@@ -46,8 +42,8 @@ import { Field } from "../ui/field"
 const AddProduct = () => {
   const [isOpen, setIsOpen] = useState(false)
   const [imageFile, setImageFile] = useState<File | null>(null)
-  // @ts-ignore - used in JSX
-  const [imagePreview, setImagePreview] = useState<string | null>(null)
+  // @ts-expect-error - used in JSX
+  const [_imagePreview, setImagePreview] = useState<string | null>(null)
   const [uploadingImage, setUploadingImage] = useState(false)
   const [buyingPriceDisplay, setBuyingPriceDisplay] = useState("")
   const [sellingPriceDisplay, setSellingPriceDisplay] = useState("")
@@ -59,13 +55,13 @@ const AddProduct = () => {
   const formatNumber = (value: string): string => {
     // Remove all non-digit characters except decimal point
     const cleanValue = value.replace(/[^\d.]/g, "")
-    
+
     // Split by decimal point
     const parts = cleanValue.split(".")
-    
+
     // Add thousand separators to integer part
     parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ",")
-    
+
     // Rejoin with decimal point (limit to 2 decimal places)
     return parts.length > 1 ? `${parts[0]}.${parts[1].slice(0, 2)}` : parts[0]
   }
@@ -85,8 +81,6 @@ const AddProduct = () => {
     queryKey: ["statuses"],
     queryFn: () => ProductsService.readStatuses(),
   })
-
-
 
   const {
     register,
@@ -115,12 +109,10 @@ const AddProduct = () => {
     register("category_id", {
       required: "Category is required",
     })
-    
+
     register("status_id", {
       required: "Status is required",
     })
-
-
 
     register("buying_price", {
       required: "Buying price is required.",
@@ -135,10 +127,11 @@ const AddProduct = () => {
       required: "Selling price is required.",
       validate: (value, formValues) => {
         const numValue = typeof value === "string" ? parseFloat(value) : value
-        const buyingPrice = typeof formValues.buying_price === "string" 
-          ? parseFloat(formValues.buying_price) 
-          : formValues.buying_price
-        
+        const buyingPrice =
+          typeof formValues.buying_price === "string"
+            ? parseFloat(formValues.buying_price)
+            : formValues.buying_price
+
         if (numValue <= 0) return "Selling price must be greater than 0"
         if (numValue <= buyingPrice) {
           return "Selling price must be greater than buying price"
@@ -151,9 +144,11 @@ const AddProduct = () => {
   // Create collections for Select components
   const categoriesCollection = useMemo(() => {
     if (!categoriesData?.data) {
-      return createListCollection<{ label: string; value: string }>({ items: [] })
+      return createListCollection<{ label: string; value: string }>({
+        items: [],
+      })
     }
-    
+
     return createListCollection({
       items: categoriesData.data.map((category) => ({
         label: category.name,
@@ -164,9 +159,11 @@ const AddProduct = () => {
 
   const statusesCollection = useMemo(() => {
     if (!statusesData) {
-      return createListCollection<{ label: string; value: string }>({ items: [] })
+      return createListCollection<{ label: string; value: string }>({
+        items: [],
+      })
     }
-    
+
     return createListCollection({
       items: statusesData.map((status) => ({
         label: status.name,
@@ -174,8 +171,6 @@ const AddProduct = () => {
       })),
     })
   }, [statusesData])
-
-
 
   const mutation = useMutation({
     mutationFn: async (data: ProductCreate) => {
@@ -189,7 +184,7 @@ const AddProduct = () => {
           formData.append("file", imageFile)
 
           const uploadedMedia = await MediaService.uploadImage({
-            formData: { file: imageFile }
+            formData: { file: imageFile },
           })
 
           imageId = uploadedMedia.id
@@ -202,7 +197,7 @@ const AddProduct = () => {
 
       // Create product with image_id
       return ProductsService.createProduct({
-        requestBody: { ...data, image_id: imageId }
+        requestBody: { ...data, image_id: imageId },
       })
     },
     onSuccess: () => {
@@ -222,19 +217,23 @@ const AddProduct = () => {
     },
   })
 
-  // @ts-ignore - used in JSX
-  const handleImageSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
+  // @ts-expect-error - used in JSX
+  const _handleImageSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0]
     if (file) {
       // Strict validation: Only .jpg, .jpeg, and .png files
-      const validTypes = ['image/jpeg', 'image/jpg', 'image/png']
-      const validExtensions = ['.jpg', '.jpeg', '.png']
+      const validTypes = ["image/jpeg", "image/jpg", "image/png"]
+      const validExtensions = [".jpg", ".jpeg", ".png"]
       const fileName = file.name.toLowerCase()
-      const fileExtension = fileName.substring(fileName.lastIndexOf('.'))
-      
-      if (!validTypes.includes(file.type) || !validExtensions.includes(fileExtension)) {
-        handleError({ 
-          message: "Invalid file type. Only .jpg, .jpeg, and .png images are allowed." 
+      const fileExtension = fileName.substring(fileName.lastIndexOf("."))
+
+      if (
+        !validTypes.includes(file.type) ||
+        !validExtensions.includes(fileExtension)
+      ) {
+        handleError({
+          message:
+            "Invalid file type. Only .jpg, .jpeg, and .png images are allowed.",
         } as ApiError)
         // Reset the file input
         if (fileInputRef.current) {
@@ -264,8 +263,8 @@ const AddProduct = () => {
     }
   }
 
-  // @ts-ignore - used in JSX
-  const removeImage = () => {
+  // @ts-expect-error - used in JSX
+  const _removeImage = () => {
     setImageFile(null)
     setImagePreview(null)
     if (fileInputRef.current) {
@@ -285,12 +284,7 @@ const AddProduct = () => {
       onOpenChange={({ open }) => setIsOpen(open)}
     >
       <DialogTrigger asChild>
-        <Button 
-          value="add-product" 
-          my={4} 
-          colorScheme="teal"
-          size="md"
-        >
+        <Button value="add-product" my={4} colorScheme="teal" size="md">
           <FaPlus /> Add Product
         </Button>
       </DialogTrigger>
@@ -304,7 +298,7 @@ const AddProduct = () => {
               Fill in the details to add a new product to your inventory.
             </Text>
           </DialogHeader>
-          
+
           <DialogBody>
             <SimpleGrid columns={2} gap={6}>
               {/* Left Column */}
@@ -350,8 +344,14 @@ const AddProduct = () => {
                     size="md"
                     onValueChange={(e) => {
                       const selectedValue = e.value[0]
-                      if (selectedValue && selectedValue !== "loading" && selectedValue !== "none") {
-                        setValue("category_id", selectedValue, { shouldValidate: true })
+                      if (
+                        selectedValue &&
+                        selectedValue !== "loading" &&
+                        selectedValue !== "none"
+                      ) {
+                        setValue("category_id", selectedValue, {
+                          shouldValidate: true,
+                        })
                       }
                     }}
                   >
@@ -360,7 +360,12 @@ const AddProduct = () => {
                     </SelectTrigger>
                     <SelectContent>
                       {loadingCategories ? (
-                        <SelectItem item={{ label: "Loading categories...", value: "loading" }}>
+                        <SelectItem
+                          item={{
+                            label: "Loading categories...",
+                            value: "loading",
+                          }}
+                        >
                           Loading categories...
                         </SelectItem>
                       ) : categoriesCollection.items.length > 0 ? (
@@ -370,7 +375,12 @@ const AddProduct = () => {
                           </SelectItem>
                         ))
                       ) : (
-                        <SelectItem item={{ label: "No categories available", value: "none" }}>
+                        <SelectItem
+                          item={{
+                            label: "No categories available",
+                            value: "none",
+                          }}
+                        >
                           No categories available
                         </SelectItem>
                       )}
@@ -389,8 +399,14 @@ const AddProduct = () => {
                     size="md"
                     onValueChange={(e) => {
                       const selectedValue = e.value[0]
-                      if (selectedValue && selectedValue !== "loading" && selectedValue !== "none") {
-                        setValue("status_id", selectedValue, { shouldValidate: true })
+                      if (
+                        selectedValue &&
+                        selectedValue !== "loading" &&
+                        selectedValue !== "none"
+                      ) {
+                        setValue("status_id", selectedValue, {
+                          shouldValidate: true,
+                        })
                       }
                     }}
                   >
@@ -399,7 +415,12 @@ const AddProduct = () => {
                     </SelectTrigger>
                     <SelectContent>
                       {loadingStatuses ? (
-                        <SelectItem item={{ label: "Loading statuses...", value: "loading" }}>
+                        <SelectItem
+                          item={{
+                            label: "Loading statuses...",
+                            value: "loading",
+                          }}
+                        >
                           Loading statuses...
                         </SelectItem>
                       ) : statusesCollection.items.length > 0 ? (
@@ -409,41 +430,46 @@ const AddProduct = () => {
                           </SelectItem>
                         ))
                       ) : (
-                        <SelectItem item={{ label: "No statuses available", value: "none" }}>
+                        <SelectItem
+                          item={{
+                            label: "No statuses available",
+                            value: "none",
+                          }}
+                        >
                           No statuses available
                         </SelectItem>
                       )}
                     </SelectContent>
                   </SelectRoot>
                 </Field>
-
-                
               </VStack>
 
               {/* Right Column */}
               <VStack gap={4} align="stretch">
                 <HStack gap={4}>
-                <Field
-                  required
-                  invalid={!!errors.buying_price}
-                  errorText={errors.buying_price?.message}
-                  label="Buying Price (BP)"
-                  flex={1}
-                >
-                  <Input
-                    value={buyingPriceDisplay}
-                    onChange={(e) => {
-                      const formatted = formatNumber(e.target.value)
-                      setBuyingPriceDisplay(formatted)
-                      const numericValue = parseFormattedNumber(formatted)
-                      setValue("buying_price", numericValue, { shouldValidate: true })
-                    }}
-                    placeholder="0"
-                    type="text"
-                    size="md"
-                    borderRadius="md"
-                  />
-                </Field>
+                  <Field
+                    required
+                    invalid={!!errors.buying_price}
+                    errorText={errors.buying_price?.message}
+                    label="Buying Price (BP)"
+                    flex={1}
+                  >
+                    <Input
+                      value={buyingPriceDisplay}
+                      onChange={(e) => {
+                        const formatted = formatNumber(e.target.value)
+                        setBuyingPriceDisplay(formatted)
+                        const numericValue = parseFormattedNumber(formatted)
+                        setValue("buying_price", numericValue, {
+                          shouldValidate: true,
+                        })
+                      }}
+                      placeholder="0"
+                      type="text"
+                      size="md"
+                      borderRadius="md"
+                    />
+                  </Field>
                   <Field
                     required
                     invalid={!!errors.selling_price}
@@ -457,7 +483,9 @@ const AddProduct = () => {
                         const formatted = formatNumber(e.target.value)
                         setSellingPriceDisplay(formatted)
                         const numericValue = parseFormattedNumber(formatted)
-                        setValue("selling_price", numericValue, { shouldValidate: true })
+                        setValue("selling_price", numericValue, {
+                          shouldValidate: true,
+                        })
                       }}
                       placeholder="0"
                       type="text"
@@ -479,12 +507,21 @@ const AddProduct = () => {
                     <Icon color={{ base: "blue.400", _light: "blue.600" }}>
                       <FaInfoCircle />
                     </Icon>
-                    <Text fontWeight="semibold" fontSize="sm" color={{ base: "blue.300", _light: "blue.700" }}>
+                    <Text
+                      fontWeight="semibold"
+                      fontSize="sm"
+                      color={{ base: "blue.300", _light: "blue.700" }}
+                    >
                       Stock Management
                     </Text>
                   </HStack>
-                  <Text fontSize="xs" color={{ base: "gray.400", _light: "gray.600" }}>
-                    Initial stock levels and reorder points should be set via the <strong>Stock Adjustment</strong> module after creating the product.
+                  <Text
+                    fontSize="xs"
+                    color={{ base: "gray.400", _light: "gray.600" }}
+                  >
+                    Initial stock levels and reorder points should be set via
+                    the <strong>Stock Adjustment</strong> module after creating
+                    the product.
                   </Text>
                 </Box>
 

@@ -161,7 +161,11 @@ def generate_low_stock_notification_email(
 ) -> EmailData:
     project_name = settings.PROJECT_NAME
     subject = f"{project_name} - Low Stock Alert: {product_name}"
-    link = f"{settings.FRONTEND_HOST}/products/{product_id}" if product_id else f"{settings.FRONTEND_HOST}/products"
+    link = (
+        f"{settings.FRONTEND_HOST}/products/{product_id}"
+        if product_id
+        else f"{settings.FRONTEND_HOST}/products"
+    )
     html_content = render_email_template(
         template_name="low_stock_notification.html",
         context={

@@ -1,23 +1,22 @@
-import { createFileRoute } from "@tanstack/react-router"
 import { Box, Button } from "@chakra-ui/react"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
-import { useState, useMemo, useEffect } from "react"
-
-import { SalesService, type ProductPublic, OpenAPI } from "../../client"
-import useCustomToast from "../../hooks/useCustomToast"
-import useAuth from "../../hooks/useAuth"
+import { createFileRoute } from "@tanstack/react-router"
+import { useEffect, useMemo, useState } from "react"
 import { ActionButtons } from "@/components/POS/ActionButtons"
-import { ReceiptDetails } from "@/components/POS/ReceiptDetails"
-import { ProductTable } from "@/components/POS/ProductTable"
-import { CustomerPanel } from "@/components/POS/CustomerPanel"
-import { PaymentModal } from "@/components/POS/PaymentModal"
-import { RecentReceiptsModal } from "@/components/POS/RecentReceiptsModal"
-import { ReceiptPreviewModal } from "@/components/POS/ReceiptPreviewModal"
-import { CreditNoteModal } from "@/components/POS/CreditNoteModal"
 import { CashMovementModal } from "@/components/POS/CashMovementModal"
+import { CreditNoteModal } from "@/components/POS/CreditNoteModal"
+import { CustomerPanel } from "@/components/POS/CustomerPanel"
 import { CustomerSearchModal } from "@/components/POS/CustomerSearchModal"
 import { NewCustomerModal } from "@/components/POS/NewCustomerModal"
-import { CartItem, SuspendedSale } from "@/components/POS/types"
+import { PaymentModal } from "@/components/POS/PaymentModal"
+import { ProductTable } from "@/components/POS/ProductTable"
+import { ReceiptDetails } from "@/components/POS/ReceiptDetails"
+import { ReceiptPreviewModal } from "@/components/POS/ReceiptPreviewModal"
+import { RecentReceiptsModal } from "@/components/POS/RecentReceiptsModal"
+import type { CartItem, SuspendedSale } from "@/components/POS/types"
+import { OpenAPI, type ProductPublic, SalesService } from "../../client"
+import useAuth from "../../hooks/useAuth"
+import useCustomToast from "../../hooks/useCustomToast"
 
 export const Route = createFileRoute("/_layout/sales")({
   component: Sales,
@@ -27,25 +26,32 @@ function Sales() {
   const queryClient = useQueryClient()
   const showToast = useCustomToast()
   const { logout } = useAuth()
-  
+
   // State management
   const [searchQuery, setSearchQuery] = useState("")
   const [cart, setCart] = useState<CartItem[]>([])
   const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false)
   const [isProcessingPayment, setIsProcessingPayment] = useState(false) // Prevent double-saving
   const [isCustomerPanelOpen, setIsCustomerPanelOpen] = useState(false) // Mobile: customer panel collapsed by default
-  const [isRecentReceiptsModalOpen, setIsRecentReceiptsModalOpen] = useState(false)
-  const [isReceiptPreviewModalOpen, setIsReceiptPreviewModalOpen] = useState(false)
+  const [isRecentReceiptsModalOpen, setIsRecentReceiptsModalOpen] =
+    useState(false)
+  const [isReceiptPreviewModalOpen, setIsReceiptPreviewModalOpen] =
+    useState(false)
   const [isCreditNoteModalOpen, setIsCreditNoteModalOpen] = useState(false)
   const [isCashMovementModalOpen, setIsCashMovementModalOpen] = useState(false)
-  const [isCustomerSearchModalOpen, setIsCustomerSearchModalOpen] = useState(false)
+  const [isCustomerSearchModalOpen, setIsCustomerSearchModalOpen] =
+    useState(false)
   const [isNewCustomerModalOpen, setIsNewCustomerModalOpen] = useState(false)
-  const [selectedReceiptId, setSelectedReceiptId] = useState<string | null>(null)
-  const [receiptDateValue, setReceiptDateValue] = useState<string>(new Date().toISOString().split('T')[0])
+  const [selectedReceiptId, setSelectedReceiptId] = useState<string | null>(
+    null,
+  )
+  const [receiptDateValue, setReceiptDateValue] = useState<string>(
+    new Date().toISOString().split("T")[0],
+  )
   const [receiptDate, setReceiptDate] = useState<string>(() => {
     const today = new Date()
-    const day = today.getDate().toString().padStart(2, '0')
-    const month = today.toLocaleString('en-US', { month: 'short' })
+    const day = today.getDate().toString().padStart(2, "0")
+    const month = today.toLocaleString("en-US", { month: "short" })
     const year = today.getFullYear()
     return `${day}/${month}/${year}`
   })
@@ -60,24 +66,29 @@ function Sales() {
     }
   })
   const [selectedSaleId, setSelectedSaleId] = useState<string | null>(null)
-  const [activeTab, setActiveTab] = useState<"customer" | "suspended">("customer")
-  
+  const [activeTab, setActiveTab] = useState<"customer" | "suspended">(
+    "customer",
+  )
+
   // Customer state
   const [customerName, setCustomerName] = useState<string>("")
   const [customerTel, setCustomerTel] = useState<string>("")
   const [customerBalance, setCustomerBalance] = useState<number>(0)
   const [remarks, setRemarks] = useState<string>("")
   const [customerPin, setCustomerPin] = useState<string>("")
-  
+
   // Save suspended sales to localStorage whenever they change
   useEffect(() => {
     try {
-      localStorage.setItem("pos_suspended_sales", JSON.stringify(suspendedSales))
-    } catch (error) {
+      localStorage.setItem(
+        "pos_suspended_sales",
+        JSON.stringify(suspendedSales),
+      )
+    } catch (_error) {
       // Failed to save suspended sales - silently continue
     }
   }, [suspendedSales])
-  
+
   // Keyboard shortcuts
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -101,7 +112,9 @@ function Sales() {
         const suspendedSale: SuspendedSale = {
           id: Date.now().toString(),
           cart: [...cart],
-          customer: customerName ? { name: customerName, tel: customerTel, balance: customerBalance } : undefined,
+          customer: customerName
+            ? { name: customerName, tel: customerTel, balance: customerBalance }
+            : undefined,
           receiptDate,
           pricelist,
           remarks: remarks || undefined,
@@ -129,24 +142,40 @@ function Sales() {
             setReceiptDate(sale.receiptDate)
             setPricelist(sale.pricelist)
             setRemarks(sale.remarks || "")
-            setSuspendedSales((prev) => prev.filter((s) => s.id !== selectedSaleId))
+            setSuspendedSales((prev) =>
+              prev.filter((s) => s.id !== selectedSaleId),
+            )
             setSelectedSaleId(null)
             showToast.showSuccessToast("Sale resumed")
           }
         }
       }
     }
-    
+
     window.addEventListener("keydown", handleKeyDown)
     return () => window.removeEventListener("keydown", handleKeyDown)
-  }, [selectedSaleId, suspendedSales, cart, customerName, customerTel, customerBalance, receiptDate, pricelist, remarks, showToast])
+  }, [
+    selectedSaleId,
+    suspendedSales,
+    cart,
+    customerName,
+    customerTel,
+    customerBalance,
+    receiptDate,
+    pricelist,
+    remarks,
+    showToast,
+  ])
 
   // Fetch payment methods
-  const { data: paymentMethods, isLoading: isLoadingPaymentMethods, error: paymentMethodsError } = useQuery({
+  const {
+    data: paymentMethods,
+    isLoading: isLoadingPaymentMethods,
+    error: paymentMethodsError,
+  } = useQuery({
     queryKey: ["payment-methods"],
     queryFn: () => SalesService.readPaymentMethods({ limit: 100 }),
   })
-
 
   // Search products
   const searchProducts = useQuery({
@@ -191,7 +220,9 @@ function Sales() {
   // Cart management
   const addToCart = (product: ProductPublic) => {
     setCart((prevCart) => {
-      const existingItem = prevCart.find((item) => item.product.id === product.id)
+      const existingItem = prevCart.find(
+        (item) => item.product.id === product.id,
+      )
       if (existingItem) {
         if (existingItem.quantity + 1 > (product.current_stock || 0)) {
           showToast.showErrorToast("Insufficient stock")
@@ -200,7 +231,7 @@ function Sales() {
         return prevCart.map((item) =>
           item.product.id === product.id
             ? { ...item, quantity: item.quantity + 1 }
-            : item
+            : item,
         )
       }
       return [...prevCart, { product, quantity: 1, discount: 0 }]
@@ -208,7 +239,9 @@ function Sales() {
   }
 
   const removeFromCart = (productId: string) => {
-    setCart((prevCart) => prevCart.filter((item) => item.product.id !== productId))
+    setCart((prevCart) =>
+      prevCart.filter((item) => item.product.id !== productId),
+    )
   }
 
   const updateQuantity = (productId: string, delta: number) => {
@@ -225,15 +258,17 @@ function Sales() {
           }
           return item
         })
-        .filter((item) => item.quantity > 0)
+        .filter((item) => item.quantity > 0),
     )
   }
 
   const updateDiscount = (productId: string, discount: number) => {
     setCart((prevCart) =>
       prevCart.map((item) =>
-        item.product.id === productId ? { ...item, discount: Math.max(0, Math.min(100, discount)) } : item
-      )
+        item.product.id === productId
+          ? { ...item, discount: Math.max(0, Math.min(100, discount)) }
+          : item,
+      ),
     )
   }
 
@@ -241,7 +276,8 @@ function Sales() {
   const cartTotal = useMemo(() => {
     return cart.reduce((total, item) => {
       const price = Number(item.product.selling_price)
-      const discountAmount = (price * item.quantity * (item.discount || 0)) / 100
+      const discountAmount =
+        (price * item.quantity * (item.discount || 0)) / 100
       return total + (price * item.quantity - discountAmount)
     }, 0)
   }, [cart])
@@ -255,7 +291,9 @@ function Sales() {
     const suspendedSale: SuspendedSale = {
       id: Date.now().toString(),
       cart: [...cart],
-      customer: customerName ? { name: customerName, tel: customerTel, balance: customerBalance } : undefined,
+      customer: customerName
+        ? { name: customerName, tel: customerTel, balance: customerBalance }
+        : undefined,
       receiptDate,
       pricelist,
       remarks: remarks || undefined,
@@ -295,15 +333,17 @@ function Sales() {
       return
     }
     setIsPaymentModalOpen(true)
-    }
+  }
 
   // Process payment with multiple payment methods
-  const processPayment = async (payments: Record<string, { amount: number; refNo?: string }>) => {
+  const processPayment = async (
+    payments: Record<string, { amount: number; refNo?: string }>,
+  ) => {
     // Prevent double-saving
     if (isProcessingPayment) {
       return
     }
-    
+
     setIsProcessingPayment(true)
     try {
       // Note: Stock validation is handled by the backend endpoint
@@ -321,22 +361,28 @@ function Sales() {
       // Validate total payments
       const totalPaid = paymentArray.reduce((sum, p) => sum + p.amount, 0)
       const difference = totalPaid - cartTotal
-      
+
       // If customer is selected, allow partial payment (will create debt)
       // Otherwise, require full payment
       if (!customerName) {
         // No customer: require full payment
         if (difference < -0.01) {
           showToast.showErrorToast(
-            `Payment total (${totalPaid.toFixed(2)}) is less than cart total (${cartTotal.toFixed(2)}). Please add ${Math.abs(difference).toFixed(2)} more.`
+            `Payment total (${totalPaid.toFixed(2)}) is less than cart total (${cartTotal.toFixed(2)}). Please add ${Math.abs(difference).toFixed(2)} more.`,
           )
           return
         }
-        
+
         // If there's a small underpayment (0.01-0.10), adjust the largest payment to match exactly
-        if (difference >= -0.10 && difference < -0.01 && paymentArray.length > 0) {
-          const largestPaymentIndex = paymentArray.reduce((maxIdx, p, idx) => 
-            p.amount > paymentArray[maxIdx].amount ? idx : maxIdx, 0
+        if (
+          difference >= -0.1 &&
+          difference < -0.01 &&
+          paymentArray.length > 0
+        ) {
+          const largestPaymentIndex = paymentArray.reduce(
+            (maxIdx, p, idx) =>
+              p.amount > paymentArray[maxIdx].amount ? idx : maxIdx,
+            0,
           )
           const adjustment = cartTotal - totalPaid
           paymentArray[largestPaymentIndex].amount += adjustment
@@ -346,7 +392,7 @@ function Sales() {
         // No minimum payment required - zero payment means full amount becomes debt
         // If payment exceeds total, that's fine (change will be given)
       }
-      
+
       // Overpayment is allowed (for change), so we don't need to adjust or error on that
 
       // Process each cart item with all payment methods
@@ -354,33 +400,42 @@ function Sales() {
       const token = localStorage.getItem("access_token") || ""
       const apiBase = OpenAPI.BASE || import.meta.env.VITE_API_URL || ""
       let firstSaleId: string | null = null
-      
+
       for (let itemIndex = 0; itemIndex < cart.length; itemIndex++) {
         const item = cart[itemIndex]
         const unitPrice = Number(item.product.selling_price)
-        const discountAmount = (unitPrice * item.quantity * (item.discount || 0)) / 100
+        const discountAmount =
+          (unitPrice * item.quantity * (item.discount || 0)) / 100
         const itemTotal = unitPrice * item.quantity - discountAmount
-        
+
         // Calculate payment amounts proportionally for this item
         const itemPaymentRatio = itemTotal / cartTotal
         const isLastItem = itemIndex === cart.length - 1
-        
+
         const itemPayments = paymentArray.map((payment) => {
           let amount = payment.amount * itemPaymentRatio
-          
+
           // For the last item, ensure we use the remaining amount to avoid rounding errors
           if (isLastItem) {
             // Calculate what was already allocated to previous items
-            const previousItemsTotal = cart.slice(0, -1).reduce((sum, prevItem) => {
-              const prevUnitPrice = Number(prevItem.product.selling_price)
-              const prevDiscountAmount = (prevUnitPrice * prevItem.quantity * (prevItem.discount || 0)) / 100
-              return sum + (prevUnitPrice * prevItem.quantity - prevDiscountAmount)
-            }, 0)
+            const previousItemsTotal = cart
+              .slice(0, -1)
+              .reduce((sum, prevItem) => {
+                const prevUnitPrice = Number(prevItem.product.selling_price)
+                const prevDiscountAmount =
+                  (prevUnitPrice *
+                    prevItem.quantity *
+                    (prevItem.discount || 0)) /
+                  100
+                return (
+                  sum + (prevUnitPrice * prevItem.quantity - prevDiscountAmount)
+                )
+              }, 0)
             const previousRatio = previousItemsTotal / cartTotal
             const alreadyAllocated = payment.amount * previousRatio
             amount = payment.amount - alreadyAllocated
           }
-          
+
           // Round to 2 decimal places
           return {
             payment_method_id: payment.payment_method_id,
@@ -388,19 +443,31 @@ function Sales() {
             reference_number: payment.reference_number,
           }
         })
-        
+
         // Ensure item payment totals match item total exactly (adjust largest payment if needed)
         // But if customer is selected and partial payment, allow it
-        const itemPaymentsTotal = itemPayments.reduce((sum, p) => sum + p.amount, 0)
+        const itemPaymentsTotal = itemPayments.reduce(
+          (sum, p) => sum + p.amount,
+          0,
+        )
         const itemDifference = itemTotal - itemPaymentsTotal
-        
+
         // Only adjust if no customer (full payment required) or if overpayment
-        if (!customerName && Math.abs(itemDifference) > 0.001 && itemPayments.length > 0) {
+        if (
+          !customerName &&
+          Math.abs(itemDifference) > 0.001 &&
+          itemPayments.length > 0
+        ) {
           // Adjust the largest payment to match exactly
-          const largestPaymentIndex = itemPayments.reduce((maxIdx, p, idx) => 
-            p.amount > itemPayments[maxIdx].amount ? idx : maxIdx, 0
+          const largestPaymentIndex = itemPayments.reduce(
+            (maxIdx, p, idx) =>
+              p.amount > itemPayments[maxIdx].amount ? idx : maxIdx,
+            0,
           )
-          itemPayments[largestPaymentIndex].amount = Math.round((itemPayments[largestPaymentIndex].amount + itemDifference) * 100) / 100
+          itemPayments[largestPaymentIndex].amount =
+            Math.round(
+              (itemPayments[largestPaymentIndex].amount + itemDifference) * 100,
+            ) / 100
         }
 
         // Use the new multi-payment endpoint
@@ -426,12 +493,12 @@ function Sales() {
           try {
             const error = await response.json()
             errorMessage = error.detail || error.message || errorMessage
-          } catch (e) {
+          } catch (_e) {
             errorMessage = `HTTP ${response.status}: ${response.statusText}`
           }
           throw new Error(errorMessage)
         }
-        
+
         // Get sale ID from response
         const saleData = await response.json()
         if (saleData.id) {
@@ -441,11 +508,11 @@ function Sales() {
           }
         }
       }
-      
+
       // Create debt if customer is selected and payment is less than total
       if (customerName && totalPaid < cartTotal) {
         const debtAmount = cartTotal - totalPaid
-        
+
         try {
           // Create one debt for the entire cart (linked to first sale)
           const debtResponse = await fetch(`${apiBase}/api/v1/debts/`, {
@@ -464,20 +531,28 @@ function Sales() {
               debt_date: new Date().toISOString(),
               due_date: null,
               status: "pending",
-              notes: remarks || `Credit sale - ${cart.length} item(s), Balance: ${debtAmount.toFixed(2)}`,
+              notes:
+                remarks ||
+                `Credit sale - ${cart.length} item(s), Balance: ${debtAmount.toFixed(2)}`,
             }),
           })
-          
+
           if (!debtResponse.ok) {
             const errorText = await debtResponse.text()
             // Don't throw - sale was successful, debt creation is secondary
-            showToast.showErrorToast(`Sale completed but failed to record debt: ${errorText}`)
+            showToast.showErrorToast(
+              `Sale completed but failed to record debt: ${errorText}`,
+            )
           } else {
-            showToast.showSuccessToast(`Sale completed. Debt of ${debtAmount.toFixed(2)} recorded for ${customerName}`)
+            showToast.showSuccessToast(
+              `Sale completed. Debt of ${debtAmount.toFixed(2)} recorded for ${customerName}`,
+            )
           }
         } catch (error: any) {
           // Don't throw - sale was successful
-          showToast.showErrorToast(`Sale completed but failed to record debt: ${error.message || "Unknown error"}`)
+          showToast.showErrorToast(
+            `Sale completed but failed to record debt: ${error.message || "Unknown error"}`,
+          )
         }
       }
 
@@ -490,7 +565,9 @@ function Sales() {
       queryClient.invalidateQueries({ queryKey: ["search-products"] })
       queryClient.invalidateQueries({ queryKey: ["recent-receipts"] })
       queryClient.invalidateQueries({ queryKey: ["debts-for-customers"] })
-      queryClient.invalidateQueries({ queryKey: ["recent-sales-for-customers"] })
+      queryClient.invalidateQueries({
+        queryKey: ["recent-sales-for-customers"],
+      })
 
       setIsPaymentModalOpen(false)
       setCart([])
@@ -500,7 +577,10 @@ function Sales() {
       setCustomerBalance(0)
       setRemarks("")
     } catch (error: any) {
-      const errorMessage = error?.message || error?.detail || "Failed to complete sale. Please check your connection and try again."
+      const errorMessage =
+        error?.message ||
+        error?.detail ||
+        "Failed to complete sale. Please check your connection and try again."
       showToast.showErrorToast(errorMessage)
       throw error
     } finally {
@@ -508,11 +588,15 @@ function Sales() {
     }
   }
 
-  const handleSave = async (payments: Record<string, { amount: number; refNo?: string }>) => {
+  const handleSave = async (
+    payments: Record<string, { amount: number; refNo?: string }>,
+  ) => {
     await processPayment(payments)
   }
 
-  const handleSaveAndPrint = async (payments: Record<string, { amount: number; refNo?: string }>) => {
+  const handleSaveAndPrint = async (
+    payments: Record<string, { amount: number; refNo?: string }>,
+  ) => {
     try {
       await processPayment(payments)
       // Get the most recent sale for printing
@@ -534,7 +618,7 @@ function Sales() {
           }, 1000)
         }
       }
-    } catch (error) {
+    } catch (_error) {
       // Error already handled in processPayment
     }
   }
@@ -556,22 +640,29 @@ function Sales() {
     setCustomerBalance(0)
   }
 
-  const handleSelectCustomer = async (customer: { name: string; tel: string; balance: number }) => {
+  const handleSelectCustomer = async (customer: {
+    name: string
+    tel: string
+    balance: number
+  }) => {
     setCustomerName(customer.name)
     setCustomerTel(customer.tel)
     setCustomerBalance(customer.balance)
-    
+
     // Fetch latest balance from API
     try {
       const token = localStorage.getItem("access_token") || ""
       const apiBase = OpenAPI.BASE || import.meta.env.VITE_API_URL || ""
       // URL encode the customer name properly
       const encodedName = encodeURIComponent(customer.name)
-      const response = await fetch(`${apiBase}/api/v1/debts/customers/${encodedName}/balance`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
+      const response = await fetch(
+        `${apiBase}/api/v1/debts/customers/${encodedName}/balance`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
         },
-      })
+      )
       if (response.ok) {
         const balanceData = await response.json()
         setCustomerBalance(balanceData.total_balance || 0)
@@ -579,12 +670,16 @@ function Sales() {
         // Customer has no debts yet, balance is 0
         setCustomerBalance(0)
       }
-    } catch (error) {
+    } catch (_error) {
       // Use the balance from customer object as fallback
     }
   }
 
-  const handleNewCustomerSave = (customer: { name: string; tel: string; balance: number }) => {
+  const handleNewCustomerSave = (customer: {
+    name: string
+    tel: string
+    balance: number
+  }) => {
     handleSelectCustomer(customer)
   }
 
@@ -597,8 +692,8 @@ function Sales() {
     e.target.type = "text"
     if (e.target.value) {
       const date = new Date(e.target.value)
-      const day = date.getDate().toString().padStart(2, '0')
-      const month = date.toLocaleString('en-US', { month: 'short' })
+      const day = date.getDate().toString().padStart(2, "0")
+      const month = date.toLocaleString("en-US", { month: "short" })
       const year = date.getFullYear()
       setReceiptDate(`${day}/${month}/${year}`)
       setReceiptDateValue(e.target.value)
@@ -606,7 +701,13 @@ function Sales() {
   }
 
   return (
-    <Box h="100%" bg="bg.canvas" display="flex" flexDirection="column" overflow={{ base: "auto", lg: "hidden" }}>
+    <Box
+      h="100%"
+      bg="bg.canvas"
+      display="flex"
+      flexDirection="column"
+      overflow={{ base: "auto", lg: "hidden" }}
+    >
       <ActionButtons
         onLogout={logout}
         onReset={resetSale}
@@ -630,15 +731,27 @@ function Sales() {
         onClose={() => setIsPaymentModalOpen(false)}
         cart={cart}
         totalAmount={cartTotal}
-        paymentMethods={paymentMethods?.data ? paymentMethods.data.map((m) => ({
-          id: m.id,
-          name: m.name,
-          type: m.name.toUpperCase().includes("CASH") ? "CASH" :
-                m.name.toUpperCase().includes("MPESA") ? "MPESA" :
-                m.name.toUpperCase().includes("PDQ") || m.name.toUpperCase().includes("KCB") ? "PDQ" :
-                m.name.toUpperCase().includes("BANK") || m.name.toUpperCase().includes("EQUITY") ? "BANK" :
-                m.name.toUpperCase().includes("CREDIT") ? "CREDIT_NOTE" : "OTHER",
-        })) : []}
+        paymentMethods={
+          paymentMethods?.data
+            ? paymentMethods.data.map((m) => ({
+                id: m.id,
+                name: m.name,
+                type: m.name.toUpperCase().includes("CASH")
+                  ? "CASH"
+                  : m.name.toUpperCase().includes("MPESA")
+                    ? "MPESA"
+                    : m.name.toUpperCase().includes("PDQ") ||
+                        m.name.toUpperCase().includes("KCB")
+                      ? "PDQ"
+                      : m.name.toUpperCase().includes("BANK") ||
+                          m.name.toUpperCase().includes("EQUITY")
+                        ? "BANK"
+                        : m.name.toUpperCase().includes("CREDIT")
+                          ? "CREDIT_NOTE"
+                          : "OTHER",
+              }))
+            : []
+        }
         onSave={handleSave}
         onSaveAndPrint={handleSaveAndPrint}
         isProcessing={isProcessingPayment || createSale.isPending}
@@ -649,21 +762,21 @@ function Sales() {
       />
 
       {/* Main Content Area */}
-      <Box 
-        display="flex" 
-        flex={1} 
-        overflow={{ base: "visible", lg: "hidden" }} 
-        minH={0} 
+      <Box
+        display="flex"
+        flex={1}
+        overflow={{ base: "visible", lg: "hidden" }}
+        minH={0}
         flexDirection={{ base: "column", lg: "row" }}
         position="relative"
       >
         {/* Left Panel - Products Table (Prioritized on mobile) */}
-        <Box 
-          flex={1} 
-          display="flex" 
-          flexDirection="column" 
-          bg="bg.canvas" 
-          minW={0} 
+        <Box
+          flex={1}
+          display="flex"
+          flexDirection="column"
+          bg="bg.canvas"
+          minW={0}
           overflow="hidden"
           order={{ base: 1, lg: 0 }} // Show first on mobile
           minH={{ base: isCustomerPanelOpen ? "50vh" : "70vh", lg: "auto" }} // Adjust height based on panel state
@@ -736,7 +849,7 @@ function Sales() {
             }}
           />
         </Box>
-        
+
         {/* Mobile: Toggle button for customer panel */}
         <Box
           display={{ base: "block", lg: "none" }}
@@ -751,9 +864,14 @@ function Sales() {
               // Scroll to customer panel when opening
               if (!isCustomerPanelOpen) {
                 setTimeout(() => {
-                  const customerPanel = document.querySelector('[data-customer-panel]')
+                  const customerPanel = document.querySelector(
+                    "[data-customer-panel]",
+                  )
                   if (customerPanel) {
-                    customerPanel.scrollIntoView({ behavior: 'smooth', block: 'start' })
+                    customerPanel.scrollIntoView({
+                      behavior: "smooth",
+                      block: "start",
+                    })
                   }
                 }, 100)
               }
@@ -769,11 +887,17 @@ function Sales() {
           </Button>
         </Box>
       </Box>
-                    
+
       {/* Footer */}
-      <Box py={2} textAlign="right" px={{ base: 4, md: 6 }} fontSize="xs" color="text.muted">
+      <Box
+        py={2}
+        textAlign="right"
+        px={{ base: 4, md: 6 }}
+        fontSize="xs"
+        color="text.muted"
+      >
         ©Anchor Core : Developed by NBS
-          </Box>
+      </Box>
 
       <RecentReceiptsModal
         isOpen={isRecentReceiptsModalOpen}
@@ -828,6 +952,6 @@ function Sales() {
         onClose={() => setIsNewCustomerModalOpen(false)}
         onSave={handleNewCustomerSave}
       />
-          </Box>
+    </Box>
   )
 }

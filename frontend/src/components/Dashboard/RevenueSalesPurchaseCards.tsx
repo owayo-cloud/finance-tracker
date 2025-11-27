@@ -1,7 +1,7 @@
-import { Box, Grid, HStack, VStack, Text, Icon } from "@chakra-ui/react"
-import { FiBox, FiShoppingCart, FiTrendingUp } from "react-icons/fi"
+import { Box, Grid, HStack, Icon, Text, VStack } from "@chakra-ui/react"
 import { useQuery } from "@tanstack/react-query"
 import { useMemo } from "react"
+import { FiBox, FiShoppingCart, FiTrendingUp } from "react-icons/fi"
 import { SalesService } from "@/client"
 import { formatCurrency } from "./utils"
 
@@ -15,15 +15,25 @@ function calculatePercentageChange(current: number, previous: number): number {
   return ((current - previous) / previous) * 100
 }
 
-export function RevenueSalesPurchaseCards({ isMounted }: RevenueSalesPurchaseCardsProps) {
+export function RevenueSalesPurchaseCards({
+  isMounted,
+}: RevenueSalesPurchaseCardsProps) {
   const today = new Date()
   const firstDayOfMonth = new Date(today.getFullYear(), today.getMonth(), 1)
   const lastDayOfLastMonth = new Date(today.getFullYear(), today.getMonth(), 0)
-  const firstDayOfLastMonth = new Date(today.getFullYear(), today.getMonth() - 1, 1)
+  const firstDayOfLastMonth = new Date(
+    today.getFullYear(),
+    today.getMonth() - 1,
+    1,
+  )
 
   // Fetch current month sales
   const { data: currentMonthSales } = useQuery({
-    queryKey: ["sales-revenue-cards-current", firstDayOfMonth.toISOString().split("T")[0], today.toISOString().split("T")[0]],
+    queryKey: [
+      "sales-revenue-cards-current",
+      firstDayOfMonth.toISOString().split("T")[0],
+      today.toISOString().split("T")[0],
+    ],
     queryFn: () =>
       SalesService.readSales({
         skip: 0,
@@ -35,7 +45,11 @@ export function RevenueSalesPurchaseCards({ isMounted }: RevenueSalesPurchaseCar
 
   // Fetch previous month sales
   const { data: previousMonthSales } = useQuery({
-    queryKey: ["sales-revenue-cards-previous", firstDayOfLastMonth.toISOString().split("T")[0], lastDayOfLastMonth.toISOString().split("T")[0]],
+    queryKey: [
+      "sales-revenue-cards-previous",
+      firstDayOfLastMonth.toISOString().split("T")[0],
+      lastDayOfLastMonth.toISOString().split("T")[0],
+    ],
     queryFn: () =>
       SalesService.readSales({
         skip: 0,
@@ -50,7 +64,7 @@ export function RevenueSalesPurchaseCards({ isMounted }: RevenueSalesPurchaseCar
     if (!currentMonthSales?.data) return 0
     return currentMonthSales.data.reduce(
       (sum, sale) => sum + parseFloat(sale.total_amount || "0"),
-      0
+      0,
     )
   }, [currentMonthSales])
 
@@ -59,7 +73,7 @@ export function RevenueSalesPurchaseCards({ isMounted }: RevenueSalesPurchaseCar
     if (!previousMonthSales?.data) return 0
     return previousMonthSales.data.reduce(
       (sum, sale) => sum + parseFloat(sale.total_amount || "0"),
-      0
+      0,
     )
   }, [previousMonthSales])
 
@@ -84,12 +98,21 @@ export function RevenueSalesPurchaseCards({ isMounted }: RevenueSalesPurchaseCar
   }, [previousMonthRevenue, previousMonthSalesCount])
 
   // Calculate percentages
-  const revenueChange = calculatePercentageChange(currentMonthRevenue, previousMonthRevenue)
-  const salesCountChange = calculatePercentageChange(currentMonthSalesCount, previousMonthSalesCount)
-  const avgSaleValueChange = calculatePercentageChange(currentMonthAvgSaleValue, previousMonthAvgSaleValue)
+  const revenueChange = calculatePercentageChange(
+    currentMonthRevenue,
+    previousMonthRevenue,
+  )
+  const salesCountChange = calculatePercentageChange(
+    currentMonthSalesCount,
+    previousMonthSalesCount,
+  )
+  const avgSaleValueChange = calculatePercentageChange(
+    currentMonthAvgSaleValue,
+    previousMonthAvgSaleValue,
+  )
 
   return (
-    <Box 
+    <Box
       mb={8}
       opacity={isMounted ? 1 : 0}
       transform={isMounted ? "translateY(0)" : "translateY(20px)"}
@@ -103,16 +126,22 @@ export function RevenueSalesPurchaseCards({ isMounted }: RevenueSalesPurchaseCar
         gap={4}
       >
         {/* Revenue Card */}
-        <Box 
-          p={6} 
+        <Box
+          p={6}
           bg="bg.surface"
-          borderRadius="lg" 
+          borderRadius="lg"
           border="1px solid"
           borderColor="border.card"
-          boxShadow={{ base: "0 2px 4px rgba(0, 0, 0, 0.2)", _light: "0 1px 3px rgba(0, 0, 0, 0.1)" }}
+          boxShadow={{
+            base: "0 2px 4px rgba(0, 0, 0, 0.2)",
+            _light: "0 1px 3px rgba(0, 0, 0, 0.1)",
+          }}
           transition="all 0.3s ease"
-          _hover={{ 
-            shadow: { base: "0 4px 12px rgba(0, 0, 0, 0.3)", _light: "0 4px 12px rgba(0, 0, 0, 0.15)" },
+          _hover={{
+            shadow: {
+              base: "0 4px 12px rgba(0, 0, 0, 0.3)",
+              _light: "0 4px 12px rgba(0, 0, 0, 0.15)",
+            },
             transform: "translateY(-2px)",
             borderColor: { base: "rgba(59, 130, 246, 0.4)", _light: "#3b82f6" },
           }}
@@ -121,11 +150,18 @@ export function RevenueSalesPurchaseCards({ isMounted }: RevenueSalesPurchaseCar
         >
           <HStack justify="space-between" align="start" mb={3}>
             <VStack align="start" gap={0} flex={1}>
-              <Text fontSize="xs" color={{ base: "#9ca3af", _light: "#6b7280" }} fontWeight="500" textTransform="uppercase" letterSpacing="0.5px" mb={2}>
+              <Text
+                fontSize="xs"
+                color={{ base: "#9ca3af", _light: "#6b7280" }}
+                fontWeight="500"
+                textTransform="uppercase"
+                letterSpacing="0.5px"
+                mb={2}
+              >
                 Revenue
               </Text>
-              <Text 
-                fontSize="3xl" 
+              <Text
+                fontSize="3xl"
                 fontWeight="700"
                 color={{ base: "#ffffff", _light: "#1a1d29" }}
                 mb={1}
@@ -133,14 +169,18 @@ export function RevenueSalesPurchaseCards({ isMounted }: RevenueSalesPurchaseCar
                 {formatCurrency(currentMonthRevenue)}
               </Text>
               <HStack gap={2} mt={1}>
-                <Text 
-                  fontSize="xs" 
-                  color={revenueChange >= 0 ? "#22c55e" : "#ef4444"} 
+                <Text
+                  fontSize="xs"
+                  color={revenueChange >= 0 ? "#22c55e" : "#ef4444"}
                   fontWeight="600"
                 >
-                  {revenueChange >= 0 ? "+" : ""}{revenueChange.toFixed(1)}%
+                  {revenueChange >= 0 ? "+" : ""}
+                  {revenueChange.toFixed(1)}%
                 </Text>
-                <Text fontSize="xs" color={{ base: "#6b7280", _light: "#9ca3af" }}>
+                <Text
+                  fontSize="xs"
+                  color={{ base: "#6b7280", _light: "#9ca3af" }}
+                >
                   vs last month
                 </Text>
               </HStack>
@@ -161,16 +201,22 @@ export function RevenueSalesPurchaseCards({ isMounted }: RevenueSalesPurchaseCar
         </Box>
 
         {/* Sales Count Card */}
-        <Box 
-          p={6} 
+        <Box
+          p={6}
           bg="bg.surface"
-          borderRadius="lg" 
+          borderRadius="lg"
           border="1px solid"
           borderColor="border.card"
-          boxShadow={{ base: "0 2px 4px rgba(0, 0, 0, 0.2)", _light: "0 1px 3px rgba(0, 0, 0, 0.1)" }}
+          boxShadow={{
+            base: "0 2px 4px rgba(0, 0, 0, 0.2)",
+            _light: "0 1px 3px rgba(0, 0, 0, 0.1)",
+          }}
           transition="all 0.3s ease"
-          _hover={{ 
-            shadow: { base: "0 4px 12px rgba(0, 0, 0, 0.3)", _light: "0 4px 12px rgba(0, 0, 0, 0.15)" },
+          _hover={{
+            shadow: {
+              base: "0 4px 12px rgba(0, 0, 0, 0.3)",
+              _light: "0 4px 12px rgba(0, 0, 0, 0.15)",
+            },
             transform: "translateY(-2px)",
             borderColor: { base: "rgba(59, 130, 246, 0.4)", _light: "#3b82f6" },
           }}
@@ -179,11 +225,18 @@ export function RevenueSalesPurchaseCards({ isMounted }: RevenueSalesPurchaseCar
         >
           <HStack justify="space-between" align="start" mb={3}>
             <VStack align="start" gap={0} flex={1}>
-              <Text fontSize="xs" color={{ base: "#9ca3af", _light: "#6b7280" }} fontWeight="500" textTransform="uppercase" letterSpacing="0.5px" mb={2}>
+              <Text
+                fontSize="xs"
+                color={{ base: "#9ca3af", _light: "#6b7280" }}
+                fontWeight="500"
+                textTransform="uppercase"
+                letterSpacing="0.5px"
+                mb={2}
+              >
                 Transactions
               </Text>
-              <Text 
-                fontSize="3xl" 
+              <Text
+                fontSize="3xl"
                 fontWeight="700"
                 color={{ base: "#ffffff", _light: "#1a1d29" }}
                 mb={1}
@@ -191,14 +244,18 @@ export function RevenueSalesPurchaseCards({ isMounted }: RevenueSalesPurchaseCar
                 {currentMonthSalesCount}
               </Text>
               <HStack gap={2} mt={1}>
-                <Text 
-                  fontSize="xs" 
-                  color={salesCountChange >= 0 ? "#22c55e" : "#ef4444"} 
+                <Text
+                  fontSize="xs"
+                  color={salesCountChange >= 0 ? "#22c55e" : "#ef4444"}
                   fontWeight="600"
                 >
-                  {salesCountChange >= 0 ? "+" : ""}{salesCountChange.toFixed(1)}%
+                  {salesCountChange >= 0 ? "+" : ""}
+                  {salesCountChange.toFixed(1)}%
                 </Text>
-                <Text fontSize="xs" color={{ base: "#6b7280", _light: "#9ca3af" }}>
+                <Text
+                  fontSize="xs"
+                  color={{ base: "#6b7280", _light: "#9ca3af" }}
+                >
                   vs last month
                 </Text>
               </HStack>
@@ -219,16 +276,22 @@ export function RevenueSalesPurchaseCards({ isMounted }: RevenueSalesPurchaseCar
         </Box>
 
         {/* Average Sale Value Card */}
-        <Box 
-          p={6} 
+        <Box
+          p={6}
           bg="bg.surface"
-          borderRadius="lg" 
+          borderRadius="lg"
           border="1px solid"
           borderColor="border.card"
-          boxShadow={{ base: "0 2px 4px rgba(0, 0, 0, 0.2)", _light: "0 1px 3px rgba(0, 0, 0, 0.1)" }}
+          boxShadow={{
+            base: "0 2px 4px rgba(0, 0, 0, 0.2)",
+            _light: "0 1px 3px rgba(0, 0, 0, 0.1)",
+          }}
           transition="all 0.3s ease"
-          _hover={{ 
-            shadow: { base: "0 4px 12px rgba(0, 0, 0, 0.3)", _light: "0 4px 12px rgba(0, 0, 0, 0.15)" },
+          _hover={{
+            shadow: {
+              base: "0 4px 12px rgba(0, 0, 0, 0.3)",
+              _light: "0 4px 12px rgba(0, 0, 0, 0.15)",
+            },
             transform: "translateY(-2px)",
             borderColor: { base: "rgba(59, 130, 246, 0.4)", _light: "#3b82f6" },
           }}
@@ -237,11 +300,18 @@ export function RevenueSalesPurchaseCards({ isMounted }: RevenueSalesPurchaseCar
         >
           <HStack justify="space-between" align="start" mb={3}>
             <VStack align="start" gap={0} flex={1}>
-              <Text fontSize="xs" color={{ base: "#9ca3af", _light: "#6b7280" }} fontWeight="500" textTransform="uppercase" letterSpacing="0.5px" mb={2}>
+              <Text
+                fontSize="xs"
+                color={{ base: "#9ca3af", _light: "#6b7280" }}
+                fontWeight="500"
+                textTransform="uppercase"
+                letterSpacing="0.5px"
+                mb={2}
+              >
                 Avg Sale Value
               </Text>
-              <Text 
-                fontSize="3xl" 
+              <Text
+                fontSize="3xl"
                 fontWeight="700"
                 color={{ base: "#ffffff", _light: "#1a1d29" }}
                 mb={1}
@@ -249,14 +319,18 @@ export function RevenueSalesPurchaseCards({ isMounted }: RevenueSalesPurchaseCar
                 {formatCurrency(currentMonthAvgSaleValue)}
               </Text>
               <HStack gap={2} mt={1}>
-                <Text 
-                  fontSize="xs" 
-                  color={avgSaleValueChange >= 0 ? "#22c55e" : "#ef4444"} 
+                <Text
+                  fontSize="xs"
+                  color={avgSaleValueChange >= 0 ? "#22c55e" : "#ef4444"}
                   fontWeight="600"
                 >
-                  {avgSaleValueChange >= 0 ? "+" : ""}{avgSaleValueChange.toFixed(1)}%
+                  {avgSaleValueChange >= 0 ? "+" : ""}
+                  {avgSaleValueChange.toFixed(1)}%
                 </Text>
-                <Text fontSize="xs" color={{ base: "#6b7280", _light: "#9ca3af" }}>
+                <Text
+                  fontSize="xs"
+                  color={{ base: "#6b7280", _light: "#9ca3af" }}
+                >
                   vs last month
                 </Text>
               </HStack>

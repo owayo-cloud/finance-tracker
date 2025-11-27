@@ -1,4 +1,4 @@
-import { Box, Button, Flex, HStack, Input, Text, Icon } from "@chakra-ui/react"
+import { Box, Button, Flex, HStack, Icon, Input, Text } from "@chakra-ui/react"
 import { FiSearch } from "react-icons/fi"
 
 interface ReceiptDetailsProps {
@@ -63,10 +63,20 @@ export function ReceiptDetails({
             size="sm"
             w={{ base: "100px", md: "120px" }}
             borderRadius="md"
-            _focus={{ borderColor: "input.focus.border", boxShadow: "input.focus.shadow" }}
+            _focus={{
+              borderColor: "input.focus.border",
+              boxShadow: "input.focus.shadow",
+            }}
           />
         </HStack>
-        <Button bg="brand.secondary" color="white" _hover={{ bg: "brand.secondary.hover" }} fontWeight="600" size="sm" onClick={onSearch}>
+        <Button
+          bg="brand.secondary"
+          color="white"
+          _hover={{ bg: "brand.secondary.hover" }}
+          fontWeight="600"
+          size="sm"
+          onClick={onSearch}
+        >
           <Icon as={FiSearch} mr={2} />
           Search
         </Button>
@@ -74,4 +84,3 @@ export function ReceiptDetails({
     </Box>
   )
 }
-

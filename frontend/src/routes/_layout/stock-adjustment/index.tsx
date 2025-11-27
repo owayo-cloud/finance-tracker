@@ -1,23 +1,30 @@
-import { useState, useEffect } from "react";
-import { createFileRoute } from "@tanstack/react-router";
 import {
-  Container,
-  Heading,
-  Text,
-  Input,
-  VStack,
-  HStack,
-  Box,
   Badge,
+  Box,
+  Container,
   Flex,
-  Separator,
   Grid,
+  Heading,
+  HStack,
+  Input,
+  Separator,
   Table,
-} from "@chakra-ui/react";
-import { useQuery, useQueryClient, useMutation } from "@tanstack/react-query";
-import { FiEdit, FiPackage, FiSearch, FiChevronLeft, FiChevronRight } from "react-icons/fi";
-import { Button } from "../../../components/ui/button";
-import { Field } from "../../../components/ui/field";
+  Text,
+  VStack,
+} from "@chakra-ui/react"
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
+import { createFileRoute } from "@tanstack/react-router"
+import { useEffect, useState } from "react"
+import {
+  FiChevronLeft,
+  FiChevronRight,
+  FiEdit,
+  FiPackage,
+  FiSearch,
+} from "react-icons/fi"
+import type { ProductPublic, ProductUpdate } from "../../../client"
+import { ProductsService } from "../../../client"
+import { Button } from "../../../components/ui/button"
 import {
   DrawerBackdrop,
   DrawerBody,
@@ -26,22 +33,21 @@ import {
   DrawerHeader,
   DrawerRoot,
   DrawerTitle,
-} from "../../../components/ui/drawer";
-import type { ProductPublic, ProductUpdate } from "../../../client";
-import { ProductsService } from "../../../client";
-import useCustomToast from "../../../hooks/useCustomToast";
-import { handleError } from "../../../utils";
+} from "../../../components/ui/drawer"
+import { Field } from "../../../components/ui/field"
+import useCustomToast from "../../../hooks/useCustomToast"
+import { handleError } from "../../../utils"
 
 export const Route = createFileRoute("/_layout/stock-adjustment/")({
   component: StockAdjustment,
-});
+})
 
 // Theme-aware Select Component
-function ThemedSelect({ 
-  value, 
-  onChange, 
-  children, 
-  ...props 
+function ThemedSelect({
+  value,
+  onChange,
+  children,
+  ...props
 }: {
   value: string | number
   onChange: (value: string) => void
@@ -63,15 +69,16 @@ function ThemedSelect({
         color: "var(--chakra-colors-text-primary)",
         fontSize: "14px",
         cursor: "pointer",
-        ...props.style
+        ...props.style,
       }}
       onFocus={(e) => {
-        e.currentTarget.style.borderColor = "var(--chakra-colors-teal-500)";
-        e.currentTarget.style.boxShadow = "0 0 0 1px var(--chakra-colors-teal-500)";
+        e.currentTarget.style.borderColor = "var(--chakra-colors-teal-500)"
+        e.currentTarget.style.boxShadow =
+          "0 0 0 1px var(--chakra-colors-teal-500)"
       }}
       onBlur={(e) => {
-        e.currentTarget.style.borderColor = "var(--chakra-colors-input-border)";
-        e.currentTarget.style.boxShadow = "none";
+        e.currentTarget.style.borderColor = "var(--chakra-colors-input-border)"
+        e.currentTarget.style.boxShadow = "none"
       }}
       {...props}
     >
@@ -82,27 +89,27 @@ function ThemedSelect({
 
 // Helper functions
 function getStockColor(product: ProductPublic): string {
-  if (product.current_stock === 0) return "red";
+  if (product.current_stock === 0) return "red"
   if (
     product.reorder_level &&
     product.current_stock !== undefined &&
     product.current_stock <= product.reorder_level
   ) {
-    return "orange";
+    return "orange"
   }
-  return "green";
+  return "green"
 }
 
 function getStockStatus(product: ProductPublic): string {
-  if (product.current_stock === 0) return "Out of Stock";
+  if (product.current_stock === 0) return "Out of Stock"
   if (
     product.reorder_level &&
     product.current_stock !== undefined &&
     product.current_stock <= product.reorder_level
   ) {
-    return "Low Stock";
+    return "Low Stock"
   }
-  return "In Stock";
+  return "In Stock"
 }
 
 // Stock Adjustment Form Component
@@ -110,64 +117,68 @@ function StockAdjustmentForm({
   selectedProduct,
   onClose,
 }: {
-  selectedProduct: ProductPublic | null;
-  onClose: () => void;
+  selectedProduct: ProductPublic | null
+  onClose: () => void
 }) {
-  const queryClient = useQueryClient();
-  const { showSuccessToast } = useCustomToast();
+  const queryClient = useQueryClient()
+  const { showSuccessToast } = useCustomToast()
 
-  const [currentStock, setCurrentStock] = useState(0);
-  const [reorderLevel, setReorderLevel] = useState(0);
-  const [_notes, setNotes] = useState("");
+  const [currentStock, setCurrentStock] = useState(0)
+  const [reorderLevel, setReorderLevel] = useState(0)
+  const [_notes, setNotes] = useState("")
 
   // Update form when product changes
   useEffect(() => {
     if (selectedProduct) {
-      setCurrentStock(selectedProduct.current_stock || 0);
-      setReorderLevel(selectedProduct.reorder_level || 0);
-      setNotes("");
+      setCurrentStock(selectedProduct.current_stock || 0)
+      setReorderLevel(selectedProduct.reorder_level || 0)
+      setNotes("")
     }
-  }, [selectedProduct]);
+  }, [selectedProduct])
 
   const mutation = useMutation({
     mutationFn: (data: ProductUpdate) =>
-      ProductsService.updateProduct({ 
-        id: selectedProduct!.id, 
-        requestBody: data 
+      ProductsService.updateProduct({
+        id: selectedProduct!.id,
+        requestBody: data,
       }),
     onSuccess: () => {
-      showSuccessToast("Stock levels updated successfully.");
-      queryClient.invalidateQueries({ queryKey: ["products"] });
-      onClose();
+      showSuccessToast("Stock levels updated successfully.")
+      queryClient.invalidateQueries({ queryKey: ["products"] })
+      onClose()
     },
     onError: (err: any) => {
-      handleError(err);
+      handleError(err)
     },
-  });
+  })
 
   const handleSubmit = () => {
-    if (!selectedProduct) return;
+    if (!selectedProduct) return
 
     const updateData: ProductUpdate = {
       current_stock: currentStock,
       reorder_level: reorderLevel,
-    };
+    }
 
-    mutation.mutate(updateData);
-  };
+    mutation.mutate(updateData)
+  }
 
   if (!selectedProduct) {
     return (
-      <Box textAlign="center" py={12} color={{ base: "gray.500", _light: "gray.600" }}>
+      <Box
+        textAlign="center"
+        py={12}
+        color={{ base: "gray.500", _light: "gray.600" }}
+      >
         <FiPackage size={48} style={{ margin: "0 auto 16px" }} />
         <Text fontSize="lg">No product selected</Text>
       </Box>
-    );
+    )
   }
 
-  const hasChanges = 
+  const hasChanges =
     currentStock !== (selectedProduct.current_stock || 0) ||
-    reorderLevel !== (selectedProduct.reorder_level || 0);
+    reorderLevel !== (selectedProduct.reorder_level || 0)
 
   return (
     <VStack gap={6} align="stretch">
@@ -186,13 +197,19 @@ function StockAdjustmentForm({
           borderColor={{ base: "gray.700", _light: "gray.200" }}
         >
           <HStack justify="space-between">
-            <Text fontSize="sm" color={{ base: "gray.400", _light: "gray.600" }}>
+            <Text
+              fontSize="sm"
+              color={{ base: "gray.400", _light: "gray.600" }}
+            >
               Product
             </Text>
             <Text fontWeight="semibold">{selectedProduct.name}</Text>
           </HStack>
           <HStack justify="space-between">
-            <Text fontSize="sm" color={{ base: "gray.400", _light: "gray.600" }}>
+            <Text
+              fontSize="sm"
+              color={{ base: "gray.400", _light: "gray.600" }}
+            >
               Category
             </Text>
             <Badge colorScheme="blue" size="sm">
@@ -200,7 +217,10 @@ function StockAdjustmentForm({
             </Badge>
           </HStack>
           <HStack justify="space-between">
-            <Text fontSize="sm" color={{ base: "gray.400", _light: "gray.600" }}>
+            <Text
+              fontSize="sm"
+              color={{ base: "gray.400", _light: "gray.600" }}
+            >
               Status
             </Text>
             <Badge colorScheme="purple" size="sm">
@@ -208,12 +228,14 @@ function StockAdjustmentForm({
             </Badge>
           </HStack>
           <HStack justify="space-between">
-            <Text fontSize="sm" color={{ base: "gray.400", _light: "gray.600" }}>
+            <Text
+              fontSize="sm"
+              color={{ base: "gray.400", _light: "gray.600" }}
+            >
               Selling Price
             </Text>
             <Text fontWeight="bold" color="teal.400">
-              KES{" "}
-              {parseFloat(selectedProduct.selling_price).toLocaleString()}
+              KES {parseFloat(selectedProduct.selling_price).toLocaleString()}
             </Text>
           </HStack>
         </VStack>
@@ -227,8 +249,8 @@ function StockAdjustmentForm({
           Adjust Stock Levels
         </Text>
         <VStack gap={4} align="stretch">
-          <Field 
-            label="Current Stock" 
+          <Field
+            label="Current Stock"
             helperText="Available units in inventory"
           >
             <Input
@@ -240,8 +262,8 @@ function StockAdjustmentForm({
             />
           </Field>
 
-          <Field 
-            label="Reorder Level" 
+          <Field
+            label="Reorder Level"
             helperText="Minimum stock before reordering"
           >
             <Input
@@ -261,32 +283,38 @@ function StockAdjustmentForm({
             borderWidth="1px"
             borderColor={{ base: "gray.700", _light: "gray.200" }}
           >
-            <Text fontSize="xs" color={{ base: "gray.400", _light: "gray.600" }} mb={2}>
+            <Text
+              fontSize="xs"
+              color={{ base: "gray.400", _light: "gray.600" }}
+              mb={2}
+            >
               Stock Status Preview
             </Text>
             <HStack justify="space-between">
               <Text fontSize="sm">Status:</Text>
-              <Badge 
+              <Badge
                 colorScheme={
-                  currentStock === 0 
-                    ? "red" 
-                    : currentStock <= reorderLevel 
-                      ? "orange" 
+                  currentStock === 0
+                    ? "red"
+                    : currentStock <= reorderLevel
+                      ? "orange"
                       : "green"
                 }
               >
-                {currentStock === 0 
-                  ? "Out of Stock" 
-                  : currentStock <= reorderLevel 
-                    ? "Low Stock" 
+                {currentStock === 0
+                  ? "Out of Stock"
+                  : currentStock <= reorderLevel
+                    ? "Low Stock"
                     : "In Stock"}
               </Badge>
             </HStack>
-            {reorderLevel > 0 && currentStock <= reorderLevel && currentStock > 0 && (
-              <Text fontSize="xs" color="orange.400" mt={2}>
-                ⚠️ Stock is at or below reorder level
-              </Text>
-            )}
+            {reorderLevel > 0 &&
+              currentStock <= reorderLevel &&
+              currentStock > 0 && (
+                <Text fontSize="xs" color="orange.400" mt={2}>
+                  ⚠️ Stock is at or below reorder level
+                </Text>
+              )}
           </Box>
 
           {/* Change Summary */}
@@ -298,19 +326,34 @@ function StockAdjustmentForm({
               borderWidth="1px"
               borderColor={{ base: "blue.700", _light: "blue.200" }}
             >
-              <Text fontWeight="semibold" fontSize="sm" color={{ base: "blue.300", _light: "blue.700" }} mb={2}>
+              <Text
+                fontWeight="semibold"
+                fontSize="sm"
+                color={{ base: "blue.300", _light: "blue.700" }}
+                mb={2}
+              >
                 Changes Summary
               </Text>
               {currentStock !== (selectedProduct.current_stock || 0) && (
-                <Text fontSize="xs" color={{ base: "gray.400", _light: "gray.600" }}>
-                  Current Stock: {selectedProduct.current_stock || 0} → {currentStock} 
-                  ({currentStock - (selectedProduct.current_stock || 0) > 0 ? "+" : ""}
+                <Text
+                  fontSize="xs"
+                  color={{ base: "gray.400", _light: "gray.600" }}
+                >
+                  Current Stock: {selectedProduct.current_stock || 0} →{" "}
+                  {currentStock}(
+                  {currentStock - (selectedProduct.current_stock || 0) > 0
+                    ? "+"
+                    : ""}
                   {currentStock - (selectedProduct.current_stock || 0)} units)
                 </Text>
               )}
               {reorderLevel !== (selectedProduct.reorder_level || 0) && (
-                <Text fontSize="xs" color={{ base: "gray.400", _light: "gray.600" }}>
-                  Reorder Level: {selectedProduct.reorder_level || 0} → {reorderLevel}
+                <Text
+                  fontSize="xs"
+                  color={{ base: "gray.400", _light: "gray.600" }}
+                >
+                  Reorder Level: {selectedProduct.reorder_level || 0} →{" "}
+                  {reorderLevel}
                 </Text>
               )}
             </Box>
@@ -330,101 +373,110 @@ function StockAdjustmentForm({
         </VStack>
       </Box>
     </VStack>
-  );
+  )
 }
 
 // Main Component
 function StockAdjustment() {
-  const [searchQuery, setSearchQuery] = useState("");
-  const [debouncedSearchQuery, setDebouncedSearchQuery] = useState("");
-  const [selectedProduct, setSelectedProduct] = useState<ProductPublic | null>(null);
-  const [drawerOpen, setDrawerOpen] = useState(false);
-  const [page, setPage] = useState(1);
-  const [pageSize] = useState(25);
-  const [selectedCategory, setSelectedCategory] = useState("");
-  const [selectedStatus, setSelectedStatus] = useState("");
+  const [searchQuery, setSearchQuery] = useState("")
+  const [debouncedSearchQuery, setDebouncedSearchQuery] = useState("")
+  const [selectedProduct, setSelectedProduct] = useState<ProductPublic | null>(
+    null,
+  )
+  const [drawerOpen, setDrawerOpen] = useState(false)
+  const [page, setPage] = useState(1)
+  const [pageSize] = useState(25)
+  const [selectedCategory, setSelectedCategory] = useState("")
+  const [selectedStatus, setSelectedStatus] = useState("")
 
   // Debounce search query
   useEffect(() => {
     const timer = setTimeout(() => {
-      setDebouncedSearchQuery(searchQuery);
-    }, 300);
+      setDebouncedSearchQuery(searchQuery)
+    }, 300)
 
-    return () => clearTimeout(timer);
-  }, [searchQuery]);
+    return () => clearTimeout(timer)
+  }, [searchQuery])
 
   // Fetch categories and statuses
   const { data: categories } = useQuery({
     queryKey: ["categories"],
     queryFn: () => ProductsService.readCategories(),
-  });
+  })
 
   const { data: statuses } = useQuery({
     queryKey: ["statuses"],
     queryFn: () => ProductsService.readStatuses(),
-  });
+  })
 
   // Fetch products with server-side filtering and pagination
   const { data: productsData, isLoading } = useQuery({
-    queryKey: ["products", page, pageSize, debouncedSearchQuery, selectedCategory, selectedStatus],
+    queryKey: [
+      "products",
+      page,
+      pageSize,
+      debouncedSearchQuery,
+      selectedCategory,
+      selectedStatus,
+    ],
     queryFn: () => {
       const params: any = {
         skip: (page - 1) * pageSize,
         limit: pageSize,
-      };
-      
-      if (debouncedSearchQuery.trim()) {
-        params.name = debouncedSearchQuery.trim();
       }
-      
-      if (selectedCategory) {
-        params.category_id = selectedCategory;
-      }
-      
-      if (selectedStatus) {
-        params.status_id = selectedStatus;
-      }
-      
-      return ProductsService.readProducts(params);
-    },
-  });
 
-  const products = productsData?.data || [];
-  const totalProducts = productsData?.count || 0;
-  const totalPages = Math.ceil(totalProducts / pageSize);
+      if (debouncedSearchQuery.trim()) {
+        params.name = debouncedSearchQuery.trim()
+      }
+
+      if (selectedCategory) {
+        params.category_id = selectedCategory
+      }
+
+      if (selectedStatus) {
+        params.status_id = selectedStatus
+      }
+
+      return ProductsService.readProducts(params)
+    },
+  })
+
+  const products = productsData?.data || []
+  const totalProducts = productsData?.count || 0
+  const totalPages = Math.ceil(totalProducts / pageSize)
 
   const handleProductSelect = (product: ProductPublic) => {
-    setSelectedProduct(product);
-    setDrawerOpen(true);
-  };
+    setSelectedProduct(product)
+    setDrawerOpen(true)
+  }
 
   const handleCloseDrawer = () => {
-    setDrawerOpen(false);
-    setTimeout(() => setSelectedProduct(null), 300);
-  };
+    setDrawerOpen(false)
+    setTimeout(() => setSelectedProduct(null), 300)
+  }
 
   const handleClearFilters = () => {
-    setSearchQuery("");
-    setDebouncedSearchQuery("");
-    setSelectedCategory("");
-    setSelectedStatus("");
-    setPage(1);
-  };
+    setSearchQuery("")
+    setDebouncedSearchQuery("")
+    setSelectedCategory("")
+    setSelectedStatus("")
+    setPage(1)
+  }
 
   // Reset to first page when filters change
   useEffect(() => {
-    setPage(1);
-  }, [debouncedSearchQuery, selectedCategory, selectedStatus]);
+    setPage(1)
+  }, [])
 
-  const hasFilters = searchQuery || selectedCategory || selectedStatus;
+  const hasFilters = searchQuery || selectedCategory || selectedStatus
 
   return (
     <Container maxW="full" minH="100vh" py={8}>
       <VStack gap={6} align="stretch">
         {/* Header */}
         <Box>
-          <Heading 
-            size="lg" 
+          <Heading
+            size="lg"
             mb={2}
             color={{ base: "#e5e7eb", _light: "#111827" }}
           >
@@ -475,10 +527,7 @@ function StockAdjustment() {
           </Field>
 
           <Field label="Status">
-            <ThemedSelect
-              value={selectedStatus}
-              onChange={setSelectedStatus}
-            >
+            <ThemedSelect value={selectedStatus} onChange={setSelectedStatus}>
               <option value="">All Statuses</option>
               {statuses?.map((status) => (
                 <option key={status.id} value={status.id}>
@@ -514,10 +563,16 @@ function StockAdjustment() {
                   <Table.ColumnHeader>Product Name</Table.ColumnHeader>
                   <Table.ColumnHeader>Category</Table.ColumnHeader>
                   <Table.ColumnHeader>Status</Table.ColumnHeader>
-                  <Table.ColumnHeader textAlign="right">Current Stock</Table.ColumnHeader>
-                  <Table.ColumnHeader textAlign="right">Reorder Level</Table.ColumnHeader>
+                  <Table.ColumnHeader textAlign="right">
+                    Current Stock
+                  </Table.ColumnHeader>
+                  <Table.ColumnHeader textAlign="right">
+                    Reorder Level
+                  </Table.ColumnHeader>
                   <Table.ColumnHeader>Stock Status</Table.ColumnHeader>
-                  <Table.ColumnHeader textAlign="right">Actions</Table.ColumnHeader>
+                  <Table.ColumnHeader textAlign="right">
+                    Actions
+                  </Table.ColumnHeader>
                 </Table.Row>
               </Table.Header>
               <Table.Body>
@@ -533,12 +588,21 @@ function StockAdjustment() {
                   <Table.Row>
                     <Table.Cell colSpan={7} textAlign="center" py={8}>
                       <VStack gap={2}>
-                        <FiPackage size={48} color="var(--chakra-colors-gray-500)" />
+                        <FiPackage
+                          size={48}
+                          color="var(--chakra-colors-gray-500)"
+                        />
                         <Text color={{ base: "gray.500", _light: "gray.600" }}>
-                          {hasFilters ? "No products match your filters" : "No products available"}
+                          {hasFilters
+                            ? "No products match your filters"
+                            : "No products available"}
                         </Text>
                         {hasFilters && (
-                          <Button size="sm" variant="outline" onClick={handleClearFilters}>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={handleClearFilters}
+                          >
                             Clear Filters
                           </Button>
                         )}
@@ -551,7 +615,9 @@ function StockAdjustment() {
                       key={product.id}
                       _hover={{ bg: { base: "gray.800", _light: "gray.50" } }}
                     >
-                      <Table.Cell fontWeight="medium">{product.name}</Table.Cell>
+                      <Table.Cell fontWeight="medium">
+                        {product.name}
+                      </Table.Cell>
                       <Table.Cell>
                         <Badge colorScheme="blue" size="sm">
                           {product.category.name}
@@ -571,10 +637,7 @@ function StockAdjustment() {
                         {product.reorder_level || 0}
                       </Table.Cell>
                       <Table.Cell>
-                        <Badge 
-                          colorScheme={getStockColor(product)}
-                          size="sm"
-                        >
+                        <Badge colorScheme={getStockColor(product)} size="sm">
                           {getStockStatus(product)}
                         </Badge>
                       </Table.Cell>
@@ -606,8 +669,13 @@ function StockAdjustment() {
               borderTopWidth="1px"
               borderColor={{ base: "gray.700", _light: "gray.200" }}
             >
-              <Text fontSize="sm" color={{ base: "gray.400", _light: "gray.600" }}>
-                Showing {(page - 1) * pageSize + 1} to {Math.min(page * pageSize, totalProducts)} of {totalProducts} products
+              <Text
+                fontSize="sm"
+                color={{ base: "gray.400", _light: "gray.600" }}
+              >
+                Showing {(page - 1) * pageSize + 1} to{" "}
+                {Math.min(page * pageSize, totalProducts)} of {totalProducts}{" "}
+                products
               </Text>
               <HStack gap={2}>
                 <Button
@@ -618,7 +686,10 @@ function StockAdjustment() {
                 >
                   <FiChevronLeft /> Previous
                 </Button>
-                <Text fontSize="sm" color={{ base: "gray.400", _light: "gray.600" }}>
+                <Text
+                  fontSize="sm"
+                  color={{ base: "gray.400", _light: "gray.600" }}
+                >
                   Page {page} of {totalPages}
                 </Text>
                 <Button
@@ -657,5 +728,5 @@ function StockAdjustment() {
         </DrawerContent>
       </DrawerRoot>
     </Container>
-  );
+  )
 }

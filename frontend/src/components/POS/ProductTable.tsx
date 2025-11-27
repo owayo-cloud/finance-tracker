@@ -1,8 +1,17 @@
-import { Box, Input, Stack, Text, IconButton, HStack, Table, Flex } from "@chakra-ui/react"
-import { FiPlus, FiMinus } from "react-icons/fi"
-import { CartItem } from "./types"
+import {
+  Box,
+  Flex,
+  HStack,
+  IconButton,
+  Input,
+  Stack,
+  Table,
+  Text,
+} from "@chakra-ui/react"
+import { FiMinus, FiPlus } from "react-icons/fi"
+import type { ProductPublic } from "@/client"
+import type { CartItem } from "./types"
 import { formatCurrency } from "./utils"
-import { ProductPublic } from "@/client"
 
 interface ProductTableProps {
   cart: CartItem[]
@@ -33,26 +42,46 @@ export function ProductTable({
         <Table.Root size="sm">
           <Table.Header>
             <Table.Row>
-              <Table.ColumnHeader color="text.primary">Product Name</Table.ColumnHeader>
-              <Table.ColumnHeader color="text.primary">Avl Qty</Table.ColumnHeader>
+              <Table.ColumnHeader color="text.primary">
+                Product Name
+              </Table.ColumnHeader>
+              <Table.ColumnHeader color="text.primary">
+                Avl Qty
+              </Table.ColumnHeader>
               <Table.ColumnHeader color="text.primary">Qty</Table.ColumnHeader>
-              <Table.ColumnHeader color="text.primary">Price</Table.ColumnHeader>
-              <Table.ColumnHeader color="text.primary">Disc%</Table.ColumnHeader>
-              <Table.ColumnHeader color="text.primary">Total</Table.ColumnHeader>
+              <Table.ColumnHeader color="text.primary">
+                Price
+              </Table.ColumnHeader>
+              <Table.ColumnHeader color="text.primary">
+                Disc%
+              </Table.ColumnHeader>
+              <Table.ColumnHeader color="text.primary">
+                Total
+              </Table.ColumnHeader>
               <Table.ColumnHeader color="text.primary">-</Table.ColumnHeader>
             </Table.Row>
           </Table.Header>
           <Table.Body>
             {cart.map((item) => {
               const price = Number(item.product.selling_price)
-              const discountAmount = (price * item.quantity * (item.discount || 0)) / 100
+              const discountAmount =
+                (price * item.quantity * (item.discount || 0)) / 100
               const total = price * item.quantity - discountAmount
               return (
                 <Table.Row key={item.product.id}>
-                  <Table.Cell fontWeight="medium" maxW="200px" overflow="hidden" textOverflow="ellipsis" whiteSpace="nowrap" color="text.primary">
+                  <Table.Cell
+                    fontWeight="medium"
+                    maxW="200px"
+                    overflow="hidden"
+                    textOverflow="ellipsis"
+                    whiteSpace="nowrap"
+                    color="text.primary"
+                  >
                     {item.product.name}
                   </Table.Cell>
-                  <Table.Cell textAlign="center" color="text.primary">{item.product.current_stock || 0}</Table.Cell>
+                  <Table.Cell textAlign="center" color="text.primary">
+                    {item.product.current_stock || 0}
+                  </Table.Cell>
                   <Table.Cell>
                     <HStack gap={1} justify="center">
                       <IconButton
@@ -64,7 +93,12 @@ export function ProductTable({
                       >
                         <FiMinus />
                       </IconButton>
-                      <Text minW="40px" textAlign="center" fontWeight="medium" color="text.primary">
+                      <Text
+                        minW="40px"
+                        textAlign="center"
+                        fontWeight="medium"
+                        color="text.primary"
+                      >
                         {item.quantity}
                       </Text>
                       <IconButton
@@ -78,12 +112,19 @@ export function ProductTable({
                       </IconButton>
                     </HStack>
                   </Table.Cell>
-                  <Table.Cell textAlign="center" color="text.primary">Ksh {formatCurrency(price)}</Table.Cell>
+                  <Table.Cell textAlign="center" color="text.primary">
+                    Ksh {formatCurrency(price)}
+                  </Table.Cell>
                   <Table.Cell>
                     <Input
                       type="number"
                       value={item.discount || 0}
-                      onChange={(e) => onUpdateDiscount(item.product.id, parseFloat(e.target.value) || 0)}
+                      onChange={(e) =>
+                        onUpdateDiscount(
+                          item.product.id,
+                          parseFloat(e.target.value) || 0,
+                        )
+                      }
                       size="sm"
                       w="80px"
                       min={0}
@@ -93,10 +134,17 @@ export function ProductTable({
                       bg="input.bg"
                       borderColor="input.border"
                       color="text.primary"
-                      _focus={{ borderColor: "input.focus.border", boxShadow: "input.focus.shadow" }}
+                      _focus={{
+                        borderColor: "input.focus.border",
+                        boxShadow: "input.focus.shadow",
+                      }}
                     />
                   </Table.Cell>
-                  <Table.Cell fontWeight="bold" textAlign="center" color="text.primary">
+                  <Table.Cell
+                    fontWeight="bold"
+                    textAlign="center"
+                    color="text.primary"
+                  >
                     Ksh {formatCurrency(total)}
                   </Table.Cell>
                   <Table.Cell textAlign="center">
@@ -106,7 +154,10 @@ export function ProductTable({
                       fontSize="sm"
                       fontWeight="500"
                       onClick={() => onRemoveFromCart(item.product.id)}
-                      _hover={{ textDecoration: "underline", color: "button.danger.hover" }}
+                      _hover={{
+                        textDecoration: "underline",
+                        color: "button.danger.hover",
+                      }}
                     >
                       Remove
                     </Text>
@@ -123,7 +174,12 @@ export function ProductTable({
                   value={searchQuery}
                   onChange={(e) => onSearchQueryChange(e.target.value)}
                   onKeyDown={(e) => {
-                    if (e.key === "Enter" && searchQuery && searchResults && searchResults.length > 0) {
+                    if (
+                      e.key === "Enter" &&
+                      searchQuery &&
+                      searchResults &&
+                      searchResults.length > 0
+                    ) {
                       onAddToCart(searchResults[0])
                       onSearchQueryChange("")
                     }
@@ -136,19 +192,23 @@ export function ProductTable({
                   size="sm"
                 />
               </Table.Cell>
-              <Table.Cell></Table.Cell>
-              <Table.Cell></Table.Cell>
-              <Table.Cell></Table.Cell>
+              <Table.Cell />
+              <Table.Cell />
+              <Table.Cell />
               <Table.Cell textAlign="right" fontWeight="medium">
                 0.000
               </Table.Cell>
-              <Table.Cell></Table.Cell>
+              <Table.Cell />
               <Table.Cell textAlign="center">
                 <IconButton
                   size="sm"
                   variant="ghost"
                   onClick={() => {
-                    if (searchQuery && searchResults && searchResults.length > 0) {
+                    if (
+                      searchQuery &&
+                      searchResults &&
+                      searchResults.length > 0
+                    ) {
                       onAddToCart(searchResults[0])
                       onSearchQueryChange("")
                     }
@@ -158,7 +218,11 @@ export function ProductTable({
                   borderColor="brand.primary"
                   color="brand.primary"
                   borderRadius="md"
-                  _hover={{ bg: "rgba(20, 184, 166, 0.1)", borderColor: "brand.primary.hover", color: "brand.primary.hover" }}
+                  _hover={{
+                    bg: "rgba(20, 184, 166, 0.1)",
+                    borderColor: "brand.primary.hover",
+                    color: "brand.primary.hover",
+                  }}
                 >
                   <FiPlus />
                 </IconButton>
@@ -188,14 +252,23 @@ export function ProductTable({
                   p={2}
                   borderRadius="sm"
                   cursor="pointer"
-                  _hover={{ bg: { base: "rgba(255, 255, 255, 0.05)", _light: "#f3f4f6" } }}
+                  _hover={{
+                    bg: {
+                      base: "rgba(255, 255, 255, 0.05)",
+                      _light: "#f3f4f6",
+                    },
+                  }}
                   onClick={() => {
                     onAddToCart(product)
                     onSearchQueryChange("")
                   }}
                 >
                   <HStack justify="space-between">
-                    <Text fontSize="sm" fontWeight="medium" color="text.primary">
+                    <Text
+                      fontSize="sm"
+                      fontWeight="medium"
+                      color="text.primary"
+                    >
                       {product.name}
                     </Text>
                     <Text fontSize="sm" color="brand.primary" fontWeight="600">
@@ -219,21 +292,37 @@ export function ProductTable({
         borderColor="border.card"
         bg="bg.surface"
       >
-        <Flex justify="space-between" alignItems="center" gap={{ base: 4, md: 8 }} fontSize="sm" flexWrap="wrap">
+        <Flex
+          justify="space-between"
+          alignItems="center"
+          gap={{ base: 4, md: 8 }}
+          fontSize="sm"
+          flexWrap="wrap"
+        >
           <HStack gap={2}>
-            <Text fontWeight="medium" color="text.primary">TOTAL QTY:</Text>
-            <Text color="text.primary">{cart.reduce((sum, item) => sum + item.quantity, 0)}</Text>
+            <Text fontWeight="medium" color="text.primary">
+              TOTAL QTY:
+            </Text>
+            <Text color="text.primary">
+              {cart.reduce((sum, item) => sum + item.quantity, 0)}
+            </Text>
           </HStack>
           <HStack gap={2}>
-            <Text fontWeight="medium" color="text.primary">SUBTOTAL:</Text>
+            <Text fontWeight="medium" color="text.primary">
+              SUBTOTAL:
+            </Text>
             <Text color="text.primary">{cartTotal.toFixed(3)}</Text>
           </HStack>
           <HStack gap={2}>
-            <Text fontWeight="medium" color="text.primary">VAT:</Text>
+            <Text fontWeight="medium" color="text.primary">
+              VAT:
+            </Text>
             <Text color="text.primary">0.000</Text>
           </HStack>
           <HStack gap={2}>
-            <Text fontWeight="medium" color="text.primary">TOTAL:</Text>
+            <Text fontWeight="medium" color="text.primary">
+              TOTAL:
+            </Text>
             <Text fontSize="lg" fontWeight="bold" color="text.primary">
               {cartTotal.toFixed(3)}
             </Text>
@@ -243,4 +332,3 @@ export function ProductTable({
     </>
   )
 }
-

@@ -26,4 +26,3 @@ def qload_chain(*attributes: Any) -> _AbstractLoad:
     for attribute in attributes[1:]:
         loader = loader.selectinload(_cast_attribute(attribute))
     return loader
-

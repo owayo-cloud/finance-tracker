@@ -5,14 +5,15 @@ import {
   Flex,
   Input,
   Text,
+  Textarea,
   VStack,
 } from "@chakra-ui/react"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
 import { useState } from "react"
 import { type SubmitHandler, useForm } from "react-hook-form"
 import { FaPlus } from "react-icons/fa"
-import type { ApiError } from "@/client/core/ApiError"
 import { ExpensesService } from "@/client"
+import type { ApiError } from "@/client/core/ApiError"
 import useCustomToast from "@/hooks/useCustomToast"
 import { handleError } from "@/utils"
 import {
@@ -25,7 +26,6 @@ import {
   DialogTrigger,
 } from "../ui/dialog"
 import { Field } from "../ui/field"
-import { Textarea } from "@chakra-ui/react"
 
 interface ExpenseCategoryCreateForm {
   name: string
@@ -79,7 +79,13 @@ const AddExpenseCategory = () => {
       onOpenChange={({ open }) => setIsOpen(open)}
     >
       <DialogTrigger asChild>
-        <Button value="add-expense-category" my={4} bg="#14b8a6" color="white" _hover={{ bg: "#0d9488" }}>
+        <Button
+          value="add-expense-category"
+          my={4}
+          bg="#14b8a6"
+          color="white"
+          _hover={{ bg: "#0d9488" }}
+        >
           <FaPlus fontSize="16px" />
           Add Category
         </Button>
@@ -91,7 +97,8 @@ const AddExpenseCategory = () => {
           </DialogHeader>
           <DialogBody>
             <Text mb={4} color={{ base: "#9ca3af", _light: "#6b7280" }}>
-              Fill in the form below to add a new expense category to the system.
+              Fill in the form below to add a new expense category to the
+              system.
             </Text>
             <VStack gap={4}>
               <Field
@@ -111,9 +118,15 @@ const AddExpenseCategory = () => {
                   placeholder="e.g., Office Supplies"
                   bg={{ base: "#1a1d29", _light: "#ffffff" }}
                   border="1px solid"
-                  borderColor={{ base: "rgba(255, 255, 255, 0.1)", _light: "#e5e7eb" }}
+                  borderColor={{
+                    base: "rgba(255, 255, 255, 0.1)",
+                    _light: "#e5e7eb",
+                  }}
                   color={{ base: "#ffffff", _light: "#1a1d29" }}
-                  _focus={{ borderColor: "#14b8a6", boxShadow: "0 0 0 1px #14b8a6" }}
+                  _focus={{
+                    borderColor: "#14b8a6",
+                    boxShadow: "0 0 0 1px #14b8a6",
+                  }}
                 />
               </Field>
               <Field
@@ -132,9 +145,15 @@ const AddExpenseCategory = () => {
                   rows={3}
                   bg={{ base: "#1a1d29", _light: "#ffffff" }}
                   border="1px solid"
-                  borderColor={{ base: "rgba(255, 255, 255, 0.1)", _light: "#e5e7eb" }}
+                  borderColor={{
+                    base: "rgba(255, 255, 255, 0.1)",
+                    _light: "#e5e7eb",
+                  }}
                   color={{ base: "#ffffff", _light: "#1a1d29" }}
-                  _focus={{ borderColor: "#14b8a6", boxShadow: "0 0 0 1px #14b8a6" }}
+                  _focus={{
+                    borderColor: "#14b8a6",
+                    boxShadow: "0 0 0 1px #14b8a6",
+                  }}
                 />
               </Field>
             </VStack>
@@ -165,4 +184,3 @@ const AddExpenseCategory = () => {
 }
 
 export default AddExpenseCategory
-

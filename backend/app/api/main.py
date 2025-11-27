@@ -37,12 +37,15 @@ api_router.include_router(debts.router)
 api_router.include_router(customers.router)
 api_router.include_router(analytics.router)
 api_router.include_router(grn.router)
-api_router.include_router(supplier_debts.router, prefix="/supplier-debts", tags=["supplier-debts"])
-api_router.include_router(notifications.router, prefix="/notifications", tags=["notifications"])
+api_router.include_router(
+    supplier_debts.router, prefix="/supplier-debts", tags=["supplier-debts"]
+)
+api_router.include_router(
+    notifications.router, prefix="/notifications", tags=["notifications"]
+)
 api_router.include_router(reminders.router, prefix="/reminders", tags=["reminders"])
 api_router.include_router(media.router)
 api_router.include_router(till.router)
-
 
 
 if settings.ENVIRONMENT == "local":

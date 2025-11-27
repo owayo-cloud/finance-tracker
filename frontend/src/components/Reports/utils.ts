@@ -18,7 +18,11 @@ export function formatDate(dateString: string | Date): string {
 // CSV Export utilities
 function sanitizeCSVCell(cell: any): string {
   const cellStr = String(cell)
-  if (cellStr.includes('"') || cellStr.includes(",") || cellStr.includes("\n")) {
+  if (
+    cellStr.includes('"') ||
+    cellStr.includes(",") ||
+    cellStr.includes("\n")
+  ) {
     return `"${cellStr.replace(/"/g, '""')}"`
   }
   return cellStr
@@ -38,4 +42,3 @@ export function downloadCSV(data: any[][], filename: string) {
   link.click()
   document.body.removeChild(link)
 }
-

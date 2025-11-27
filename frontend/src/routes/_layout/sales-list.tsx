@@ -1,35 +1,35 @@
 import {
-  Container,
-  Heading,
-  Text,
-  Table,
-  VStack,
   Badge,
   Box,
-  HStack,
-  Input,
-  Flex,
   Button,
+  Container,
+  Flex,
+  Heading,
+  HStack,
   Icon,
+  Input,
+  Table,
+  Text,
+  VStack,
 } from "@chakra-ui/react"
 import { useQuery } from "@tanstack/react-query"
 import { createFileRoute } from "@tanstack/react-router"
 import { useState } from "react"
-import { FiSearch, FiCalendar } from "react-icons/fi"
-import { SalesService, type SalePublic } from "../../client"
-import { useColorMode } from "@/components/ui/color-mode"
-import { REFRESH_INTERVALS } from "@/hooks/useAutoRefresh"
+import { FiCalendar, FiSearch } from "react-icons/fi"
 import AutoRefreshIndicator from "@/components/Common/AutoRefreshIndicator"
+import { useColorMode } from "@/components/ui/color-mode"
 import {
   PaginationItems,
   PaginationNextTrigger,
   PaginationPrevTrigger,
   PaginationRoot,
 } from "@/components/ui/pagination.tsx"
+import { REFRESH_INTERVALS } from "@/hooks/useAutoRefresh"
+import { type SalePublic, SalesService } from "../../client"
 
 function formatCurrency(amount: string | number): string {
   const num = typeof amount === "string" ? parseFloat(amount) : amount
-  return num.toLocaleString('en-US', {
+  return num.toLocaleString("en-US", {
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
   })
@@ -37,12 +37,12 @@ function formatCurrency(amount: string | number): string {
 
 function formatDate(dateString: string): string {
   const date = new Date(dateString)
-  return date.toLocaleDateString('en-US', {
-    year: 'numeric',
-    month: 'short',
-    day: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit',
+  return date.toLocaleDateString("en-US", {
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
   })
 }
 
@@ -58,10 +58,11 @@ function SalesList() {
 
   const { data, isLoading } = useQuery({
     queryKey: ["sales", page, pageSize],
-    queryFn: () => SalesService.readSales({
-      skip: (page - 1) * pageSize,
-      limit: pageSize,
-    }),
+    queryFn: () =>
+      SalesService.readSales({
+        skip: (page - 1) * pageSize,
+        limit: pageSize,
+      }),
   })
 
   const sales = data?.data || []
@@ -73,9 +74,10 @@ function SalesList() {
     return sum + parseFloat(sale.total_amount)
   }, 0)
 
-  const valueGradient = colorMode === "dark"
-    ? "linear-gradient(to right, #60a5fa, #3b82f6)"
-    : "linear-gradient(to right, #2563eb, #3b82f6)"
+  const valueGradient =
+    colorMode === "dark"
+      ? "linear-gradient(to right, #60a5fa, #3b82f6)"
+      : "linear-gradient(to right, #2563eb, #3b82f6)"
 
   return (
     <Container maxW="full" minH="100vh" py={8}>
@@ -83,8 +85,8 @@ function SalesList() {
         {/* Header */}
         <Flex justify="space-between" align="start" flexWrap="wrap" gap={4}>
           <Box>
-            <Heading 
-              size="lg" 
+            <Heading
+              size="lg"
               mb={2}
               color={{ base: "#e5e7eb", _light: "#111827" }}
             >
@@ -98,17 +100,27 @@ function SalesList() {
             <AutoRefreshIndicator interval={REFRESH_INTERVALS.LIST} />
             <Box
               p={4}
-              bg={{ base: "rgba(15, 20, 30, 0.7)", _light: "rgba(255, 255, 255, 0.8)" }}
+              bg={{
+                base: "rgba(15, 20, 30, 0.7)",
+                _light: "rgba(255, 255, 255, 0.8)",
+              }}
               backdropFilter="blur(20px)"
               borderRadius="xl"
               border="1px solid"
-              borderColor={{ base: "rgba(59, 130, 246, 0.2)", _light: "rgba(59, 130, 246, 0.3)" }}
+              borderColor={{
+                base: "rgba(59, 130, 246, 0.2)",
+                _light: "rgba(59, 130, 246, 0.3)",
+              }}
             >
-              <Text fontSize="xs" color={{ base: "#9ca3af", _light: "#6b7280" }} mb={1}>
+              <Text
+                fontSize="xs"
+                color={{ base: "#9ca3af", _light: "#6b7280" }}
+                mb={1}
+              >
                 Total Sales
               </Text>
-              <Text 
-                fontSize="2xl" 
+              <Text
+                fontSize="2xl"
                 fontWeight="bold"
                 css={{
                   background: valueGradient,
@@ -127,11 +139,17 @@ function SalesList() {
         {/* Search and Filters */}
         <Box
           p={4}
-          bg={{ base: "rgba(15, 20, 30, 0.7)", _light: "rgba(255, 255, 255, 0.8)" }}
+          bg={{
+            base: "rgba(15, 20, 30, 0.7)",
+            _light: "rgba(255, 255, 255, 0.8)",
+          }}
           backdropFilter="blur(20px)"
           borderRadius="xl"
           border="1px solid"
-          borderColor={{ base: "rgba(59, 130, 246, 0.2)", _light: "rgba(59, 130, 246, 0.3)" }}
+          borderColor={{
+            base: "rgba(59, 130, 246, 0.2)",
+            _light: "rgba(59, 130, 246, 0.3)",
+          }}
         >
           <HStack gap={3}>
             <Box position="relative" flex={1}>
@@ -139,8 +157,14 @@ function SalesList() {
                 placeholder="Search sales..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                bg={{ base: "rgba(10, 14, 20, 0.6)", _light: "rgba(255, 255, 255, 0.6)" }}
-                borderColor={{ base: "rgba(59, 130, 246, 0.2)", _light: "rgba(59, 130, 246, 0.3)" }}
+                bg={{
+                  base: "rgba(10, 14, 20, 0.6)",
+                  _light: "rgba(255, 255, 255, 0.6)",
+                }}
+                borderColor={{
+                  base: "rgba(59, 130, 246, 0.2)",
+                  _light: "rgba(59, 130, 246, 0.3)",
+                }}
                 color={{ base: "#e5e7eb", _light: "#111827" }}
                 _focus={{
                   borderColor: "rgba(59, 130, 246, 0.5)",
@@ -154,13 +178,12 @@ function SalesList() {
                 transform="translateY(-50%)"
                 pointerEvents="none"
               >
-                <FiSearch color={colorMode === "dark" ? "#9ca3af" : "#6b7280"} />
+                <FiSearch
+                  color={colorMode === "dark" ? "#9ca3af" : "#6b7280"}
+                />
               </Box>
             </Box>
-            <Button
-              variant="outline"
-              colorScheme="blue"
-            >
+            <Button variant="outline" colorScheme="blue">
               <Icon as={FiCalendar} mr={2} />
               Filter
             </Button>
@@ -169,23 +192,38 @@ function SalesList() {
 
         {/* Sales Table */}
         <Box
-          bg={{ base: "rgba(15, 20, 30, 0.7)", _light: "rgba(255, 255, 255, 0.8)" }}
+          bg={{
+            base: "rgba(15, 20, 30, 0.7)",
+            _light: "rgba(255, 255, 255, 0.8)",
+          }}
           backdropFilter="blur(20px)"
           borderRadius="xl"
           border="1px solid"
-          borderColor={{ base: "rgba(59, 130, 246, 0.2)", _light: "rgba(59, 130, 246, 0.3)" }}
+          borderColor={{
+            base: "rgba(59, 130, 246, 0.2)",
+            _light: "rgba(59, 130, 246, 0.3)",
+          }}
           overflow="hidden"
         >
           {isLoading ? (
             <Box p={8} textAlign="center">
-              <Text color={{ base: "#d1d5db", _light: "#6b7280" }}>Loading sales...</Text>
+              <Text color={{ base: "#d1d5db", _light: "#6b7280" }}>
+                Loading sales...
+              </Text>
             </Box>
           ) : sales.length === 0 ? (
             <Box p={8} textAlign="center">
-              <Text color={{ base: "#d1d5db", _light: "#6b7280" }} fontSize="lg" mb={2}>
+              <Text
+                color={{ base: "#d1d5db", _light: "#6b7280" }}
+                fontSize="lg"
+                mb={2}
+              >
                 No sales found
               </Text>
-              <Text color={{ base: "#9ca3af", _light: "#9ca3af" }} fontSize="sm">
+              <Text
+                color={{ base: "#9ca3af", _light: "#9ca3af" }}
+                fontSize="sm"
+              >
                 Sales transactions will appear here
               </Text>
             </Box>
@@ -194,25 +232,39 @@ function SalesList() {
               <Table.Root size="sm" variant="outline">
                 <Table.Header>
                   <Table.Row>
-                    <Table.ColumnHeader color={{ base: "#9ca3af", _light: "#6b7280" }}>
+                    <Table.ColumnHeader
+                      color={{ base: "#9ca3af", _light: "#6b7280" }}
+                    >
                       Date & Time
                     </Table.ColumnHeader>
-                    <Table.ColumnHeader color={{ base: "#9ca3af", _light: "#6b7280" }}>
+                    <Table.ColumnHeader
+                      color={{ base: "#9ca3af", _light: "#6b7280" }}
+                    >
                       Product
                     </Table.ColumnHeader>
-                    <Table.ColumnHeader color={{ base: "#9ca3af", _light: "#6b7280" }}>
+                    <Table.ColumnHeader
+                      color={{ base: "#9ca3af", _light: "#6b7280" }}
+                    >
                       Quantity
                     </Table.ColumnHeader>
-                    <Table.ColumnHeader color={{ base: "#9ca3af", _light: "#6b7280" }}>
+                    <Table.ColumnHeader
+                      color={{ base: "#9ca3af", _light: "#6b7280" }}
+                    >
                       Unit Price
                     </Table.ColumnHeader>
-                    <Table.ColumnHeader color={{ base: "#9ca3af", _light: "#6b7280" }}>
+                    <Table.ColumnHeader
+                      color={{ base: "#9ca3af", _light: "#6b7280" }}
+                    >
                       Total Amount
                     </Table.ColumnHeader>
-                    <Table.ColumnHeader color={{ base: "#9ca3af", _light: "#6b7280" }}>
+                    <Table.ColumnHeader
+                      color={{ base: "#9ca3af", _light: "#6b7280" }}
+                    >
                       Payment Method
                     </Table.ColumnHeader>
-                    <Table.ColumnHeader color={{ base: "#9ca3af", _light: "#6b7280" }}>
+                    <Table.ColumnHeader
+                      color={{ base: "#9ca3af", _light: "#6b7280" }}
+                    >
                       Status
                     </Table.ColumnHeader>
                   </Table.Row>
@@ -220,19 +272,28 @@ function SalesList() {
                 <Table.Body>
                   {sales.map((sale: SalePublic) => (
                     <Table.Row key={sale.id}>
-                      <Table.Cell color={{ base: "#d1d5db", _light: "#374151" }}>
+                      <Table.Cell
+                        color={{ base: "#d1d5db", _light: "#374151" }}
+                      >
                         {formatDate(sale.sale_date)}
                       </Table.Cell>
-                      <Table.Cell color={{ base: "#e5e7eb", _light: "#111827" }} fontWeight="medium">
+                      <Table.Cell
+                        color={{ base: "#e5e7eb", _light: "#111827" }}
+                        fontWeight="medium"
+                      >
                         {sale.product.name}
                       </Table.Cell>
-                      <Table.Cell color={{ base: "#d1d5db", _light: "#374151" }}>
+                      <Table.Cell
+                        color={{ base: "#d1d5db", _light: "#374151" }}
+                      >
                         {sale.quantity}
                       </Table.Cell>
-                      <Table.Cell color={{ base: "#d1d5db", _light: "#374151" }}>
+                      <Table.Cell
+                        color={{ base: "#d1d5db", _light: "#374151" }}
+                      >
                         KES {formatCurrency(sale.unit_price)}
                       </Table.Cell>
-                      <Table.Cell 
+                      <Table.Cell
                         fontWeight="bold"
                         css={{
                           background: valueGradient,
@@ -245,10 +306,7 @@ function SalesList() {
                         KES {formatCurrency(sale.total_amount)}
                       </Table.Cell>
                       <Table.Cell>
-                        <Badge
-                          colorScheme="blue"
-                          variant="subtle"
-                        >
+                        <Badge colorScheme="blue" variant="subtle">
                           {sale.payment_method.name}
                         </Badge>
                       </Table.Cell>
@@ -270,7 +328,14 @@ function SalesList() {
 
               {/* Pagination */}
               {totalPages > 1 && (
-                <Box p={4} borderTop="1px solid" borderColor={{ base: "rgba(59, 130, 246, 0.2)", _light: "rgba(59, 130, 246, 0.3)" }}>
+                <Box
+                  p={4}
+                  borderTop="1px solid"
+                  borderColor={{
+                    base: "rgba(59, 130, 246, 0.2)",
+                    _light: "rgba(59, 130, 246, 0.3)",
+                  }}
+                >
                   <PaginationRoot
                     count={totalSales}
                     pageSize={pageSize}
@@ -278,8 +343,13 @@ function SalesList() {
                     onPageChange={(details) => setPage(details.page)}
                   >
                     <HStack justify="space-between" w="full">
-                      <Text fontSize="sm" color={{ base: "#9ca3af", _light: "#6b7280" }}>
-                        Showing {((page - 1) * pageSize) + 1} to {Math.min(page * pageSize, totalSales)} of {totalSales} sales
+                      <Text
+                        fontSize="sm"
+                        color={{ base: "#9ca3af", _light: "#6b7280" }}
+                      >
+                        Showing {(page - 1) * pageSize + 1} to{" "}
+                        {Math.min(page * pageSize, totalSales)} of {totalSales}{" "}
+                        sales
                       </Text>
                       <HStack gap={2}>
                         <PaginationPrevTrigger />
@@ -297,4 +367,3 @@ function SalesList() {
     </Container>
   )
 }
-

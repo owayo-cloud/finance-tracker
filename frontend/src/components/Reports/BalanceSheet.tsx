@@ -1,6 +1,16 @@
-import { Box, Button, Card, Grid, Heading, HStack, Separator, Text, VStack } from "@chakra-ui/react"
+import {
+  Box,
+  Button,
+  Card,
+  Grid,
+  Heading,
+  HStack,
+  Separator,
+  Text,
+  VStack,
+} from "@chakra-ui/react"
 import { FiDownload } from "react-icons/fi"
-import { formatCurrency, downloadCSV } from "./utils"
+import { downloadCSV, formatCurrency } from "./utils"
 
 interface BalanceSheetProps {
   balanceSheet: {
@@ -22,13 +32,16 @@ interface BalanceSheetProps {
 function exportBalanceSheetToCSV(
   balanceSheet: BalanceSheetProps["balanceSheet"],
   startDate: string,
-  endDate: string
+  endDate: string,
 ) {
   const headers = ["Item", "Amount"]
   const rows = [
     ["ASSETS", ""],
     ["Inventory", formatCurrency(balanceSheet.assets.inventory)],
-    ["Cash & Receivables", formatCurrency(balanceSheet.assets.cashAndReceivables)],
+    [
+      "Cash & Receivables",
+      formatCurrency(balanceSheet.assets.cashAndReceivables),
+    ],
     ["Total Assets", formatCurrency(balanceSheet.assets.total)],
     ["", ""],
     ["LIABILITIES", ""],
@@ -43,7 +56,10 @@ function exportBalanceSheetToCSV(
       formatCurrency(balanceSheet.liabilities.total + balanceSheet.equity),
     ],
   ]
-  downloadCSV([headers, ...rows], `balance-sheet-${startDate}-to-${endDate}.csv`)
+  downloadCSV(
+    [headers, ...rows],
+    `balance-sheet-${startDate}-to-${endDate}.csv`,
+  )
 }
 
 export function BalanceSheet({
@@ -65,7 +81,9 @@ export function BalanceSheet({
             <Button
               size="sm"
               variant="outline"
-              onClick={() => exportBalanceSheetToCSV(balanceSheet, startDate, endDate)}
+              onClick={() =>
+                exportBalanceSheetToCSV(balanceSheet, startDate, endDate)
+              }
             >
               <FiDownload size={14} style={{ marginRight: "4px" }} />
               Export CSV
@@ -118,7 +136,12 @@ export function BalanceSheet({
                   </Text>
                 </HStack>
                 <Separator />
-                <HStack justify="space-between" p={3} bg="teal.500" borderRadius="md">
+                <HStack
+                  justify="space-between"
+                  p={3}
+                  bg="teal.500"
+                  borderRadius="md"
+                >
                   <Text fontWeight="bold" color="white">
                     Total Assets
                   </Text>
@@ -152,7 +175,12 @@ export function BalanceSheet({
                   </Text>
                 </HStack>
                 <Separator />
-                <HStack justify="space-between" p={3} bg="blue.500" borderRadius="md">
+                <HStack
+                  justify="space-between"
+                  p={3}
+                  bg="blue.500"
+                  borderRadius="md"
+                >
                   <Text fontWeight="bold" color="white">
                     Equity
                   </Text>
@@ -161,14 +189,19 @@ export function BalanceSheet({
                   </Text>
                 </HStack>
                 <Separator />
-                <HStack justify="space-between" p={3} bg="purple.500" borderRadius="md">
+                <HStack
+                  justify="space-between"
+                  p={3}
+                  bg="purple.500"
+                  borderRadius="md"
+                >
                   <Text fontWeight="bold" color="white">
                     Total Liabilities & Equity
                   </Text>
                   <Text fontWeight="bold" fontSize="lg" color="white">
                     Ksh{" "}
                     {formatCurrency(
-                      balanceSheet.liabilities.total + balanceSheet.equity
+                      balanceSheet.liabilities.total + balanceSheet.equity,
                     )}
                   </Text>
                 </HStack>
@@ -180,4 +213,3 @@ export function BalanceSheet({
     </Card.Root>
   )
 }
-

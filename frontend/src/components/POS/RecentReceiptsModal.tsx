@@ -2,26 +2,34 @@ import {
   Box,
   Button,
   Flex,
-  Input,
-  Text,
   HStack,
-  Table,
-  VStack,
-  IconButton,
   Icon,
+  IconButton,
+  Input,
+  Table,
+  Text,
+  VStack,
 } from "@chakra-ui/react"
+import { useQuery } from "@tanstack/react-query"
+import { useCallback, useEffect, useState } from "react"
 import {
-  DialogRoot,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
+  FiCalendar,
+  FiChevronLeft,
+  FiChevronRight,
+  FiEye,
+  FiFilter,
+  FiLink,
+  FiSearch,
+} from "react-icons/fi"
+import { SalesService } from "@/client"
+import {
   DialogBody,
   DialogCloseTrigger,
+  DialogContent,
+  DialogHeader,
+  DialogRoot,
+  DialogTitle,
 } from "@/components/ui/dialog"
-import { useQuery } from "@tanstack/react-query"
-import { useState, useEffect } from "react"
-import { FiSearch, FiCalendar, FiFilter, FiLink, FiChevronLeft, FiChevronRight, FiEye } from "react-icons/fi"
-import { SalesService } from "@/client"
 import { formatCurrency } from "./utils"
 
 interface RecentReceiptsModalProps {
@@ -34,12 +42,12 @@ interface RecentReceiptsModalProps {
 
 function formatDate(dateString: string): string {
   const date = new Date(dateString)
-  const day = date.getDate().toString().padStart(2, '0')
-  const month = date.toLocaleString('en-US', { month: 'short' })
+  const day = date.getDate().toString().padStart(2, "0")
+  const month = date.toLocaleString("en-US", { month: "short" })
   const year = date.getFullYear()
-  const hours = date.getHours().toString().padStart(2, '0')
-  const minutes = date.getMinutes().toString().padStart(2, '0')
-  const seconds = date.getSeconds().toString().padStart(2, '0')
+  const hours = date.getHours().toString().padStart(2, "0")
+  const minutes = date.getMinutes().toString().padStart(2, "0")
+  const seconds = date.getSeconds().toString().padStart(2, "0")
   return `${day}/${month}/${year} ${hours}:${minutes}:${seconds}`
 }
 
@@ -52,21 +60,25 @@ export function RecentReceiptsModal({
 }: RecentReceiptsModalProps) {
   const [page, setPage] = useState(1)
   const [pageSize, setPageSize] = useState(50)
-  const [selectedReceiptId, setSelectedReceiptId] = useState<string | null>(null)
+  const [selectedReceiptId, setSelectedReceiptId] = useState<string | null>(
+    null,
+  )
   // Default to today's date
-  const getTodayDate = () => {
+  const getTodayDate = useCallback(() => {
     const today = new Date()
-    return today.toISOString().split('T')[0]
-  }
-  
+    return today.toISOString().split("T")[0]
+  }, [])
+
   const [dateFilter, setDateFilter] = useState<string>(() => {
     const today = new Date()
-    const day = today.getDate().toString().padStart(2, '0')
-    const month = today.toLocaleString('en-US', { month: 'short' })
+    const day = today.getDate().toString().padStart(2, "0")
+    const month = today.toLocaleString("en-US", { month: "short" })
     const year = today.getFullYear()
     return `${day}/${month}/${year}`
   })
-  const [dateFilterValue, setDateFilterValue] = useState<string>(() => getTodayDate())
+  const [dateFilterValue, setDateFilterValue] = useState<string>(() =>
+    getTodayDate(),
+  )
   const [salesRepFilter, setSalesRepFilter] = useState<string>("")
   const [searchQuery, setSearchQuery] = useState<string>("")
 
@@ -75,26 +87,27 @@ export function RecentReceiptsModal({
     if (isOpen) {
       const today = getTodayDate()
       const todayDate = new Date(today)
-      const day = todayDate.getDate().toString().padStart(2, '0')
-      const month = todayDate.toLocaleString('en-US', { month: 'short' })
+      const day = todayDate.getDate().toString().padStart(2, "0")
+      const month = todayDate.toLocaleString("en-US", { month: "short" })
       const year = todayDate.getFullYear()
       setDateFilter(`${day}/${month}/${year}`)
       setDateFilterValue(today)
       setPage(1) // Reset to first page
     }
-  }, [isOpen])
+  }, [isOpen, getTodayDate])
 
   // Use date filter in query - default to today
   const selectedDate = dateFilterValue || getTodayDate()
-  
+
   const { data, isLoading } = useQuery({
     queryKey: ["recent-receipts", page, pageSize, selectedDate],
-    queryFn: () => SalesService.readSales({
-      skip: (page - 1) * pageSize,
-      limit: pageSize,
-      startDate: selectedDate, // Filter by selected date
-      endDate: selectedDate,    // Same date for single day filter
-    }),
+    queryFn: () =>
+      SalesService.readSales({
+        skip: (page - 1) * pageSize,
+        limit: pageSize,
+        startDate: selectedDate, // Filter by selected date
+        endDate: selectedDate, // Same date for single day filter
+      }),
     enabled: isOpen,
   })
 
@@ -103,20 +116,25 @@ export function RecentReceiptsModal({
   const totalPages = Math.ceil(totalReceipts / pageSize)
 
   // Filter receipts based on search query
-  const filteredReceipts = receipts.filter((receipt) => {
-    if (!searchQuery) return true
-    const query = searchQuery.toLowerCase()
-    const receiptNo = receipt.id.slice(-6).toLowerCase()
-    const remarks = receipt.notes?.toLowerCase() || ""
-    // Search by receipt no and remarks
-    return receiptNo.includes(query) || remarks.includes(query)
-  }).filter((receipt) => {
-    // Filter by sales rep (cashier) if specified
-    if (!salesRepFilter) return true
-    const filter = salesRepFilter.toLowerCase()
-    const cashierName = (receipt as any).created_by?.full_name?.toLowerCase() || (receipt as any).created_by?.username?.toLowerCase() || ""
-    return cashierName.includes(filter)
-  })
+  const filteredReceipts = receipts
+    .filter((receipt) => {
+      if (!searchQuery) return true
+      const query = searchQuery.toLowerCase()
+      const receiptNo = receipt.id.slice(-6).toLowerCase()
+      const remarks = receipt.notes?.toLowerCase() || ""
+      // Search by receipt no and remarks
+      return receiptNo.includes(query) || remarks.includes(query)
+    })
+    .filter((receipt) => {
+      // Filter by sales rep (cashier) if specified
+      if (!salesRepFilter) return true
+      const filter = salesRepFilter.toLowerCase()
+      const cashierName =
+        (receipt as any).created_by?.full_name?.toLowerCase() ||
+        (receipt as any).created_by?.username?.toLowerCase() ||
+        ""
+      return cashierName.includes(filter)
+    })
 
   const handleDateFocus = (e: React.FocusEvent<HTMLInputElement>) => {
     e.target.type = "date"
@@ -127,8 +145,8 @@ export function RecentReceiptsModal({
     e.target.type = "text"
     if (e.target.value) {
       const date = new Date(e.target.value)
-      const day = date.getDate().toString().padStart(2, '0')
-      const month = date.toLocaleString('en-US', { month: 'short' })
+      const day = date.getDate().toString().padStart(2, "0")
+      const month = date.toLocaleString("en-US", { month: "short" })
       const year = date.getFullYear()
       setDateFilter(`${day}/${month}/${year}`)
       setDateFilterValue(e.target.value)
@@ -136,8 +154,8 @@ export function RecentReceiptsModal({
     } else {
       // If cleared, reset to today
       const today = new Date()
-      const day = today.getDate().toString().padStart(2, '0')
-      const month = today.toLocaleString('en-US', { month: 'short' })
+      const day = today.getDate().toString().padStart(2, "0")
+      const month = today.toLocaleString("en-US", { month: "short" })
       const year = today.getFullYear()
       setDateFilter(`${day}/${month}/${year}`)
       setDateFilterValue(getTodayDate())
@@ -178,10 +196,18 @@ export function RecentReceiptsModal({
         <DialogBody p={0} overflow="hidden">
           <VStack gap={0} align="stretch" h="calc(90vh - 120px)">
             {/* Search and Filter Section */}
-            <Box p={4} borderBottom="1px solid" borderColor="gray.200" bg="gray.50" _dark={{ bg: "gray.800", borderColor: "gray.700" }}>
+            <Box
+              p={4}
+              borderBottom="1px solid"
+              borderColor="gray.200"
+              bg="gray.50"
+              _dark={{ bg: "gray.800", borderColor: "gray.700" }}
+            >
               <Flex gap={3} flexWrap="wrap" alignItems="end">
                 <Box>
-                  <Text fontSize="xs" fontWeight="medium" mb={1}>Date:</Text>
+                  <Text fontSize="xs" fontWeight="medium" mb={1}>
+                    Date:
+                  </Text>
                   <HStack gap={1}>
                     <Input
                       type="text"
@@ -194,17 +220,15 @@ export function RecentReceiptsModal({
                       bg="white"
                       _dark={{ bg: "gray.700" }}
                     />
-                    <IconButton
-                      aria-label="Calendar"
-                      size="sm"
-                      variant="ghost"
-                    >
+                    <IconButton aria-label="Calendar" size="sm" variant="ghost">
                       <Icon as={FiCalendar} />
                     </IconButton>
                   </HStack>
                 </Box>
                 <Box>
-                  <Text fontSize="xs" fontWeight="medium" mb={1}>Cashier:</Text>
+                  <Text fontSize="xs" fontWeight="medium" mb={1}>
+                    Cashier:
+                  </Text>
                   <Input
                     value={salesRepFilter}
                     onChange={(e) => setSalesRepFilter(e.target.value)}
@@ -216,7 +240,9 @@ export function RecentReceiptsModal({
                   />
                 </Box>
                 <Box flex={1}>
-                  <Text fontSize="xs" fontWeight="medium" mb={1}>Search By: Receipt No / Remarks</Text>
+                  <Text fontSize="xs" fontWeight="medium" mb={1}>
+                    Search By: Receipt No / Remarks
+                  </Text>
                   <HStack gap={1}>
                     <Input
                       value={searchQuery}
@@ -226,11 +252,7 @@ export function RecentReceiptsModal({
                       bg="white"
                       _dark={{ bg: "gray.700" }}
                     />
-                    <IconButton
-                      aria-label="Filter"
-                      size="sm"
-                      variant="ghost"
-                    >
+                    <IconButton aria-label="Filter" size="sm" variant="ghost">
                       <Icon as={FiFilter} />
                     </IconButton>
                     <Button
@@ -277,8 +299,23 @@ export function RecentReceiptsModal({
                       <Table.Row
                         key={receipt.id}
                         cursor="pointer"
-                        bg={selectedReceiptId === receipt.id ? "blue.50" : undefined}
-                        _hover={{ bg: selectedReceiptId === receipt.id ? "blue.100" : "gray.50", _dark: { bg: selectedReceiptId === receipt.id ? "blue.900" : "gray.800" } }}
+                        bg={
+                          selectedReceiptId === receipt.id
+                            ? "blue.50"
+                            : undefined
+                        }
+                        _hover={{
+                          bg:
+                            selectedReceiptId === receipt.id
+                              ? "blue.100"
+                              : "gray.50",
+                          _dark: {
+                            bg:
+                              selectedReceiptId === receipt.id
+                                ? "blue.900"
+                                : "gray.800",
+                          },
+                        }}
                         onClick={() => {
                           setSelectedReceiptId(receipt.id)
                           if (onSelectReceipt) {
@@ -286,10 +323,18 @@ export function RecentReceiptsModal({
                           }
                         }}
                       >
-                        <Table.Cell fontWeight="medium">{receipt.id.slice(-6)}</Table.Cell>
+                        <Table.Cell fontWeight="medium">
+                          {receipt.id.slice(-6)}
+                        </Table.Cell>
                         <Table.Cell>{formatDate(receipt.sale_date)}</Table.Cell>
-                        <Table.Cell fontWeight="medium">Ksh {formatCurrency(parseFloat(receipt.total_amount))}</Table.Cell>
-                        <Table.Cell>{(receipt as any).created_by?.full_name || (receipt as any).created_by?.username || "-"}</Table.Cell>
+                        <Table.Cell fontWeight="medium">
+                          Ksh {formatCurrency(parseFloat(receipt.total_amount))}
+                        </Table.Cell>
+                        <Table.Cell>
+                          {(receipt as any).created_by?.full_name ||
+                            (receipt as any).created_by?.username ||
+                            "-"}
+                        </Table.Cell>
                         <Table.Cell>{receipt.notes || "-"}</Table.Cell>
                       </Table.Row>
                     ))
@@ -299,10 +344,28 @@ export function RecentReceiptsModal({
             </Box>
 
             {/* Pagination */}
-            <Box p={4} borderTop="1px solid" borderColor="gray.200" bg="gray.50" _dark={{ bg: "gray.800", borderColor: "gray.700" }}>
-              <Flex justify="space-between" align="center" flexWrap="wrap" gap={3}>
-                <Text fontSize="sm" color="gray.600" _dark={{ color: "gray.400" }}>
-                  Showing {filteredReceipts.length > 0 ? (page - 1) * pageSize + 1 : 0} - {Math.min(page * pageSize, filteredReceipts.length)} out of {filteredReceipts.length}
+            <Box
+              p={4}
+              borderTop="1px solid"
+              borderColor="gray.200"
+              bg="gray.50"
+              _dark={{ bg: "gray.800", borderColor: "gray.700" }}
+            >
+              <Flex
+                justify="space-between"
+                align="center"
+                flexWrap="wrap"
+                gap={3}
+              >
+                <Text
+                  fontSize="sm"
+                  color="gray.600"
+                  _dark={{ color: "gray.400" }}
+                >
+                  Showing{" "}
+                  {filteredReceipts.length > 0 ? (page - 1) * pageSize + 1 : 0}{" "}
+                  - {Math.min(page * pageSize, filteredReceipts.length)} out of{" "}
+                  {filteredReceipts.length}
                 </Text>
                 <HStack gap={2}>
                   <Button
@@ -323,7 +386,14 @@ export function RecentReceiptsModal({
                   >
                     <Icon as={FiChevronLeft} />
                   </IconButton>
-                  <Text fontSize="sm" px={2} fontWeight="medium" bg="blue.100" _dark={{ bg: "blue.900" }} borderRadius="md">
+                  <Text
+                    fontSize="sm"
+                    px={2}
+                    fontWeight="medium"
+                    bg="blue.100"
+                    _dark={{ bg: "blue.900" }}
+                    borderRadius="md"
+                  >
                     {page}
                   </Text>
                   <IconButton
@@ -388,7 +458,9 @@ export function RecentReceiptsModal({
                       bg="#3b82f6"
                       color="white"
                       _hover={{ bg: "#2563eb" }}
-                      onClick={() => selectedReceiptId && handleAttach(selectedReceiptId)}
+                      onClick={() =>
+                        selectedReceiptId && handleAttach(selectedReceiptId)
+                      }
                     >
                       <Icon as={FiLink} mr={2} />
                       Attach
@@ -403,4 +475,3 @@ export function RecentReceiptsModal({
     </DialogRoot>
   )
 }
-

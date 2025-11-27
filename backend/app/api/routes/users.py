@@ -2,7 +2,7 @@ import uuid
 from typing import Any
 
 from fastapi import APIRouter, Depends, HTTPException
-from sqlmodel import col, delete, func, select
+from sqlmodel import func, select
 
 from app import crud
 from app.api.deps import (
@@ -60,10 +60,12 @@ def create_user(*, session: SessionDep, user_in: UserCreate) -> Any:
             status_code=400,
             detail="The user with this email already exists in the system.",
         )
-    
+
     # Check for username conflicts (case insensitive)
     if user_in.username:
-        existing_username = crud.get_user_by_username(session=session, username=user_in.username)
+        existing_username = crud.get_user_by_username(
+            session=session, username=user_in.username
+        )
         if existing_username:
             raise HTTPException(
                 status_code=400,
@@ -158,16 +160,18 @@ def register_user(session: SessionDep, user_in: UserRegister) -> Any:
             status_code=400,
             detail="The user with this email already exists in the system",
         )
-    
+
     # Check for username conflicts (case insensitive)
     if user_in.username:
-        existing_username = crud.get_user_by_username(session=session, username=user_in.username)
+        existing_username = crud.get_user_by_username(
+            session=session, username=user_in.username
+        )
         if existing_username:
             raise HTTPException(
                 status_code=400,
                 detail="The user with this username already exists in the system",
             )
-    
+
     user_create = UserCreate.model_validate(user_in)
     user = crud.create_user(session=session, user_create=user_create)
     return user
@@ -218,10 +222,12 @@ def update_user(
             raise HTTPException(
                 status_code=409, detail="User with this email already exists"
             )
-    
+
     # Check for username conflicts (case insensitive)
     if user_in.username:
-        existing_username = crud.get_user_by_username(session=session, username=user_in.username)
+        existing_username = crud.get_user_by_username(
+            session=session, username=user_in.username
+        )
         if existing_username and existing_username.id != user_id:
             raise HTTPException(
                 status_code=409, detail="User with this username already exists"

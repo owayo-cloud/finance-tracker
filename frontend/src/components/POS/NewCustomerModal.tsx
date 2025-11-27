@@ -1,24 +1,18 @@
-import {
-  Button,
-  Flex,
-  Input,
-  Text,
-  VStack,
-} from "@chakra-ui/react"
-import {
-  DialogRoot,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogBody,
-  DialogFooter,
-} from "@/components/ui/dialog"
-import { Field } from "@/components/ui/field"
+import { Button, Flex, Input, Text, VStack } from "@chakra-ui/react"
+import { useQueryClient } from "@tanstack/react-query"
 import { useState } from "react"
 import { type SubmitHandler, useForm } from "react-hook-form"
-import { useQueryClient } from "@tanstack/react-query"
-import useCustomToast from "@/hooks/useCustomToast"
+import {
+  DialogBody,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogRoot,
+  DialogTitle,
+} from "@/components/ui/dialog"
+import { Field } from "@/components/ui/field"
 import useAuth from "@/hooks/useAuth"
+import useCustomToast from "@/hooks/useCustomToast"
 
 interface Customer {
   name: string
@@ -47,7 +41,7 @@ export function NewCustomerModal({
   const queryClient = useQueryClient()
   const { user: currentUser } = useAuth()
   const [isSubmitting, setIsSubmitting] = useState(false)
-  
+
   // Check if user is admin
   const isAdmin = currentUser?.is_superuser || false
   const {
@@ -63,25 +57,25 @@ export function NewCustomerModal({
       balance: 0,
     },
   })
-  
+
   const onSubmit: SubmitHandler<NewCustomerForm> = async (data) => {
     try {
       setIsSubmitting(true)
-      
+
       const customerName = data.name.trim()
       const customerTel = data.tel.trim()
       const initialBalance = data.balance || 0
-      
+
       // Create debt entry via API (this creates the customer account)
       const token = localStorage.getItem("access_token") || ""
       const apiBase = import.meta.env.VITE_API_URL || ""
-      
+
       // Create debt entry to establish customer account
       // If balance is 0, create a minimal paid debt to establish the account
       // If balance > 0, create an actual debt
       const amount = initialBalance > 0 ? initialBalance : 0.01
       const amountPaid = initialBalance > 0 ? 0 : 0.01
-      
+
       // Backend calculates balance automatically, so we don't need to send it
       const debtData = {
         customer_name: customerName,
@@ -89,11 +83,12 @@ export function NewCustomerModal({
         amount: amount,
         amount_paid: amountPaid,
         // balance is calculated by backend as amount - amount_paid
-        notes: initialBalance > 0 
-          ? `Initial customer account with balance of ${initialBalance}` 
-          : "Initial customer account creation (zero balance)",
+        notes:
+          initialBalance > 0
+            ? `Initial customer account with balance of ${initialBalance}`
+            : "Initial customer account creation (zero balance)",
       }
-      
+
       const response = await fetch(`${apiBase}/api/v1/debts/`, {
         method: "POST",
         headers: {
@@ -102,41 +97,53 @@ export function NewCustomerModal({
         },
         body: JSON.stringify(debtData),
       })
-      
+
       if (!response.ok) {
-        const errorData = await response.json().catch(() => ({ detail: "Failed to create customer" }))
-        throw new Error(errorData.detail || `Failed to create customer: ${response.status}`)
+        const errorData = await response
+          .json()
+          .catch(() => ({ detail: "Failed to create customer" }))
+        throw new Error(
+          errorData.detail || `Failed to create customer: ${response.status}`,
+        )
       }
-      
+
       const createdDebt = await response.json()
-      
+
       const customer: Customer = {
         name: customerName,
         tel: customerTel,
         balance: parseFloat(createdDebt.balance?.toString() || "0"),
       }
-      
+
       // Invalidate all customer queries (including those with search params)
-      await queryClient.invalidateQueries({ queryKey: ["customers"], exact: false })
+      await queryClient.invalidateQueries({
+        queryKey: ["customers"],
+        exact: false,
+      })
       await queryClient.invalidateQueries({ queryKey: ["debts-for-customers"] })
-      
+
       // Verify the debt was created by checking the debts API
       try {
-        await fetch(`${apiBase}/api/v1/debts/?customer_name=${encodeURIComponent(customerName)}&limit=10`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
+        await fetch(
+          `${apiBase}/api/v1/debts/?customer_name=${encodeURIComponent(customerName)}&limit=10`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
           },
-        })
-      } catch (e) {
+        )
+      } catch (_e) {
         // Verification failed, but continue anyway
       }
-      
+
       // Small delay to ensure backend has processed the creation
-      await new Promise(resolve => setTimeout(resolve, 200))
-      
+      await new Promise((resolve) => setTimeout(resolve, 200))
+
       // Trigger custom event to update customer search modal in same window
-      window.dispatchEvent(new CustomEvent("customerCreated", { detail: { customerName } }))
-      
+      window.dispatchEvent(
+        new CustomEvent("customerCreated", { detail: { customerName } }),
+      )
+
       showSuccessToast("Customer created successfully")
       onSave(customer)
       reset()
@@ -174,7 +181,8 @@ export function NewCustomerModal({
           </DialogHeader>
           <DialogBody>
             <Text mb={4} color="text.muted" fontSize="sm">
-              Create a new credit customer account. This customer will be able to make purchases on credit.
+              Create a new credit customer account. This customer will be able
+              to make purchases on credit.
             </Text>
             <VStack gap={4}>
               <Field
@@ -195,7 +203,10 @@ export function NewCustomerModal({
                   bg="input.bg"
                   borderColor="input.border"
                   color="text.primary"
-                  _focus={{ borderColor: "input.focus.border", boxShadow: "input.focus.shadow" }}
+                  _focus={{
+                    borderColor: "input.focus.border",
+                    boxShadow: "input.focus.shadow",
+                  }}
                 />
               </Field>
               <Field
@@ -214,7 +225,10 @@ export function NewCustomerModal({
                   bg="input.bg"
                   borderColor="input.border"
                   color="text.primary"
-                  _focus={{ borderColor: "input.focus.border", boxShadow: "input.focus.shadow" }}
+                  _focus={{
+                    borderColor: "input.focus.border",
+                    boxShadow: "input.focus.shadow",
+                  }}
                 />
               </Field>
               <Field
@@ -236,14 +250,19 @@ export function NewCustomerModal({
                   bg="input.bg"
                   borderColor="input.border"
                   color="text.primary"
-                  _focus={{ borderColor: "input.focus.border", boxShadow: "input.focus.shadow" }}
+                  _focus={{
+                    borderColor: "input.focus.border",
+                    boxShadow: "input.focus.shadow",
+                  }}
                 />
               </Field>
             </VStack>
           </DialogBody>
           <DialogFooter>
             <Flex gap={2} w="full" justify="flex-end">
-              <Button variant="outline" onClick={handleClose}>Cancel</Button>
+              <Button variant="outline" onClick={handleClose}>
+                Cancel
+              </Button>
               <Button
                 type="submit"
                 bg="brand.primary"
@@ -261,4 +280,3 @@ export function NewCustomerModal({
     </DialogRoot>
   )
 }
-

@@ -26,7 +26,6 @@ const PendingProducts = () => (
           <Table.Cell>
             <SkeletonText noOfLines={1} />
           </Table.Cell>
-         
         </Table.Row>
       ))}
     </Table.Body>

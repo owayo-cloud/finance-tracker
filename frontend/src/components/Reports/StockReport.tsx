@@ -10,7 +10,7 @@ import {
   VStack,
 } from "@chakra-ui/react"
 import { FiDownload } from "react-icons/fi"
-import { formatCurrency, downloadCSV } from "./utils"
+import { downloadCSV, formatCurrency } from "./utils"
 
 interface StockReportProps {
   stockSummary: {
@@ -53,7 +53,10 @@ function exportStockToCSV(stockSummary: StockReportProps["stockSummary"]) {
     formatCurrency(product.inventoryValue),
     product.status,
   ])
-  downloadCSV([headers, ...rows], `stock-report-${new Date().toISOString().split("T")[0]}.csv`)
+  downloadCSV(
+    [headers, ...rows],
+    `stock-report-${new Date().toISOString().split("T")[0]}.csv`,
+  )
 }
 
 export function StockReport({ stockSummary }: StockReportProps) {
@@ -142,17 +145,20 @@ export function StockReport({ stockSummary }: StockReportProps) {
                 </Button>
               </HStack>
             </HStack>
-            <Table.Root 
-              size="sm"
-              variant="outline"
-            >
+            <Table.Root size="sm" variant="outline">
               <Table.Header>
                 <Table.Row bg="table.header.bg">
                   <Table.ColumnHeader>Product</Table.ColumnHeader>
                   <Table.ColumnHeader>Category</Table.ColumnHeader>
-                  <Table.ColumnHeader textAlign="right">Stock</Table.ColumnHeader>
-                  <Table.ColumnHeader textAlign="right">Buying Price</Table.ColumnHeader>
-                  <Table.ColumnHeader textAlign="right">Inventory Value</Table.ColumnHeader>
+                  <Table.ColumnHeader textAlign="right">
+                    Stock
+                  </Table.ColumnHeader>
+                  <Table.ColumnHeader textAlign="right">
+                    Buying Price
+                  </Table.ColumnHeader>
+                  <Table.ColumnHeader textAlign="right">
+                    Inventory Value
+                  </Table.ColumnHeader>
                   <Table.ColumnHeader>Status</Table.ColumnHeader>
                 </Table.Row>
               </Table.Header>
@@ -160,12 +166,14 @@ export function StockReport({ stockSummary }: StockReportProps) {
                 {stockSummary.products
                   .sort((a, b) => b.inventoryValue - a.inventoryValue)
                   .map((product) => (
-                    <Table.Row 
+                    <Table.Row
                       key={product.id}
                       bg="table.row.bg"
                       _hover={{ bg: "table.row.hover" }}
                     >
-                      <Table.Cell fontWeight="medium">{product.name}</Table.Cell>
+                      <Table.Cell fontWeight="medium">
+                        {product.name}
+                      </Table.Cell>
                       <Table.Cell>
                         <Badge colorPalette="purple">{product.category}</Badge>
                       </Table.Cell>
@@ -175,8 +183,8 @@ export function StockReport({ stockSummary }: StockReportProps) {
                             product.currentStock === 0
                               ? "red"
                               : product.currentStock <= product.reorderLevel
-                              ? "orange"
-                              : "green"
+                                ? "orange"
+                                : "green"
                           }
                         >
                           {product.currentStock}
@@ -190,7 +198,9 @@ export function StockReport({ stockSummary }: StockReportProps) {
                       </Table.Cell>
                       <Table.Cell>
                         <Badge
-                          colorPalette={product.status === "Active" ? "green" : "gray"}
+                          colorPalette={
+                            product.status === "Active" ? "green" : "gray"
+                          }
                         >
                           {product.status}
                         </Badge>
@@ -205,4 +215,3 @@ export function StockReport({ stockSummary }: StockReportProps) {
     </VStack>
   )
 }
-

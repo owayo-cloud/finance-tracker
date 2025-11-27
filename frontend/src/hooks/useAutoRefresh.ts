@@ -1,5 +1,5 @@
-import { useState, useEffect } from "react"
 import { useQueryClient } from "@tanstack/react-query"
+import { useEffect, useState } from "react"
 
 const AUTO_REFRESH_KEY = "autoRefreshEnabled"
 const AUTO_REFRESH_INTERVAL_KEY = "autoRefreshInterval"
@@ -25,15 +25,15 @@ if (typeof window !== "undefined") {
     if (storedEnabled !== null) {
       globalAutoRefreshEnabled = storedEnabled === "true"
     }
-    
+
     const storedInterval = localStorage.getItem(AUTO_REFRESH_INTERVAL_KEY)
     if (storedInterval) {
       const parsed = parseInt(storedInterval, 10)
-      if (!isNaN(parsed)) {
+      if (!Number.isNaN(parsed)) {
         globalAutoRefreshInterval = parsed
       }
     }
-  } catch (error) {
+  } catch (_error) {
     // If localStorage is not available, use defaults
   }
 }
@@ -47,9 +47,9 @@ export const useAutoRefresh = (defaultInterval?: number) => {
     try {
       globalAutoRefreshEnabled = enabled
       localStorage.setItem(AUTO_REFRESH_KEY, enabled.toString())
-      
+
       // Update QueryClient default options
-      const newInterval = enabled ? (defaultInterval || interval) : false
+      const newInterval = enabled ? defaultInterval || interval : false
       const currentDefaults = queryClient.getDefaultOptions().queries || {}
       queryClient.setDefaultOptions({
         queries: {
@@ -57,18 +57,21 @@ export const useAutoRefresh = (defaultInterval?: number) => {
           refetchInterval: newInterval,
         },
       })
-      
+
       // Update all active queries
-      queryClient.getQueryCache().getAll().forEach((query) => {
-        try {
-          queryClient.setQueryDefaults(query.queryKey, {
-            refetchInterval: newInterval,
-          })
-        } catch (err) {
-          // Ignore errors for individual queries
-        }
-      })
-    } catch (error) {
+      queryClient
+        .getQueryCache()
+        .getAll()
+        .forEach((query) => {
+          try {
+            queryClient.setQueryDefaults(query.queryKey, {
+              refetchInterval: newInterval,
+            })
+          } catch (_err) {
+            // Ignore errors for individual queries
+          }
+        })
+    } catch (_error) {
       // Failed to update auto-refresh settings - silently continue
     }
   }, [enabled, interval, defaultInterval, queryClient])
@@ -91,7 +94,7 @@ export const useAutoRefresh = (defaultInterval?: number) => {
     interval,
     toggle,
     setInterval,
-    refetchInterval: enabled ? (defaultInterval || interval) : false,
+    refetchInterval: enabled ? defaultInterval || interval : false,
   }
 }
 
@@ -101,7 +104,9 @@ export const getGlobalAutoRefreshInterval = () => {
 }
 
 // Page auto-refresh hook (reloads entire page)
-export const usePageAutoRefresh = (interval: number = REFRESH_INTERVALS.PAGE_REFRESH) => {
+export const usePageAutoRefresh = (
+  interval: number = REFRESH_INTERVALS.PAGE_REFRESH,
+) => {
   const [enabled, setEnabled] = useState(() => {
     if (typeof window === "undefined") return false
     const stored = localStorage.getItem(PAGE_REFRESH_KEY)
@@ -135,4 +140,3 @@ export const usePageAutoRefresh = (interval: number = REFRESH_INTERVALS.PAGE_REF
     toggle,
   }
 }
-

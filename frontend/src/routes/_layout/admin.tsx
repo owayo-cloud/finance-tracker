@@ -73,8 +73,8 @@ function UsersTable() {
         </Table.Header>
         <Table.Body>
           {users?.map((user) => (
-            <Table.Row 
-              key={user.id} 
+            <Table.Row
+              key={user.id}
               opacity={isPlaceholderData ? 0.5 : 1}
               bg="table.row.bg"
               _hover={{ bg: "table.row.hover" }}
@@ -87,7 +87,11 @@ function UsersTable() {
                   </Badge>
                 )}
               </Table.Cell>
-              <Table.Cell truncate maxW="sm" color={!user.username ? "gray.500" : undefined}>
+              <Table.Cell
+                truncate
+                maxW="sm"
+                color={!user.username ? "gray.500" : undefined}
+              >
                 {user.username || "N/A"}
               </Table.Cell>
               <Table.Cell truncate maxW="sm">
@@ -110,7 +114,11 @@ function UsersTable() {
                   borderRadius="sm"
                   textTransform="uppercase"
                 >
-                  {user.is_superuser ? "Admin" : user.is_auditor ? "Auditor" : "Cashier"}
+                  {user.is_superuser
+                    ? "Admin"
+                    : user.is_auditor
+                      ? "Auditor"
+                      : "Cashier"}
                 </Badge>
               </Table.Cell>
               <Table.Cell>{user.is_active ? "Active" : "Inactive"}</Table.Cell>
@@ -144,17 +152,9 @@ function UsersTable() {
 function Admin() {
   return (
     <Container maxW="full" minH="100vh">
-      <Flex 
-        direction="column" 
-        gap={6}
-        pt={12}
-        pb={8}
-      >
+      <Flex direction="column" gap={6} pt={12} pb={8}>
         <Flex justify="space-between" align="center">
-          <Heading 
-            size="lg"
-            color={{ base: "#e5e7eb", _light: "#111827" }}
-          >
+          <Heading size="lg" color={{ base: "#e5e7eb", _light: "#111827" }}>
             Users
           </Heading>
           <AddUser />

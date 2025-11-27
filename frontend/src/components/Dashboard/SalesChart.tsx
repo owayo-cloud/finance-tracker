@@ -1,4 +1,12 @@
-import { Box, Heading, VStack, HStack, Text, Card, Skeleton } from "@chakra-ui/react"
+import {
+  Box,
+  Card,
+  Heading,
+  HStack,
+  Skeleton,
+  Text,
+  VStack,
+} from "@chakra-ui/react"
 import { useQuery } from "@tanstack/react-query"
 import { useMemo } from "react"
 import { SalesService } from "@/client"
@@ -8,7 +16,7 @@ interface SalesChartProps {
   totalRevenue: number
 }
 
-export function SalesChart({}: SalesChartProps) {
+export function SalesChart(_props: SalesChartProps) {
   // Get last 7 days of sales (including today)
   const today = new Date()
   today.setHours(23, 59, 59, 999) // End of today
@@ -19,7 +27,11 @@ export function SalesChart({}: SalesChartProps) {
   const startDate = sixDaysAgo.toISOString().split("T")[0]
   const endDate = today.toISOString().split("T")[0]
 
-  const { data: salesData, isLoading, error } = useQuery({
+  const {
+    data: salesData,
+    isLoading,
+    error,
+  } = useQuery({
     queryKey: ["sales-chart", startDate, endDate],
     queryFn: () =>
       SalesService.readSales({
@@ -36,7 +48,7 @@ export function SalesChart({}: SalesChartProps) {
 
     const salesByDate: Record<string, number> = {}
     const chartToday = new Date()
-    
+
     // Initialize all 7 days with 0 (last 6 days + today)
     for (let i = 6; i >= 0; i--) {
       const date = new Date(chartToday)
@@ -60,7 +72,10 @@ export function SalesChart({}: SalesChartProps) {
       .map(([date, amount]) => ({
         date,
         amount,
-        label: new Date(date).toLocaleDateString("en-KE", { weekday: "short", day: "numeric" }),
+        label: new Date(date).toLocaleDateString("en-KE", {
+          weekday: "short",
+          day: "numeric",
+        }),
       }))
       .sort((a, b) => a.date.localeCompare(b.date))
   }, [salesData])
@@ -77,7 +92,10 @@ export function SalesChart({}: SalesChartProps) {
       borderWidth="1px"
       p={6}
       borderRadius="lg"
-      boxShadow={{ base: "0 2px 4px rgba(0, 0, 0, 0.2)", _light: "0 1px 3px rgba(0, 0, 0, 0.1)" }}
+      boxShadow={{
+        base: "0 2px 4px rgba(0, 0, 0, 0.2)",
+        _light: "0 1px 3px rgba(0, 0, 0, 0.1)",
+      }}
     >
       <Card.Body>
         <VStack align="stretch" gap={4}>
@@ -117,7 +135,10 @@ export function SalesChart({}: SalesChartProps) {
                 w="full"
                 position="relative"
                 borderBottom="2px solid"
-                borderColor={{ base: "rgba(255, 255, 255, 0.1)", _light: "#e5e7eb" }}
+                borderColor={{
+                  base: "rgba(255, 255, 255, 0.1)",
+                  _light: "#e5e7eb",
+                }}
               >
                 {dailySales.length > 0 ? (
                   <HStack
@@ -128,12 +149,19 @@ export function SalesChart({}: SalesChartProps) {
                     pb={2}
                   >
                     {dailySales.map((day) => {
-                      const calculatedHeight = maxAmount > 0 ? (day.amount / maxAmount) * (chartHeight - 40) : 0
+                      const calculatedHeight =
+                        maxAmount > 0
+                          ? (day.amount / maxAmount) * (chartHeight - 40)
+                          : 0
                       // Ensure minimum height for visibility (at least 4px if there's any amount)
-                      const barHeight = day.amount > 0 && calculatedHeight < 4 ? 4 : calculatedHeight
+                      const barHeight =
+                        day.amount > 0 && calculatedHeight < 4
+                          ? 4
+                          : calculatedHeight
                       const chartToday = new Date()
-                      const isToday = day.date === chartToday.toISOString().split("T")[0]
-                      
+                      const isToday =
+                        day.date === chartToday.toISOString().split("T")[0]
+
                       return (
                         <VStack
                           key={day.date}
@@ -148,14 +176,29 @@ export function SalesChart({}: SalesChartProps) {
                             w={`${barWidth}px`}
                             h={`${Math.max(barHeight, 0)}px`}
                             minH={day.amount > 0 ? "4px" : "0px"}
-                            bg={day.amount > 0 ? (isToday ? "#14b8a6" : "#3b82f6") : "transparent"}
+                            bg={
+                              day.amount > 0
+                                ? isToday
+                                  ? "#14b8a6"
+                                  : "#3b82f6"
+                                : "transparent"
+                            }
                             border={day.amount === 0 ? "1px dashed" : "none"}
-                            borderColor={{ base: "rgba(255, 255, 255, 0.2)", _light: "#e5e7eb" }}
+                            borderColor={{
+                              base: "rgba(255, 255, 255, 0.2)",
+                              _light: "#e5e7eb",
+                            }}
                             borderRadius="md md 0 0"
                             transition="all 0.3s"
                             _hover={{
-                              bg: day.amount > 0 ? (isToday ? "#0d9488" : "#2563eb") : undefined,
-                              transform: day.amount > 0 ? "scaleY(1.05)" : undefined,
+                              bg:
+                                day.amount > 0
+                                  ? isToday
+                                    ? "#0d9488"
+                                    : "#2563eb"
+                                  : undefined,
+                              transform:
+                                day.amount > 0 ? "scaleY(1.05)" : undefined,
                               transformOrigin: "bottom",
                             }}
                             cursor="pointer"
@@ -195,7 +238,10 @@ export function SalesChart({}: SalesChartProps) {
                     alignItems="center"
                     justifyContent="center"
                   >
-                    <Text fontSize="sm" color={{ base: "#9ca3af", _light: "#6b7280" }}>
+                    <Text
+                      fontSize="sm"
+                      color={{ base: "#9ca3af", _light: "#6b7280" }}
+                    >
                       No sales data available
                     </Text>
                   </Box>
@@ -204,22 +250,48 @@ export function SalesChart({}: SalesChartProps) {
 
               {/* Summary */}
               {dailySales.length > 0 && (
-                <HStack justify="space-between" mt={4} pt={4} borderTop="1px solid" borderColor={{ base: "rgba(255, 255, 255, 0.1)", _light: "#e5e7eb" }}>
+                <HStack
+                  justify="space-between"
+                  mt={4}
+                  pt={4}
+                  borderTop="1px solid"
+                  borderColor={{
+                    base: "rgba(255, 255, 255, 0.1)",
+                    _light: "#e5e7eb",
+                  }}
+                >
                   <VStack align="start" gap={0}>
-                    <Text fontSize="xs" color={{ base: "#9ca3af", _light: "#6b7280" }}>
+                    <Text
+                      fontSize="xs"
+                      color={{ base: "#9ca3af", _light: "#6b7280" }}
+                    >
                       Total (7 days)
                     </Text>
-                    <Text fontSize="lg" fontWeight="700" color={{ base: "#ffffff", _light: "#1a1d29" }}>
-                      {formatCurrency(dailySales.reduce((sum, day) => sum + day.amount, 0))}
+                    <Text
+                      fontSize="lg"
+                      fontWeight="700"
+                      color={{ base: "#ffffff", _light: "#1a1d29" }}
+                    >
+                      {formatCurrency(
+                        dailySales.reduce((sum, day) => sum + day.amount, 0),
+                      )}
                     </Text>
                   </VStack>
                   <VStack align="end" gap={0}>
-                    <Text fontSize="xs" color={{ base: "#9ca3af", _light: "#6b7280" }}>
+                    <Text
+                      fontSize="xs"
+                      color={{ base: "#9ca3af", _light: "#6b7280" }}
+                    >
                       Average per day
                     </Text>
-                    <Text fontSize="lg" fontWeight="700" color={{ base: "#ffffff", _light: "#1a1d29" }}>
+                    <Text
+                      fontSize="lg"
+                      fontWeight="700"
+                      color={{ base: "#ffffff", _light: "#1a1d29" }}
+                    >
                       {formatCurrency(
-                        dailySales.reduce((sum, day) => sum + day.amount, 0) / (dailySales.length || 1)
+                        dailySales.reduce((sum, day) => sum + day.amount, 0) /
+                          (dailySales.length || 1),
                       )}
                     </Text>
                   </VStack>
@@ -232,4 +304,3 @@ export function SalesChart({}: SalesChartProps) {
     </Card.Root>
   )
 }
-

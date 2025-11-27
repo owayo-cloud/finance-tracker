@@ -1,6 +1,15 @@
-import { Badge, Button, Card, Grid, HStack, Heading, Table, VStack } from "@chakra-ui/react"
+import {
+  Badge,
+  Button,
+  Card,
+  Grid,
+  Heading,
+  HStack,
+  Table,
+  VStack,
+} from "@chakra-ui/react"
 import { FiDownload, FiPrinter } from "react-icons/fi"
-import { formatCurrency, downloadCSV, formatDate } from "./utils"
+import { downloadCSV, formatCurrency, formatDate } from "./utils"
 
 interface SalesBreakdownProps {
   salesSummary: {
@@ -13,7 +22,11 @@ interface SalesBreakdownProps {
   endDate: string
 }
 
-function exportSalesToCSV(salesData: any[], startDate: string, endDate: string) {
+function exportSalesToCSV(
+  salesData: any[],
+  startDate: string,
+  endDate: string,
+) {
   const headers = [
     "Date",
     "Receipt No",
@@ -66,7 +79,9 @@ export function SalesBreakdown({
                 <Button
                   size="sm"
                   variant="outline"
-                  onClick={() => exportSalesToCSV(salesData, startDate, endDate)}
+                  onClick={() =>
+                    exportSalesToCSV(salesData, startDate, endDate)
+                  }
                 >
                   <FiDownload size={14} style={{ marginRight: "4px" }} />
                   CSV
@@ -77,15 +92,16 @@ export function SalesBreakdown({
                 </Button>
               </HStack>
             </HStack>
-            <Table.Root 
-              size="sm"
-              variant="outline"
-            >
+            <Table.Root size="sm" variant="outline">
               <Table.Header>
                 <Table.Row bg="table.header.bg">
                   <Table.ColumnHeader>Method</Table.ColumnHeader>
-                  <Table.ColumnHeader textAlign="right">Count</Table.ColumnHeader>
-                  <Table.ColumnHeader textAlign="right">Amount</Table.ColumnHeader>
+                  <Table.ColumnHeader textAlign="right">
+                    Count
+                  </Table.ColumnHeader>
+                  <Table.ColumnHeader textAlign="right">
+                    Amount
+                  </Table.ColumnHeader>
                   <Table.ColumnHeader textAlign="right">%</Table.ColumnHeader>
                 </Table.Row>
               </Table.Header>
@@ -93,7 +109,7 @@ export function SalesBreakdown({
                 {Object.entries(salesSummary.paymentMethodBreakdown)
                   .sort((a, b) => b[1].amount - a[1].amount)
                   .map(([method, data]) => (
-                    <Table.Row 
+                    <Table.Row
                       key={method}
                       bg="table.row.bg"
                       _hover={{ bg: "table.row.hover" }}
@@ -105,7 +121,11 @@ export function SalesBreakdown({
                       </Table.Cell>
                       <Table.Cell textAlign="right">
                         <Badge colorPalette="blue">
-                          {((data.amount / salesSummary.totalAmount) * 100).toFixed(1)}%
+                          {(
+                            (data.amount / salesSummary.totalAmount) *
+                            100
+                          ).toFixed(1)}
+                          %
                         </Badge>
                       </Table.Cell>
                     </Table.Row>
@@ -136,15 +156,16 @@ export function SalesBreakdown({
                 CSV
               </Button>
             </HStack>
-            <Table.Root 
-              size="sm"
-              variant="outline"
-            >
+            <Table.Root size="sm" variant="outline">
               <Table.Header>
                 <Table.Row bg="table.header.bg">
                   <Table.ColumnHeader>Cashier</Table.ColumnHeader>
-                  <Table.ColumnHeader textAlign="right">Count</Table.ColumnHeader>
-                  <Table.ColumnHeader textAlign="right">Amount</Table.ColumnHeader>
+                  <Table.ColumnHeader textAlign="right">
+                    Count
+                  </Table.ColumnHeader>
+                  <Table.ColumnHeader textAlign="right">
+                    Amount
+                  </Table.ColumnHeader>
                   <Table.ColumnHeader textAlign="right">%</Table.ColumnHeader>
                 </Table.Row>
               </Table.Header>
@@ -152,7 +173,7 @@ export function SalesBreakdown({
                 {Object.entries(salesSummary.cashierBreakdown)
                   .sort((a, b) => b[1].amount - a[1].amount)
                   .map(([cashier, data]) => (
-                    <Table.Row 
+                    <Table.Row
                       key={cashier}
                       bg="table.row.bg"
                       _hover={{ bg: "table.row.hover" }}
@@ -164,7 +185,11 @@ export function SalesBreakdown({
                       </Table.Cell>
                       <Table.Cell textAlign="right">
                         <Badge colorPalette="teal">
-                          {((data.amount / salesSummary.totalAmount) * 100).toFixed(1)}%
+                          {(
+                            (data.amount / salesSummary.totalAmount) *
+                            100
+                          ).toFixed(1)}
+                          %
                         </Badge>
                       </Table.Cell>
                     </Table.Row>
@@ -177,4 +202,3 @@ export function SalesBreakdown({
     </Grid>
   )
 }
-

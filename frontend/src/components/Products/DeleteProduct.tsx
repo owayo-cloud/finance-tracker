@@ -27,20 +27,27 @@ interface DeleteProductProps {
   children?: React.ReactNode
   isOpen?: boolean
   onOpenChange?: (open: boolean) => void
-  'data-testid'?: string
+  "data-testid"?: string
 }
 
-const DeleteProduct = ({ product, children, isOpen: controlledIsOpen, onOpenChange, 'data-testid': testId }: DeleteProductProps) => {
+const DeleteProduct = ({
+  product,
+  children,
+  isOpen: controlledIsOpen,
+  onOpenChange,
+  "data-testid": testId,
+}: DeleteProductProps) => {
   const [internalIsOpen, setInternalIsOpen] = useState(false)
   const queryClient = useQueryClient()
   const { showSuccessToast } = useCustomToast()
-  
+
   // Use controlled or internal state
-  const isOpen = controlledIsOpen !== undefined ? controlledIsOpen : internalIsOpen
+  const isOpen =
+    controlledIsOpen !== undefined ? controlledIsOpen : internalIsOpen
   const setIsOpen = onOpenChange || setInternalIsOpen
 
   const deleteProductMutation = useMutation({
-     mutationFn: (id: string) => ProductsService.deleteProduct({ id }),
+    mutationFn: (id: string) => ProductsService.deleteProduct({ id }),
     onSuccess: () => {
       showSuccessToast("Product deleted successfully.")
       setIsOpen(false)

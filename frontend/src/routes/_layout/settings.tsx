@@ -30,9 +30,9 @@ function UserSettings() {
 
   return (
     <Container maxW="full" minH="100vh">
-      <Heading 
-        size="lg" 
-        textAlign={{ base: "center", md: "left" }} 
+      <Heading
+        size="lg"
+        textAlign={{ base: "center", md: "left" }}
         py={12}
         color={{ base: "#e5e7eb", _light: "#111827" }}
       >
@@ -42,10 +42,7 @@ function UserSettings() {
       <Tabs.Root defaultValue="my-profile" variant="subtle">
         <Tabs.List>
           {finalTabs.map((tab) => (
-            <Tabs.Trigger 
-              key={tab.value} 
-              value={tab.value}
-            >
+            <Tabs.Trigger key={tab.value} value={tab.value}>
               {tab.title}
             </Tabs.Trigger>
           ))}

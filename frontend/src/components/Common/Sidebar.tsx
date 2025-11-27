@@ -1,12 +1,20 @@
-import { Box, Flex, IconButton, Text, HStack, VStack, Badge, Icon } from "@chakra-ui/react"
-import { Link } from "@tanstack/react-router"
+import {
+  Badge,
+  Box,
+  Flex,
+  HStack,
+  Icon,
+  IconButton,
+  Text,
+  VStack,
+} from "@chakra-ui/react"
 import { useQueryClient } from "@tanstack/react-query"
+import { Link } from "@tanstack/react-router"
 import { useState } from "react"
-import { FiLogOut, FiMoreVertical, FiX, FiUser } from "react-icons/fi"
+import { FiLogOut, FiMoreVertical, FiUser, FiX } from "react-icons/fi"
 
 import type { UserPublic } from "@/client"
 import useAuth from "@/hooks/useAuth"
-import { MenuContent, MenuItem, MenuRoot, MenuTrigger } from "../ui/menu"
 import { getUserInitials } from "@/utils"
 import {
   DrawerBackdrop,
@@ -15,6 +23,7 @@ import {
   DrawerContent,
   DrawerRoot,
 } from "../ui/drawer"
+import { MenuContent, MenuItem, MenuRoot, MenuTrigger } from "../ui/menu"
 import SidebarItems from "./SidebarItems"
 
 interface SidebarProps {
@@ -23,16 +32,20 @@ interface SidebarProps {
   isCollapsed?: boolean
 }
 
-const Sidebar = ({ open: controlledOpen, onOpenChange, isCollapsed = false }: SidebarProps) => {
+const Sidebar = ({
+  open: controlledOpen,
+  onOpenChange,
+  isCollapsed = false,
+}: SidebarProps) => {
   const queryClient = useQueryClient()
   const currentUser = queryClient.getQueryData<UserPublic>(["currentUser"])
   const { logout } = useAuth()
   const [internalOpen, setInternalOpen] = useState(false)
-  
+
   const handleLogout = async () => {
     await logout()
   }
-  
+
   // Use controlled state if provided, otherwise use internal state
   const open = controlledOpen !== undefined ? controlledOpen : internalOpen
   const setOpen = (newOpen: boolean) => {
@@ -52,8 +65,8 @@ const Sidebar = ({ open: controlledOpen, onOpenChange, isCollapsed = false }: Si
         onOpenChange={(e) => setOpen(e.open)}
       >
         <DrawerBackdrop />
-        <DrawerContent 
-          maxW="xs" 
+        <DrawerContent
+          maxW="xs"
           w="280px"
           bg={{ base: "#1a1d29", _light: "#ffffff" }}
           borderRight="1px solid"
@@ -65,7 +78,10 @@ const Sidebar = ({ open: controlledOpen, onOpenChange, isCollapsed = false }: Si
             justify="space-between"
             p={4}
             borderBottom="1px solid"
-            borderColor={{ base: "rgba(255, 255, 255, 0.08)", _light: "#e5e7eb" }}
+            borderColor={{
+              base: "rgba(255, 255, 255, 0.08)",
+              _light: "#e5e7eb",
+            }}
             flexShrink={0}
           >
             <HStack gap={2}>
@@ -85,7 +101,11 @@ const Sidebar = ({ open: controlledOpen, onOpenChange, isCollapsed = false }: Si
                   FT
                 </Text>
               </Box>
-              <Text fontSize="md" fontWeight="700" color={{ base: "#ffffff", _light: "#1a1d29" }}>
+              <Text
+                fontSize="md"
+                fontWeight="700"
+                color={{ base: "#ffffff", _light: "#1a1d29" }}
+              >
                 Menu
               </Text>
             </HStack>
@@ -95,22 +115,23 @@ const Sidebar = ({ open: controlledOpen, onOpenChange, isCollapsed = false }: Si
                 aria-label="Close menu"
                 size="sm"
                 color={{ base: "#9ca3af", _light: "#6b7280" }}
-                _hover={{ bg: { base: "rgba(255, 255, 255, 0.05)", _light: "rgba(0, 0, 0, 0.05)" } }}
+                _hover={{
+                  bg: {
+                    base: "rgba(255, 255, 255, 0.05)",
+                    _light: "rgba(0, 0, 0, 0.05)",
+                  },
+                }}
               >
                 <Icon as={FiX} fontSize="20px" />
               </IconButton>
             </DrawerCloseTrigger>
           </Flex>
-          <DrawerBody 
-            p={0}
-            overflow="hidden"
-          >
+          <DrawerBody p={0} overflow="hidden">
             <Flex flexDir="column" h="full" overflow="hidden">
-
               {/* Menu Items - Scrollable */}
-              <Box 
-                flex="1" 
-                overflowY="auto" 
+              <Box
+                flex="1"
+                overflowY="auto"
                 overflowX="hidden"
                 py={4}
                 minH="0"
@@ -122,29 +143,51 @@ const Sidebar = ({ open: controlledOpen, onOpenChange, isCollapsed = false }: Si
                     background: "transparent",
                   },
                   "&::-webkit-scrollbar-thumb": {
-                    background: { base: "rgba(255, 255, 255, 0.2)", _light: "rgba(0, 0, 0, 0.2)" },
+                    background: {
+                      base: "rgba(255, 255, 255, 0.2)",
+                      _light: "rgba(0, 0, 0, 0.2)",
+                    },
                     borderRadius: "3px",
                   },
                   "&::-webkit-scrollbar-thumb:hover": {
-                    background: { base: "rgba(255, 255, 255, 0.3)", _light: "rgba(0, 0, 0, 0.3)" },
+                    background: {
+                      base: "rgba(255, 255, 255, 0.3)",
+                      _light: "rgba(0, 0, 0, 0.3)",
+                    },
                   },
                   scrollbarWidth: "thin",
-                  scrollbarColor: { base: "rgba(255, 255, 255, 0.2) transparent", _light: "rgba(0, 0, 0, 0.2) transparent" },
+                  scrollbarColor: {
+                    base: "rgba(255, 255, 255, 0.2) transparent",
+                    _light: "rgba(0, 0, 0, 0.2) transparent",
+                  },
                 }}
               >
                 <SidebarItems onClose={() => setOpen(false)} />
               </Box>
-              
+
               {/* User Profile Footer - Fixed */}
-              <Box 
-                borderTop="1px solid" 
-                borderColor={{ base: "rgba(255, 255, 255, 0.1)", _light: "gray.200" }}
+              <Box
+                borderTop="1px solid"
+                borderColor={{
+                  base: "rgba(255, 255, 255, 0.1)",
+                  _light: "gray.200",
+                }}
                 p={4}
                 bg={{ base: "rgba(0, 0, 0, 0.2)", _light: "gray.50" }}
                 flexShrink={0}
               >
                 {currentUser && (
-                  <HStack mb={3} p={2} borderRadius="lg" _hover={{ bg: { base: "rgba(255, 255, 255, 0.05)", _light: "rgba(0, 0, 0, 0.05)" } }}>
+                  <HStack
+                    mb={3}
+                    p={2}
+                    borderRadius="lg"
+                    _hover={{
+                      bg: {
+                        base: "rgba(255, 255, 255, 0.05)",
+                        _light: "rgba(0, 0, 0, 0.05)",
+                      },
+                    }}
+                  >
                     <Box
                       w={8}
                       h={8}
@@ -158,13 +201,25 @@ const Sidebar = ({ open: controlledOpen, onOpenChange, isCollapsed = false }: Si
                       fontWeight="bold"
                       flexShrink={0}
                     >
-                      {getUserInitials(currentUser.full_name, currentUser.email)}
+                      {getUserInitials(
+                        currentUser.full_name,
+                        currentUser.email,
+                      )}
                     </Box>
                     <VStack align="start" flex={1} gap={0}>
-                      <Text fontSize="sm" fontWeight="600" color={{ base: "white", _light: "gray.800" }}>
+                      <Text
+                        fontSize="sm"
+                        fontWeight="600"
+                        color={{ base: "white", _light: "gray.800" }}
+                      >
                         {currentUser.full_name || "User"}
                       </Text>
-                      <Text fontSize="xs" color={{ base: "gray.400", _light: "gray.600" }} truncate maxW="150px">
+                      <Text
+                        fontSize="xs"
+                        color={{ base: "gray.400", _light: "gray.600" }}
+                        truncate
+                        maxW="150px"
+                      >
                         {currentUser.email}
                       </Text>
                     </VStack>
@@ -183,7 +238,10 @@ const Sidebar = ({ open: controlledOpen, onOpenChange, isCollapsed = false }: Si
                   w="full"
                   color={{ base: "gray.300", _light: "gray.700" }}
                   _hover={{
-                    bg: { base: "rgba(255, 255, 255, 0.1)", _light: "rgba(0, 0, 0, 0.05)" },
+                    bg: {
+                      base: "rgba(255, 255, 255, 0.1)",
+                      _light: "rgba(0, 0, 0, 0.05)",
+                    },
                     color: { base: "white", _light: "gray.900" },
                   }}
                   transition="all 0.2s"
@@ -206,7 +264,10 @@ const Sidebar = ({ open: controlledOpen, onOpenChange, isCollapsed = false }: Si
         w={isCollapsed ? "70px" : "260px"}
         h="100%"
         direction="column"
-        boxShadow={{ base: "2px 0 8px rgba(0, 0, 0, 0.4)", _light: "2px 0 8px rgba(0, 0, 0, 0.08)" }}
+        boxShadow={{
+          base: "2px 0 8px rgba(0, 0, 0, 0.4)",
+          _light: "2px 0 8px rgba(0, 0, 0, 0.08)",
+        }}
         transition="width 0.3s ease, box-shadow 0.3s ease"
         overflow="hidden"
         flexShrink={0}
@@ -214,13 +275,16 @@ const Sidebar = ({ open: controlledOpen, onOpenChange, isCollapsed = false }: Si
       >
         {/* User Profile Section at Top - Fixed */}
         {currentUser && !isCollapsed && (
-          <Box 
+          <Box
             p={4}
             bg={{ base: "#1a1d29", _light: "#ffffff" }}
             minW="260px"
             flexShrink={0}
             borderBottom="1px solid"
-            borderColor={{ base: "rgba(255, 255, 255, 0.08)", _light: "#e5e7eb" }}
+            borderColor={{
+              base: "rgba(255, 255, 255, 0.08)",
+              _light: "#e5e7eb",
+            }}
           >
             <HStack gap={3} justify="space-between" align="center">
               <HStack gap={3} flex={1}>
@@ -237,12 +301,20 @@ const Sidebar = ({ open: controlledOpen, onOpenChange, isCollapsed = false }: Si
                   fontWeight="700"
                   flexShrink={0}
                   border="2px solid"
-                  borderColor={{ base: "rgba(255, 255, 255, 0.1)", _light: "rgba(0, 0, 0, 0.1)" }}
+                  borderColor={{
+                    base: "rgba(255, 255, 255, 0.1)",
+                    _light: "rgba(0, 0, 0, 0.1)",
+                  }}
                 >
                   {getUserInitials(currentUser.full_name, currentUser.email)}
                 </Box>
                 <VStack align="start" gap={0} flex={1} minW={0}>
-                  <Text fontSize="sm" fontWeight="600" color={{ base: "#ffffff", _light: "#1a1d29" }} lineHeight="1.2">
+                  <Text
+                    fontSize="sm"
+                    fontWeight="600"
+                    color={{ base: "#ffffff", _light: "#1a1d29" }}
+                    lineHeight="1.2"
+                  >
                     {currentUser.full_name || "User"}
                   </Text>
                   <Badge
@@ -253,8 +325,8 @@ const Sidebar = ({ open: controlledOpen, onOpenChange, isCollapsed = false }: Si
                       currentUser.is_superuser
                         ? "linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%)" // Purple for Admin
                         : currentUser.is_auditor
-                        ? "linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)" // Blue for Auditor
-                        : "linear-gradient(135deg, #22c55e 0%, #16a34a 100%)" // Green for Cashier
+                          ? "linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)" // Blue for Auditor
+                          : "linear-gradient(135deg, #22c55e 0%, #16a34a 100%)" // Green for Cashier
                     }
                     color="white"
                     fontSize="2xs"
@@ -263,7 +335,11 @@ const Sidebar = ({ open: controlledOpen, onOpenChange, isCollapsed = false }: Si
                     textTransform="uppercase"
                     letterSpacing="0.5px"
                   >
-                    {currentUser.is_superuser ? "Admin" : currentUser.is_auditor ? "Auditor" : "Cashier"}
+                    {currentUser.is_superuser
+                      ? "Admin"
+                      : currentUser.is_auditor
+                        ? "Auditor"
+                        : "Cashier"}
                   </Badge>
                 </VStack>
               </HStack>
@@ -274,7 +350,12 @@ const Sidebar = ({ open: controlledOpen, onOpenChange, isCollapsed = false }: Si
                     aria-label="More options"
                     size="sm"
                     color={{ base: "#9ca3af", _light: "#6b7280" }}
-                    _hover={{ bg: { base: "rgba(255, 255, 255, 0.05)", _light: "rgba(0, 0, 0, 0.05)" } }}
+                    _hover={{
+                      bg: {
+                        base: "rgba(255, 255, 255, 0.05)",
+                        _light: "rgba(0, 0, 0, 0.05)",
+                      },
+                    }}
                   >
                     <Icon as={FiMoreVertical} fontSize="16px" />
                   </IconButton>
@@ -309,7 +390,7 @@ const Sidebar = ({ open: controlledOpen, onOpenChange, isCollapsed = false }: Si
         )}
 
         {/* Scrollable menu items */}
-        <Box 
+        <Box
           flex="1"
           overflowY="auto"
           overflowX="hidden"
@@ -325,14 +406,23 @@ const Sidebar = ({ open: controlledOpen, onOpenChange, isCollapsed = false }: Si
               background: "transparent",
             },
             "&::-webkit-scrollbar-thumb": {
-              background: { base: "rgba(255, 255, 255, 0.2)", _light: "rgba(0, 0, 0, 0.2)" },
+              background: {
+                base: "rgba(255, 255, 255, 0.2)",
+                _light: "rgba(0, 0, 0, 0.2)",
+              },
               borderRadius: "3px",
             },
             "&::-webkit-scrollbar-thumb:hover": {
-              background: { base: "rgba(255, 255, 255, 0.3)", _light: "rgba(0, 0, 0, 0.3)" },
+              background: {
+                base: "rgba(255, 255, 255, 0.3)",
+                _light: "rgba(0, 0, 0, 0.3)",
+              },
             },
             scrollbarWidth: "thin",
-            scrollbarColor: { base: "rgba(255, 255, 255, 0.2) transparent", _light: "rgba(0, 0, 0, 0.2) transparent" },
+            scrollbarColor: {
+              base: "rgba(255, 255, 255, 0.2) transparent",
+              _light: "rgba(0, 0, 0, 0.2) transparent",
+            },
           }}
         >
           <SidebarItems isCollapsed={isCollapsed} />

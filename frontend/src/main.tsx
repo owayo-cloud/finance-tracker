@@ -10,8 +10,8 @@ import ReactDOM from "react-dom/client"
 import { ApiError, OpenAPI } from "./client"
 import ErrorBoundary from "./components/Common/ErrorBoundary"
 import { CustomProvider } from "./components/ui/provider"
-import { routeTree } from "./routeTree.gen"
 import { REFRESH_INTERVALS } from "./hooks/useAutoRefresh"
+import { routeTree } from "./routeTree.gen"
 
 OpenAPI.BASE = import.meta.env.VITE_API_URL
 OpenAPI.TOKEN = async () => {
@@ -24,20 +24,20 @@ const handleApiError = (error: Error) => {
     if (error.status === 401) {
       // Clear authentication state
       localStorage.removeItem("access_token")
-      
+
       // Redirect to login page
       window.location.href = "/login"
       return
     }
-    
+
     // Handle forbidden errors (403 - Forbidden)
     if (error.status === 403) {
       const errDetail = (error.body as any)?.detail
-      
+
       // Check if it's an authentication issue disguised as 403
       // Backend returns 403 for "Could not validate credentials" which is actually an auth issue
       if (
-        errDetail === "Not authenticated" || 
+        errDetail === "Not authenticated" ||
         errDetail?.includes("authenticated") ||
         errDetail === "Could not validate credentials" ||
         errDetail?.includes("validate credentials")
@@ -58,13 +58,15 @@ const handleApiError = (error: Error) => {
 const getInitialRefreshInterval = () => {
   try {
     if (typeof window === "undefined") return REFRESH_INTERVALS.DEFAULT
-    
+
     const storedEnabled = localStorage.getItem("autoRefreshEnabled")
     const storedInterval = localStorage.getItem("autoRefreshInterval")
-    
+
     if (storedEnabled === "false") return false
-    return storedInterval ? parseInt(storedInterval, 10) : REFRESH_INTERVALS.DEFAULT
-  } catch (error) {
+    return storedInterval
+      ? parseInt(storedInterval, 10)
+      : REFRESH_INTERVALS.DEFAULT
+  } catch (_error) {
     // If localStorage is not available, use default
     return REFRESH_INTERVALS.DEFAULT
   }

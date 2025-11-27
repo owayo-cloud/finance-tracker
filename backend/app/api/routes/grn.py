@@ -1,14 +1,16 @@
+import uuid
 from datetime import datetime, timezone
 from typing import Any
-import uuid
 
-from fastapi import APIRouter, HTTPException, Query
-from sqlalchemy import and_, func, or_, desc
+from fastapi import APIRouter, HTTPException
+from sqlalchemy import and_, desc, func, or_
 from sqlalchemy.sql import ColumnElement
 from sqlmodel import select
 
 from app.api.deps import AdminUser, CurrentUser, SessionDep
-from app.crud import grn as grn_crud, supplier as supplier_crud, transporter as transporter_crud
+from app.crud import grn as grn_crud
+from app.crud import supplier as supplier_crud
+from app.crud import transporter as transporter_crud
 from app.models import (
     GRN,
     GRNCreate,
@@ -35,6 +37,7 @@ router = APIRouter(prefix="/grn", tags=["grn"])
 
 # ==================== SUPPLIER ROUTES ====================
 
+
 @router.get("/suppliers", response_model=SuppliersPublic)
 def read_suppliers(
     session: SessionDep,
@@ -49,7 +52,7 @@ def read_suppliers(
     """
     # Build query
     statement = select(Supplier)
-    
+
     # Apply filters
     filters: list[ColumnElement[bool]] = []
     if search:
@@ -58,21 +61,21 @@ def read_suppliers(
             Supplier.contact_person.ilike(f"%{search}%"),
         )
         filters.append(search_filter)
-    
+
     if is_active is not None:
         filters.append(Supplier.is_active == is_active)  # type: ignore[arg-type]
-    
+
     if filters:
         statement = statement.where(and_(*filters))
-    
+
     # Get count
     count_statement = select(func.count()).select_from(statement.subquery())
     count = session.exec(count_statement).one()
-    
+
     # Apply pagination and ordering
     statement = statement.order_by(Supplier.name).offset(skip).limit(limit)
     suppliers = session.exec(statement).all()
-    
+
     return SuppliersPublic(data=suppliers, count=count)
 
 
@@ -92,7 +95,7 @@ def create_supplier(
             status_code=400,
             detail=f"Supplier with name '{supplier_in.name}' already exists.",
         )
-    
+
     supplier = supplier_crud.create(db=session, obj_in=supplier_in)
     return supplier
 
@@ -125,7 +128,7 @@ def update_supplier(
     supplier = session.get(Supplier, supplier_id)
     if not supplier:
         raise HTTPException(status_code=404, detail="Supplier not found")
-    
+
     # Check for duplicate name if changing name
     if supplier_in.name and supplier_in.name != supplier.name:
         existing = supplier_crud.get_by_name(db=session, name=supplier_in.name)
@@ -134,7 +137,7 @@ def update_supplier(
                 status_code=400,
                 detail=f"Supplier with name '{supplier_in.name}' already exists.",
             )
-    
+
     supplier = supplier_crud.update(db=session, db_obj=supplier, obj_in=supplier_in)
     return supplier
 
@@ -151,24 +154,25 @@ def delete_supplier(
     supplier = session.get(Supplier, supplier_id)
     if not supplier:
         raise HTTPException(status_code=404, detail="Supplier not found")
-    
+
     # Check if supplier has GRNs
     grn_count = session.exec(
         select(func.count()).select_from(GRN).where(GRN.supplier_id == supplier_id)
     ).one()
-    
+
     if grn_count > 0:
         raise HTTPException(
             status_code=400,
             detail=f"Cannot delete supplier. {grn_count} GRN(s) are associated with this supplier.",
         )
-    
+
     session.delete(supplier)
     session.commit()
     return {"message": "Supplier deleted successfully"}
 
 
 # ==================== TRANSPORTER ROUTES ====================
+
 
 @router.get("/transporters", response_model=TransportersPublic)
 def read_transporters(
@@ -184,7 +188,7 @@ def read_transporters(
     """
     # Build query
     statement = select(Transporter)
-    
+
     # Apply filters
     filters: list[ColumnElement[bool]] = []
     if search:
@@ -193,21 +197,21 @@ def read_transporters(
             Transporter.contact_person.ilike(f"%{search}%"),
         )
         filters.append(search_filter)
-    
+
     if is_active is not None:
         filters.append(Transporter.is_active == is_active)  # type: ignore[arg-type]
-    
+
     if filters:
         statement = statement.where(and_(*filters))
-    
+
     # Get count
     count_statement = select(func.count()).select_from(statement.subquery())
     count = session.exec(count_statement).one()
-    
+
     # Apply pagination and ordering
     statement = statement.order_by(Transporter.name).offset(skip).limit(limit)
     transporters = session.exec(statement).all()
-    
+
     return TransportersPublic(data=transporters, count=count)
 
 
@@ -227,7 +231,7 @@ def create_transporter(
             status_code=400,
             detail=f"Transporter with name '{transporter_in.name}' already exists.",
         )
-    
+
     transporter = transporter_crud.create(db=session, obj_in=transporter_in)
     return transporter
 
@@ -260,7 +264,7 @@ def update_transporter(
     transporter = session.get(Transporter, transporter_id)
     if not transporter:
         raise HTTPException(status_code=404, detail="Transporter not found")
-    
+
     # Check for duplicate name if changing name
     if transporter_in.name and transporter_in.name != transporter.name:
         existing = transporter_crud.get_by_name(db=session, name=transporter_in.name)
@@ -269,8 +273,10 @@ def update_transporter(
                 status_code=400,
                 detail=f"Transporter with name '{transporter_in.name}' already exists.",
             )
-    
-    transporter = transporter_crud.update(db=session, db_obj=transporter, obj_in=transporter_in)
+
+    transporter = transporter_crud.update(
+        db=session, db_obj=transporter, obj_in=transporter_in
+    )
     return transporter
 
 
@@ -286,24 +292,27 @@ def delete_transporter(
     transporter = session.get(Transporter, transporter_id)
     if not transporter:
         raise HTTPException(status_code=404, detail="Transporter not found")
-    
+
     # Check if transporter has GRNs
     grn_count = session.exec(
-        select(func.count()).select_from(GRN).where(GRN.transporter_id == transporter_id)
+        select(func.count())
+        .select_from(GRN)
+        .where(GRN.transporter_id == transporter_id)
     ).one()
-    
+
     if grn_count > 0:
         raise HTTPException(
             status_code=400,
             detail=f"Cannot delete transporter. {grn_count} GRN(s) are associated with this transporter.",
         )
-    
+
     session.delete(transporter)
     session.commit()
     return {"message": "Transporter deleted successfully"}
 
 
 # ==================== GRN ROUTES ====================
+
 
 @router.get("/", response_model=GRNsPublic)
 def read_grns(
@@ -325,7 +334,7 @@ def read_grns(
         qload(GRN.supplier),
         qload(GRN.transporter),
     )
-    
+
     # Apply filters
     filters: list[ColumnElement[bool]] = []
     if search:
@@ -335,30 +344,30 @@ def read_grns(
             GRN.consignment_number.ilike(f"%{search}%"),
         )
         filters.append(search_filter)
-    
+
     if supplier_id:
         filters.append(GRN.supplier_id == supplier_id)  # type: ignore[arg-type]
-    
+
     if is_approved is not None:
         filters.append(GRN.is_approved == is_approved)  # type: ignore[arg-type]
-    
+
     if start_date:
         filters.append(GRN.goods_receipt_date >= start_date)  # type: ignore[arg-type]
-    
+
     if end_date:
         filters.append(GRN.goods_receipt_date <= end_date)  # type: ignore[arg-type]
-    
+
     if filters:
         statement = statement.where(and_(*filters))
-    
+
     # Get count
     count_statement = select(func.count()).select_from(statement.subquery())
     count = session.exec(count_statement).one()
-    
+
     # Apply pagination and ordering (newest first)
     statement = statement.order_by(desc(GRN.created_at)).offset(skip).limit(limit)
     grns = session.exec(statement).all()
-    
+
     # Add computed fields
     grns_public = []
     for grn in grns:
@@ -367,7 +376,7 @@ def read_grns(
         grn_dict["transporter_name"] = grn.transporter.name if grn.transporter else None
         grn_dict["items_count"] = len(grn.items) if grn.items else 0
         grns_public.append(GRNPublic(**grn_dict))
-    
+
     return GRNsPublic(data=grns_public, count=count)
 
 
@@ -379,7 +388,7 @@ def create_grn(
 ) -> Any:
     """
     Create new GRN with optional credit purchase support.
-    
+
     If payment_type is "Credit", validates supplier credit limit
     and can optionally create supplier debt after approval.
     """
@@ -387,12 +396,12 @@ def create_grn(
     supplier = session.get(Supplier, grn_in.supplier_id)
     if not supplier:
         raise HTTPException(status_code=404, detail="Supplier not found")
-    
+
     # Credit limit validation for credit purchases
     if grn_in.payment_type == "Credit":
         total_amount = grn_in.total_amount
         new_credit_used = supplier.current_credit_used + total_amount
-        
+
         if new_credit_used > supplier.credit_limit:
             raise HTTPException(
                 status_code=400,
@@ -402,29 +411,30 @@ def create_grn(
                 f"This purchase: {total_amount}, "
                 f"Would be: {new_credit_used}",
             )
-    
+
     # Verify transporter if provided
     if grn_in.transporter_id:
         transporter = session.get(Transporter, grn_in.transporter_id)
         if not transporter:
             raise HTTPException(status_code=404, detail="Transporter not found")
-    
+
     # Verify all products exist
     for item in grn_in.items:
         from app.models import Product
+
         product = session.get(Product, item.product_id)
         if not product:
             raise HTTPException(
-                status_code=404, 
-                detail=f"Product with ID {item.product_id} not found"
+                status_code=404, detail=f"Product with ID {item.product_id} not found"
             )
-    
+
     # Create GRN
     grn = grn_crud.create(db=session, obj_in=grn_in, created_by_id=current_user.id)
-    
+
     # Create notification for admin if requires approval
     if grn.requires_approval:
         from app import crud
+
         crud.create_notification_for_admins(
             session=session,
             notification_type="grn_approval_needed",
@@ -433,13 +443,13 @@ def create_grn(
             priority="warning",
             link_url=f"/grn/{grn.id}",
         )
-    
+
     # Convert to GRNPublicWithItems
     grn_dict = GRNPublicWithItems.model_validate(grn).model_dump()
     grn_dict["supplier_name"] = grn.supplier.name if grn.supplier else None
     grn_dict["transporter_name"] = grn.transporter.name if grn.transporter else None
     grn_dict["items_count"] = len(grn.items) if grn.items else 0
-    
+
     return GRNPublicWithItems(**grn_dict)
 
 
@@ -462,16 +472,16 @@ def read_grn(
         )
     )
     grn = session.exec(statement).first()
-    
+
     if not grn:
         raise HTTPException(status_code=404, detail="GRN not found")
-    
+
     # Add computed fields
     grn_dict = GRNPublicWithItems.model_validate(grn).model_dump()
     grn_dict["supplier_name"] = grn.supplier.name if grn.supplier else None
     grn_dict["transporter_name"] = grn.transporter.name if grn.transporter else None
     grn_dict["items_count"] = len(grn.items) if grn.items else 0
-    
+
     return GRNPublicWithItems(**grn_dict)
 
 
@@ -488,19 +498,19 @@ def update_grn(
     grn = session.get(GRN, grn_id)
     if not grn:
         raise HTTPException(status_code=404, detail="GRN not found")
-    
+
     # If approving, set approved_by
     if grn_in.is_approved and not grn.is_approved:
         grn_in.approved_by_id = current_user.id
-    
+
     grn = grn_crud.update(db=session, db_obj=grn, obj_in=grn_in)
-    
+
     # Add computed fields
     grn_dict = GRNPublicWithItems.model_validate(grn).model_dump()
     grn_dict["supplier_name"] = grn.supplier.name if grn.supplier else None
     grn_dict["transporter_name"] = grn.transporter.name if grn.transporter else None
     grn_dict["items_count"] = len(grn.items) if grn.items else 0
-    
+
     return GRNPublicWithItems(**grn_dict)
 
 
@@ -516,13 +526,13 @@ def delete_grn(
     grn = session.get(GRN, grn_id)
     if not grn:
         raise HTTPException(status_code=404, detail="GRN not found")
-    
+
     if grn.is_approved:
         raise HTTPException(
             status_code=400,
             detail="Cannot delete approved GRN. Reverse the approval first.",
         )
-    
+
     session.delete(grn)
     session.commit()
     return {"message": "GRN deleted successfully"}
@@ -537,9 +547,9 @@ def approve_grn(
 ) -> Any:
     """
     Approve GRN and optionally create supplier debt for credit purchases.
-    
+
     **Access**: Admin only
-    
+
     **Business Logic:**
     - If payment_type is "Credit" and creates_debt is True:
       - Creates SupplierDebt record
@@ -557,28 +567,29 @@ def approve_grn(
         )
     )
     grn = session.exec(statement).first()
-    
+
     if not grn:
         raise HTTPException(status_code=404, detail="GRN not found")
-    
+
     if grn.is_approved:
         raise HTTPException(status_code=400, detail="GRN is already approved")
-    
+
     # Mark as approved
     grn.is_approved = True
     grn.approved_by_id = current_user.id
     grn.approved_at = datetime.now(timezone.utc)
     session.add(grn)
-    
+
     # Create supplier debt if credit purchase
     if grn.payment_type == "Credit" and grn.creates_debt:
-        from app.models import SupplierDebt, SupplierDebtCreate
-        from app import crud
-        
         # Calculate due date based on credit terms
         from datetime import timedelta
+
+        from app import crud
+        from app.models import SupplierDebt, SupplierDebtCreate
+
         invoice_date = grn.received_date or datetime.now(timezone.utc)
-        
+
         # Parse credit terms (e.g., "Net 30" = 30 days)
         credit_period_days = 30  # Default
         if grn.credit_terms:
@@ -587,9 +598,9 @@ def approve_grn(
                     credit_period_days = int(grn.credit_terms.split()[-1])
                 except (ValueError, IndexError):
                     pass
-        
+
         due_date = invoice_date + timedelta(days=credit_period_days)
-        
+
         # Create debt
         debt_in = SupplierDebtCreate(
             supplier_id=grn.supplier_id,
@@ -602,19 +613,19 @@ def approve_grn(
             currency=grn.currency or "KES",
             notes=f"Auto-created from GRN #{grn.grn_number}",
         )
-        
+
         debt = SupplierDebt.model_validate(
             debt_in,
             update={"created_by_id": current_user.id},
         )
         session.add(debt)
-        
+
         # Update supplier credit used
         supplier = grn.supplier
         if supplier:
             supplier.current_credit_used += grn.total_amount
             session.add(supplier)
-        
+
         # Create notification
         crud.create_notification_for_admins(
             session=session,
@@ -624,15 +635,16 @@ def approve_grn(
             priority="info",
             link_url=f"/supplier-debts/{debt.id}",
         )
-    
+
     # Update product stock levels (existing logic would go here)
     # For now, we'll just commit the approval
-    
+
     session.commit()
     session.refresh(grn)
-    
+
     # Create approval notification
     from app import crud
+
     crud.create_notification_for_admins(
         session=session,
         notification_type="grn_approved",
@@ -641,12 +653,11 @@ def approve_grn(
         priority="info",
         link_url=f"/grn/{grn.id}",
     )
-    
+
     # Convert to response
     grn_dict = GRNPublicWithItems.model_validate(grn).model_dump()
     grn_dict["supplier_name"] = grn.supplier.name if grn.supplier else None
     grn_dict["transporter_name"] = grn.transporter.name if grn.transporter else None
     grn_dict["items_count"] = len(grn.items) if grn.items else 0
-    
-    return GRNPublicWithItems(**grn_dict)
 
+    return GRNPublicWithItems(**grn_dict)

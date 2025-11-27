@@ -1,23 +1,23 @@
 import {
+  Badge,
   Box,
   Button,
   Container,
   Flex,
   Heading,
+  HStack,
+  IconButton,
   Input,
+  Spinner,
   Table,
   Text,
   VStack,
-  Badge,
-  HStack,
-  Spinner,
-  IconButton,
 } from "@chakra-ui/react"
 import { useQuery, useQueryClient } from "@tanstack/react-query"
 import { useState } from "react"
 import { LuDollarSign } from "react-icons/lu"
 
-import { DebtsService, type DebtPublic } from "../../client"
+import { type DebtPublic, DebtsService } from "../../client"
 import RecordPayment from "./RecordPayment"
 
 const PER_PAGE = 20
@@ -106,10 +106,7 @@ export default function DebtList() {
   return (
     <Container maxW="full" px={0}>
       <Flex justify="space-between" align="center" mb={6}>
-        <Heading
-          size="lg"
-          color={{ base: "#e5e7eb", _light: "#111827" }}
-        >
+        <Heading size="lg" color={{ base: "#e5e7eb", _light: "#111827" }}>
           Customer Debts
         </Heading>
       </Flex>
@@ -131,7 +128,10 @@ export default function DebtList() {
               onChange={(e) => handleSearch(e.target.value)}
               bg={{ base: "#0f1117", _light: "#f9fafb" }}
               border="1px solid"
-              borderColor={{ base: "rgba(255, 255, 255, 0.08)", _light: "#e5e7eb" }}
+              borderColor={{
+                base: "rgba(255, 255, 255, 0.08)",
+                _light: "#e5e7eb",
+              }}
             />
           </Box>
 
@@ -284,7 +284,9 @@ export default function DebtList() {
                       >
                         {debt.customer_name}
                       </Table.Cell>
-                      <Table.Cell color={{ base: "#9ca3af", _light: "#6b7280" }}>
+                      <Table.Cell
+                        color={{ base: "#9ca3af", _light: "#6b7280" }}
+                      >
                         {debt.customer_contact || "—"}
                       </Table.Cell>
                       <Table.Cell
@@ -293,7 +295,9 @@ export default function DebtList() {
                       >
                         {formatCurrency(debt.amount)}
                       </Table.Cell>
-                      <Table.Cell color={{ base: "#9ca3af", _light: "#6b7280" }}>
+                      <Table.Cell
+                        color={{ base: "#9ca3af", _light: "#6b7280" }}
+                      >
                         {formatCurrency(debt.amount_paid || 0)}
                       </Table.Cell>
                       <Table.Cell
@@ -302,14 +306,22 @@ export default function DebtList() {
                       >
                         {formatCurrency(debt.balance)}
                       </Table.Cell>
-                      <Table.Cell color={{ base: "#9ca3af", _light: "#6b7280" }}>
+                      <Table.Cell
+                        color={{ base: "#9ca3af", _light: "#6b7280" }}
+                      >
                         {debt.debt_date ? formatDate(debt.debt_date) : "—"}
                       </Table.Cell>
-                      <Table.Cell color={{ base: "#9ca3af", _light: "#6b7280" }}>
+                      <Table.Cell
+                        color={{ base: "#9ca3af", _light: "#6b7280" }}
+                      >
                         {debt.due_date ? formatDate(debt.due_date) : "—"}
                       </Table.Cell>
                       <Table.Cell>
-                        <Badge colorPalette={getStatusBadgeColor(debt.status || "pending")}>
+                        <Badge
+                          colorPalette={getStatusBadgeColor(
+                            debt.status || "pending",
+                          )}
+                        >
                           {debt.status || "pending"}
                         </Badge>
                       </Table.Cell>
@@ -332,17 +344,20 @@ export default function DebtList() {
 
             <Flex justify="space-between" align="center" mt={4}>
               <Button
-                onClick={() => setPage(p => Math.max(1, p - 1))}
+                onClick={() => setPage((p) => Math.max(1, p - 1))}
                 disabled={page <= 1}
                 size="sm"
               >
                 Previous
               </Button>
-              <Text fontSize="sm" color={{ base: "#9ca3af", _light: "#6b7280" }}>
+              <Text
+                fontSize="sm"
+                color={{ base: "#9ca3af", _light: "#6b7280" }}
+              >
                 Page {page} of {Math.ceil(totalItems / PER_PAGE)}
               </Text>
               <Button
-                onClick={() => setPage(p => p + 1)}
+                onClick={() => setPage((p) => p + 1)}
                 disabled={page * PER_PAGE >= totalItems}
                 size="sm"
               >

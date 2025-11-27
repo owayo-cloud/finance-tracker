@@ -47,7 +47,10 @@ class ErrorBoundary extends Component<Props, State> {
 
       if (error.status === 403) {
         const errDetail = (error.body as any)?.detail
-        if (errDetail === "Not authenticated" || errDetail?.includes("authenticated")) {
+        if (
+          errDetail === "Not authenticated" ||
+          errDetail?.includes("authenticated")
+        ) {
           localStorage.removeItem("access_token")
           window.location.href = "/login"
           return
@@ -73,7 +76,6 @@ class ErrorBoundary extends Component<Props, State> {
  * Fallback UI displayed when an error is caught
  */
 function ErrorFallback({ error }: { error: Error | null }) {
-
   const handleGoHome = () => {
     window.location.href = "/"
   }
@@ -95,7 +97,8 @@ function ErrorFallback({ error }: { error: Error | null }) {
       errorMessage = "The requested resource could not be found."
     } else if (error.status >= 500) {
       errorTitle = "Server Error"
-      errorMessage = "Our server is experiencing issues. Please try again later."
+      errorMessage =
+        "Our server is experiencing issues. Please try again later."
     }
   }
 

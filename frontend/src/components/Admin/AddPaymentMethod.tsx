@@ -11,8 +11,8 @@ import { useMutation, useQueryClient } from "@tanstack/react-query"
 import { useState } from "react"
 import { type SubmitHandler, useForm } from "react-hook-form"
 import { FaPlus } from "react-icons/fa"
-import type { ApiError } from "@/client/core/ApiError"
 import { OpenAPI } from "@/client"
+import type { ApiError } from "@/client/core/ApiError"
 import useCustomToast from "@/hooks/useCustomToast"
 import { handleError } from "@/utils"
 import { Checkbox } from "../ui/checkbox"
@@ -55,14 +55,17 @@ const AddPaymentMethod = () => {
   const mutation = useMutation({
     mutationFn: async (data: PaymentMethodCreateForm) => {
       const token = localStorage.getItem("access_token")
-      const response = await fetch(`${OpenAPI.BASE}/api/v1/sales/payment-methods`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
+      const response = await fetch(
+        `${OpenAPI.BASE}/api/v1/sales/payment-methods`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify(data),
         },
-        body: JSON.stringify(data),
-      })
+      )
       if (!response.ok) {
         const error = await response.json()
         throw new Error(error.detail || "Failed to create payment method")
@@ -94,7 +97,13 @@ const AddPaymentMethod = () => {
       onOpenChange={({ open }) => setIsOpen(open)}
     >
       <DialogTrigger asChild>
-        <Button value="add-payment-method" my={4} bg="#14b8a6" color="white" _hover={{ bg: "#0d9488" }}>
+        <Button
+          value="add-payment-method"
+          my={4}
+          bg="#14b8a6"
+          color="white"
+          _hover={{ bg: "#0d9488" }}
+        >
           <FaPlus fontSize="16px" />
           Add Payment Method
         </Button>
@@ -126,9 +135,15 @@ const AddPaymentMethod = () => {
                   placeholder="e.g., POS Cash Acc"
                   bg={{ base: "#1a1d29", _light: "#ffffff" }}
                   border="1px solid"
-                  borderColor={{ base: "rgba(255, 255, 255, 0.1)", _light: "#e5e7eb" }}
+                  borderColor={{
+                    base: "rgba(255, 255, 255, 0.1)",
+                    _light: "#e5e7eb",
+                  }}
                   color={{ base: "#ffffff", _light: "#1a1d29" }}
-                  _focus={{ borderColor: "#14b8a6", boxShadow: "0 0 0 1px #14b8a6" }}
+                  _focus={{
+                    borderColor: "#14b8a6",
+                    boxShadow: "0 0 0 1px #14b8a6",
+                  }}
                 />
               </Field>
               <Field
@@ -146,9 +161,15 @@ const AddPaymentMethod = () => {
                   placeholder="e.g., Cash payments at point of sale"
                   bg={{ base: "#1a1d29", _light: "#ffffff" }}
                   border="1px solid"
-                  borderColor={{ base: "rgba(255, 255, 255, 0.1)", _light: "#e5e7eb" }}
+                  borderColor={{
+                    base: "rgba(255, 255, 255, 0.1)",
+                    _light: "#e5e7eb",
+                  }}
                   color={{ base: "#ffffff", _light: "#1a1d29" }}
-                  _focus={{ borderColor: "#14b8a6", boxShadow: "0 0 0 1px #14b8a6" }}
+                  _focus={{
+                    borderColor: "#14b8a6",
+                    boxShadow: "0 0 0 1px #14b8a6",
+                  }}
                 />
               </Field>
               <Field label="Status">
@@ -188,4 +209,3 @@ const AddPaymentMethod = () => {
 }
 
 export default AddPaymentMethod
-

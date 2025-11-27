@@ -4,18 +4,19 @@ Reminder Settings & Logs API Routes
 Handles email reminder configuration for supplier debts and reorder alerts.
 Admins can configure when and how often to receive email reminders.
 """
+
 import uuid
 from datetime import datetime, timezone
 from typing import Any
 
 from fastapi import APIRouter, HTTPException
+from sqlalchemy import desc
 from sqlmodel import func, select
 
 from app.api.deps import CurrentUser, SessionDep
 from app.models import (
     Message,
     ReminderLog,
-    ReminderLogPublic,
     ReminderLogsPublic,
     ReminderSetting,
     ReminderSettingCreate,
@@ -34,7 +35,7 @@ def list_reminder_settings(
 ) -> Any:
     """
     Get current user's reminder configurations.
-    
+
     **Access**: Admin only (for now)
     """
     if not current_user.is_superuser and current_user.role != "admin":
@@ -42,14 +43,14 @@ def list_reminder_settings(
             status_code=403,
             detail="Only admin users can manage reminder settings",
         )
-    
+
     statement = (
         select(ReminderSetting)
         .where(ReminderSetting.user_id == current_user.id)
         .order_by(ReminderSetting.reminder_type)
     )
     settings = session.exec(statement).all()
-    
+
     return ReminderSettingsPublic(data=settings, count=len(settings))
 
 
@@ -62,12 +63,12 @@ def create_reminder_setting(
 ) -> Any:
     """
     Create or update reminder setting.
-    
+
     **Access**: Admin only
     """
     if not current_user.is_superuser and current_user.role != "admin":
         raise HTTPException(status_code=403, detail="Only admin can create reminders")
-    
+
     # Check if setting for this type already exists
     existing_statement = (
         select(ReminderSetting)
@@ -75,7 +76,7 @@ def create_reminder_setting(
         .where(ReminderSetting.reminder_type == setting_in.reminder_type)
     )
     existing_setting = session.exec(existing_statement).first()
-    
+
     if existing_setting:
         # Update existing setting
         update_data = setting_in.model_dump(exclude_unset=True, exclude={"user_id"})
@@ -85,7 +86,7 @@ def create_reminder_setting(
         session.commit()
         session.refresh(existing_setting)
         return existing_setting
-    
+
     # Create new setting
     setting = ReminderSetting.model_validate(
         setting_in,
@@ -94,7 +95,7 @@ def create_reminder_setting(
     session.add(setting)
     session.commit()
     session.refresh(setting)
-    
+
     return setting
 
 
@@ -107,25 +108,25 @@ def get_reminder_setting(
 ) -> Any:
     """
     Get single reminder setting.
-    
+
     **Access**: Admin only (own settings)
     """
     if not current_user.is_superuser and current_user.role != "admin":
         raise HTTPException(status_code=403, detail="Not authorized")
-    
+
     statement = (
         select(ReminderSetting)
         .where(ReminderSetting.id == setting_id)
         .where(ReminderSetting.user_id == current_user.id)
     )
     setting = session.exec(statement).first()
-    
+
     if not setting:
         raise HTTPException(
             status_code=404,
             detail="Reminder setting not found or does not belong to current user",
         )
-    
+
     return setting
 
 
@@ -139,30 +140,30 @@ def update_reminder_setting(
 ) -> Any:
     """
     Update reminder setting.
-    
+
     **Access**: Admin only (own settings)
     """
     if not current_user.is_superuser and current_user.role != "admin":
         raise HTTPException(status_code=403, detail="Not authorized")
-    
+
     statement = (
         select(ReminderSetting)
         .where(ReminderSetting.id == setting_id)
         .where(ReminderSetting.user_id == current_user.id)
     )
     setting = session.exec(statement).first()
-    
+
     if not setting:
         raise HTTPException(status_code=404, detail="Reminder setting not found")
-    
+
     update_data = setting_in.model_dump(exclude_unset=True)
     setting.sqlmodel_update(update_data)
     setting.updated_at = datetime.now(timezone.utc)
-    
+
     session.add(setting)
     session.commit()
     session.refresh(setting)
-    
+
     return setting
 
 
@@ -175,25 +176,25 @@ def delete_reminder_setting(
 ) -> Any:
     """
     Delete reminder setting.
-    
+
     **Access**: Admin only (own settings)
     """
     if not current_user.is_superuser and current_user.role != "admin":
         raise HTTPException(status_code=403, detail="Not authorized")
-    
+
     statement = (
         select(ReminderSetting)
         .where(ReminderSetting.id == setting_id)
         .where(ReminderSetting.user_id == current_user.id)
     )
     setting = session.exec(statement).first()
-    
+
     if not setting:
         raise HTTPException(status_code=404, detail="Reminder setting not found")
-    
+
     session.delete(setting)
     session.commit()
-    
+
     return Message(message="Reminder setting deleted successfully")
 
 
@@ -207,29 +208,29 @@ def list_reminder_logs(
 ) -> Any:
     """
     View sent email history.
-    
+
     **Access**: Admin only (own logs)
     """
     if not current_user.is_superuser and current_user.role != "admin":
         raise HTTPException(status_code=403, detail="Not authorized")
-    
+
     statement = (
         select(ReminderLog)
         .where(ReminderLog.user_id == current_user.id)
         .order_by(desc(ReminderLog.created_at))
     )
-    
+
     if status:
         statement = statement.where(ReminderLog.status == status)
-    
+
     # Get total count
     count_statement = select(func.count()).select_from(statement.subquery())
     total_count = session.exec(count_statement).one()
-    
+
     # Apply pagination
     statement = statement.offset(skip).limit(limit)
     logs = session.exec(statement).all()
-    
+
     return ReminderLogsPublic(data=logs, count=total_count)
 
 
@@ -240,12 +241,12 @@ def get_reminder_statistics(
 ) -> Any:
     """
     Get reminder statistics (sent count, failed count, etc.).
-    
+
     **Access**: Admin only
     """
     if not current_user.is_superuser and current_user.role != "admin":
         raise HTTPException(status_code=403, detail="Not authorized")
-    
+
     # Total sent
     sent_statement = (
         select(func.count())
@@ -254,7 +255,7 @@ def get_reminder_statistics(
         .where(ReminderLog.status == "sent")
     )
     sent_count = session.exec(sent_statement).one() or 0
-    
+
     # Total failed
     failed_statement = (
         select(func.count())
@@ -263,7 +264,7 @@ def get_reminder_statistics(
         .where(ReminderLog.status == "failed")
     )
     failed_count = session.exec(failed_statement).one() or 0
-    
+
     # Last sent
     last_sent_statement = (
         select(ReminderLog)
@@ -273,16 +274,16 @@ def get_reminder_statistics(
         .limit(1)
     )
     last_sent = session.exec(last_sent_statement).first()
-    
+
     # Active settings count
     active_settings_statement = (
         select(func.count())
         .select_from(ReminderSetting)
         .where(ReminderSetting.user_id == current_user.id)
-        .where(ReminderSetting.is_enabled == True)
+        .where(ReminderSetting.is_enabled is True)
     )
     active_settings_count = session.exec(active_settings_statement).one() or 0
-    
+
     return {
         "total_sent": sent_count,
         "total_failed": failed_count,

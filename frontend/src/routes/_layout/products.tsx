@@ -1,36 +1,35 @@
 import {
+  Badge,
+  Box,
+  Button,
   Container,
   EmptyState,
   Flex,
   Heading,
-  Table,
-  VStack,
-  Badge,
-  Button,
-  Text,
-  Input,
-  Box,
   HStack,
   Icon,
+  Input,
+  Table,
+  Text,
+  VStack,
 } from "@chakra-ui/react"
-import { Checkbox } from "@/components/ui/checkbox"
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { createFileRoute, useNavigate } from "@tanstack/react-router"
+import { useEffect, useState } from "react"
 import { FiSearch, FiTrash2 } from "react-icons/fi"
 import { z } from "zod"
-import { useState, useEffect } from "react"
-
 import { ProductsService } from "@/client"
-import ProductActionsMenu from "@/components/Products/ProductActionsMenu"
 import PendingProducts from "@/components/Pending/PendingProducts"
-import useCustomToast from "@/hooks/useCustomToast"
-import { handleError } from "@/utils"
+import ProductActionsMenu from "@/components/Products/ProductActionsMenu"
+import { Checkbox } from "@/components/ui/checkbox"
 import {
   PaginationItems,
   PaginationNextTrigger,
   PaginationPrevTrigger,
   PaginationRoot,
 } from "@/components/ui/pagination.tsx"
+import useCustomToast from "@/hooks/useCustomToast"
+import { handleError } from "@/utils"
 
 const productsSearchSchema = z.object({
   page: z.number().catch(1),
@@ -40,14 +39,13 @@ const productsSearchSchema = z.object({
   pageSize: z.number().catch(25),
 })
 
-
 // Theme-aware Select Component matching the image
-function ThemedSelect({ 
-  value, 
-  onChange, 
+function ThemedSelect({
+  value,
+  onChange,
   children,
   placeholder,
-  ...props 
+  ...props
 }: {
   value: string | number
   onChange: (value: string) => void
@@ -71,7 +69,7 @@ function ThemedSelect({
         fontSize: "14px",
         cursor: "pointer",
         outline: "none",
-        ...props.style
+        ...props.style,
       }}
       {...props}
     >
@@ -80,13 +78,13 @@ function ThemedSelect({
   )
 }
 
-function getProductsQueryOptions({ 
-  page, 
-  pageSize, 
-  search, 
-  category, 
-  status 
-}: { 
+function getProductsQueryOptions({
+  page,
+  pageSize,
+  search,
+  category,
+  status,
+}: {
   page: number
   pageSize: number
   search: string
@@ -97,19 +95,19 @@ function getProductsQueryOptions({
     skip: (page - 1) * pageSize,
     limit: pageSize,
   }
-  
+
   if (search.trim()) {
     params.name = search.trim()
   }
-  
+
   if (category) {
     params.categoryId = category
   }
-  
+
   if (status) {
     params.statusId = status
   }
-  
+
   return {
     queryKey: ["products", { page, pageSize, search, category, status }],
     queryFn: () => ProductsService.readProducts(params),
@@ -132,7 +130,9 @@ function ProductsTable() {
   const [debouncedSearchQuery, setDebouncedSearchQuery] = useState(search)
 
   // Bulk selection state
-  const [selectedProducts, setSelectedProducts] = useState<Set<string>>(new Set())
+  const [selectedProducts, setSelectedProducts] = useState<Set<string>>(
+    new Set(),
+  )
   const [isDeleting, setIsDeleting] = useState(false)
 
   // Debounce search query
@@ -149,8 +149,8 @@ function ProductsTable() {
     if (debouncedSearchQuery !== search) {
       navigate({
         to: "/products" as any,
-        search: (prev: any) => ({ 
-          ...prev, 
+        search: (prev: any) => ({
+          ...prev,
           search: debouncedSearchQuery,
           page: 1,
         }),
@@ -172,12 +172,12 @@ function ProductsTable() {
   const statuses = statusesData || []
 
   const { data, isLoading, isPlaceholderData } = useQuery({
-    ...getProductsQueryOptions({ 
-      page, 
-      pageSize, 
-      search: debouncedSearchQuery, 
-      category, 
-      status 
+    ...getProductsQueryOptions({
+      page,
+      pageSize,
+      search: debouncedSearchQuery,
+      category,
+      status,
     }),
     placeholderData: (prevData) => prevData,
   })
@@ -186,11 +186,13 @@ function ProductsTable() {
   const bulkDeleteMutation = useMutation({
     mutationFn: async (productIds: string[]) => {
       await Promise.all(
-        productIds.map(id => ProductsService.deleteProduct({ id }))
+        productIds.map((id) => ProductsService.deleteProduct({ id })),
       )
     },
     onSuccess: () => {
-      showSuccessToast(`Successfully deleted ${selectedProducts.size} product(s)! 🗑️`)
+      showSuccessToast(
+        `Successfully deleted ${selectedProducts.size} product(s)! 🗑️`,
+      )
       setSelectedProducts(new Set())
       queryClient.invalidateQueries({ queryKey: ["products"] })
     },
@@ -209,8 +211,8 @@ function ProductsTable() {
   const setPageSize = (newPageSize: number) => {
     navigate({
       to: "/products" as any,
-      search: (prev: any) => ({ 
-        ...prev, 
+      search: (prev: any) => ({
+        ...prev,
         pageSize: newPageSize,
         page: 1,
       }),
@@ -220,8 +222,8 @@ function ProductsTable() {
   const setCategory = (newCategory: string) => {
     navigate({
       to: "/products" as any,
-      search: (prev: any) => ({ 
-        ...prev, 
+      search: (prev: any) => ({
+        ...prev,
         category: newCategory,
         page: 1,
       }),
@@ -231,8 +233,8 @@ function ProductsTable() {
   const setStatus = (newStatus: string) => {
     navigate({
       to: "/products" as any,
-      search: (prev: any) => ({ 
-        ...prev, 
+      search: (prev: any) => ({
+        ...prev,
         status: newStatus,
         page: 1,
       }),
@@ -246,11 +248,11 @@ function ProductsTable() {
   // Bulk action handlers
   const handleBulkDelete = async () => {
     if (selectedProducts.size === 0) return
-    
+
     const confirmed = window.confirm(
-      `Are you sure you want to delete ${selectedProducts.size} product(s)? This action cannot be undone.`
+      `Are you sure you want to delete ${selectedProducts.size} product(s)? This action cannot be undone.`,
     )
-    
+
     if (confirmed) {
       setIsDeleting(true)
       try {
@@ -262,7 +264,7 @@ function ProductsTable() {
   }
 
   const toggleProductSelection = (productId: string) => {
-    setSelectedProducts(prev => {
+    setSelectedProducts((prev) => {
       const newSet = new Set(prev)
       if (newSet.has(productId)) {
         newSet.delete(productId)
@@ -277,12 +279,14 @@ function ProductsTable() {
     if (selectedProducts.size === products.length) {
       setSelectedProducts(new Set())
     } else {
-      setSelectedProducts(new Set(products.map(p => p.id)))
+      setSelectedProducts(new Set(products.map((p) => p.id)))
     }
   }
 
-  const isAllSelected = products.length > 0 && selectedProducts.size === products.length
-  const isIndeterminate = selectedProducts.size > 0 && selectedProducts.size < products.length
+  const isAllSelected =
+    products.length > 0 && selectedProducts.size === products.length
+  const isIndeterminate =
+    selectedProducts.size > 0 && selectedProducts.size < products.length
 
   if (isLoading) {
     return <PendingProducts />
@@ -294,10 +298,10 @@ function ProductsTable() {
       <HStack gap={3} width="100%">
         {/* Search Input */}
         <Box flex={1} position="relative">
-          <Icon 
-            position="absolute" 
-            left="12px" 
-            top="50%" 
+          <Icon
+            position="absolute"
+            left="12px"
+            top="50%"
             transform="translateY(-50%)"
             color="gray.500"
             zIndex={1}
@@ -316,10 +320,7 @@ function ProductsTable() {
 
         {/* Category Dropdown */}
         <Box minW="200px">
-          <ThemedSelect
-            value={category}
-            onChange={setCategory}
-          >
+          <ThemedSelect value={category} onChange={setCategory}>
             <option value="">Category: Any</option>
             {categories?.data.map((cat) => (
               <option key={cat.id} value={cat.id}>
@@ -331,10 +332,7 @@ function ProductsTable() {
 
         {/* Status Dropdown */}
         <Box minW="200px">
-          <ThemedSelect
-            value={status}
-            onChange={setStatus}
-          >
+          <ThemedSelect value={status} onChange={setStatus}>
             <option value="">Stock: Any</option>
             {statuses?.map((statusOption) => (
               <option key={statusOption.id} value={statusOption.id}>
@@ -347,9 +345,12 @@ function ProductsTable() {
 
       {/* Bulk Actions Bar */}
       {selectedProducts.size > 0 && (
-        <HStack 
-          p={3} 
-          bg={{ base: "rgba(56, 178, 172, 0.1)", _light: "rgba(56, 178, 172, 0.05)" }}
+        <HStack
+          p={3}
+          bg={{
+            base: "rgba(56, 178, 172, 0.1)",
+            _light: "rgba(56, 178, 172, 0.05)",
+          }}
           borderRadius="md"
           justify="space-between"
         >
@@ -418,20 +419,26 @@ function ProductsTable() {
               </Table.Header>
               <Table.Body>
                 {products.map((product) => (
-                  <Table.Row 
+                  <Table.Row
                     key={product.id}
                     opacity={isPlaceholderData ? 0.5 : 1}
-                    bg={selectedProducts.has(product.id) ? "table.row.selected" : "table.row.bg"}
-                    _hover={{
-                      bg: selectedProducts.has(product.id) 
+                    bg={
+                      selectedProducts.has(product.id)
                         ? "table.row.selected"
-                        : "table.row.hover"
+                        : "table.row.bg"
+                    }
+                    _hover={{
+                      bg: selectedProducts.has(product.id)
+                        ? "table.row.selected"
+                        : "table.row.hover",
                     }}
                   >
                     <Table.Cell>
                       <Checkbox
                         checked={selectedProducts.has(product.id)}
-                        onCheckedChange={() => toggleProductSelection(product.id)}
+                        onCheckedChange={() =>
+                          toggleProductSelection(product.id)
+                        }
                         aria-label={`Select ${product.name}`}
                       />
                     </Table.Cell>
@@ -442,23 +449,35 @@ function ProductsTable() {
                       </Badge>
                     </Table.Cell>
                     <Table.Cell>
-                      KES {parseFloat(product.buying_price).toLocaleString(undefined, {
-                        minimumFractionDigits: 2,
-                        maximumFractionDigits: 2,
-                      })}
+                      KES{" "}
+                      {parseFloat(product.buying_price).toLocaleString(
+                        undefined,
+                        {
+                          minimumFractionDigits: 2,
+                          maximumFractionDigits: 2,
+                        },
+                      )}
                     </Table.Cell>
                     <Table.Cell fontWeight="semibold">
-                      KES {parseFloat(product.selling_price).toLocaleString(undefined, {
-                        minimumFractionDigits: 2,
-                        maximumFractionDigits: 2,
-                      })}
+                      KES{" "}
+                      {parseFloat(product.selling_price).toLocaleString(
+                        undefined,
+                        {
+                          minimumFractionDigits: 2,
+                          maximumFractionDigits: 2,
+                        },
+                      )}
                     </Table.Cell>
                     <Table.Cell>
                       <Badge
                         colorScheme={
-                          (product.current_stock ?? 0) === 0 ? 'red' :
-                          product.reorder_level && (product.current_stock ?? 0) <= product.reorder_level ? 'orange' :
-                          'green'
+                          (product.current_stock ?? 0) === 0
+                            ? "red"
+                            : product.reorder_level &&
+                                (product.current_stock ?? 0) <=
+                                  product.reorder_level
+                              ? "orange"
+                              : "green"
                         }
                         size="sm"
                       >
@@ -468,13 +487,17 @@ function ProductsTable() {
                     <Table.Cell>
                       <Badge
                         colorScheme={
-                          product.status?.name?.toLowerCase().includes('active') ? 'green' :
-                          product.status?.name?.toLowerCase().includes('inactive') ? 'red' :
-                          'gray'
+                          product.status?.name?.toLowerCase().includes("active")
+                            ? "green"
+                            : product.status?.name
+                                  ?.toLowerCase()
+                                  .includes("inactive")
+                              ? "red"
+                              : "gray"
                         }
                         size="sm"
                       >
-                        {product.status?.name || 'Unknown'}
+                        {product.status?.name || "Unknown"}
                       </Badge>
                     </Table.Cell>
                     <Table.Cell>
@@ -496,7 +519,11 @@ function ProductsTable() {
                 <ThemedSelect
                   value={pageSize}
                   onChange={(value) => setPageSize(Number(value))}
-                  style={{ maxWidth: "80px", fontSize: "14px", padding: "6px 8px" }}
+                  style={{
+                    maxWidth: "80px",
+                    fontSize: "14px",
+                    padding: "6px 8px",
+                  }}
                 >
                   <option value="10">10</option>
                   <option value="25">25</option>
@@ -504,7 +531,8 @@ function ProductsTable() {
                   <option value="100">100</option>
                 </ThemedSelect>
                 <Text fontSize="sm" color="gray.500">
-                  {((page - 1) * pageSize) + 1}-{Math.min(page * pageSize, count)} of {count}
+                  {(page - 1) * pageSize + 1}-{Math.min(page * pageSize, count)}{" "}
+                  of {count}
                 </Text>
               </HStack>
 
@@ -529,17 +557,9 @@ function ProductsTable() {
 function Products() {
   return (
     <Container maxW="full" minH="100vh">
-      <Flex 
-        direction="column" 
-        gap={6}
-        pt={12}
-        pb={8}
-      >
+      <Flex direction="column" gap={6} pt={12} pb={8}>
         <Flex justify="space-between" align="center">
-          <Heading 
-            size="lg"
-            color={{ base: "#e5e7eb", _light: "#111827" }}
-          >
+          <Heading size="lg" color={{ base: "#e5e7eb", _light: "#111827" }}>
             Products Catalog
           </Heading>
         </Flex>

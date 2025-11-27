@@ -1,20 +1,28 @@
-import { Box, Card, Container, Input, Text, VStack, Heading } from "@chakra-ui/react"
+import {
+  Box,
+  Card,
+  Container,
+  Heading,
+  Input,
+  Text,
+  VStack,
+} from "@chakra-ui/react"
 import {
   createFileRoute,
   Link as RouterLink,
   redirect,
 } from "@tanstack/react-router"
 import { type SubmitHandler, useForm } from "react-hook-form"
-import { FiLock, FiUser, FiMail } from "react-icons/fi"
+import { FiLock, FiMail, FiUser } from "react-icons/fi"
 
 import type { UserRegister } from "@/client"
+import BrandMark from "@/components/Common/BrandMark"
 import { Button } from "@/components/ui/button"
 import { Field } from "@/components/ui/field"
 import { InputGroup } from "@/components/ui/input-group"
 import { PasswordInput } from "@/components/ui/password-input"
 import useAuth, { isLoggedIn } from "@/hooks/useAuth"
 import { confirmPasswordRules, emailPattern, passwordRules } from "@/utils"
-import BrandMark from "@/components/Common/BrandMark"
 
 export const Route = createFileRoute("/signup")({
   component: SignUp,
@@ -66,22 +74,25 @@ function SignUp() {
       <Container maxW="md" w="full">
         <Card.Root
           variant="outline"
-          bg={{ base: "rgba(15, 20, 30, 0.7)", _light: "rgba(255, 255, 255, 0.95)" }}
+          bg={{
+            base: "rgba(15, 20, 30, 0.7)",
+            _light: "rgba(255, 255, 255, 0.95)",
+          }}
           backdropFilter="blur(20px) saturate(180%)"
           border="1px solid"
-          borderColor={{ base: "rgba(0, 150, 136, 0.3)", _light: "rgba(0, 150, 136, 0.2)" }}
+          borderColor={{
+            base: "rgba(0, 150, 136, 0.3)",
+            _light: "rgba(0, 150, 136, 0.2)",
+          }}
           borderRadius="2xl"
-          boxShadow={{ 
-            base: "0 10px 40px rgba(0, 0, 0, 0.4), 0 0 1px rgba(0, 150, 136, 0.3)", 
-            _light: "0 10px 40px rgba(0, 0, 0, 0.1), 0 0 1px rgba(0, 150, 136, 0.2)" 
+          boxShadow={{
+            base: "0 10px 40px rgba(0, 0, 0, 0.4), 0 0 1px rgba(0, 150, 136, 0.3)",
+            _light:
+              "0 10px 40px rgba(0, 0, 0, 0.1), 0 0 1px rgba(0, 150, 136, 0.2)",
           }}
         >
           <Card.Body p={{ base: 6, md: 8 }}>
-            <Box
-              as="form"
-              onSubmit={handleSubmit(onSubmit)}
-              w="full"
-            >
+            <Box as="form" onSubmit={handleSubmit(onSubmit)} w="full">
               <VStack gap={6} align="stretch">
                 {/* Logo and Title */}
                 <VStack gap={4}>
@@ -91,7 +102,8 @@ function SignUp() {
                       size="lg"
                       fontWeight="bold"
                       css={{
-                        background: "linear-gradient(to right, #009688, #00bcd4)",
+                        background:
+                          "linear-gradient(to right, #009688, #00bcd4)",
                         WebkitBackgroundClip: "text",
                         WebkitTextFillColor: "transparent",
                         backgroundClip: "text",
@@ -99,10 +111,7 @@ function SignUp() {
                     >
                       Create Account
                     </Heading>
-                    <Text
-                      fontSize="sm"
-                      color="text.secondary"
-                    >
+                    <Text fontSize="sm" color="text.secondary">
                       Sign up to get started
                     </Text>
                   </VStack>
@@ -127,7 +136,10 @@ function SignUp() {
                     </InputGroup>
                   </Field>
 
-                  <Field invalid={!!errors.username} errorText={errors.username?.message}>
+                  <Field
+                    invalid={!!errors.username}
+                    errorText={errors.username?.message}
+                  >
                     <InputGroup w="100%" startElement={<FiUser />}>
                       <Input
                         {...register("username", {
@@ -137,7 +149,8 @@ function SignUp() {
                           },
                           maxLength: {
                             value: 100,
-                            message: "Username must be less than 100 characters",
+                            message:
+                              "Username must be less than 100 characters",
                           },
                         })}
                         placeholder="Username (optional)"
@@ -147,7 +160,10 @@ function SignUp() {
                     </InputGroup>
                   </Field>
 
-                  <Field invalid={!!errors.email} errorText={errors.email?.message}>
+                  <Field
+                    invalid={!!errors.email}
+                    errorText={errors.email?.message}
+                  >
                     <InputGroup w="100%" startElement={<FiMail />}>
                       <Input
                         {...register("email", {
@@ -172,7 +188,10 @@ function SignUp() {
                   <PasswordInput
                     type="confirm_password"
                     startElement={<FiLock />}
-                    {...register("confirm_password", confirmPasswordRules(getValues))}
+                    {...register(
+                      "confirm_password",
+                      confirmPasswordRules(getValues),
+                    )}
                     placeholder="Confirm Password"
                     errors={errors}
                     autoComplete="new-password"
@@ -180,9 +199,9 @@ function SignUp() {
                 </VStack>
 
                 {/* Submit Button */}
-                <Button 
-                  variant="solid" 
-                  type="submit" 
+                <Button
+                  variant="solid"
+                  type="submit"
                   loading={isSubmitting}
                   size="lg"
                   w="full"

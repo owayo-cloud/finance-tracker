@@ -1,27 +1,23 @@
 import {
+  Badge,
   Box,
   Button,
   Container,
   Flex,
   Heading,
+  HStack,
   Input,
+  Separator,
   Text,
   VStack,
-  HStack,
-  Badge,
-  Separator,
 } from "@chakra-ui/react"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
 import { useState } from "react"
 import { type SubmitHandler, useForm } from "react-hook-form"
-import {
-  type ApiError,
-  UsersService,
-  type UserUpdateMe,
-} from "@/client"
+import { type ApiError, UsersService, type UserUpdateMe } from "@/client"
 import useAuth from "@/hooks/useAuth"
 import useCustomToast from "@/hooks/useCustomToast"
-import { emailPattern, handleError, getUserInitials } from "@/utils"
+import { emailPattern, getUserInitials, handleError } from "@/utils"
 import { Field } from "../ui/field"
 
 const UserInformation = () => {
@@ -88,7 +84,8 @@ const UserInformation = () => {
           Admin
         </Badge>
       )
-    } else if (currentUser?.is_auditor) {
+    }
+    if (currentUser?.is_auditor) {
       return (
         <Badge
           bg="linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)"
@@ -103,22 +100,21 @@ const UserInformation = () => {
           Auditor
         </Badge>
       )
-    } else {
-      return (
-        <Badge
-          bg="linear-gradient(135deg, #22c55e 0%, #16a34a 100%)"
-          color="white"
-          fontSize="xs"
-          fontWeight="700"
-          px={3}
-          py={1}
-          borderRadius="sm"
-          textTransform="uppercase"
-        >
-          Cashier
-        </Badge>
-      )
     }
+    return (
+      <Badge
+        bg="linear-gradient(135deg, #22c55e 0%, #16a34a 100%)"
+        color="white"
+        fontSize="xs"
+        fontWeight="700"
+        px={3}
+        py={1}
+        borderRadius="sm"
+        textTransform="uppercase"
+      >
+        Cashier
+      </Badge>
+    )
   }
 
   return (
@@ -131,7 +127,10 @@ const UserInformation = () => {
           borderRadius="lg"
           border="1px solid"
           borderColor="border.card"
-          boxShadow={{ base: "0 2px 4px rgba(0, 0, 0, 0.2)", _light: "0 1px 3px rgba(0, 0, 0, 0.1)" }}
+          boxShadow={{
+            base: "0 2px 4px rgba(0, 0, 0, 0.2)",
+            _light: "0 1px 3px rgba(0, 0, 0, 0.1)",
+          }}
         >
           <HStack gap={4} align="start">
             {/* Avatar */}
@@ -148,22 +147,34 @@ const UserInformation = () => {
               fontWeight="700"
               flexShrink={0}
               border="3px solid"
-              borderColor={{ base: "rgba(255, 255, 255, 0.1)", _light: "rgba(0, 0, 0, 0.1)" }}
+              borderColor={{
+                base: "rgba(255, 255, 255, 0.1)",
+                _light: "rgba(0, 0, 0, 0.1)",
+              }}
               transition="all 0.2s"
               _hover={{
-                borderColor: { base: "rgba(59, 130, 246, 0.5)", _light: "rgba(59, 130, 246, 0.3)" },
-                boxShadow: { base: "0 0 0 4px rgba(59, 130, 246, 0.2)", _light: "0 0 0 4px rgba(59, 130, 246, 0.1)" },
+                borderColor: {
+                  base: "rgba(59, 130, 246, 0.5)",
+                  _light: "rgba(59, 130, 246, 0.3)",
+                },
+                boxShadow: {
+                  base: "0 0 0 4px rgba(59, 130, 246, 0.2)",
+                  _light: "0 0 0 4px rgba(59, 130, 246, 0.1)",
+                },
               }}
               _focus={{
                 borderColor: { base: "#3b82f6", _light: "#3b82f6" },
-                boxShadow: { base: "0 0 0 4px rgba(59, 130, 246, 0.3)", _light: "0 0 0 4px rgba(59, 130, 246, 0.2)" },
+                boxShadow: {
+                  base: "0 0 0 4px rgba(59, 130, 246, 0.3)",
+                  _light: "0 0 0 4px rgba(59, 130, 246, 0.2)",
+                },
                 outline: "none",
               }}
               tabIndex={0}
             >
               {getUserInitials(currentUser?.full_name, currentUser?.email)}
             </Box>
-            
+
             {/* User Info */}
             <VStack align="start" gap={2} flex={1}>
               <VStack align="start" gap={1}>
@@ -193,7 +204,10 @@ const UserInformation = () => {
           borderRadius="lg"
           border="1px solid"
           borderColor="border.card"
-          boxShadow={{ base: "0 2px 4px rgba(0, 0, 0, 0.2)", _light: "0 1px 3px rgba(0, 0, 0, 0.1)" }}
+          boxShadow={{
+            base: "0 2px 4px rgba(0, 0, 0, 0.2)",
+            _light: "0 1px 3px rgba(0, 0, 0, 0.1)",
+          }}
         >
           <Heading size="sm" mb={4} color="text.primary">
             Edit Profile
@@ -208,11 +222,17 @@ const UserInformation = () => {
                     size="md"
                     placeholder="Enter your full name"
                     _hover={{
-                      borderColor: { base: "rgba(59, 130, 246, 0.5)", _light: "rgba(59, 130, 246, 0.3)" },
+                      borderColor: {
+                        base: "rgba(59, 130, 246, 0.5)",
+                        _light: "rgba(59, 130, 246, 0.3)",
+                      },
                     }}
                     _focus={{
                       borderColor: { base: "#3b82f6", _light: "#3b82f6" },
-                      boxShadow: { base: "0 0 0 3px rgba(59, 130, 246, 0.2)", _light: "0 0 0 3px rgba(59, 130, 246, 0.1)" },
+                      boxShadow: {
+                        base: "0 0 0 3px rgba(59, 130, 246, 0.2)",
+                        _light: "0 0 0 3px rgba(59, 130, 246, 0.1)",
+                      },
                     }}
                   />
                 ) : (
@@ -220,14 +240,16 @@ const UserInformation = () => {
                     <Text
                       fontSize="md"
                       py={2}
-                      color={!currentUser?.full_name ? "text.muted" : "text.primary"}
+                      color={
+                        !currentUser?.full_name ? "text.muted" : "text.primary"
+                      }
                     >
                       {currentUser?.full_name || "Not set"}
                     </Text>
                   </HStack>
                 )}
               </Field>
-              
+
               <Field
                 label="Email"
                 invalid={!!errors.email}
@@ -243,11 +265,17 @@ const UserInformation = () => {
                     size="md"
                     placeholder="Enter your email"
                     _hover={{
-                      borderColor: { base: "rgba(59, 130, 246, 0.5)", _light: "rgba(59, 130, 246, 0.3)" },
+                      borderColor: {
+                        base: "rgba(59, 130, 246, 0.5)",
+                        _light: "rgba(59, 130, 246, 0.3)",
+                      },
                     }}
                     _focus={{
                       borderColor: { base: "#3b82f6", _light: "#3b82f6" },
-                      boxShadow: { base: "0 0 0 3px rgba(59, 130, 246, 0.2)", _light: "0 0 0 3px rgba(59, 130, 246, 0.1)" },
+                      boxShadow: {
+                        base: "0 0 0 3px rgba(59, 130, 246, 0.2)",
+                        _light: "0 0 0 3px rgba(59, 130, 246, 0.1)",
+                      },
                     }}
                   />
                 ) : (
@@ -281,11 +309,17 @@ const UserInformation = () => {
                     onClick={toggleEditMode}
                     type="button"
                     _hover={{
-                      bg: { base: "rgba(59, 130, 246, 0.8)", _light: "rgba(59, 130, 246, 0.9)" },
+                      bg: {
+                        base: "rgba(59, 130, 246, 0.8)",
+                        _light: "rgba(59, 130, 246, 0.9)",
+                      },
                     }}
                     _focus={{
                       bg: { base: "#3b82f6", _light: "#3b82f6" },
-                      boxShadow: { base: "0 0 0 3px rgba(59, 130, 246, 0.3)", _light: "0 0 0 3px rgba(59, 130, 246, 0.2)" },
+                      boxShadow: {
+                        base: "0 0 0 3px rgba(59, 130, 246, 0.3)",
+                        _light: "0 0 0 3px rgba(59, 130, 246, 0.2)",
+                      },
                     }}
                   >
                     Edit Profile
@@ -299,11 +333,20 @@ const UserInformation = () => {
                       onClick={onCancel}
                       disabled={isSubmitting}
                       _hover={{
-                        bg: { base: "rgba(255, 255, 255, 0.1)", _light: "rgba(0, 0, 0, 0.05)" },
+                        bg: {
+                          base: "rgba(255, 255, 255, 0.1)",
+                          _light: "rgba(0, 0, 0, 0.05)",
+                        },
                       }}
                       _focus={{
-                        bg: { base: "rgba(59, 130, 246, 0.1)", _light: "rgba(59, 130, 246, 0.05)" },
-                        boxShadow: { base: "0 0 0 3px rgba(59, 130, 246, 0.2)", _light: "0 0 0 3px rgba(59, 130, 246, 0.1)" },
+                        bg: {
+                          base: "rgba(59, 130, 246, 0.1)",
+                          _light: "rgba(59, 130, 246, 0.05)",
+                        },
+                        boxShadow: {
+                          base: "0 0 0 3px rgba(59, 130, 246, 0.2)",
+                          _light: "0 0 0 3px rgba(59, 130, 246, 0.1)",
+                        },
                       }}
                     >
                       Cancel
@@ -314,11 +357,17 @@ const UserInformation = () => {
                       loading={isSubmitting}
                       disabled={!isDirty || !getValues("email")}
                       _hover={{
-                        bg: { base: "rgba(59, 130, 246, 0.8)", _light: "rgba(59, 130, 246, 0.9)" },
+                        bg: {
+                          base: "rgba(59, 130, 246, 0.8)",
+                          _light: "rgba(59, 130, 246, 0.9)",
+                        },
                       }}
                       _focus={{
                         bg: { base: "#3b82f6", _light: "#3b82f6" },
-                        boxShadow: { base: "0 0 0 3px rgba(59, 130, 246, 0.3)", _light: "0 0 0 3px rgba(59, 130, 246, 0.2)" },
+                        boxShadow: {
+                          base: "0 0 0 3px rgba(59, 130, 246, 0.3)",
+                          _light: "0 0 0 3px rgba(59, 130, 246, 0.2)",
+                        },
                       }}
                     >
                       Save Changes

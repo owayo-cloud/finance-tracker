@@ -5,11 +5,13 @@ Handles in-app notifications (bell icon 🔔) for users.
 Notifications provide real-time updates about supplier debts, reorder alerts,
 GRN approvals, and other system events.
 """
+
 import uuid
 from datetime import datetime, timezone
 from typing import Any
 
 from fastapi import APIRouter, HTTPException
+from sqlalchemy import desc
 from sqlmodel import func, select
 
 from app import crud
@@ -19,7 +21,6 @@ from app.models import (
     Notification,
     NotificationPublic,
     NotificationsPublic,
-    NotificationUpdate,
 )
 
 router = APIRouter()
@@ -37,12 +38,12 @@ def list_notifications(
 ) -> Any:
     """
     List current user's notifications with filtering.
-    
+
     Returns notifications paginated with unread count.
     """
     # Build query for user's notifications
     statement = select(Notification).where(Notification.user_id == current_user.id)
-    
+
     # Apply filters
     if is_read is not None:
         statement = statement.where(Notification.is_read == is_read)
@@ -50,27 +51,27 @@ def list_notifications(
         statement = statement.where(Notification.notification_type == notification_type)
     if priority:
         statement = statement.where(Notification.priority == priority)
-    
+
     # Order by created_at desc (newest first)
     statement = statement.order_by(desc(Notification.created_at))
-    
+
     # Get total count
     count_statement = select(func.count()).select_from(statement.subquery())
     total_count = session.exec(count_statement).one()
-    
+
     # Get unread count
     unread_statement = (
         select(func.count())
         .select_from(Notification)
         .where(Notification.user_id == current_user.id)
-        .where(Notification.is_read == False)
+        .where(Notification.is_read is False)
     )
     unread_count = session.exec(unread_statement).one()
-    
+
     # Apply pagination
     statement = statement.offset(skip).limit(limit)
     notifications = session.exec(statement).all()
-    
+
     return NotificationsPublic(
         data=notifications,
         count=total_count,
@@ -85,17 +86,17 @@ def get_unread_count(
 ) -> Any:
     """
     Get count of unread notifications for current user.
-    
+
     Used for badge display on notification bell icon.
     """
     statement = (
         select(func.count())
         .select_from(Notification)
         .where(Notification.user_id == current_user.id)
-        .where(Notification.is_read == False)
+        .where(Notification.is_read is False)
     )
     count = session.exec(statement).one()
-    
+
     return {"unread_count": count}
 
 
@@ -108,7 +109,7 @@ def mark_as_read(
 ) -> Any:
     """
     Mark notification as read.
-    
+
     User can only mark their own notifications as read.
     """
     notification = crud.mark_notification_read(
@@ -116,13 +117,13 @@ def mark_as_read(
         notification_id=notification_id,
         user_id=current_user.id,
     )
-    
+
     if not notification:
         raise HTTPException(
             status_code=404,
             detail="Notification not found or does not belong to current user",
         )
-    
+
     return notification
 
 
@@ -138,19 +139,19 @@ def mark_all_as_read(
     statement = (
         select(Notification)
         .where(Notification.user_id == current_user.id)
-        .where(Notification.is_read == False)
+        .where(Notification.is_read is False)
     )
     unread_notifications = session.exec(statement).all()
-    
+
     count = 0
     for notification in unread_notifications:
         notification.is_read = True
         notification.read_at = datetime.now(timezone.utc)
         session.add(notification)
         count += 1
-    
+
     session.commit()
-    
+
     return Message(message=f"Marked {count} notifications as read")
 
 
@@ -163,7 +164,7 @@ def delete_notification(
 ) -> Any:
     """
     Delete a notification.
-    
+
     User can only delete their own notifications.
     """
     statement = (
@@ -172,16 +173,16 @@ def delete_notification(
         .where(Notification.user_id == current_user.id)
     )
     notification = session.exec(statement).first()
-    
+
     if not notification:
         raise HTTPException(
             status_code=404,
             detail="Notification not found or does not belong to current user",
         )
-    
+
     session.delete(notification)
     session.commit()
-    
+
     return Message(message="Notification deleted successfully")
 
 

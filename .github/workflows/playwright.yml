@@ -75,7 +75,6 @@ jobs:
     - run: npm ci
       working-directory: frontend
     - run: uv run bash scripts/generate-client.sh
-      working-directory: backend
     - run: docker compose build
     - run: docker compose down -v --remove-orphans
     - name: Run Playwright tests

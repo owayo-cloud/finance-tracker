@@ -82,7 +82,7 @@ export type BulkImportSessionPublic = {
     completed_at?: (string | null);
     columns?: (Array<(string)> | null);
     auto_mapping?: ({
-    [key: string]: unknown;
+    [key: string]: (string);
 } | null);
 };
 
@@ -104,13 +104,32 @@ export type CashierBreakdown = {
     amount: number;
 };
 
+export type CashierVariancePublic = {
+    till_shift_id: string;
+    cashier_id: string;
+    total_variance: string;
+    variance_type: string;
+    notes?: (string | null);
+    id: string;
+    cashier_name?: (string | null);
+    shift_type?: (string | null);
+    created_at: string;
+};
+
+export type CashierVariancesPublic = {
+    data: Array<CashierVariancePublic>;
+    count: number;
+    total_shortage?: string;
+    total_overage?: string;
+};
+
 /**
  * Request model for column mapping.
  */
 export type ColumnMappingRequest = {
     session_id: string;
     column_mapping: {
-        [key: string]: unknown;
+        [key: string]: (string);
     };
     default_category_id?: (string | null);
     default_status_id?: (string | null);
@@ -161,16 +180,17 @@ export type DashboardStats = {
     net_profit_change_percent: number;
 };
 
+/**
+ * Create a new debt. Balance is calculated automatically from amount - amount_paid.
+ */
 export type DebtCreate = {
     customer_name: string;
     customer_contact?: (string | null);
     sale_id?: (string | null);
     amount: (number | string);
     amount_paid?: (number | string);
-    balance: (number | string);
-    debt_date?: string;
+    debt_date?: (string | null);
     due_date?: (string | null);
-    status?: string;
     notes?: (string | null);
 };
 
@@ -209,6 +229,7 @@ export type DebtPublic = {
     status?: string;
     notes?: (string | null);
     id: string;
+    sale?: (SalePublic | null);
 };
 
 export type DebtsPublic = {
@@ -1035,6 +1056,42 @@ export type SupplierUpdate = {
     phone?: (string | null);
     address?: (string | null);
     is_active?: (boolean | null);
+};
+
+/**
+ * Create a new till shift
+ */
+export type TillShiftCreate = {
+    shift_type: string;
+    opening_cash_float: (number | string);
+    opening_balance?: (number | string | null);
+    notes?: (string | null);
+};
+
+/**
+ * Public model for till shift
+ */
+export type TillShiftPublic = {
+    shift_type: string;
+    opening_cash_float: string;
+    opening_balance?: (string | null);
+    opening_time?: string;
+    closing_time?: (string | null);
+    closing_cash_float?: (string | null);
+    status?: string;
+    notes?: (string | null);
+    id: string;
+    opened_by_id: string;
+    closed_by_id: (string | null);
+    opened_by_name?: (string | null);
+    closed_by_name?: (string | null);
+    created_at: string;
+    updated_at: string;
+};
+
+export type TillShiftsPublic = {
+    data: Array<TillShiftPublic>;
+    count: number;
 };
 
 export type Token = {
@@ -1891,6 +1948,72 @@ export type SupplierDebtsCreateInstallmentsData = {
 };
 
 export type SupplierDebtsCreateInstallmentsResponse = (SupplierDebtInstallmentsPublic);
+
+export type TillOpenTillData = {
+    requestBody: TillShiftCreate;
+};
+
+export type TillOpenTillResponse = (TillShiftPublic);
+
+export type TillGetCurrentTillResponse = (TillShiftPublic);
+
+export type TillGetTillStatusResponse = ({
+    [key: string]: unknown;
+});
+
+export type TillCloseTillData = {
+    /**
+     * Closing cash float amount
+     */
+    closingCashFloat: (number | string);
+};
+
+export type TillCloseTillResponse = (TillShiftPublic);
+
+export type TillGetSystemCountsResponse = ({
+    [key: string]: unknown;
+});
+
+export type TillReconcileShiftData = {
+    notes?: (string | null);
+    requestBody: {
+        [key: string]: unknown;
+    };
+};
+
+export type TillReconcileShiftResponse = ({
+    [key: string]: unknown;
+});
+
+export type TillGetCashierVariancesData = {
+    /**
+     * Filter by cashier ID
+     */
+    cashierId?: (string | null);
+    /**
+     * Filter until this date
+     */
+    endDate?: (string | null);
+    limit?: number;
+    skip?: number;
+    /**
+     * Filter from this date
+     */
+    startDate?: (string | null);
+};
+
+export type TillGetCashierVariancesResponse = (CashierVariancesPublic);
+
+export type TillGetTillShiftsData = {
+    limit?: number;
+    skip?: number;
+    /**
+     * Filter by status: open, closed, reconciled
+     */
+    status?: (string | null);
+};
+
+export type TillGetTillShiftsResponse = (TillShiftsPublic);
 
 export type UsersReadUsersData = {
     limit?: number;

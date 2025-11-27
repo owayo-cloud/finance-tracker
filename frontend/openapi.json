@@ -7,7 +7,9 @@
   "paths": {
     "/api/v1/login/access-token": {
       "post": {
-        "tags": ["login"],
+        "tags": [
+          "login"
+        ],
         "summary": "Login Access Token",
         "description": "OAuth2 compatible token login, get an access token for future requests.\nSupports login with email or username (case insensitive for username).",
         "operationId": "login-login_access_token",
@@ -47,7 +49,9 @@
     },
     "/api/v1/login/test-token": {
       "post": {
-        "tags": ["login"],
+        "tags": [
+          "login"
+        ],
         "summary": "Test Token",
         "description": "Test access token",
         "operationId": "login-test_token",
@@ -72,7 +76,9 @@
     },
     "/api/v1/password-recovery/{email}": {
       "post": {
-        "tags": ["login"],
+        "tags": [
+          "login"
+        ],
         "summary": "Recover Password",
         "description": "Password Recovery",
         "operationId": "login-recover_password",
@@ -113,7 +119,9 @@
     },
     "/api/v1/reset-password/": {
       "post": {
-        "tags": ["login"],
+        "tags": [
+          "login"
+        ],
         "summary": "Reset Password",
         "description": "Reset password",
         "operationId": "login-reset_password",
@@ -153,7 +161,9 @@
     },
     "/api/v1/password-recovery-html-content/{email}": {
       "post": {
-        "tags": ["login"],
+        "tags": [
+          "login"
+        ],
         "summary": "Recover Password Html Content",
         "description": "HTML Content for Password Recovery",
         "operationId": "login-recover_password_html_content",
@@ -199,7 +209,9 @@
     },
     "/api/v1/users/": {
       "get": {
-        "tags": ["users"],
+        "tags": [
+          "users"
+        ],
         "summary": "Read Users",
         "description": "Retrieve users.",
         "operationId": "users-read_users",
@@ -254,7 +266,9 @@
         }
       },
       "post": {
-        "tags": ["users"],
+        "tags": [
+          "users"
+        ],
         "summary": "Create User",
         "description": "Create new user.",
         "operationId": "users-create_user",
@@ -299,7 +313,9 @@
     },
     "/api/v1/users/me": {
       "get": {
-        "tags": ["users"],
+        "tags": [
+          "users"
+        ],
         "summary": "Read User Me",
         "description": "Get current user.",
         "operationId": "users-read_user_me",
@@ -322,7 +338,9 @@
         ]
       },
       "delete": {
-        "tags": ["users"],
+        "tags": [
+          "users"
+        ],
         "summary": "Delete User Me",
         "description": "Delete own user.",
         "operationId": "users-delete_user_me",
@@ -345,7 +363,9 @@
         ]
       },
       "patch": {
-        "tags": ["users"],
+        "tags": [
+          "users"
+        ],
         "summary": "Update User Me",
         "description": "Update own user.",
         "operationId": "users-update_user_me",
@@ -390,7 +410,9 @@
     },
     "/api/v1/users/me/password": {
       "patch": {
-        "tags": ["users"],
+        "tags": [
+          "users"
+        ],
         "summary": "Update Password Me",
         "description": "Update own password.",
         "operationId": "users-update_password_me",
@@ -435,7 +457,9 @@
     },
     "/api/v1/users/signup": {
       "post": {
-        "tags": ["users"],
+        "tags": [
+          "users"
+        ],
         "summary": "Register User",
         "description": "Create new user without the need to be logged in.",
         "operationId": "users-register_user",
@@ -475,7 +499,9 @@
     },
     "/api/v1/users/{user_id}": {
       "get": {
-        "tags": ["users"],
+        "tags": [
+          "users"
+        ],
         "summary": "Read User By Id",
         "description": "Get a specific user by id.",
         "operationId": "users-read_user_by_id",
@@ -520,7 +546,9 @@
         }
       },
       "patch": {
-        "tags": ["users"],
+        "tags": [
+          "users"
+        ],
         "summary": "Update User",
         "description": "Update a user.",
         "operationId": "users-update_user",
@@ -575,7 +603,9 @@
         }
       },
       "delete": {
-        "tags": ["users"],
+        "tags": [
+          "users"
+        ],
         "summary": "Delete User",
         "description": "Delete a user.",
         "operationId": "users-delete_user",
@@ -622,7 +652,9 @@
     },
     "/api/v1/utils/test-email/": {
       "post": {
-        "tags": ["utils"],
+        "tags": [
+          "utils"
+        ],
         "summary": "Test Email",
         "description": "Test emails.",
         "operationId": "utils-test_email",
@@ -669,7 +701,9 @@
     },
     "/api/v1/utils/health-check/": {
       "get": {
-        "tags": ["utils"],
+        "tags": [
+          "utils"
+        ],
         "summary": "Health Check",
         "operationId": "utils-health_check",
         "responses": {
@@ -689,7 +723,9 @@
     },
     "/api/v1/products/categories": {
       "get": {
-        "tags": ["products"],
+        "tags": [
+          "products"
+        ],
         "summary": "Read Categories",
         "description": "Retrieve product categories.",
         "operationId": "products-read_categories",
@@ -709,7 +745,9 @@
     },
     "/api/v1/products/statuses": {
       "get": {
-        "tags": ["products"],
+        "tags": [
+          "products"
+        ],
         "summary": "Read Statuses",
         "description": "Retrieve product statuses.",
         "operationId": "products-read_statuses",
@@ -733,7 +771,9 @@
     },
     "/api/v1/products/": {
       "get": {
-        "tags": ["products"],
+        "tags": [
+          "products"
+        ],
         "summary": "Read Products",
         "description": "Retrieve products with optional filtering.\n\nArgs:\n    skip: Number of products to skip (pagination)\n    limit: Number of products to return (max 100)\n    name: Filter by product name (partial match, case-insensitive)\n    category_id: Filter by category ID\n    status_id: Filter by status ID",
         "operationId": "products-read_products",
@@ -831,7 +871,9 @@
         }
       },
       "post": {
-        "tags": ["products"],
+        "tags": [
+          "products"
+        ],
         "summary": "Create Product",
         "description": "Create new product.",
         "operationId": "products-create_product",
@@ -876,7 +918,9 @@
     },
     "/api/v1/products/{id}": {
       "get": {
-        "tags": ["products"],
+        "tags": [
+          "products"
+        ],
         "summary": "Read Product",
         "description": "Get product by ID.",
         "operationId": "products-read_product",
@@ -921,7 +965,9 @@
         }
       },
       "patch": {
-        "tags": ["products"],
+        "tags": [
+          "products"
+        ],
         "summary": "Update Product",
         "description": "Update a product.",
         "operationId": "products-update_product",
@@ -976,7 +1022,9 @@
         }
       },
       "delete": {
-        "tags": ["products"],
+        "tags": [
+          "products"
+        ],
         "summary": "Delete Product",
         "description": "Delete a product.",
         "operationId": "products-delete_product",
@@ -1027,7 +1075,9 @@
     },
     "/api/v1/products/bulk/template": {
       "get": {
-        "tags": ["bulk-import"],
+        "tags": [
+          "bulk-import"
+        ],
         "summary": "Download Template",
         "description": "Download CSV template for bulk product import.\n\nReturns a CSV file with sample data showing the expected format.",
         "operationId": "bulk-import-download_template",
@@ -1052,7 +1102,9 @@
     },
     "/api/v1/products/bulk/upload": {
       "post": {
-        "tags": ["bulk-import"],
+        "tags": [
+          "bulk-import"
+        ],
         "summary": "Upload File",
         "description": "Upload CSV/Excel file for bulk import.\n\nValidates file format and size, parses the file, and creates an import session.\nSaves the file to uploads/bulk-imports directory.\n\nReturns session ID and basic file information.",
         "operationId": "bulk-import-upload_file",
@@ -1097,7 +1149,9 @@
     },
     "/api/v1/products/bulk/map-columns": {
       "post": {
-        "tags": ["bulk-import"],
+        "tags": [
+          "bulk-import"
+        ],
         "summary": "Map Columns",
         "description": "Submit column mapping and validate data.\n\nMaps uploaded columns to system fields and performs initial validation.\nReturns preview of first 5 rows with validation results.",
         "operationId": "bulk-import-map_columns",
@@ -1142,7 +1196,9 @@
     },
     "/api/v1/products/bulk/validate/{session_id}": {
       "get": {
-        "tags": ["bulk-import"],
+        "tags": [
+          "bulk-import"
+        ],
         "summary": "Get Validation Results",
         "description": "Get validation results for all rows.\n\nSupports filtering by status and pagination.",
         "operationId": "bulk-import-get_validation_results",
@@ -1225,7 +1281,9 @@
     },
     "/api/v1/products/bulk/fix-row/{session_id}": {
       "patch": {
-        "tags": ["bulk-import"],
+        "tags": [
+          "bulk-import"
+        ],
         "summary": "Fix Row",
         "description": "Fix data for a specific row.\n\nRe-validates the row after applying fixes.",
         "operationId": "bulk-import-fix_row",
@@ -1282,7 +1340,9 @@
     },
     "/api/v1/products/bulk/import/{session_id}": {
       "post": {
-        "tags": ["bulk-import"],
+        "tags": [
+          "bulk-import"
+        ],
         "summary": "Import Products",
         "description": "Execute final import of validated products.\n\nImports all valid rows, handles duplicates according to specified action.",
         "operationId": "bulk-import-import_products",
@@ -1339,7 +1399,9 @@
     },
     "/api/v1/products/bulk/status/{session_id}": {
       "get": {
-        "tags": ["bulk-import"],
+        "tags": [
+          "bulk-import"
+        ],
         "summary": "Get Import Status",
         "description": "Get current status of an import session.",
         "operationId": "bulk-import-get_import_status",
@@ -1386,7 +1448,9 @@
     },
     "/api/v1/stock-entries/search-products": {
       "get": {
-        "tags": ["stock-entries"],
+        "tags": [
+          "stock-entries"
+        ],
         "summary": "Search Products For Stock Entry",
         "description": "Blazingly fast product search for stock entry.\nSearches by name or category name.\nReturns products with all relationships loaded.",
         "operationId": "stock-entries-search_products_for_stock_entry",
@@ -1452,7 +1516,9 @@
     },
     "/api/v1/stock-entries/": {
       "get": {
-        "tags": ["stock-entries"],
+        "tags": [
+          "stock-entries"
+        ],
         "summary": "Read Stock Entries",
         "description": "Retrieve stock entries.\nOptionally filter by product_id.",
         "operationId": "stock-entries-read_stock_entries",
@@ -1524,7 +1590,9 @@
         }
       },
       "post": {
-        "tags": ["stock-entries"],
+        "tags": [
+          "stock-entries"
+        ],
         "summary": "Create Stock Entry",
         "description": "Create new stock entry.",
         "operationId": "stock-entries-create_stock_entry",
@@ -1569,7 +1637,9 @@
     },
     "/api/v1/stock-entries/{id}": {
       "get": {
-        "tags": ["stock-entries"],
+        "tags": [
+          "stock-entries"
+        ],
         "summary": "Read Stock Entry",
         "description": "Get stock entry by ID.",
         "operationId": "stock-entries-read_stock_entry",
@@ -1614,7 +1684,9 @@
         }
       },
       "patch": {
-        "tags": ["stock-entries"],
+        "tags": [
+          "stock-entries"
+        ],
         "summary": "Update Stock Entry",
         "description": "Update a stock entry.",
         "operationId": "stock-entries-update_stock_entry",
@@ -1669,7 +1741,9 @@
         }
       },
       "delete": {
-        "tags": ["stock-entries"],
+        "tags": [
+          "stock-entries"
+        ],
         "summary": "Delete Stock Entry",
         "description": "Delete a stock entry.",
         "operationId": "stock-entries-delete_stock_entry",
@@ -1720,7 +1794,9 @@
     },
     "/api/v1/sales/payment-methods": {
       "get": {
-        "tags": ["sales"],
+        "tags": [
+          "sales"
+        ],
         "summary": "Read Payment Methods",
         "description": "Retrieve all available payment methods.\nUsed for cashier to select payment method during sale.",
         "operationId": "sales-read_payment_methods",
@@ -1777,7 +1853,9 @@
         }
       },
       "post": {
-        "tags": ["sales"],
+        "tags": [
+          "sales"
+        ],
         "summary": "Create Payment Method",
         "description": "Create a new payment method (admin only).",
         "operationId": "sales-create_payment_method",
@@ -1822,7 +1900,9 @@
     },
     "/api/v1/sales/payment-methods/{payment_method_id}": {
       "patch": {
-        "tags": ["sales"],
+        "tags": [
+          "sales"
+        ],
         "summary": "Update Payment Method",
         "description": "Update a payment method (admin only).",
         "operationId": "sales-update_payment_method",
@@ -1879,7 +1959,9 @@
     },
     "/api/v1/sales/search-products": {
       "get": {
-        "tags": ["sales"],
+        "tags": [
+          "sales"
+        ],
         "summary": "Search Products For Sale",
         "description": "Fast product search for sales cart.\nSearches by name or category.\nOnly returns products with status 'Active' and stock > 0.",
         "operationId": "sales-search_products_for_sale",
@@ -1963,9 +2045,11 @@
     },
     "/api/v1/sales": {
       "post": {
-        "tags": ["sales"],
+        "tags": [
+          "sales"
+        ],
         "summary": "Create Sale",
-        "description": "Create a new sale and update product stock.\nThis is an atomic operation - both sale creation and stock update happen together.\n\nBusiness Rules:\n- Product must exist and be active\n- Product must have sufficient stock (real-time check)\n- Stock is automatically decremented\n- Sale amount is calculated from product selling price \u00d7 quantity\n- Each sale is tracked to the cashier who created it (current_user)",
+        "description": "Create a new sale and update product stock.\nThis is an atomic operation - both sale creation and stock update happen together.\n\nBusiness Rules:\n- Till must be open (POS lock)\n- Product must exist and be active\n- Product must have sufficient stock (real-time check)\n- Stock is automatically decremented\n- Sale amount is calculated from product selling price \u00d7 quantity\n- Each sale is tracked to the cashier who created it (current_user)",
         "operationId": "sales-create_sale",
         "security": [
           {
@@ -2006,7 +2090,9 @@
         }
       },
       "get": {
-        "tags": ["sales"],
+        "tags": [
+          "sales"
+        ],
         "summary": "Read Sales",
         "description": "Retrieve sales with optional filtering.\nAdmins see all sales, cashiers see only their own sales.",
         "operationId": "sales-read_sales",
@@ -2157,9 +2243,11 @@
     },
     "/api/v1/sales/multi-payment": {
       "post": {
-        "tags": ["sales"],
+        "tags": [
+          "sales"
+        ],
         "summary": "Create Sale With Multiple Payments",
-        "description": "Create a sale with multiple payment methods.\nThis allows splitting a single sale across multiple payment methods (e.g., cash + MPESA).\n\nBusiness Rules:\n- Product must exist and be active\n- Product must have sufficient stock\n- Sum of all payment amounts must equal total_amount\n- Each payment can have an optional reference number\n- Sale is attributed to the currently authenticated user (current_user)",
+        "description": "Create a sale with multiple payment methods.\nThis allows splitting a single sale across multiple payment methods (e.g., cash + MPESA).\n\nBusiness Rules:\n- Till must be open (POS lock)\n- Product must exist and be active\n- Product must have sufficient stock\n- Sum of all payment amounts must equal total_amount\n- Each payment can have an optional reference number\n- Sale is attributed to the currently authenticated user (current_user)",
         "operationId": "sales-create_sale_with_multiple_payments",
         "requestBody": {
           "content": {
@@ -2202,7 +2290,9 @@
     },
     "/api/v1/sales/{sale_id}/payments": {
       "get": {
-        "tags": ["sales"],
+        "tags": [
+          "sales"
+        ],
         "summary": "Read Sale Payments",
         "description": "Get all payment methods used for a specific sale.",
         "operationId": "sales-read_sale_payments",
@@ -2253,7 +2343,9 @@
     },
     "/api/v1/sales/today-summary": {
       "get": {
-        "tags": ["sales"],
+        "tags": [
+          "sales"
+        ],
         "summary": "Get Today Sales Summary",
         "description": "Get today's sales summary for the current cashier.\nReturns total sales, total amount, and breakdown by payment method.",
         "operationId": "sales-get_today_sales_summary",
@@ -2280,7 +2372,9 @@
     },
     "/api/v1/sales/{sale_id}": {
       "get": {
-        "tags": ["sales"],
+        "tags": [
+          "sales"
+        ],
         "summary": "Read Sale",
         "description": "Get sale by ID.\nCashiers can only view their own sales.",
         "operationId": "sales-read_sale",
@@ -2325,7 +2419,9 @@
         }
       },
       "delete": {
-        "tags": ["sales"],
+        "tags": [
+          "sales"
+        ],
         "summary": "Delete Sale",
         "description": "Delete a sale (admin only).\nNote: This also restores the product stock.",
         "operationId": "sales-delete_sale",
@@ -2372,7 +2468,9 @@
     },
     "/api/v1/shift-reconciliation": {
       "post": {
-        "tags": ["shift-reconciliation"],
+        "tags": [
+          "shift-reconciliation"
+        ],
         "summary": "Create Shift Reconciliation",
         "description": "Create a new shift reconciliation.\nCashiers can create their own shift reconciliations.",
         "operationId": "shift-reconciliation-create_shift_reconciliation",
@@ -2415,7 +2513,9 @@
         }
       },
       "get": {
-        "tags": ["shift-reconciliation"],
+        "tags": [
+          "shift-reconciliation"
+        ],
         "summary": "Read Shift Reconciliations",
         "description": "Retrieve shift reconciliations.\nAdmins see all, cashiers see only their own.",
         "operationId": "shift-reconciliation-read_shift_reconciliations",
@@ -2512,7 +2612,9 @@
     },
     "/api/v1/shift-reconciliation/{shift_id}": {
       "get": {
-        "tags": ["shift-reconciliation"],
+        "tags": [
+          "shift-reconciliation"
+        ],
         "summary": "Read Shift Reconciliation",
         "description": "Get shift reconciliation by ID.\nCashiers can only view their own.",
         "operationId": "shift-reconciliation-read_shift_reconciliation",
@@ -2557,7 +2659,9 @@
         }
       },
       "patch": {
-        "tags": ["shift-reconciliation"],
+        "tags": [
+          "shift-reconciliation"
+        ],
         "summary": "Update Shift Reconciliation",
         "description": "Update a shift reconciliation.\nCashiers can only update their own.",
         "operationId": "shift-reconciliation-update_shift_reconciliation",
@@ -2614,7 +2718,9 @@
     },
     "/api/v1/shift-reconciliation/current/cash-summary": {
       "get": {
-        "tags": ["shift-reconciliation"],
+        "tags": [
+          "shift-reconciliation"
+        ],
         "summary": "Get Current Cash Summary",
         "description": "Get cash sales summary for shift reconciliation.\nReturns cash totals for the specified date range.",
         "operationId": "shift-reconciliation-get_current_cash_summary",
@@ -2691,7 +2797,9 @@
     },
     "/api/v1/expenses/categories": {
       "get": {
-        "tags": ["expenses"],
+        "tags": [
+          "expenses"
+        ],
         "summary": "Read Expense Categories",
         "description": "Retrieve all expense categories.",
         "operationId": "expenses-read_expense_categories",
@@ -2748,7 +2856,9 @@
         }
       },
       "post": {
-        "tags": ["expenses"],
+        "tags": [
+          "expenses"
+        ],
         "summary": "Create Expense Category",
         "description": "Create a new expense category (admin only).",
         "operationId": "expenses-create_expense_category",
@@ -2793,7 +2903,9 @@
     },
     "/api/v1/expenses/categories/{category_id}": {
       "get": {
-        "tags": ["expenses"],
+        "tags": [
+          "expenses"
+        ],
         "summary": "Read Expense Category",
         "description": "Get a specific expense category by ID.",
         "operationId": "expenses-read_expense_category",
@@ -2838,7 +2950,9 @@
         }
       },
       "put": {
-        "tags": ["expenses"],
+        "tags": [
+          "expenses"
+        ],
         "summary": "Update Expense Category",
         "description": "Update an expense category (admin only).",
         "operationId": "expenses-update_expense_category",
@@ -2893,7 +3007,9 @@
         }
       },
       "delete": {
-        "tags": ["expenses"],
+        "tags": [
+          "expenses"
+        ],
         "summary": "Delete Expense Category",
         "description": "Delete an expense category (admin only).",
         "operationId": "expenses-delete_expense_category",
@@ -2940,7 +3056,9 @@
     },
     "/api/v1/expenses/": {
       "get": {
-        "tags": ["expenses"],
+        "tags": [
+          "expenses"
+        ],
         "summary": "Read Expenses",
         "description": "Retrieve expenses with optional filtering.\n\nArgs:\n    skip: Number of expenses to skip (pagination)\n    limit: Number of expenses to return (max 1000)\n    category_id: Filter by category ID\n    start_date: Filter expenses from this date onwards\n    end_date: Filter expenses up to this date\n    search: Search in description (partial match, case-insensitive)",
         "operationId": "expenses-read_expenses",
@@ -3064,7 +3182,9 @@
         }
       },
       "post": {
-        "tags": ["expenses"],
+        "tags": [
+          "expenses"
+        ],
         "summary": "Create Expense",
         "description": "Create a new expense.",
         "operationId": "expenses-create_expense",
@@ -3109,7 +3229,9 @@
     },
     "/api/v1/expenses/{expense_id}": {
       "get": {
-        "tags": ["expenses"],
+        "tags": [
+          "expenses"
+        ],
         "summary": "Read Expense",
         "description": "Get a specific expense by ID.",
         "operationId": "expenses-read_expense",
@@ -3154,7 +3276,9 @@
         }
       },
       "put": {
-        "tags": ["expenses"],
+        "tags": [
+          "expenses"
+        ],
         "summary": "Update Expense",
         "description": "Update an expense.\nOnly admins can update any expense, others can only update their own expenses.",
         "operationId": "expenses-update_expense",
@@ -3209,7 +3333,9 @@
         }
       },
       "delete": {
-        "tags": ["expenses"],
+        "tags": [
+          "expenses"
+        ],
         "summary": "Delete Expense",
         "description": "Delete an expense (admin only).",
         "operationId": "expenses-delete_expense",
@@ -3256,7 +3382,9 @@
     },
     "/api/v1/expenses/stats/summary": {
       "get": {
-        "tags": ["expenses"],
+        "tags": [
+          "expenses"
+        ],
         "summary": "Get Expense Summary",
         "description": "Get expense summary statistics.",
         "operationId": "expenses-get_expense_summary",
@@ -3344,7 +3472,9 @@
     },
     "/api/v1/debts/": {
       "get": {
-        "tags": ["debts"],
+        "tags": [
+          "debts"
+        ],
         "summary": "Read Debts",
         "description": "Retrieve debts with optional filters.",
         "operationId": "debts-read_debts",
@@ -3465,7 +3595,9 @@
         }
       },
       "post": {
-        "tags": ["debts"],
+        "tags": [
+          "debts"
+        ],
         "summary": "Create Debt",
         "description": "Create a new debt record.\nCan be linked to a sale via sale_id.",
         "operationId": "debts-create_debt",
@@ -3510,7 +3642,9 @@
     },
     "/api/v1/debts/{debt_id}": {
       "get": {
-        "tags": ["debts"],
+        "tags": [
+          "debts"
+        ],
         "summary": "Read Debt",
         "description": "Get a specific debt by ID.",
         "operationId": "debts-read_debt",
@@ -3555,7 +3689,9 @@
         }
       },
       "patch": {
-        "tags": ["debts"],
+        "tags": [
+          "debts"
+        ],
         "summary": "Update Debt",
         "description": "Update a debt record.",
         "operationId": "debts-update_debt",
@@ -3610,7 +3746,9 @@
         }
       },
       "delete": {
-        "tags": ["debts"],
+        "tags": [
+          "debts"
+        ],
         "summary": "Delete Debt",
         "description": "Delete a debt record (admin only).",
         "operationId": "debts-delete_debt",
@@ -3657,7 +3795,9 @@
     },
     "/api/v1/debts/{debt_id}/payments": {
       "post": {
-        "tags": ["debts"],
+        "tags": [
+          "debts"
+        ],
         "summary": "Create Debt Payment",
         "description": "Record a payment against a debt.\nThis automatically updates the debt's amount_paid and balance.",
         "operationId": "debts-create_debt_payment",
@@ -3712,7 +3852,9 @@
         }
       },
       "get": {
-        "tags": ["debts"],
+        "tags": [
+          "debts"
+        ],
         "summary": "Read Debt Payments",
         "description": "Get all payments for a specific debt.",
         "operationId": "debts-read_debt_payments",
@@ -3781,7 +3923,9 @@
     },
     "/api/v1/debts/customers/{customer_name}/balance": {
       "get": {
-        "tags": ["debts"],
+        "tags": [
+          "debts"
+        ],
         "summary": "Get Customer Balance",
         "description": "Get total outstanding balance for a customer.",
         "operationId": "debts-get_customer_balance",
@@ -3827,7 +3971,9 @@
     },
     "/api/v1/customers/": {
       "get": {
-        "tags": ["customers"],
+        "tags": [
+          "customers"
+        ],
         "summary": "Get Customers",
         "description": "Get all customers with aggregated data from debts and sales.\nThis endpoint aggregates customer information from both debts and sales tables,\ncalculating total balances and finding the most recent sale date.",
         "operationId": "customers-get_customers",
@@ -3904,7 +4050,9 @@
     },
     "/api/v1/analytics/sales-summary": {
       "get": {
-        "tags": ["analytics"],
+        "tags": [
+          "analytics"
+        ],
         "summary": "Get Sales Summary",
         "description": "Get sales summary with totals, averages, and breakdowns by payment method and cashier.",
         "operationId": "analytics-get_sales_summary",
@@ -3979,7 +4127,9 @@
     },
     "/api/v1/analytics/stock-summary": {
       "get": {
-        "tags": ["analytics"],
+        "tags": [
+          "analytics"
+        ],
         "summary": "Get Stock Summary",
         "description": "Get stock inventory summary with total value, low stock counts, and product details.",
         "operationId": "analytics-get_stock_summary",
@@ -4004,7 +4154,9 @@
     },
     "/api/v1/analytics/balance-sheet": {
       "get": {
-        "tags": ["analytics"],
+        "tags": [
+          "analytics"
+        ],
         "summary": "Get Balance Sheet",
         "description": "Get balance sheet with assets, liabilities, and equity calculations.",
         "operationId": "analytics-get_balance_sheet",
@@ -4079,7 +4231,9 @@
     },
     "/api/v1/analytics/dashboard-stats": {
       "get": {
-        "tags": ["analytics"],
+        "tags": [
+          "analytics"
+        ],
         "summary": "Get Dashboard Stats",
         "description": "Get dashboard statistics including revenue, expenses, and percentage changes.",
         "operationId": "analytics-get_dashboard_stats",
@@ -4104,7 +4258,9 @@
     },
     "/api/v1/grn/suppliers": {
       "get": {
-        "tags": ["grn"],
+        "tags": [
+          "grn"
+        ],
         "summary": "Read Suppliers",
         "description": "Retrieve suppliers with optional filtering.",
         "operationId": "grn-read_suppliers",
@@ -4191,7 +4347,9 @@
         }
       },
       "post": {
-        "tags": ["grn"],
+        "tags": [
+          "grn"
+        ],
         "summary": "Create Supplier",
         "description": "Create new supplier (Admin only).",
         "operationId": "grn-create_supplier",
@@ -4236,7 +4394,9 @@
     },
     "/api/v1/grn/suppliers/{supplier_id}": {
       "get": {
-        "tags": ["grn"],
+        "tags": [
+          "grn"
+        ],
         "summary": "Read Supplier",
         "description": "Get supplier by ID.",
         "operationId": "grn-read_supplier",
@@ -4281,7 +4441,9 @@
         }
       },
       "put": {
-        "tags": ["grn"],
+        "tags": [
+          "grn"
+        ],
         "summary": "Update Supplier",
         "description": "Update supplier (Admin only).",
         "operationId": "grn-update_supplier",
@@ -4336,7 +4498,9 @@
         }
       },
       "delete": {
-        "tags": ["grn"],
+        "tags": [
+          "grn"
+        ],
         "summary": "Delete Supplier",
         "description": "Delete supplier (Admin only).",
         "operationId": "grn-delete_supplier",
@@ -4383,7 +4547,9 @@
     },
     "/api/v1/grn/transporters": {
       "get": {
-        "tags": ["grn"],
+        "tags": [
+          "grn"
+        ],
         "summary": "Read Transporters",
         "description": "Retrieve transporters with optional filtering.",
         "operationId": "grn-read_transporters",
@@ -4470,7 +4636,9 @@
         }
       },
       "post": {
-        "tags": ["grn"],
+        "tags": [
+          "grn"
+        ],
         "summary": "Create Transporter",
         "description": "Create new transporter (Admin only).",
         "operationId": "grn-create_transporter",
@@ -4515,7 +4683,9 @@
     },
     "/api/v1/grn/transporters/{transporter_id}": {
       "get": {
-        "tags": ["grn"],
+        "tags": [
+          "grn"
+        ],
         "summary": "Read Transporter",
         "description": "Get transporter by ID.",
         "operationId": "grn-read_transporter",
@@ -4560,7 +4730,9 @@
         }
       },
       "put": {
-        "tags": ["grn"],
+        "tags": [
+          "grn"
+        ],
         "summary": "Update Transporter",
         "description": "Update transporter (Admin only).",
         "operationId": "grn-update_transporter",
@@ -4615,7 +4787,9 @@
         }
       },
       "delete": {
-        "tags": ["grn"],
+        "tags": [
+          "grn"
+        ],
         "summary": "Delete Transporter",
         "description": "Delete transporter (Admin only).",
         "operationId": "grn-delete_transporter",
@@ -4662,7 +4836,9 @@
     },
     "/api/v1/grn/": {
       "get": {
-        "tags": ["grn"],
+        "tags": [
+          "grn"
+        ],
         "summary": "Read Grns",
         "description": "Retrieve GRNs with optional filtering.",
         "operationId": "grn-read_grns",
@@ -4800,7 +4976,9 @@
         }
       },
       "post": {
-        "tags": ["grn"],
+        "tags": [
+          "grn"
+        ],
         "summary": "Create Grn",
         "description": "Create new GRN with optional credit purchase support.\n\nIf payment_type is \"Credit\", validates supplier credit limit\nand can optionally create supplier debt after approval.",
         "operationId": "grn-create_grn",
@@ -4845,7 +5023,9 @@
     },
     "/api/v1/grn/{grn_id}": {
       "get": {
-        "tags": ["grn"],
+        "tags": [
+          "grn"
+        ],
         "summary": "Read Grn",
         "description": "Get GRN by ID with items.",
         "operationId": "grn-read_grn",
@@ -4890,7 +5070,9 @@
         }
       },
       "put": {
-        "tags": ["grn"],
+        "tags": [
+          "grn"
+        ],
         "summary": "Update Grn",
         "description": "Update GRN (Admin only).",
         "operationId": "grn-update_grn",
@@ -4945,7 +5127,9 @@
         }
       },
       "delete": {
-        "tags": ["grn"],
+        "tags": [
+          "grn"
+        ],
         "summary": "Delete Grn",
         "description": "Delete GRN (Admin only). Can only delete if not approved.",
         "operationId": "grn-delete_grn",
@@ -4992,7 +5176,9 @@
     },
     "/api/v1/grn/{grn_id}/approve": {
       "post": {
-        "tags": ["grn"],
+        "tags": [
+          "grn"
+        ],
         "summary": "Approve Grn",
         "description": "Approve GRN and optionally create supplier debt for credit purchases.\n\n**Access**: Admin only\n\n**Business Logic:**\n- If payment_type is \"Credit\" and creates_debt is True:\n  - Creates SupplierDebt record\n  - Updates supplier's current_credit_used\n  - Creates notification for admins\n- Updates product stock levels (existing logic)\n- Marks GRN as approved",
         "operationId": "grn-approve_grn",
@@ -5039,7 +5225,9 @@
     },
     "/api/v1/supplier-debts/": {
       "get": {
-        "tags": ["supplier-debts"],
+        "tags": [
+          "supplier-debts"
+        ],
         "summary": "List Supplier Debts",
         "description": "List supplier debts with filtering.\n\n**Access**: Admin, Auditor (read-only)",
         "operationId": "supplier-debts-list_supplier_debts",
@@ -5177,7 +5365,9 @@
         }
       },
       "post": {
-        "tags": ["supplier-debts"],
+        "tags": [
+          "supplier-debts"
+        ],
         "summary": "Create Supplier Debt",
         "description": "Manually create supplier debt (rare use case - usually auto-created from GRN).\n\n**Access**: Admin only",
         "operationId": "supplier-debts-create_supplier_debt",
@@ -5222,7 +5412,9 @@
     },
     "/api/v1/supplier-debts/summary": {
       "get": {
-        "tags": ["supplier-debts"],
+        "tags": [
+          "supplier-debts"
+        ],
         "summary": "Get Summary",
         "description": "Dashboard summary (total outstanding, overdue count, etc.).\n\n**Access**: Admin only",
         "operationId": "supplier-debts-get_summary",
@@ -5249,7 +5441,9 @@
     },
     "/api/v1/supplier-debts/aging-report": {
       "get": {
-        "tags": ["supplier-debts"],
+        "tags": [
+          "supplier-debts"
+        ],
         "summary": "Get Aging Report",
         "description": "Generate aging report (30/60/90 days buckets).\n\n**Access**: Admin only",
         "operationId": "supplier-debts-get_aging_report",
@@ -5308,7 +5502,9 @@
     },
     "/api/v1/supplier-debts/{debt_id}": {
       "get": {
-        "tags": ["supplier-debts"],
+        "tags": [
+          "supplier-debts"
+        ],
         "summary": "Get Supplier Debt",
         "description": "Get single supplier debt with full details (installments, payments).\n\n**Access**: Admin only (auditor can also view)",
         "operationId": "supplier-debts-get_supplier_debt",
@@ -5353,7 +5549,9 @@
         }
       },
       "patch": {
-        "tags": ["supplier-debts"],
+        "tags": [
+          "supplier-debts"
+        ],
         "summary": "Update Supplier Debt",
         "description": "Update supplier debt (notes, status override).\n\n**Access**: Admin only",
         "operationId": "supplier-debts-update_supplier_debt",
@@ -5410,7 +5608,9 @@
     },
     "/api/v1/supplier-debts/{debt_id}/payments": {
       "post": {
-        "tags": ["supplier-debts"],
+        "tags": [
+          "supplier-debts"
+        ],
         "summary": "Record Payment",
         "description": "Record payment to supplier.\n\nApplies payment to specified installment or oldest unpaid installment.\nUpdates debt balance, status, and supplier credit_used.\n\n**Access**: Admin only",
         "operationId": "supplier-debts-record_payment",
@@ -5467,7 +5667,9 @@
     },
     "/api/v1/supplier-debts/{debt_id}/installments": {
       "get": {
-        "tags": ["supplier-debts"],
+        "tags": [
+          "supplier-debts"
+        ],
         "summary": "List Installments",
         "description": "List installments for a debt.\n\n**Access**: Admin, Auditor",
         "operationId": "supplier-debts-list_installments",
@@ -5512,7 +5714,9 @@
         }
       },
       "post": {
-        "tags": ["supplier-debts"],
+        "tags": [
+          "supplier-debts"
+        ],
         "summary": "Create Installments",
         "description": "Add installment schedule to debt.\n\n**Access**: Admin only",
         "operationId": "supplier-debts-create_installments",
@@ -5573,7 +5777,9 @@
     },
     "/api/v1/notifications/": {
       "get": {
-        "tags": ["notifications"],
+        "tags": [
+          "notifications"
+        ],
         "summary": "List Notifications",
         "description": "List current user's notifications with filtering.\n\nReturns notifications paginated with unread count.",
         "operationId": "notifications-list_notifications",
@@ -5678,7 +5884,9 @@
     },
     "/api/v1/notifications/unread-count": {
       "get": {
-        "tags": ["notifications"],
+        "tags": [
+          "notifications"
+        ],
         "summary": "Get Unread Count",
         "description": "Get count of unread notifications for current user.\n\nUsed for badge display on notification bell icon.",
         "operationId": "notifications-get_unread_count",
@@ -5707,7 +5915,9 @@
     },
     "/api/v1/notifications/{notification_id}/read": {
       "patch": {
-        "tags": ["notifications"],
+        "tags": [
+          "notifications"
+        ],
         "summary": "Mark As Read",
         "description": "Mark notification as read.\n\nUser can only mark their own notifications as read.",
         "operationId": "notifications-mark_as_read",
@@ -5754,7 +5964,9 @@
     },
     "/api/v1/notifications/mark-all-read": {
       "patch": {
-        "tags": ["notifications"],
+        "tags": [
+          "notifications"
+        ],
         "summary": "Mark All As Read",
         "description": "Mark all notifications as read for current user.",
         "operationId": "notifications-mark_all_as_read",
@@ -5779,7 +5991,9 @@
     },
     "/api/v1/notifications/{notification_id}": {
       "delete": {
-        "tags": ["notifications"],
+        "tags": [
+          "notifications"
+        ],
         "summary": "Delete Notification",
         "description": "Delete a notification.\n\nUser can only delete their own notifications.",
         "operationId": "notifications-delete_notification",
@@ -5826,7 +6040,9 @@
     },
     "/api/v1/notifications/types": {
       "get": {
-        "tags": ["notifications"],
+        "tags": [
+          "notifications"
+        ],
         "summary": "Get Notification Types",
         "description": "Get list of available notification types for filtering.",
         "operationId": "notifications-get_notification_types",
@@ -5853,7 +6069,9 @@
     },
     "/api/v1/reminders/settings": {
       "get": {
-        "tags": ["reminders"],
+        "tags": [
+          "reminders"
+        ],
         "summary": "List Reminder Settings",
         "description": "Get current user's reminder configurations.\n\n**Access**: Admin only (for now)",
         "operationId": "reminders-list_reminder_settings",
@@ -5876,7 +6094,9 @@
         ]
       },
       "post": {
-        "tags": ["reminders"],
+        "tags": [
+          "reminders"
+        ],
         "summary": "Create Reminder Setting",
         "description": "Create or update reminder setting.\n\n**Access**: Admin only",
         "operationId": "reminders-create_reminder_setting",
@@ -5921,7 +6141,9 @@
     },
     "/api/v1/reminders/settings/{setting_id}": {
       "get": {
-        "tags": ["reminders"],
+        "tags": [
+          "reminders"
+        ],
         "summary": "Get Reminder Setting",
         "description": "Get single reminder setting.\n\n**Access**: Admin only (own settings)",
         "operationId": "reminders-get_reminder_setting",
@@ -5966,7 +6188,9 @@
         }
       },
       "patch": {
-        "tags": ["reminders"],
+        "tags": [
+          "reminders"
+        ],
         "summary": "Update Reminder Setting",
         "description": "Update reminder setting.\n\n**Access**: Admin only (own settings)",
         "operationId": "reminders-update_reminder_setting",
@@ -6021,7 +6245,9 @@
         }
       },
       "delete": {
-        "tags": ["reminders"],
+        "tags": [
+          "reminders"
+        ],
         "summary": "Delete Reminder Setting",
         "description": "Delete reminder setting.\n\n**Access**: Admin only (own settings)",
         "operationId": "reminders-delete_reminder_setting",
@@ -6068,7 +6294,9 @@
     },
     "/api/v1/reminders/logs": {
       "get": {
-        "tags": ["reminders"],
+        "tags": [
+          "reminders"
+        ],
         "summary": "List Reminder Logs",
         "description": "View sent email history.\n\n**Access**: Admin only (own logs)",
         "operationId": "reminders-list_reminder_logs",
@@ -6141,7 +6369,9 @@
     },
     "/api/v1/reminders/statistics": {
       "get": {
-        "tags": ["reminders"],
+        "tags": [
+          "reminders"
+        ],
         "summary": "Get Reminder Statistics",
         "description": "Get reminder statistics (sent count, failed count, etc.).\n\n**Access**: Admin only",
         "operationId": "reminders-get_reminder_statistics",
@@ -6168,7 +6398,9 @@
     },
     "/api/v1/reminders/types": {
       "get": {
-        "tags": ["reminders"],
+        "tags": [
+          "reminders"
+        ],
         "summary": "Get Reminder Types",
         "description": "Get available reminder types and frequencies.",
         "operationId": "reminders-get_reminder_types",
@@ -6195,7 +6427,9 @@
     },
     "/api/v1/media/upload": {
       "post": {
-        "tags": ["media"],
+        "tags": [
+          "media"
+        ],
         "summary": "Upload Image",
         "description": "Upload a product image.\nOnly admin users can upload images.",
         "operationId": "media-upload_image",
@@ -6240,7 +6474,9 @@
     },
     "/api/v1/media/serve/{media_id}": {
       "get": {
-        "tags": ["media"],
+        "tags": [
+          "media"
+        ],
         "summary": "Serve Image",
         "description": "Serve an uploaded image.",
         "operationId": "media-serve_image",
@@ -6282,7 +6518,9 @@
     },
     "/api/v1/media/{media_id}": {
       "delete": {
-        "tags": ["media"],
+        "tags": [
+          "media"
+        ],
         "summary": "Delete Media",
         "description": "Delete a media file.\nOnly admin users can delete media.",
         "operationId": "media-delete_media",
@@ -6333,7 +6571,9 @@
     },
     "/api/v1/media/": {
       "get": {
-        "tags": ["media"],
+        "tags": [
+          "media"
+        ],
         "summary": "List Media",
         "description": "List all media files.",
         "operationId": "media-list_media",
@@ -6387,9 +6627,467 @@
         }
       }
     },
+    "/api/v1/till/open": {
+      "post": {
+        "tags": [
+          "till"
+        ],
+        "summary": "Open Till",
+        "description": "Open a new till shift.\n- Cashiers must open till before making sales\n- Shift type alternates (Day/Night)\n- Only one till can be open at a time",
+        "operationId": "till-open_till",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TillShiftCreate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TillShiftPublic"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ]
+      }
+    },
+    "/api/v1/till/current": {
+      "get": {
+        "tags": [
+          "till"
+        ],
+        "summary": "Get Current Till",
+        "description": "Get the currently open till shift",
+        "operationId": "till-get_current_till",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TillShiftPublic"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ]
+      }
+    },
+    "/api/v1/till/status": {
+      "get": {
+        "tags": [
+          "till"
+        ],
+        "summary": "Get Till Status",
+        "description": "Check if till is open (for POS lock)",
+        "operationId": "till-get_till_status",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "type": "object",
+                  "title": "Response Till-Get Till Status"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ]
+      }
+    },
+    "/api/v1/till/close": {
+      "post": {
+        "tags": [
+          "till"
+        ],
+        "summary": "Close Till",
+        "description": "Close the current till shift.\n- Only the cashier who opened it can close it (unless admin)\n- Calculates system counts automatically",
+        "operationId": "till-close_till",
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "closing_cash_float",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "string",
+                  "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$"
+                }
+              ],
+              "description": "Closing cash float amount",
+              "title": "Closing Cash Float"
+            },
+            "description": "Closing cash float amount"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TillShiftPublic"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/till/system-counts": {
+      "get": {
+        "tags": [
+          "till"
+        ],
+        "summary": "Get System Counts",
+        "description": "Get system counts (auto-calculated) for the current open shift.\nReturns amounts by payment method based on recorded sales.",
+        "operationId": "till-get_system_counts",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "type": "object",
+                  "title": "Response Till-Get System Counts"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ]
+      }
+    },
+    "/api/v1/till/reconcile": {
+      "post": {
+        "tags": [
+          "till"
+        ],
+        "summary": "Reconcile Shift",
+        "description": "Reconcile a closed shift.\n- Creates shift reconciliation record\n- Records payment method reconciliations\n- Calculates variances\n- Creates cashier variance record if any variance exists",
+        "operationId": "till-reconcile_shift",
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "notes",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Notes"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": true,
+                "title": "Physical Counts"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true,
+                  "title": "Response Till-Reconcile Shift"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/till/variances": {
+      "get": {
+        "tags": [
+          "till"
+        ],
+        "summary": "Get Cashier Variances",
+        "description": "Get cashier variance report.\nShows all variances (shortages and overages) by cashier.",
+        "operationId": "till-get_cashier_variances",
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "skip",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 0,
+              "default": 0,
+              "title": "Skip"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 1000,
+              "default": 100,
+              "title": "Limit"
+            }
+          },
+          {
+            "name": "cashier_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Filter by cashier ID",
+              "title": "Cashier Id"
+            },
+            "description": "Filter by cashier ID"
+          },
+          {
+            "name": "start_date",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "date"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Filter from this date",
+              "title": "Start Date"
+            },
+            "description": "Filter from this date"
+          },
+          {
+            "name": "end_date",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "date"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Filter until this date",
+              "title": "End Date"
+            },
+            "description": "Filter until this date"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CashierVariancesPublic"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/till": {
+      "get": {
+        "tags": [
+          "till"
+        ],
+        "summary": "Get Till Shifts",
+        "description": "Get list of till shifts",
+        "operationId": "till-get_till_shifts",
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "skip",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 0,
+              "default": 0,
+              "title": "Skip"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 1000,
+              "default": 100,
+              "title": "Limit"
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Filter by status: open, closed, reconciled",
+              "title": "Status"
+            },
+            "description": "Filter by status: open, closed, reconciled"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TillShiftsPublic"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/private/users/": {
       "post": {
-        "tags": ["private"],
+        "tags": [
+          "private"
+        ],
         "summary": "Create User",
         "description": "Create a new user.",
         "operationId": "private-create_user",
@@ -6444,7 +7142,11 @@
           }
         },
         "type": "object",
-        "required": ["assets", "liabilities", "equity"],
+        "required": [
+          "assets",
+          "liabilities",
+          "equity"
+        ],
         "title": "BalanceSheet"
       },
       "BalanceSheetAssets": {
@@ -6463,7 +7165,11 @@
           }
         },
         "type": "object",
-        "required": ["inventory", "cash_and_receivables", "total"],
+        "required": [
+          "inventory",
+          "cash_and_receivables",
+          "total"
+        ],
         "title": "BalanceSheetAssets"
       },
       "BalanceSheetLiabilities": {
@@ -6478,7 +7184,10 @@
           }
         },
         "type": "object",
-        "required": ["expenses", "total"],
+        "required": [
+          "expenses",
+          "total"
+        ],
         "title": "BalanceSheetLiabilities"
       },
       "Body_bulk-import-upload_file": {
@@ -6490,7 +7199,9 @@
           }
         },
         "type": "object",
-        "required": ["file"],
+        "required": [
+          "file"
+        ],
         "title": "Body_bulk-import-upload_file"
       },
       "Body_login-login_access_token": {
@@ -6544,7 +7255,10 @@
           }
         },
         "type": "object",
-        "required": ["username", "password"],
+        "required": [
+          "username",
+          "password"
+        ],
         "title": "Body_login-login_access_token"
       },
       "Body_media-upload_image": {
@@ -6556,7 +7270,9 @@
           }
         },
         "type": "object",
-        "required": ["file"],
+        "required": [
+          "file"
+        ],
         "title": "Body_media-upload_image"
       },
       "BulkImportFinalRequest": {
@@ -6597,7 +7313,9 @@
           }
         },
         "type": "object",
-        "required": ["session_id"],
+        "required": [
+          "session_id"
+        ],
         "title": "BulkImportFinalRequest",
         "description": "Final import request with options."
       },
@@ -6639,8 +7357,7 @@
               "format": "uuid"
             },
             "type": "array",
-            "title": "Imported Product Ids",
-            "default": []
+            "title": "Imported Product Ids"
           },
           "errors": {
             "items": {
@@ -6648,8 +7365,7 @@
               "type": "object"
             },
             "type": "array",
-            "title": "Errors",
-            "default": []
+            "title": "Errors"
           }
         },
         "type": "object",
@@ -6776,7 +7492,9 @@
           "auto_mapping": {
             "anyOf": [
               {
-                "additionalProperties": true,
+                "additionalProperties": {
+                  "type": "string"
+                },
                 "type": "object"
               },
               {
@@ -6787,7 +7505,12 @@
           }
         },
         "type": "object",
-        "required": ["filename", "total_rows", "id", "created_at"],
+        "required": [
+          "filename",
+          "total_rows",
+          "id",
+          "created_at"
+        ],
         "title": "BulkImportSessionPublic"
       },
       "BulkImportValidationResponse": {
@@ -6849,8 +7572,123 @@
           }
         },
         "type": "object",
-        "required": ["cashier_name", "count", "amount"],
+        "required": [
+          "cashier_name",
+          "count",
+          "amount"
+        ],
         "title": "CashierBreakdown"
+      },
+      "CashierVariancePublic": {
+        "properties": {
+          "till_shift_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Till Shift Id"
+          },
+          "cashier_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Cashier Id"
+          },
+          "total_variance": {
+            "type": "string",
+            "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d{0,2}0*$",
+            "title": "Total Variance"
+          },
+          "variance_type": {
+            "type": "string",
+            "maxLength": 20,
+            "title": "Variance Type"
+          },
+          "notes": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 2000
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Notes"
+          },
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "cashier_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Cashier Name"
+          },
+          "shift_type": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Shift Type"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "till_shift_id",
+          "cashier_id",
+          "total_variance",
+          "variance_type",
+          "id",
+          "created_at"
+        ],
+        "title": "CashierVariancePublic"
+      },
+      "CashierVariancesPublic": {
+        "properties": {
+          "data": {
+            "items": {
+              "$ref": "#/components/schemas/CashierVariancePublic"
+            },
+            "type": "array",
+            "title": "Data"
+          },
+          "count": {
+            "type": "integer",
+            "title": "Count"
+          },
+          "total_shortage": {
+            "type": "string",
+            "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d{0,2}0*$",
+            "title": "Total Shortage",
+            "default": "0"
+          },
+          "total_overage": {
+            "type": "string",
+            "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d{0,2}0*$",
+            "title": "Total Overage",
+            "default": "0"
+          }
+        },
+        "type": "object",
+        "required": [
+          "data",
+          "count"
+        ],
+        "title": "CashierVariancesPublic"
       },
       "ColumnMappingRequest": {
         "properties": {
@@ -6860,7 +7698,9 @@
             "title": "Session Id"
           },
           "column_mapping": {
-            "additionalProperties": true,
+            "additionalProperties": {
+              "type": "string"
+            },
             "type": "object",
             "title": "Column Mapping"
           },
@@ -6890,7 +7730,10 @@
           }
         },
         "type": "object",
-        "required": ["session_id", "column_mapping"],
+        "required": [
+          "session_id",
+          "column_mapping"
+        ],
         "title": "ColumnMappingRequest",
         "description": "Request model for column mapping."
       },
@@ -6964,7 +7807,11 @@
           }
         },
         "type": "object",
-        "required": ["name", "tel", "balance"],
+        "required": [
+          "name",
+          "tel",
+          "balance"
+        ],
         "title": "CustomerSummary",
         "description": "Customer summary with aggregated data"
       },
@@ -6983,7 +7830,10 @@
           }
         },
         "type": "object",
-        "required": ["data", "count"],
+        "required": [
+          "data",
+          "count"
+        ],
         "title": "CustomersPublic",
         "description": "List of customers"
       },
@@ -7113,22 +7963,16 @@
             "title": "Amount Paid",
             "default": "0"
           },
-          "balance": {
+          "debt_date": {
             "anyOf": [
               {
-                "type": "number",
-                "minimum": 0.0
+                "type": "string",
+                "format": "date-time"
               },
               {
-                "type": "string",
-                "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d{0,2}0*$"
+                "type": "null"
               }
             ],
-            "title": "Balance"
-          },
-          "debt_date": {
-            "type": "string",
-            "format": "date-time",
             "title": "Debt Date"
           },
           "due_date": {
@@ -7142,12 +7986,6 @@
               }
             ],
             "title": "Due Date"
-          },
-          "status": {
-            "type": "string",
-            "maxLength": 50,
-            "title": "Status",
-            "default": "pending"
           },
           "notes": {
             "anyOf": [
@@ -7163,8 +8001,12 @@
           }
         },
         "type": "object",
-        "required": ["customer_name", "amount", "balance"],
-        "title": "DebtCreate"
+        "required": [
+          "customer_name",
+          "amount"
+        ],
+        "title": "DebtCreate",
+        "description": "Create a new debt. Balance is calculated automatically from amount - amount_paid."
       },
       "DebtPaymentCreate": {
         "properties": {
@@ -7210,7 +8052,11 @@
           }
         },
         "type": "object",
-        "required": ["debt_id", "amount", "payment_method_id"],
+        "required": [
+          "debt_id",
+          "amount",
+          "payment_method_id"
+        ],
         "title": "DebtPaymentCreate"
       },
       "DebtPaymentPublic": {
@@ -7281,7 +8127,10 @@
           }
         },
         "type": "object",
-        "required": ["data", "count"],
+        "required": [
+          "data",
+          "count"
+        ],
         "title": "DebtPaymentsPublic"
       },
       "DebtPublic": {
@@ -7370,10 +8219,25 @@
             "type": "string",
             "format": "uuid",
             "title": "Id"
+          },
+          "sale": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/SalePublic"
+              },
+              {
+                "type": "null"
+              }
+            ]
           }
         },
         "type": "object",
-        "required": ["customer_name", "amount", "balance", "id"],
+        "required": [
+          "customer_name",
+          "amount",
+          "balance",
+          "id"
+        ],
         "title": "DebtPublic"
       },
       "DebtUpdate": {
@@ -7486,7 +8350,10 @@
           }
         },
         "type": "object",
-        "required": ["data", "count"],
+        "required": [
+          "data",
+          "count"
+        ],
         "title": "DebtsPublic"
       },
       "ExpenseCategoriesPublic": {
@@ -7504,7 +8371,10 @@
           }
         },
         "type": "object",
-        "required": ["data", "count"],
+        "required": [
+          "data",
+          "count"
+        ],
         "title": "ExpenseCategoriesPublic"
       },
       "ExpenseCategoryCreate": {
@@ -7528,7 +8398,9 @@
           }
         },
         "type": "object",
-        "required": ["name"],
+        "required": [
+          "name"
+        ],
         "title": "ExpenseCategoryCreate"
       },
       "ExpenseCategoryPublic": {
@@ -7557,7 +8429,10 @@
           }
         },
         "type": "object",
-        "required": ["name", "id"],
+        "required": [
+          "name",
+          "id"
+        ],
         "title": "ExpenseCategoryPublic"
       },
       "ExpenseCategoryUpdate": {
@@ -7633,7 +8508,11 @@
           }
         },
         "type": "object",
-        "required": ["category_id", "amount", "description"],
+        "required": [
+          "category_id",
+          "amount",
+          "description"
+        ],
         "title": "ExpenseCreate"
       },
       "ExpensePublic": {
@@ -7789,7 +8668,10 @@
           }
         },
         "type": "object",
-        "required": ["data", "count"],
+        "required": [
+          "data",
+          "count"
+        ],
         "title": "ExpensesPublic"
       },
       "FixRowRequest": {
@@ -7810,7 +8692,11 @@
           }
         },
         "type": "object",
-        "required": ["session_id", "row_number", "updated_data"],
+        "required": [
+          "session_id",
+          "row_number",
+          "updated_data"
+        ],
         "title": "FixRowRequest",
         "description": "Request to fix a specific row."
       },
@@ -8062,7 +8948,9 @@
           }
         },
         "type": "object",
-        "required": ["supplier_id"],
+        "required": [
+          "supplier_id"
+        ],
         "title": "GRNCreate"
       },
       "GRNItemCreate": {
@@ -8200,7 +9088,10 @@
           }
         },
         "type": "object",
-        "required": ["product_id", "received_quantity"],
+        "required": [
+          "product_id",
+          "received_quantity"
+        ],
         "title": "GRNItemCreate"
       },
       "GRNItemPublic": {
@@ -8326,7 +9217,12 @@
           }
         },
         "type": "object",
-        "required": ["grn_id", "product_id", "received_quantity", "id"],
+        "required": [
+          "grn_id",
+          "product_id",
+          "received_quantity",
+          "id"
+        ],
         "title": "GRNItemPublic"
       },
       "GRNPublic": {
@@ -8602,7 +9498,12 @@
           }
         },
         "type": "object",
-        "required": ["supplier_id", "id", "grn_number", "created_at"],
+        "required": [
+          "supplier_id",
+          "id",
+          "grn_number",
+          "created_at"
+        ],
         "title": "GRNPublic"
       },
       "GRNPublicWithItems": {
@@ -8886,7 +9787,12 @@
           }
         },
         "type": "object",
-        "required": ["supplier_id", "id", "grn_number", "created_at"],
+        "required": [
+          "supplier_id",
+          "id",
+          "grn_number",
+          "created_at"
+        ],
         "title": "GRNPublicWithItems"
       },
       "GRNUpdate": {
@@ -9118,7 +10024,10 @@
           }
         },
         "type": "object",
-        "required": ["data", "count"],
+        "required": [
+          "data",
+          "count"
+        ],
         "title": "GRNsPublic"
       },
       "HTTPValidationError": {
@@ -9197,7 +10106,10 @@
           }
         },
         "type": "object",
-        "required": ["row_number", "data"],
+        "required": [
+          "row_number",
+          "data"
+        ],
         "title": "ImportRow",
         "description": "Represents a single row in the bulk import."
       },
@@ -9252,7 +10164,13 @@
           }
         },
         "type": "object",
-        "required": ["file_path", "file_name", "size", "id", "created_at"],
+        "required": [
+          "file_path",
+          "file_name",
+          "size",
+          "id",
+          "created_at"
+        ],
         "title": "MediaPublic"
       },
       "Message": {
@@ -9263,7 +10181,9 @@
           }
         },
         "type": "object",
-        "required": ["message"],
+        "required": [
+          "message"
+        ],
         "title": "Message"
       },
       "MultiPaymentSaleCreate": {
@@ -9339,7 +10259,10 @@
           }
         },
         "type": "object",
-        "required": ["token", "new_password"],
+        "required": [
+          "token",
+          "new_password"
+        ],
         "title": "NewPassword"
       },
       "NotificationPublic": {
@@ -9477,7 +10400,10 @@
           }
         },
         "type": "object",
-        "required": ["data", "count"],
+        "required": [
+          "data",
+          "count"
+        ],
         "title": "NotificationsPublic"
       },
       "PaymentData": {
@@ -9503,7 +10429,10 @@
           }
         },
         "type": "object",
-        "required": ["payment_method_id", "amount"],
+        "required": [
+          "payment_method_id",
+          "amount"
+        ],
         "title": "PaymentData",
         "description": "Individual payment data"
       },
@@ -9523,7 +10452,11 @@
           }
         },
         "type": "object",
-        "required": ["payment_method", "count", "amount"],
+        "required": [
+          "payment_method",
+          "count",
+          "amount"
+        ],
         "title": "PaymentMethodBreakdown"
       },
       "PaymentMethodCreate": {
@@ -9552,7 +10485,9 @@
           }
         },
         "type": "object",
-        "required": ["name"],
+        "required": [
+          "name"
+        ],
         "title": "PaymentMethodCreate"
       },
       "PaymentMethodPublic": {
@@ -9586,7 +10521,10 @@
           }
         },
         "type": "object",
-        "required": ["name", "id"],
+        "required": [
+          "name",
+          "id"
+        ],
         "title": "PaymentMethodPublic"
       },
       "PaymentMethodUpdate": {
@@ -9644,7 +10582,10 @@
           }
         },
         "type": "object",
-        "required": ["data", "count"],
+        "required": [
+          "data",
+          "count"
+        ],
         "title": "PaymentMethodsPublic"
       },
       "PrivateUserCreate": {
@@ -9668,7 +10609,11 @@
           }
         },
         "type": "object",
-        "required": ["email", "password", "full_name"],
+        "required": [
+          "email",
+          "password",
+          "full_name"
+        ],
         "title": "PrivateUserCreate"
       },
       "ProductCategoriesPublic": {
@@ -9686,7 +10631,10 @@
           }
         },
         "type": "object",
-        "required": ["data", "count"],
+        "required": [
+          "data",
+          "count"
+        ],
         "title": "ProductCategoriesPublic"
       },
       "ProductCategoryPublic": {
@@ -9720,7 +10668,11 @@
           }
         },
         "type": "object",
-        "required": ["name", "id", "created_at"],
+        "required": [
+          "name",
+          "id",
+          "created_at"
+        ],
         "title": "ProductCategoryPublic"
       },
       "ProductCreate": {
@@ -9994,7 +10946,10 @@
           }
         },
         "type": "object",
-        "required": ["name", "id"],
+        "required": [
+          "name",
+          "id"
+        ],
         "title": "ProductStatusPublic"
       },
       "ProductUpdate": {
@@ -10161,7 +11116,10 @@
           }
         },
         "type": "object",
-        "required": ["data", "count"],
+        "required": [
+          "data",
+          "count"
+        ],
         "title": "ProductsPublic"
       },
       "ReminderLogPublic": {
@@ -10251,7 +11209,13 @@
           }
         },
         "type": "object",
-        "required": ["user_id", "sent_to_email", "status", "id", "created_at"],
+        "required": [
+          "user_id",
+          "sent_to_email",
+          "status",
+          "id",
+          "created_at"
+        ],
         "title": "ReminderLogPublic"
       },
       "ReminderLogsPublic": {
@@ -10269,7 +11233,10 @@
           }
         },
         "type": "object",
-        "required": ["data", "count"],
+        "required": [
+          "data",
+          "count"
+        ],
         "title": "ReminderLogsPublic"
       },
       "ReminderSettingCreate": {
@@ -10326,7 +11293,11 @@
           }
         },
         "type": "object",
-        "required": ["user_id", "reminder_type", "frequency"],
+        "required": [
+          "user_id",
+          "reminder_type",
+          "frequency"
+        ],
         "title": "ReminderSettingCreate"
       },
       "ReminderSettingPublic": {
@@ -10412,7 +11383,12 @@
           }
         },
         "type": "object",
-        "required": ["user_id", "reminder_type", "frequency", "id"],
+        "required": [
+          "user_id",
+          "reminder_type",
+          "frequency",
+          "id"
+        ],
         "title": "ReminderSettingPublic"
       },
       "ReminderSettingUpdate": {
@@ -10493,7 +11469,10 @@
           }
         },
         "type": "object",
-        "required": ["data", "count"],
+        "required": [
+          "data",
+          "count"
+        ],
         "title": "ReminderSettingsPublic"
       },
       "SaleCreate": {
@@ -10734,7 +11713,10 @@
           }
         },
         "type": "object",
-        "required": ["data", "count"],
+        "required": [
+          "data",
+          "count"
+        ],
         "title": "SalesPublic"
       },
       "SalesSummary": {
@@ -11118,7 +12100,10 @@
           }
         },
         "type": "object",
-        "required": ["id", "created_at"],
+        "required": [
+          "id",
+          "created_at"
+        ],
         "title": "ShiftReconciliationPublic"
       },
       "ShiftReconciliationUpdate": {
@@ -11196,7 +12181,10 @@
           }
         },
         "type": "object",
-        "required": ["data", "count"],
+        "required": [
+          "data",
+          "count"
+        ],
         "title": "ShiftReconciliationsPublic"
       },
       "StockEntriesPublic": {
@@ -11214,7 +12202,10 @@
           }
         },
         "type": "object",
-        "required": ["data", "count"],
+        "required": [
+          "data",
+          "count"
+        ],
         "title": "StockEntriesPublic"
       },
       "StockEntryCreate": {
@@ -11698,7 +12689,9 @@
           }
         },
         "type": "object",
-        "required": ["name"],
+        "required": [
+          "name"
+        ],
         "title": "SupplierCreate"
       },
       "SupplierDebtCreate": {
@@ -11796,7 +12789,12 @@
           }
         },
         "type": "object",
-        "required": ["supplier_id", "grn_id", "total_amount", "payment_terms"],
+        "required": [
+          "supplier_id",
+          "grn_id",
+          "total_amount",
+          "payment_terms"
+        ],
         "title": "SupplierDebtCreate"
       },
       "SupplierDebtInstallmentCreate": {
@@ -11932,7 +12930,10 @@
           }
         },
         "type": "object",
-        "required": ["data", "count"],
+        "required": [
+          "data",
+          "count"
+        ],
         "title": "SupplierDebtInstallmentsPublic"
       },
       "SupplierDebtPaymentCreate": {
@@ -12003,7 +13004,11 @@
           }
         },
         "type": "object",
-        "required": ["supplier_debt_id", "payment_amount", "payment_method_id"],
+        "required": [
+          "supplier_debt_id",
+          "payment_amount",
+          "payment_method_id"
+        ],
         "title": "SupplierDebtPaymentCreate"
       },
       "SupplierDebtPaymentPublic": {
@@ -12470,7 +13475,10 @@
           }
         },
         "type": "object",
-        "required": ["data", "count"],
+        "required": [
+          "data",
+          "count"
+        ],
         "title": "SupplierDebtsPublic"
       },
       "SupplierPublic": {
@@ -12552,7 +13560,10 @@
           }
         },
         "type": "object",
-        "required": ["name", "id"],
+        "required": [
+          "name",
+          "id"
+        ],
         "title": "SupplierPublic"
       },
       "SupplierUpdate": {
@@ -12647,8 +13658,227 @@
           }
         },
         "type": "object",
-        "required": ["data", "count"],
+        "required": [
+          "data",
+          "count"
+        ],
         "title": "SuppliersPublic"
+      },
+      "TillShiftCreate": {
+        "properties": {
+          "shift_type": {
+            "type": "string",
+            "maxLength": 20,
+            "title": "Shift Type"
+          },
+          "opening_cash_float": {
+            "anyOf": [
+              {
+                "type": "number",
+                "minimum": 0.0
+              },
+              {
+                "type": "string",
+                "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d{0,2}0*$"
+              }
+            ],
+            "title": "Opening Cash Float"
+          },
+          "opening_balance": {
+            "anyOf": [
+              {
+                "type": "number",
+                "minimum": 0.0
+              },
+              {
+                "type": "string",
+                "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d{0,2}0*$"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Opening Balance"
+          },
+          "notes": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Notes"
+          }
+        },
+        "type": "object",
+        "required": [
+          "shift_type",
+          "opening_cash_float"
+        ],
+        "title": "TillShiftCreate",
+        "description": "Create a new till shift"
+      },
+      "TillShiftPublic": {
+        "properties": {
+          "shift_type": {
+            "type": "string",
+            "maxLength": 20,
+            "title": "Shift Type"
+          },
+          "opening_cash_float": {
+            "type": "string",
+            "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d{0,2}0*$",
+            "title": "Opening Cash Float"
+          },
+          "opening_balance": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d{0,2}0*$"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Opening Balance"
+          },
+          "opening_time": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Opening Time"
+          },
+          "closing_time": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Closing Time"
+          },
+          "closing_cash_float": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d{0,2}0*$"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Closing Cash Float"
+          },
+          "status": {
+            "type": "string",
+            "maxLength": 20,
+            "title": "Status",
+            "default": "open"
+          },
+          "notes": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 2000
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Notes"
+          },
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "opened_by_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Opened By Id"
+          },
+          "closed_by_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Closed By Id"
+          },
+          "opened_by_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Opened By Name"
+          },
+          "closed_by_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Closed By Name"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Updated At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "shift_type",
+          "opening_cash_float",
+          "id",
+          "opened_by_id",
+          "closed_by_id",
+          "created_at",
+          "updated_at"
+        ],
+        "title": "TillShiftPublic",
+        "description": "Public model for till shift"
+      },
+      "TillShiftsPublic": {
+        "properties": {
+          "data": {
+            "items": {
+              "$ref": "#/components/schemas/TillShiftPublic"
+            },
+            "type": "array",
+            "title": "Data"
+          },
+          "count": {
+            "type": "integer",
+            "title": "Count"
+          }
+        },
+        "type": "object",
+        "required": [
+          "data",
+          "count"
+        ],
+        "title": "TillShiftsPublic"
       },
       "Token": {
         "properties": {
@@ -12663,7 +13893,9 @@
           }
         },
         "type": "object",
-        "required": ["access_token"],
+        "required": [
+          "access_token"
+        ],
         "title": "Token"
       },
       "TransporterCreate": {
@@ -12716,7 +13948,9 @@
           }
         },
         "type": "object",
-        "required": ["name"],
+        "required": [
+          "name"
+        ],
         "title": "TransporterCreate"
       },
       "TransporterPublic": {
@@ -12774,7 +14008,10 @@
           }
         },
         "type": "object",
-        "required": ["name", "id"],
+        "required": [
+          "name",
+          "id"
+        ],
         "title": "TransporterPublic"
       },
       "TransporterUpdate": {
@@ -12857,7 +14094,10 @@
           }
         },
         "type": "object",
-        "required": ["data", "count"],
+        "required": [
+          "data",
+          "count"
+        ],
         "title": "TransportersPublic"
       },
       "UpdatePassword": {
@@ -12876,7 +14116,10 @@
           }
         },
         "type": "object",
-        "required": ["current_password", "new_password"],
+        "required": [
+          "current_password",
+          "new_password"
+        ],
         "title": "UpdatePassword"
       },
       "UserCreate": {
@@ -12934,7 +14177,10 @@
           }
         },
         "type": "object",
-        "required": ["email", "password"],
+        "required": [
+          "email",
+          "password"
+        ],
         "title": "UserCreate"
       },
       "UserPublic": {
@@ -12991,7 +14237,10 @@
           }
         },
         "type": "object",
-        "required": ["email", "id"],
+        "required": [
+          "email",
+          "id"
+        ],
         "title": "UserPublic"
       },
       "UserRegister": {
@@ -13034,7 +14283,10 @@
           }
         },
         "type": "object",
-        "required": ["email", "password"],
+        "required": [
+          "email",
+          "password"
+        ],
         "title": "UserRegister"
       },
       "UserUpdate": {
@@ -13184,7 +14436,10 @@
           }
         },
         "type": "object",
-        "required": ["data", "count"],
+        "required": [
+          "data",
+          "count"
+        ],
         "title": "UsersPublic"
       },
       "ValidationError": {
@@ -13213,7 +14468,11 @@
           }
         },
         "type": "object",
-        "required": ["loc", "msg", "type"],
+        "required": [
+          "loc",
+          "msg",
+          "type"
+        ],
         "title": "ValidationError"
       }
     },

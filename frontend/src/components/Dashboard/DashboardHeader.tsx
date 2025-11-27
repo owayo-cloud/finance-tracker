@@ -19,7 +19,10 @@ export function DashboardHeader({ userName, isMounted }: DashboardHeaderProps) {
           Dashboard
         </Heading>
         <Text fontSize="sm" color="text.muted" fontWeight="500">
-          Welcome back, {userName || "user"}
+          Welcome back, nice to see you again!
+        </Text>
+        <Text fontSize="xs" color="text.muted" fontWeight="500">
+          Signed in as {userName || "user"}
         </Text>
       </Box>
     </Box>

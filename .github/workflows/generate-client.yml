@@ -44,7 +44,6 @@ jobs:
     - run: uv sync
       working-directory: backend
     - run: uv run bash scripts/generate-client.sh
-      working-directory: backend
       env:
         SECRET_KEY: just-for-generating-client
         POSTGRES_PASSWORD: just-for-generating-client

@@ -15,6 +15,25 @@ const fillForm = async (page: Page, email: string, password: string) => {
   await page.getByPlaceholder("Password", { exact: true }).fill(password)
 }
 
+async function expectAuthMessage(page: Page, text: string) {
+  const inline = page.getByRole("alert", { exact: true, name: text }).first()
+  if ((await inline.count()) > 0) {
+    await expect(inline).toBeVisible()
+    return
+  }
+
+  const toast = page
+    .locator('[data-scope="toast"]')
+    .filter({ hasText: text })
+    .first()
+  if ((await toast.count()) > 0) {
+    await expect(toast).toBeVisible()
+    return
+  }
+
+  await expect(page.getByText(text, { exact: true })).toBeVisible()
+}
+
 const verifyInput = async (
   page: Page,
   placeholder: string,
@@ -22,7 +41,7 @@ const verifyInput = async (
 ) => {
   const input = page.getByPlaceholder(placeholder, options)
   await expect(input).toBeVisible()
-  await expect(input).toHaveText("")
+  await expect(input).toHaveValue("")
   await expect(input).toBeEditable()
 }
 
@@ -66,7 +85,7 @@ test("Log in with invalid email", async ({ page }) => {
   await fillForm(page, "invalidemail", firstSuperuserPassword)
   await page.getByRole("button", { name: "Log In" }).click()
 
-  await expect(page.getByText("Invalid email address")).toBeVisible()
+  await expectAuthMessage(page, "Invalid email address")
 })
 
 test("Log in with invalid password", async ({ page }) => {
@@ -76,7 +95,7 @@ test("Log in with invalid password", async ({ page }) => {
   await fillForm(page, firstSuperuser, password)
   await page.getByRole("button", { name: "Log In" }).click()
 
-  await expect(page.getByText("Incorrect email or password")).toBeVisible()
+  await expectAuthMessage(page, "Incorrect email or password")
 })
 
 // Log out
@@ -93,7 +112,9 @@ test("Successful log out", async ({ page }) => {
     page.getByText("Welcome back, nice to see you again!"),
   ).toBeVisible()
 
-  await page.getByTestId("user-menu").click()
+  const userMenu = page.getByTestId("user-menu")
+  await expect(userMenu).toBeVisible({ timeout: 10000 })
+  await userMenu.click()
   await page.getByRole("menuitem", { name: "Log out" }).click()
   await page.waitForURL("/login")
 })
@@ -110,7 +131,9 @@ test("Logged-out user cannot access protected routes", async ({ page }) => {
     page.getByText("Welcome back, nice to see you again!"),
   ).toBeVisible()
 
-  await page.getByTestId("user-menu").click()
+  const userMenu = page.getByTestId("user-menu")
+  await expect(userMenu).toBeVisible({ timeout: 10000 })
+  await userMenu.click()
   await page.getByRole("menuitem", { name: "Log out" }).click()
   await page.waitForURL("/login")
 

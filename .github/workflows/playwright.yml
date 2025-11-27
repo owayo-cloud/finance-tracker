@@ -74,6 +74,9 @@ jobs:
       working-directory: backend
     - run: npm ci
       working-directory: frontend
+    - name: Install Playwright browsers
+      run: npx playwright install --with-deps
+      working-directory: frontend
     - run: uv run bash scripts/generate-client.sh
     - run: docker compose build
     - run: docker compose down -v --remove-orphans

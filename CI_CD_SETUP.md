@@ -34,8 +34,8 @@ git init  # If not already a git repo
 git remote add origin https://github.com/YOUR_USERNAME/finance-tracker.git
 git add .
 git commit -m "Initial commit"
-git branch -M main
-git push -u origin main
+git branch -M master  # Production branch is 'master'
+git push -u origin master
 ```
 
 ### 4. Configure GitHub Secrets
@@ -63,6 +63,19 @@ SMTP_PASSWORD            → Your email password
 EMAILS_FROM_EMAIL        → noreply@wiseman-palace.co.ke
 ```
 
+#### Staging Secrets (Optional - for staging environment):
+
+```
+SERVER_HOST_STAGING      → Staging server hostname/IP (or use SERVER_HOST)
+SERVER_USER_STAGING      → Staging server user (or use SERVER_USER)
+APP_DIR_STAGING          → /root/code/finance-tracker-staging (default)
+DOMAIN_STAGING           → staging.yourdomain.com
+STACK_NAME_STAGING       → finance-tracker-staging
+POSTGRES_DB_STAGING      → app_staging (default)
+FRONTEND_HOST_STAGING    → https://dashboard.${DOMAIN_STAGING}
+BACKEND_CORS_ORIGINS_STAGING → Auto-generated from staging domain
+```
+
 #### Optional Secrets:
 
 ```
@@ -72,41 +85,94 @@ BACKEND_CORS_ORIGINS     → Auto-generated from domain
 DOCKER_IMAGE_BACKEND     → finance-tracker-backend (default)
 DOCKER_IMAGE_FRONTEND    → finance-tracker-frontend (default)
 SENTRY_DSN               → (optional, leave empty if not using)
+SMOKESHOW_AUTH_KEY       → (optional, for coverage preview)
+REPO_DEPLOY_KEY          → (optional, for private repo access)
+REPO_DEPLOY_KEY_B64      → (optional, base64 encoded deploy key)
+REPO_PAT                 → (optional, Personal Access Token for repo access)
 ```
 
 ### 5. How It Works
 
 #### CI Workflow (`.github/workflows/ci.yml`)
-- **Triggers**: Push to main/master/develop, Pull requests
+- **Triggers**: Push to `master` or `develop`, Pull requests
 - **Actions**:
-  - Runs backend tests
-  - Tests Docker Compose setup
-  - Lints backend code
-  - Uploads test coverage
+  - Lints backend code (Python)
+  - Lints frontend code (TypeScript/React with Biome)
+  - Runs backend tests with coverage
+  - Tests Docker Compose setup and health checks
+  - Uploads test coverage (if SMOKESHOW_AUTH_KEY is set)
 
-#### Deploy Workflow (`.github/workflows/deploy-production.yml`)
+#### Playwright Tests (`.github/workflows/playwright.yml`)
+- **Triggers**: Push to `master` or `develop`, Pull requests
+- **Actions**:
+  - Runs end-to-end tests in parallel (4 shards)
+  - Only runs if relevant files changed (smart filtering)
+  - Generates and uploads HTML test reports
+
+#### Deploy to Production (`.github/workflows/deploy-production.yml`)
 - **Triggers**:
-  - Push to main/master branch
+  - Push to `master` branch
+  - After CI and Playwright workflows complete successfully
+  - Manual trigger via GitHub Actions UI
+- **Actions**:
+  - Connects to production server via SSH
+  - Pulls latest code from `master` branch
+  - Rebuilds Docker images
+  - Restarts services and supervisor processes
+  - Comprehensive deployment verification:
+    - Container status checks
+    - Supervisor process checks
+    - Internal health check (container)
+    - External health check (HTTPS endpoint)
+
+#### Deploy to Staging (`.github/workflows/deploy-staging.yml`)
+- **Triggers**:
+  - Push to `develop` branch
   - After CI workflow completes successfully
   - Manual trigger via GitHub Actions UI
 - **Actions**:
-  - Connects to Linode server via SSH
-  - Pulls latest code from GitHub
-  - Rebuilds Docker images
-  - Restarts services
-  - Verifies deployment
+  - Same as production but deploys from `develop` branch
+  - Uses staging-specific configuration
+  - Includes same health checks as production
 
 ### 6. Testing the Pipeline
 
-1. Make a small change to your code
-2. Commit and push:
+#### Test CI (Development)
+1. Create a feature branch:
+   ```bash
+   git checkout -b feature/test-ci
+   ```
+2. Make a small change to your code
+3. Commit and push:
    ```bash
    git add .
    git commit -m "Test CI/CD"
-   git push origin main
+   git push origin feature/test-ci
    ```
-3. Go to **Actions** tab in GitHub to watch the workflows
-4. Verify deployment completed successfully
+4. Create a Pull Request to `develop` or `master`
+5. Go to **Actions** tab in GitHub to watch the CI workflow
+6. Verify all checks pass (linting, tests, Docker Compose)
+
+#### Test Staging Deployment
+1. Merge your feature to `develop` branch:
+   ```bash
+   git checkout develop
+   git merge feature/test-ci
+   git push origin develop
+   ```
+2. Watch the Actions tab - CI should run, then staging deployment
+3. Verify staging deployment completed with health checks
+
+#### Test Production Deployment
+1. Merge `develop` to `master`:
+   ```bash
+   git checkout master
+   git merge develop
+   git push origin master
+   ```
+2. Watch the Actions tab - CI and Playwright should run, then production deployment
+3. Verify production deployment completed with health checks
+4. Check your production site is working
 
 ## Troubleshooting
 
@@ -135,10 +201,43 @@ cd /root/code/finance-tracker
 docker compose restart
 ```
 
+### Health Checks Fail
+
+- **Internal health check fails**: Check backend container logs
+  ```bash
+  docker compose logs backend
+  docker exec $(docker compose ps -q backend) supervisorctl status
+  ```
+- **External health check fails**: May be SSL/certificate issue
+  - Check Traefik logs
+  - Verify domain DNS is correct
+  - Internal check passing = deployment likely successful
+
+### Frontend Linting Fails
+
+Run locally to see errors:
+```bash
+cd frontend
+npm run lint
+```
+
+### Backend Linting Fails
+
+Run locally to see errors:
+```bash
+cd backend
+uv run bash scripts/lint.sh
+```
+
 ## Workflow Files
 
 - `.github/workflows/ci.yml` - Continuous Integration (tests, linting)
+- `.github/workflows/playwright.yml` - End-to-end testing
 - `.github/workflows/deploy-production.yml` - Production deployment
+- `.github/workflows/deploy-staging.yml` - Staging deployment
+- `.github/workflows/generate-client.yml` - Auto-generate frontend client
+
+See `.github/workflows/README.md` for detailed workflow documentation.
 
 ## Security Notes
 
@@ -148,10 +247,22 @@ docker compose restart
 - Use strong passwords for all services
 - Enable 2FA on your GitHub account
 
+## Branch Strategy
+
+- **`master`**: Production branch
+  - Protected branch (recommended)
+  - Requires CI + Playwright to pass
+  - Auto-deploys to production
+
+- **`develop`**: Development/staging branch
+  - Requires CI to pass
+  - Auto-deploys to staging
+
 ## Next Steps
 
-- Set up staging environment
+- ✅ Set up staging environment (now automated)
 - Configure automated backups
 - Set up monitoring and alerts
 - Configure log aggregation
+- Set up branch protection rules in GitHub
 

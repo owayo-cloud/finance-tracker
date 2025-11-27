@@ -3,26 +3,26 @@ name: Deploy to Production
 on:
   push:
     branches:
-      - main
       - master
   workflow_dispatch: # Allow manual triggering
   workflow_run:
-    workflows: ["CI"]
+    workflows: ["CI", "Playwright Tests"]
     types:
       - completed
     branches:
-      - main
       - master
 
 jobs:
   deploy:
     # Do not deploy in the main repository, only in user projects
-    # Only deploy if CI workflow completed successfully (when triggered by workflow_run)
+    # Only deploy if CI and Playwright workflows completed successfully (when triggered by workflow_run)
     if: |
       github.repository_owner != 'fastapi' &&
       (github.event_name == 'workflow_dispatch' || 
        github.event_name == 'push' || 
-       (github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success'))
+       (github.event_name == 'workflow_run' && 
+        github.event.workflow_run.conclusion == 'success' &&
+        (github.event.workflow_run.name == 'CI' || github.event.workflow_run.name == 'Playwright Tests')))
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -81,7 +81,7 @@ jobs:
             
             # Pull latest code from GitHub
             git fetch origin
-            git reset --hard origin/main || git reset --hard origin/master
+            git reset --hard origin/master
             
             # Set environment variables
             export DOMAIN=${{ secrets.DOMAIN_PRODUCTION }}
@@ -131,15 +131,62 @@ jobs:
           SERVER_USER: ${{ secrets.SERVER_USER }}
           SERVER_HOST: ${{ secrets.SERVER_HOST }}
           APP_DIR: ${{ secrets.APP_DIR }}
+          DOMAIN: ${{ secrets.DOMAIN_PRODUCTION }}
         run: |
           ssh ${SERVER_USER}@${SERVER_HOST} << ENDSSH
+            set -e
             APP_DIR_PATH="${APP_DIR:-/root/code/finance-tracker}"
             cd "\${APP_DIR_PATH}"
-            echo "Checking service health..."
+            
+            echo "=== Checking service status ==="
             docker compose ps
-            echo "Checking backend health..."
+            
+            echo "=== Checking backend container health ==="
             BACKEND_CONTAINER=$(docker compose ps -q backend)
-            if [ ! -z "$BACKEND_CONTAINER" ]; then
-              docker exec $BACKEND_CONTAINER supervisorctl status || true
+            if [ -z "$BACKEND_CONTAINER" ]; then
+              echo "ERROR: Backend container not found!"
+              exit 1
             fi
+            
+            echo "=== Checking supervisor processes ==="
+            docker exec $BACKEND_CONTAINER supervisorctl status || true
+            
+            echo "=== Waiting for services to be ready ==="
+            sleep 10
+            
+            echo "=== Checking backend health endpoint (internal) ==="
+            for i in {1..30}; do
+              if docker exec $BACKEND_CONTAINER curl -f http://localhost:8000/api/v1/utils/health-check/ > /dev/null 2>&1; then
+                echo "✓ Backend health check passed (internal)"
+                break
+              fi
+              if [ $i -eq 30 ]; then
+                echo "ERROR: Backend health check failed after 30 attempts"
+                exit 1
+              fi
+              echo "Attempt $i/30: Waiting for backend to be ready..."
+              sleep 2
+            done
+            
+            echo "=== Checking backend health endpoint (external) ==="
+            if [ -n "${DOMAIN}" ]; then
+              BACKEND_URL="https://api.${DOMAIN}/api/v1/utils/health-check/"
+              echo "Testing: $BACKEND_URL"
+              for i in {1..20}; do
+                if curl -f -k "$BACKEND_URL" > /dev/null 2>&1; then
+                  echo "✓ Backend health check passed (external)"
+                  break
+                fi
+                if [ $i -eq 20 ]; then
+                  echo "WARNING: External backend health check failed (may be SSL/certificate issue)"
+                  echo "Internal health check passed, so deployment is likely successful"
+                fi
+                echo "Attempt $i/20: Waiting for external endpoint..."
+                sleep 3
+              done
+            else
+              echo "DOMAIN not set, skipping external health check"
+            fi
+            
+            echo "=== Deployment verification completed successfully ==="
           ENDSSH

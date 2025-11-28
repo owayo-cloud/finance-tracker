@@ -24,19 +24,26 @@ jobs:
         github.event.workflow_run.conclusion == 'success' &&
         github.event.workflow_run.name == 'CI'))
     runs-on: ubuntu-latest
+    environment: staging
+    env:
+      SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY_STAGING || secrets.SSH_PRIVATE_KEY || '' }}
+      SERVER_USER: ${{ secrets.SERVER_USER_STAGING || secrets.SERVER_USER }}
+      SERVER_HOST: ${{ secrets.SERVER_HOST_STAGING || secrets.SERVER_HOST }}
+      APP_DIR: ${{ secrets.APP_DIR_STAGING || secrets.APP_DIR || '/root/code/finance-tracker-staging' }}
+      STACK_NAME: ${{ secrets.STACK_NAME_STAGING || 'staging' }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v5
 
       - name: Setup SSH
-        if: ${{ secrets.SSH_PRIVATE_KEY != '' }}
+        if: ${{ env.SSH_PRIVATE_KEY != '' }}
         uses: webfactory/ssh-agent@v0.9.0
         with:
-          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+          ssh-private-key: ${{ env.SSH_PRIVATE_KEY }}
 
       - name: Add server to known hosts
         run: |
-          ssh-keyscan -H ${{ secrets.SERVER_HOST_STAGING || secrets.SERVER_HOST }} >> ~/.ssh/known_hosts
+          ssh-keyscan -H "$SERVER_HOST" >> ~/.ssh/known_hosts
 
       - name: Deploy to staging server
         env:
@@ -108,14 +115,14 @@ jobs:
             
             # Build and restart services
             echo "Building Docker images..."
-            docker compose -f docker-compose.yml --project-name ${{ secrets.STACK_NAME_STAGING }} build
+            docker compose -f docker-compose.yml --project-name ${STACK_NAME} build
             
             echo "Starting services..."
-            docker compose -f docker-compose.yml --project-name ${{ secrets.STACK_NAME_STAGING }} up -d
+            docker compose -f docker-compose.yml --project-name ${STACK_NAME} up -d
             
             # Restart supervisor processes in backend container
             echo "Restarting supervisor processes..."
-            BACKEND_CONTAINER=$(docker compose --project-name ${{ secrets.STACK_NAME_STAGING }} ps -q backend)
+            BACKEND_CONTAINER=$(docker compose --project-name ${STACK_NAME} ps -q backend)
             if [ ! -z "$BACKEND_CONTAINER" ]; then
               docker exec $BACKEND_CONTAINER supervisorctl restart all || true
             fi
@@ -123,16 +130,12 @@ jobs:
             echo "Deployment completed successfully!"
             
             # Show service status
-            docker compose --project-name ${{ secrets.STACK_NAME_STAGING }} ps
+            docker compose --project-name ${STACK_NAME} ps
           ENDSSH
 
       - name: Verify deployment
         env:
-          SERVER_USER: ${{ secrets.SERVER_USER_STAGING || secrets.SERVER_USER }}
-          SERVER_HOST: ${{ secrets.SERVER_HOST_STAGING || secrets.SERVER_HOST }}
-          APP_DIR: ${{ secrets.APP_DIR_STAGING || secrets.APP_DIR }}
           DOMAIN: ${{ secrets.DOMAIN_STAGING }}
-          STACK_NAME: ${{ secrets.STACK_NAME_STAGING }}
         run: |
           ssh ${SERVER_USER}@${SERVER_HOST} << ENDSSH
             set -e

@@ -4,7 +4,7 @@ version = "0.1.0"
 description = ""
 requires-python = ">=3.10,<4.0"
 dependencies = [
-    "fastapi[standard]==0.115.4",
+    "fastapi[standard]==0.123.0",
     "python-multipart>=0.0.17",
     "email-validator>=2.1.0.post1",
     "passlib[bcrypt]>=1.7.4",

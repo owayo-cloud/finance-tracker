@@ -418,6 +418,109 @@ export const CashierBreakdownSchema = {
     title: 'CashierBreakdown'
 } as const;
 
+export const CashierVariancePublicSchema = {
+    properties: {
+        till_shift_id: {
+            type: 'string',
+            format: 'uuid',
+            title: 'Till Shift Id'
+        },
+        cashier_id: {
+            type: 'string',
+            format: 'uuid',
+            title: 'Cashier Id'
+        },
+        total_variance: {
+            type: 'string',
+            pattern: '^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d{0,2}0*$',
+            title: 'Total Variance'
+        },
+        variance_type: {
+            type: 'string',
+            maxLength: 20,
+            title: 'Variance Type'
+        },
+        notes: {
+            anyOf: [
+                {
+                    type: 'string',
+                    maxLength: 2000
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Notes'
+        },
+        id: {
+            type: 'string',
+            format: 'uuid',
+            title: 'Id'
+        },
+        cashier_name: {
+            anyOf: [
+                {
+                    type: 'string'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Cashier Name'
+        },
+        shift_type: {
+            anyOf: [
+                {
+                    type: 'string'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Shift Type'
+        },
+        created_at: {
+            type: 'string',
+            format: 'date-time',
+            title: 'Created At'
+        }
+    },
+    type: 'object',
+    required: ['till_shift_id', 'cashier_id', 'total_variance', 'variance_type', 'id', 'created_at'],
+    title: 'CashierVariancePublic'
+} as const;
+
+export const CashierVariancesPublicSchema = {
+    properties: {
+        data: {
+            items: {
+                '$ref': '#/components/schemas/CashierVariancePublic'
+            },
+            type: 'array',
+            title: 'Data'
+        },
+        count: {
+            type: 'integer',
+            title: 'Count'
+        },
+        total_shortage: {
+            type: 'string',
+            pattern: '^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d{0,2}0*$',
+            title: 'Total Shortage',
+            default: '0'
+        },
+        total_overage: {
+            type: 'string',
+            pattern: '^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d{0,2}0*$',
+            title: 'Total Overage',
+            default: '0'
+        }
+    },
+    type: 'object',
+    required: ['data', 'count'],
+    title: 'CashierVariancesPublic'
+} as const;
+
 export const ColumnMappingRequestSchema = {
     properties: {
         session_id: {
@@ -664,22 +767,16 @@ export const DebtCreateSchema = {
             title: 'Amount Paid',
             default: '0'
         },
-        balance: {
+        debt_date: {
             anyOf: [
                 {
-                    type: 'number',
-                    minimum: 0
+                    type: 'string',
+                    format: 'date-time'
                 },
                 {
-                    type: 'string',
-                    pattern: '^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d{0,2}0*$'
+                    type: 'null'
                 }
             ],
-            title: 'Balance'
-        },
-        debt_date: {
-            type: 'string',
-            format: 'date-time',
             title: 'Debt Date'
         },
         due_date: {
@@ -693,12 +790,6 @@ export const DebtCreateSchema = {
                 }
             ],
             title: 'Due Date'
-        },
-        status: {
-            type: 'string',
-            maxLength: 50,
-            title: 'Status',
-            default: 'pending'
         },
         notes: {
             anyOf: [
@@ -714,8 +805,9 @@ export const DebtCreateSchema = {
         }
     },
     type: 'object',
-    required: ['customer_name', 'amount', 'balance'],
-    title: 'DebtCreate'
+    required: ['customer_name', 'amount'],
+    title: 'DebtCreate',
+    description: 'Create a new debt. Balance is calculated automatically from amount - amount_paid.'
 } as const;
 
 export const DebtPaymentCreateSchema = {
@@ -919,6 +1011,16 @@ export const DebtPublicSchema = {
             type: 'string',
             format: 'uuid',
             title: 'Id'
+        },
+        sale: {
+            anyOf: [
+                {
+                    '$ref': '#/components/schemas/SalePublic'
+                },
+                {
+                    type: 'null'
+                }
+            ]
         }
     },
     type: 'object',
@@ -6137,6 +6239,211 @@ export const SuppliersPublicSchema = {
     type: 'object',
     required: ['data', 'count'],
     title: 'SuppliersPublic'
+} as const;
+
+export const TillShiftCreateSchema = {
+    properties: {
+        shift_type: {
+            type: 'string',
+            maxLength: 20,
+            title: 'Shift Type'
+        },
+        opening_cash_float: {
+            anyOf: [
+                {
+                    type: 'number',
+                    minimum: 0
+                },
+                {
+                    type: 'string',
+                    pattern: '^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d{0,2}0*$'
+                }
+            ],
+            title: 'Opening Cash Float'
+        },
+        opening_balance: {
+            anyOf: [
+                {
+                    type: 'number',
+                    minimum: 0
+                },
+                {
+                    type: 'string',
+                    pattern: '^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d{0,2}0*$'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Opening Balance'
+        },
+        notes: {
+            anyOf: [
+                {
+                    type: 'string'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Notes'
+        }
+    },
+    type: 'object',
+    required: ['shift_type', 'opening_cash_float'],
+    title: 'TillShiftCreate',
+    description: 'Create a new till shift'
+} as const;
+
+export const TillShiftPublicSchema = {
+    properties: {
+        shift_type: {
+            type: 'string',
+            maxLength: 20,
+            title: 'Shift Type'
+        },
+        opening_cash_float: {
+            type: 'string',
+            pattern: '^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d{0,2}0*$',
+            title: 'Opening Cash Float'
+        },
+        opening_balance: {
+            anyOf: [
+                {
+                    type: 'string',
+                    pattern: '^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d{0,2}0*$'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Opening Balance'
+        },
+        opening_time: {
+            type: 'string',
+            format: 'date-time',
+            title: 'Opening Time'
+        },
+        closing_time: {
+            anyOf: [
+                {
+                    type: 'string',
+                    format: 'date-time'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Closing Time'
+        },
+        closing_cash_float: {
+            anyOf: [
+                {
+                    type: 'string',
+                    pattern: '^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d{0,2}0*$'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Closing Cash Float'
+        },
+        status: {
+            type: 'string',
+            maxLength: 20,
+            title: 'Status',
+            default: 'open'
+        },
+        notes: {
+            anyOf: [
+                {
+                    type: 'string',
+                    maxLength: 2000
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Notes'
+        },
+        id: {
+            type: 'string',
+            format: 'uuid',
+            title: 'Id'
+        },
+        opened_by_id: {
+            type: 'string',
+            format: 'uuid',
+            title: 'Opened By Id'
+        },
+        closed_by_id: {
+            anyOf: [
+                {
+                    type: 'string',
+                    format: 'uuid'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Closed By Id'
+        },
+        opened_by_name: {
+            anyOf: [
+                {
+                    type: 'string'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Opened By Name'
+        },
+        closed_by_name: {
+            anyOf: [
+                {
+                    type: 'string'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Closed By Name'
+        },
+        created_at: {
+            type: 'string',
+            format: 'date-time',
+            title: 'Created At'
+        },
+        updated_at: {
+            type: 'string',
+            format: 'date-time',
+            title: 'Updated At'
+        }
+    },
+    type: 'object',
+    required: ['shift_type', 'opening_cash_float', 'id', 'opened_by_id', 'closed_by_id', 'created_at', 'updated_at'],
+    title: 'TillShiftPublic',
+    description: 'Public model for till shift'
+} as const;
+
+export const TillShiftsPublicSchema = {
+    properties: {
+        data: {
+            items: {
+                '$ref': '#/components/schemas/TillShiftPublic'
+            },
+            type: 'array',
+            title: 'Data'
+        },
+        count: {
+            type: 'integer',
+            title: 'Count'
+        }
+    },
+    type: 'object',
+    required: ['data', 'count'],
+    title: 'TillShiftsPublic'
 } as const;
 
 export const TokenSchema = {

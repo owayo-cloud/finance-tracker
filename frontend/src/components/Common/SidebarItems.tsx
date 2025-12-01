@@ -26,13 +26,7 @@ import { TbReceiptDollar } from "react-icons/tb"
 import type { IconType } from "react-icons/lib"
 
 import type { UserPublic } from "@/client"
-
-const API_BASE = import.meta.env.VITE_API_URL || ""
-
-const getAuthHeaders = () => ({
-  "Content-Type": "application/json",
-  Authorization: `Bearer ${localStorage.getItem("access_token") || ""}`,
-})
+import { TillService } from "@/client"
 
 interface MenuItem {
   icon: IconType
@@ -145,16 +139,15 @@ const SidebarItems = ({ onClose, isCollapsed = false }: SidebarItemsProps) => {
   const { data: tillStatus } = useQuery({
     queryKey: ["till-status"],
     queryFn: async () => {
-      const response = await fetch(`${API_BASE}/api/v1/till/status`, {
-        headers: getAuthHeaders(),
-      })
-      if (!response.ok) {
-        if (response.status === 404) {
+      try {
+        return await TillService.getTillStatus()
+      } catch (error: any) {
+        // If 404 or any error, return closed status
+        if (error?.status === 404) {
           return { is_open: false }
         }
         return { is_open: false }
       }
-      return response.json()
     },
     refetchInterval: 5000, // Check every 5 seconds
     enabled: true,

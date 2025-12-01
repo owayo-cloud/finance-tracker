@@ -18,6 +18,7 @@ import { OpenAPI, type ProductPublic, SalesService } from "../../client"
 import useAuth from "../../hooks/useAuth"
 import useCustomToast from "../../hooks/useCustomToast"
 
+
 export const Route = createFileRoute("/_layout/sales")({
   component: Sales,
 })
@@ -166,6 +167,35 @@ function Sales() {
     remarks,
     showToast,
   ])
+
+  // Check till status
+  const { data: tillStatus, isLoading: isLoadingTillStatus, refetch: refetchTillStatus } = useQuery({
+    queryKey: ["till-status"],
+    queryFn: async () => {
+      try {
+        return await TillService.getTillStatus()
+      } catch (error: any) {
+        // If 404 or any error, return closed status
+        if (error?.status === 404) {
+          return { is_open: false }
+        }
+        return { is_open: false }
+      }
+    },
+    refetchInterval: 5000, // Check every 5 seconds
+  })
+
+  // Refetch till status when window regains focus (user returns from shift-reconciliation)
+  useEffect(() => {
+    const handleFocus = () => {
+      refetchTillStatus()
+    }
+    window.addEventListener("focus", handleFocus)
+    return () => window.removeEventListener("focus", handleFocus)
+  }, [refetchTillStatus])
+
+  const isTillOpen = tillStatus?.is_open === true
+  const hasNoTill = !isLoadingTillStatus && !isTillOpen
 
   // Fetch payment methods
   const {

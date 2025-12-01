@@ -17,11 +17,16 @@ export function ThemedSelect({
   id,
   ...props
 }: ThemedSelectProps) {
-  const { title: propsTitle, "aria-label": propsAriaLabel, id: propsId, ...restProps } = props
+  const {
+    title: propsTitle,
+    "aria-label": propsAriaLabel,
+    id: propsId,
+    ...restProps
+  } = props
   const finalTitle = title || propsTitle || "Select an option"
   const finalAriaLabel = ariaLabel || propsAriaLabel || "Select an option"
   const finalId = id || propsId
-  
+
   return (
     <select
       id={finalId}
@@ -31,7 +36,8 @@ export function ThemedSelect({
       title={finalTitle}
       onFocus={(e) => {
         e.target.style.borderColor = "var(--chakra-colors-border-focused)"
-        e.target.style.boxShadow = "0 0 0 1px var(--chakra-colors-border-focused)"
+        e.target.style.boxShadow =
+          "0 0 0 1px var(--chakra-colors-border-focused)"
       }}
       onBlur={(e) => {
         e.target.style.borderColor = "var(--chakra-colors-input-border)"
@@ -55,4 +61,3 @@ export function ThemedSelect({
     </select>
   )
 }
-

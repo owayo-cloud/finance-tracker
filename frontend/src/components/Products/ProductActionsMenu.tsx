@@ -1,6 +1,6 @@
+import { useState } from "react"
 import { BsThreeDotsVertical } from "react-icons/bs"
 import { FiEdit, FiTrash } from "react-icons/fi"
-import { useState } from "react"
 
 import type { ProductPublic } from "@/client"
 import { MenuContent, MenuItem, MenuRoot, MenuTrigger } from "../ui/menu"
@@ -22,32 +22,36 @@ const ProductActionsMenu = ({ product }: ProductActionsMenuProps) => {
   }
 
   const handleDeleteClick = () => {
-    setMenuOpen(false) // Close menu first  
+    setMenuOpen(false) // Close menu first
     setTimeout(() => setDeleteDialogOpen(true), 100) // Small delay to ensure menu closes
   }
 
   return (
     <>
-      <MenuRoot open={menuOpen} onOpenChange={(e) => setMenuOpen(e.open)} data-testid="product-actions-menu">
+      <MenuRoot
+        open={menuOpen}
+        onOpenChange={(e) => setMenuOpen(e.open)}
+        data-testid="product-actions-menu"
+      >
         <MenuTrigger asChild>
-          <BsThreeDotsVertical 
-            fontSize={18} 
-            cursor="pointer" 
+          <BsThreeDotsVertical
+            fontSize={18}
+            cursor="pointer"
             data-testid="product-actions-trigger"
           />
         </MenuTrigger>
         <MenuContent>
-          <MenuItem 
-            value="edit" 
+          <MenuItem
+            value="edit"
             onClick={handleEditClick}
             data-testid="edit-product-menu-item"
           >
             <FiEdit fontSize={16} />
             Edit Product
           </MenuItem>
-          <MenuItem 
-            value="delete" 
-            color="red.500" 
+          <MenuItem
+            value="delete"
+            color="red.500"
             onClick={handleDeleteClick}
             data-testid="delete-product-menu-item"
           >
@@ -58,7 +62,7 @@ const ProductActionsMenu = ({ product }: ProductActionsMenuProps) => {
       </MenuRoot>
 
       {/* Controlled Edit Drawer */}
-      <EditProduct 
+      <EditProduct
         product={product}
         isOpen={editDrawerOpen}
         onOpenChange={setEditDrawerOpen}
@@ -66,7 +70,7 @@ const ProductActionsMenu = ({ product }: ProductActionsMenuProps) => {
       />
 
       {/* Controlled Delete Dialog */}
-      <DeleteProduct 
+      <DeleteProduct
         product={product}
         isOpen={deleteDialogOpen}
         onOpenChange={setDeleteDialogOpen}

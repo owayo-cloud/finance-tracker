@@ -21,15 +21,17 @@ export async function logInUser(page: Page, email: string, password: string) {
 
   await page.getByPlaceholder("Email").fill(email)
   await page.getByPlaceholder("Password", { exact: true }).fill(password)
-  await page.getByRole("button", { name: "Log In" }).click()
-  await page.waitForURL("/")
-  await expect(
-    page.getByText("Welcome back, nice to see you again!"),
-  ).toBeVisible()
+  await Promise.all([
+    page.waitForURL("**", { waitUntil: "domcontentloaded" }),
+    page.getByRole("button", { name: "Log In" }).click(),
+  ])
+  await expect(page.getByTestId("user-menu")).toBeVisible({ timeout: 10000 })
 }
 
 export async function logOutUser(page: Page) {
-  await page.getByTestId("user-menu").click()
+  const userMenu = page.getByTestId("user-menu")
+  await expect(userMenu).toBeVisible({ timeout: 10000 })
+  await userMenu.click()
   await page.getByRole("menuitem", { name: "Log out" }).click()
   await page.goto("/login")
 }

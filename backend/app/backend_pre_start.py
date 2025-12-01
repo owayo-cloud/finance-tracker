@@ -5,7 +5,7 @@ from sqlmodel import Session, select
 from tenacity import after_log, before_log, retry, stop_after_attempt, wait_fixed
 
 from app.core.db import engine
-from app.core.logging_config import setup_logging, get_logger
+from app.core.logging_config import get_logger, setup_logging
 
 setup_logging(level=logging.INFO)
 logger = get_logger(__name__)

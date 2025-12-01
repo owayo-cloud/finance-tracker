@@ -1,28 +1,24 @@
 import {
+  Badge,
+  Box,
   Button,
+  HStack,
   Input,
+  Separator,
   Text,
   VStack,
-  Box,
-  HStack,
-  Badge,
-  Separator,
-  // @ts-ignore - used in JSX
-  Image,
-  // @ts-ignore - used in JSX
-  IconButton,
 } from "@chakra-ui/react"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
-import { useState, useRef } from "react"
+import { useId, useRef, useState } from "react"
 import { type SubmitHandler, useForm } from "react-hook-form"
-// @ts-ignore - used in JSX
-import { FaTimes, FaInfoCircle } from "react-icons/fa"
+// @ts-expect-error - used in JSX
+import { FaInfoCircle } from "react-icons/fa"
 
 import {
-  type ProductPublic,
-  type ProductUpdate,
-  ProductsService,
   MediaService,
+  type ProductPublic,
+  ProductsService,
+  type ProductUpdate,
 } from "@/client"
 import type { ApiError } from "@/client/core/ApiError"
 import useCustomToast from "@/hooks/useCustomToast"
@@ -44,23 +40,31 @@ interface EditProductProps {
   children?: React.ReactNode
   isOpen?: boolean
   onOpenChange?: (open: boolean) => void
-  'data-testid'?: string
+  "data-testid"?: string
 }
 
-const EditProduct = ({ product, children, isOpen: controlledIsOpen, onOpenChange, 'data-testid': testId }: EditProductProps) => {
+const EditProduct = ({
+  product,
+  children,
+  isOpen: controlledIsOpen,
+  onOpenChange,
+  "data-testid": testId,
+}: EditProductProps) => {
   const [internalIsOpen, setInternalIsOpen] = useState(false)
   const [imageFile, setImageFile] = useState<File | null>(null)
-  // @ts-ignore - used in JSX
-  const [imagePreview, setImagePreview] = useState<string | null>(null)
+  // @ts-expect-error - used in JSX
+  const [_imagePreview, setImagePreview] = useState<string | null>(null)
   const [uploadingImage, setUploadingImage] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
   const queryClient = useQueryClient()
   const { showSuccessToast } = useCustomToast()
-  
+  const formId = useId()
+
   // Use controlled or internal state
-  const isOpen = controlledIsOpen !== undefined ? controlledIsOpen : internalIsOpen
+  const isOpen =
+    controlledIsOpen !== undefined ? controlledIsOpen : internalIsOpen
   const setIsOpen = onOpenChange || setInternalIsOpen
-  
+
   const {
     register,
     handleSubmit,
@@ -81,7 +85,7 @@ const EditProduct = ({ product, children, isOpen: controlledIsOpen, onOpenChange
         setUploadingImage(true)
         try {
           const uploadedMedia = await MediaService.uploadImage({
-            formData: { file: imageFile }
+            formData: { file: imageFile },
           })
 
           imageId = uploadedMedia.id
@@ -93,9 +97,9 @@ const EditProduct = ({ product, children, isOpen: controlledIsOpen, onOpenChange
       }
 
       // Update product with image_id
-      return ProductsService.updateProduct({ 
-        id: product.id, 
-        requestBody: { ...data, image_id: imageId } 
+      return ProductsService.updateProduct({
+        id: product.id,
+        requestBody: { ...data, image_id: imageId },
       })
     },
     onSuccess: () => {
@@ -112,19 +116,23 @@ const EditProduct = ({ product, children, isOpen: controlledIsOpen, onOpenChange
     },
   })
 
-  // @ts-ignore - used in JSX
-  const handleImageSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
+  // @ts-expect-error - used in JSX
+  const _handleImageSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0]
     if (file) {
       // Strict validation: Only .jpg, .jpeg, and .png files
-      const validTypes = ['image/jpeg', 'image/jpg', 'image/png']
-      const validExtensions = ['.jpg', '.jpeg', '.png']
+      const validTypes = ["image/jpeg", "image/jpg", "image/png"]
+      const validExtensions = [".jpg", ".jpeg", ".png"]
       const fileName = file.name.toLowerCase()
-      const fileExtension = fileName.substring(fileName.lastIndexOf('.'))
-      
-      if (!validTypes.includes(file.type) || !validExtensions.includes(fileExtension)) {
-        handleError({ 
-          message: "Invalid file type. Only .jpg, .jpeg, and .png images are allowed." 
+      const fileExtension = fileName.substring(fileName.lastIndexOf("."))
+
+      if (
+        !validTypes.includes(file.type) ||
+        !validExtensions.includes(fileExtension)
+      ) {
+        handleError({
+          message:
+            "Invalid file type. Only .jpg, .jpeg, and .png images are allowed.",
         } as ApiError)
         // Reset the file input
         if (fileInputRef.current) {
@@ -154,8 +162,8 @@ const EditProduct = ({ product, children, isOpen: controlledIsOpen, onOpenChange
     }
   }
 
-  // @ts-ignore - used in JSX
-  const removeImage = () => {
+  // @ts-expect-error - used in JSX
+  const _removeImage = () => {
     setImageFile(null)
     setImagePreview(null)
     if (fileInputRef.current) {
@@ -185,9 +193,19 @@ const EditProduct = ({ product, children, isOpen: controlledIsOpen, onOpenChange
     <>
       {/* Trigger Element - Only render if children provided and not controlled */}
       {children && controlledIsOpen === undefined && (
-        <div onClick={handleOpen} style={{ cursor: 'pointer', display: 'inline-block' }}>
+        <button
+          type="button"
+          onClick={handleOpen}
+          style={{
+            cursor: "pointer",
+            display: "inline-block",
+            background: "none",
+            border: "none",
+            padding: 0,
+          }}
+        >
           {children}
-        </div>
+        </button>
       )}
 
       {/* Drawer */}
@@ -201,12 +219,10 @@ const EditProduct = ({ product, children, isOpen: controlledIsOpen, onOpenChange
         <DrawerBackdrop />
         <DrawerContent>
           <DrawerHeader borderBottomWidth="1px">
-            <DrawerTitle>
-              Edit Product - {product.name}
-            </DrawerTitle>
+            <DrawerTitle>Edit Product - {product.name}</DrawerTitle>
             <DrawerCloseTrigger />
           </DrawerHeader>
-          
+
           <DrawerBody>
             <VStack gap={6} align="stretch">
               {/* Product Details Section */}
@@ -256,8 +272,12 @@ const EditProduct = ({ product, children, isOpen: controlledIsOpen, onOpenChange
                 <Text fontSize="md" fontWeight="semibold" mb={3}>
                   Update Product Details
                 </Text>
-                
-                <form onSubmit={handleSubmit(onSubmit)} id="edit-product-form" data-testid="edit-product-form">
+
+                <form
+                  onSubmit={handleSubmit(onSubmit)}
+                  id={formId}
+                  data-testid="edit-product-form"
+                >
                   <VStack gap={4} align="stretch">
                     <Field
                       invalid={!!errors.name}
@@ -265,8 +285,8 @@ const EditProduct = ({ product, children, isOpen: controlledIsOpen, onOpenChange
                       label="Product Name"
                     >
                       <Input
-                        {...register("name", { 
-                          required: "Product name is required" 
+                        {...register("name", {
+                          required: "Product name is required",
                         })}
                         placeholder="Enter product name"
                         type="text"
@@ -317,13 +337,19 @@ const EditProduct = ({ product, children, isOpen: controlledIsOpen, onOpenChange
                           valueAsNumber: true,
                           required: "Selling price is required",
                           validate: (value, formValues) => {
-                            const numValue = typeof value === "number" ? value : parseFloat(String(value))
+                            const numValue =
+                              typeof value === "number"
+                                ? value
+                                : parseFloat(String(value))
                             if (!numValue || numValue <= 0) {
                               return "Selling price must be greater than 0"
                             }
-                            const buyingPrice = typeof formValues.buying_price === "number" 
-                              ? formValues.buying_price 
-                              : parseFloat(String(formValues.buying_price || 0))
+                            const buyingPrice =
+                              typeof formValues.buying_price === "number"
+                                ? formValues.buying_price
+                                : parseFloat(
+                                    String(formValues.buying_price || 0),
+                                  )
                             if (numValue <= buyingPrice) {
                               return "Selling price must be greater than buying price"
                             }
@@ -347,12 +373,21 @@ const EditProduct = ({ product, children, isOpen: controlledIsOpen, onOpenChange
                       <HStack gap={2} mb={2}>
                         {/* @ts-ignore */}
                         <FaInfoCircle color="var(--chakra-colors-blue-400)" />
-                        <Text fontWeight="semibold" fontSize="sm" color={{ base: "blue.300", _light: "blue.700" }}>
+                        <Text
+                          fontWeight="semibold"
+                          fontSize="sm"
+                          color={{ base: "blue.300", _light: "blue.700" }}
+                        >
                           Stock Management
                         </Text>
                       </HStack>
-                      <Text fontSize="xs" color={{ base: "gray.400", _light: "gray.600" }}>
-                        Stock levels and reorder points are managed via the <strong>Stock Adjustment</strong> module. Current stock: <strong>{product.current_stock || 0} units</strong>
+                      <Text
+                        fontSize="xs"
+                        color={{ base: "gray.400", _light: "gray.600" }}
+                      >
+                        Stock levels and reorder points are managed via the{" "}
+                        <strong>Stock Adjustment</strong> module. Current stock:{" "}
+                        <strong>{product.current_stock || 0} units</strong>
                       </Text>
                     </Box>
 

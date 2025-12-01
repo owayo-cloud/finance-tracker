@@ -1,14 +1,11 @@
 /**
  * useNotifications Hook
- * 
+ *
  * Manages notification state, fetching, and real-time updates
  */
 
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
-import {
-  NotificationsService,
-  type NotificationsPublic,
-} from "@/client"
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
+import { type NotificationsPublic, NotificationsService } from "@/client"
 
 interface UseNotificationsOptions {
   pollInterval?: number // Auto-refresh interval in ms (default: 30000 = 30 seconds)

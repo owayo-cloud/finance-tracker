@@ -47,23 +47,28 @@ export const confirmPasswordRules = (
 export const handleError = (err: ApiError) => {
   const { showErrorToast } = useCustomToast()
   const errDetail = (err.body as any)?.detail
-  
+
   // Handle specific error cases
   if (err.status === 403) {
-    if (errDetail === "Not authenticated" || errDetail?.includes("authenticated")) {
+    if (
+      errDetail === "Not authenticated" ||
+      errDetail?.includes("authenticated")
+    ) {
       showErrorToast("Your session has expired. Please log in again.")
     } else {
-      const errorMessage = errDetail || "Access denied. You don't have permission to perform this action."
+      const errorMessage =
+        errDetail ||
+        "Access denied. You don't have permission to perform this action."
       showErrorToast(errorMessage)
     }
     return
   }
-  
+
   if (err.status === 401) {
     showErrorToast("Authentication required. Please log in.")
     return
   }
-  
+
   // Handle other errors
   let errorMessage = errDetail || "Something went wrong."
   if (Array.isArray(errDetail) && errDetail.length > 0) {
@@ -78,22 +83,31 @@ export const handleError = (err: ApiError) => {
  * - If full_name is a single word, returns first letter (e.g., "John" -> "J")
  * - Falls back to email first letter or "U" if no name/email
  */
-export const getUserInitials = (fullName?: string | null, email?: string | null): string => {
+export const getUserInitials = (
+  fullName?: string | null,
+  email?: string | null,
+): string => {
   if (fullName) {
-    const nameParts = fullName.trim().split(/\s+/).filter(part => part.length > 0)
+    const nameParts = fullName
+      .trim()
+      .split(/\s+/)
+      .filter((part) => part.length > 0)
     if (nameParts.length >= 2) {
       // Multiple names: take first letter of first and last name
-      return (nameParts[0][0] + nameParts[nameParts.length - 1][0]).toUpperCase()
-    } else if (nameParts.length === 1) {
+      return (
+        nameParts[0][0] + nameParts[nameParts.length - 1][0]
+      ).toUpperCase()
+    }
+    if (nameParts.length === 1) {
       // Single name: take first letter
       return nameParts[0][0].toUpperCase()
     }
   }
-  
+
   // Fallback to email or "U"
   if (email) {
     return email[0].toUpperCase()
   }
-  
+
   return "U"
 }

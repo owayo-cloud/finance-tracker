@@ -28,7 +28,7 @@ export const usePageVisits = () => {
       }
 
       localStorage.setItem(VISIT_TRACKING_KEY, JSON.stringify(visits))
-    } catch (error) {
+    } catch (_error) {
       // Failed to track page visit - silently continue
     }
   }
@@ -39,7 +39,7 @@ export const usePageVisits = () => {
     try {
       const stored = localStorage.getItem(VISIT_TRACKING_KEY)
       return stored ? JSON.parse(stored) : {}
-    } catch (error) {
+    } catch (_error) {
       return {}
     }
   }
@@ -52,7 +52,9 @@ export const usePageVisits = () => {
         if (b.count !== a.count) {
           return b.count - a.count
         }
-        return new Date(b.lastVisited).getTime() - new Date(a.lastVisited).getTime()
+        return (
+          new Date(b.lastVisited).getTime() - new Date(a.lastVisited).getTime()
+        )
       })
       .slice(0, limit)
   }
@@ -68,10 +70,17 @@ export const usePageVisits = () => {
 export const useTrackPageVisit = (path: string) => {
   useEffect(() => {
     // Only track actual module pages, not the dashboard itself
-    if (path && path !== "/" && path !== "/dashboard" && typeof window !== "undefined") {
+    if (
+      path &&
+      path !== "/" &&
+      path !== "/dashboard" &&
+      typeof window !== "undefined"
+    ) {
       try {
         const stored = localStorage.getItem(VISIT_TRACKING_KEY)
-        const visits: Record<string, PageVisit> = stored ? JSON.parse(stored) : {}
+        const visits: Record<string, PageVisit> = stored
+          ? JSON.parse(stored)
+          : {}
 
         if (visits[path]) {
           visits[path].count += 1
@@ -85,10 +94,9 @@ export const useTrackPageVisit = (path: string) => {
         }
 
         localStorage.setItem(VISIT_TRACKING_KEY, JSON.stringify(visits))
-      } catch (error) {
+      } catch (_error) {
         // Failed to track page visit - silently continue
       }
     }
   }, [path])
 }
-

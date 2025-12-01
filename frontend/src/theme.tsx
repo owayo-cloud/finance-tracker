@@ -141,22 +141,28 @@ export const system = createSystem(defaultConfig, {
         "gradient.primary": {
           value: {
             base: "linear-gradient(120deg, #14b8a6 0%, #60a5fa 60%, #a855f7 100%)",
-            _light: "linear-gradient(120deg, #14b8a6 0%, #60a5fa 60%, #a855f7 100%)",
-            _dark: "linear-gradient(120deg, #14b8a6 0%, #60a5fa 60%, #a855f7 100%)",
+            _light:
+              "linear-gradient(120deg, #14b8a6 0%, #60a5fa 60%, #a855f7 100%)",
+            _dark:
+              "linear-gradient(120deg, #14b8a6 0%, #60a5fa 60%, #a855f7 100%)",
           },
         },
         "gradient.primary.hover": {
           value: {
             base: "linear-gradient(120deg, #0d9488 0%, #3b82f6 60%, #9333ea 100%)",
-            _light: "linear-gradient(120deg, #0d9488 0%, #3b82f6 60%, #9333ea 100%)",
-            _dark: "linear-gradient(120deg, #0d9488 0%, #3b82f6 60%, #9333ea 100%)",
+            _light:
+              "linear-gradient(120deg, #0d9488 0%, #3b82f6 60%, #9333ea 100%)",
+            _dark:
+              "linear-gradient(120deg, #0d9488 0%, #3b82f6 60%, #9333ea 100%)",
           },
         },
         "gradient.canvas": {
           value: {
             base: "linear-gradient(135deg, #0f172a 0%, #111827 40%, #1f1b2e 100%)",
-            _light: "linear-gradient(135deg, #f8fafc 0%, #dbeafe 45%, #ede9fe 100%)",
-            _dark: "linear-gradient(135deg, #0f172a 0%, #111827 40%, #1f1b2e 100%)",
+            _light:
+              "linear-gradient(135deg, #f8fafc 0%, #dbeafe 45%, #ede9fe 100%)",
+            _dark:
+              "linear-gradient(135deg, #0f172a 0%, #111827 40%, #1f1b2e 100%)",
           },
         },
         // Text colors for brand

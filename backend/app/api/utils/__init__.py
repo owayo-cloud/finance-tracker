@@ -1,2 +1,1 @@
 """API utility functions"""
-

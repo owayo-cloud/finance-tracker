@@ -216,8 +216,7 @@ export const BulkImportResultSchema = {
                 format: 'uuid'
             },
             type: 'array',
-            title: 'Imported Product Ids',
-            default: []
+            title: 'Imported Product Ids'
         },
         errors: {
             items: {
@@ -225,8 +224,7 @@ export const BulkImportResultSchema = {
                 type: 'object'
             },
             type: 'array',
-            title: 'Errors',
-            default: []
+            title: 'Errors'
         }
     },
     type: 'object',
@@ -346,7 +344,9 @@ export const BulkImportSessionPublicSchema = {
         auto_mapping: {
             anyOf: [
                 {
-                    additionalProperties: true,
+                    additionalProperties: {
+                        type: 'string'
+                    },
                     type: 'object'
                 },
                 {
@@ -529,7 +529,9 @@ export const ColumnMappingRequestSchema = {
             title: 'Session Id'
         },
         column_mapping: {
-            additionalProperties: true,
+            additionalProperties: {
+                type: 'string'
+            },
             type: 'object',
             title: 'Column Mapping'
         },

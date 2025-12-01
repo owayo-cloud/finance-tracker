@@ -1,16 +1,32 @@
 /**
  * NotificationBell Component
- * 
+ *
  * Displays notification bell icon with unread count badge and dropdown list
  */
 
-import { Box, IconButton, Text, VStack, HStack, Spinner, Badge, Icon } from "@chakra-ui/react"
-import { FiBell, FiCheck, FiCheckCircle, FiTrash2, FiAlertCircle, FiInfo } from "react-icons/fi"
-import { MenuContent, MenuRoot, MenuSeparator, MenuTrigger } from "../ui/menu"
+import {
+  Badge,
+  Box,
+  HStack,
+  Icon,
+  IconButton,
+  Spinner,
+  Text,
+  VStack,
+} from "@chakra-ui/react"
 import { Link } from "@tanstack/react-router"
-import { useNotifications } from "@/hooks/useNotifications"
 import { formatDistanceToNow } from "date-fns"
+import {
+  FiAlertCircle,
+  FiBell,
+  FiCheck,
+  FiCheckCircle,
+  FiInfo,
+  FiTrash2,
+} from "react-icons/fi"
 import type { NotificationPublic } from "@/client"
+import { useNotifications } from "@/hooks/useNotifications"
+import { MenuContent, MenuRoot, MenuSeparator, MenuTrigger } from "../ui/menu"
 
 interface NotificationBellProps {
   variant?: "desktop" | "mobile"
@@ -31,11 +47,14 @@ const getPriorityColor = (priority: string) => {
 // Type icons
 const getTypeIcon = (type: string) => {
   if (type.includes("alert") || type.includes("critical")) return FiAlertCircle
-  if (type.includes("success") || type.includes("approved")) return FiCheckCircle
+  if (type.includes("success") || type.includes("approved"))
+    return FiCheckCircle
   return FiInfo
 }
 
-function NotificationBell({ variant: _variant = "desktop" }: NotificationBellProps) {
+function NotificationBell({
+  variant: _variant = "desktop",
+}: NotificationBellProps) {
   const {
     notifications,
     unreadCount,
@@ -62,12 +81,22 @@ function NotificationBell({ variant: _variant = "desktop" }: NotificationBellPro
   return (
     <MenuRoot positioning={{ placement: "bottom-end" }}>
       <MenuTrigger asChild>
-        <Box position="relative" display="inline-flex" alignItems="center" justifyContent="center">
+        <Box
+          position="relative"
+          display="inline-flex"
+          alignItems="center"
+          justifyContent="center"
+        >
           <IconButton
             variant="ghost"
             aria-label="Notifications"
             color={{ base: "#ffffff", _light: "#1a1d29" }}
-            _hover={{ bg: { base: "rgba(255, 255, 255, 0.05)", _light: "rgba(0, 0, 0, 0.05)" } }}
+            _hover={{
+              bg: {
+                base: "rgba(255, 255, 255, 0.05)",
+                _light: "rgba(0, 0, 0, 0.05)",
+              },
+            }}
             size="sm"
           >
             <FiBell fontSize="18px" />
@@ -121,11 +150,21 @@ function NotificationBell({ variant: _variant = "desktop" }: NotificationBellPro
           zIndex={1}
         >
           <HStack gap={2}>
-            <Text fontWeight="700" fontSize="md" color={{ base: "#ffffff", _light: "#1a1d29" }}>
+            <Text
+              fontWeight="700"
+              fontSize="md"
+              color={{ base: "#ffffff", _light: "#1a1d29" }}
+            >
               Notifications
             </Text>
             {unreadCount > 0 && (
-              <Badge colorScheme="red" borderRadius="full" px={2} py={0.5} fontSize="xs">
+              <Badge
+                colorScheme="red"
+                borderRadius="full"
+                px={2}
+                py={0.5}
+                fontSize="xs"
+              >
                 {unreadCount}
               </Badge>
             )}
@@ -138,7 +177,12 @@ function NotificationBell({ variant: _variant = "desktop" }: NotificationBellPro
               onClick={() => markAllAsRead()}
               loading={isMarkingAllAsRead}
               color={{ base: "#14b8a6", _light: "#0d9488" }}
-              _hover={{ bg: { base: "rgba(255, 255, 255, 0.05)", _light: "rgba(0, 0, 0, 0.05)" } }}
+              _hover={{
+                bg: {
+                  base: "rgba(255, 255, 255, 0.05)",
+                  _light: "rgba(0, 0, 0, 0.05)",
+                },
+              }}
             >
               <FiCheckCircle fontSize="16px" />
             </IconButton>
@@ -155,8 +199,16 @@ function NotificationBell({ variant: _variant = "desktop" }: NotificationBellPro
           </VStack>
         ) : notifications.length === 0 ? (
           <VStack py={8} gap={2}>
-            <Icon as={FiBell} fontSize="40px" color={{ base: "#4b5563", _light: "#9ca3af" }} />
-            <Text fontSize="sm" color={{ base: "#9ca3af", _light: "#6b7280" }} fontWeight="500">
+            <Icon
+              as={FiBell}
+              fontSize="40px"
+              color={{ base: "#4b5563", _light: "#9ca3af" }}
+            />
+            <Text
+              fontSize="sm"
+              color={{ base: "#9ca3af", _light: "#6b7280" }}
+              fontWeight="500"
+            >
               No notifications yet
             </Text>
             <Text fontSize="xs" color={{ base: "#6b7280", _light: "#9ca3af" }}>
@@ -167,8 +219,10 @@ function NotificationBell({ variant: _variant = "desktop" }: NotificationBellPro
           <VStack gap={0} align="stretch">
             {notifications.map((notification) => {
               const TypeIcon = getTypeIcon(notification.notification_type || "")
-              const priorityColor = getPriorityColor(notification.priority || "info")
-              
+              const priorityColor = getPriorityColor(
+                notification.priority || "info",
+              )
+
               const notificationContent = (
                 <HStack
                   key={notification.id}
@@ -178,13 +232,21 @@ function NotificationBell({ variant: _variant = "desktop" }: NotificationBellPro
                   py={3}
                   bg={
                     !notification.is_read
-                      ? { base: "rgba(20, 184, 166, 0.05)", _light: "rgba(20, 184, 166, 0.05)" }
+                      ? {
+                          base: "rgba(20, 184, 166, 0.05)",
+                          _light: "rgba(20, 184, 166, 0.05)",
+                        }
                       : "transparent"
                   }
                   borderLeft="3px solid"
-                  borderLeftColor={!notification.is_read ? priorityColor : "transparent"}
+                  borderLeftColor={
+                    !notification.is_read ? priorityColor : "transparent"
+                  }
                   _hover={{
-                    bg: { base: "rgba(255, 255, 255, 0.03)", _light: "rgba(0, 0, 0, 0.02)" },
+                    bg: {
+                      base: "rgba(255, 255, 255, 0.03)",
+                      _light: "rgba(0, 0, 0, 0.02)",
+                    },
                   }}
                   cursor="pointer"
                   onClick={() => handleNotificationClick(notification)}
@@ -211,11 +273,11 @@ function NotificationBell({ variant: _variant = "desktop" }: NotificationBellPro
                       fontSize="sm"
                       fontWeight={!notification.is_read ? "700" : "500"}
                       color={{ base: "#ffffff", _light: "#1a1d29" }}
-                      style={{ 
+                      style={{
                         display: "-webkit-box",
                         WebkitLineClamp: 2,
                         WebkitBoxOrient: "vertical",
-                        overflow: "hidden"
+                        overflow: "hidden",
                       }}
                     >
                       {notification.title}
@@ -224,18 +286,23 @@ function NotificationBell({ variant: _variant = "desktop" }: NotificationBellPro
                       <Text
                         fontSize="xs"
                         color={{ base: "#9ca3af", _light: "#6b7280" }}
-                        style={{ 
+                        style={{
                           display: "-webkit-box",
                           WebkitLineClamp: 2,
                           WebkitBoxOrient: "vertical",
-                          overflow: "hidden"
+                          overflow: "hidden",
                         }}
                       >
                         {notification.message}
                       </Text>
                     )}
-                    <Text fontSize="xs" color={{ base: "#6b7280", _light: "#9ca3af" }}>
-                      {formatDistanceToNow(new Date(notification.created_at), { addSuffix: true })}
+                    <Text
+                      fontSize="xs"
+                      color={{ base: "#6b7280", _light: "#9ca3af" }}
+                    >
+                      {formatDistanceToNow(new Date(notification.created_at), {
+                        addSuffix: true,
+                      })}
                     </Text>
                   </VStack>
 
@@ -251,7 +318,12 @@ function NotificationBell({ variant: _variant = "desktop" }: NotificationBellPro
                           markAsRead(notification.id)
                         }}
                         color={{ base: "#14b8a6", _light: "#0d9488" }}
-                        _hover={{ bg: { base: "rgba(255, 255, 255, 0.05)", _light: "rgba(0, 0, 0, 0.05)" } }}
+                        _hover={{
+                          bg: {
+                            base: "rgba(255, 255, 255, 0.05)",
+                            _light: "rgba(0, 0, 0, 0.05)",
+                          },
+                        }}
                       >
                         <FiCheck fontSize="14px" />
                       </IconButton>
@@ -262,7 +334,12 @@ function NotificationBell({ variant: _variant = "desktop" }: NotificationBellPro
                       size="xs"
                       onClick={(e) => handleDelete(notification.id, e)}
                       color={{ base: "#ef4444", _light: "#dc2626" }}
-                      _hover={{ bg: { base: "rgba(255, 255, 255, 0.05)", _light: "rgba(0, 0, 0, 0.05)" } }}
+                      _hover={{
+                        bg: {
+                          base: "rgba(255, 255, 255, 0.05)",
+                          _light: "rgba(0, 0, 0, 0.05)",
+                        },
+                      }}
                     >
                       <FiTrash2 fontSize="14px" />
                     </IconButton>
@@ -272,7 +349,11 @@ function NotificationBell({ variant: _variant = "desktop" }: NotificationBellPro
 
               // Wrap in Link if link_url exists
               return notification.link_url ? (
-                <Link key={notification.id} to={notification.link_url} style={{ textDecoration: "none" }}>
+                <Link
+                  key={notification.id}
+                  to={notification.link_url}
+                  style={{ textDecoration: "none" }}
+                >
                   {notificationContent}
                 </Link>
               ) : (
@@ -290,7 +371,10 @@ function NotificationBell({ variant: _variant = "desktop" }: NotificationBellPro
               textAlign="center"
               py={3}
               borderTop="1px solid"
-              borderColor={{ base: "rgba(255, 255, 255, 0.1)", _light: "#e5e7eb" }}
+              borderColor={{
+                base: "rgba(255, 255, 255, 0.1)",
+                _light: "#e5e7eb",
+              }}
               bg={{ base: "#1a1d29", _light: "#f9fafb" }}
             >
               <Link to="/" style={{ textDecoration: "none" }}>

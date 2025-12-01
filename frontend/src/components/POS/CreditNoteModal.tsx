@@ -1,27 +1,20 @@
-import {
-  Button,
-  Flex,
-  Input,
-  Text,
-  VStack,
-} from "@chakra-ui/react"
-import {
-  DialogRoot,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogBody,
-  DialogFooter,
-  DialogActionTrigger,
-} from "@/components/ui/dialog"
-import { Field } from "@/components/ui/field"
-import { Textarea } from "@chakra-ui/react"
+import { Button, Flex, Input, Text, Textarea, VStack } from "@chakra-ui/react"
 import { useState } from "react"
 import { type SubmitHandler, useForm } from "react-hook-form"
-import { SalesService, OpenAPI } from "@/client"
+import { OpenAPI, SalesService } from "@/client"
+import type { ApiError } from "@/client/core/ApiError"
+import {
+  DialogActionTrigger,
+  DialogBody,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogRoot,
+  DialogTitle,
+} from "@/components/ui/dialog"
+import { Field } from "@/components/ui/field"
 import useCustomToast from "@/hooks/useCustomToast"
 import { handleError } from "@/utils"
-import type { ApiError } from "@/client/core/ApiError"
 
 interface CreditNoteModalProps {
   isOpen: boolean
@@ -61,15 +54,21 @@ export function CreditNoteModal({
   const onSubmit: SubmitHandler<CreditNoteForm> = async (data) => {
     try {
       setIsSubmitting(true)
-      
+
       // Find Credit Note payment method
-      const paymentMethods = await SalesService.readPaymentMethods({ limit: 100 })
+      const paymentMethods = await SalesService.readPaymentMethods({
+        limit: 100,
+      })
       const creditNoteMethod = paymentMethods.data.find(
-        (pm) => pm.name.toUpperCase().includes("CREDIT NOTE") || pm.name.toUpperCase().includes("CREDIT")
+        (pm) =>
+          pm.name.toUpperCase().includes("CREDIT NOTE") ||
+          pm.name.toUpperCase().includes("CREDIT"),
       )
-      
+
       if (!creditNoteMethod) {
-        showErrorToast("Credit Note payment method not found. Please contact administrator.")
+        showErrorToast(
+          "Credit Note payment method not found. Please contact administrator.",
+        )
         return
       }
 
@@ -77,7 +76,7 @@ export function CreditNoteModal({
       // Note: This creates a negative sale or refund entry
       const token = localStorage.getItem("access_token") || ""
       const apiBase = OpenAPI.BASE || import.meta.env.VITE_API_URL || ""
-      
+
       // For credit notes, we'll create a special sale entry
       // In a real system, you might want a separate credit_note table
       const response = await fetch(`${apiBase}/api/v1/sales`, {
@@ -107,7 +106,8 @@ export function CreditNoteModal({
       onClose()
       onSuccess?.()
     } catch (error: any) {
-      const errorMessage = error?.message || error?.detail || "Failed to create credit note"
+      const errorMessage =
+        error?.message || error?.detail || "Failed to create credit note"
       showErrorToast(errorMessage)
       handleError(error as ApiError)
     } finally {
@@ -133,7 +133,11 @@ export function CreditNoteModal({
             <DialogTitle>Add Credit Note</DialogTitle>
           </DialogHeader>
           <DialogBody>
-            <Text mb={4} color={{ base: "#9ca3af", _light: "#6b7280" }} fontSize="sm">
+            <Text
+              mb={4}
+              color={{ base: "#9ca3af", _light: "#6b7280" }}
+              fontSize="sm"
+            >
               Create a credit note for a customer refund or adjustment.
             </Text>
             <VStack gap={4}>
@@ -155,7 +159,10 @@ export function CreditNoteModal({
                   bg="input.bg"
                   borderColor="input.border"
                   color="text.primary"
-                  _focus={{ borderColor: "input.focus.border", boxShadow: "input.focus.shadow" }}
+                  _focus={{
+                    borderColor: "input.focus.border",
+                    boxShadow: "input.focus.shadow",
+                  }}
                 />
               </Field>
               <Field
@@ -180,7 +187,10 @@ export function CreditNoteModal({
                   bg="input.bg"
                   borderColor="input.border"
                   color="text.primary"
-                  _focus={{ borderColor: "input.focus.border", boxShadow: "input.focus.shadow" }}
+                  _focus={{
+                    borderColor: "input.focus.border",
+                    boxShadow: "input.focus.shadow",
+                  }}
                 />
               </Field>
               <Field
@@ -201,7 +211,10 @@ export function CreditNoteModal({
                   bg="input.bg"
                   borderColor="input.border"
                   color="text.primary"
-                  _focus={{ borderColor: "input.focus.border", boxShadow: "input.focus.shadow" }}
+                  _focus={{
+                    borderColor: "input.focus.border",
+                    boxShadow: "input.focus.shadow",
+                  }}
                 />
               </Field>
               <Field
@@ -221,14 +234,19 @@ export function CreditNoteModal({
                   bg="input.bg"
                   borderColor="input.border"
                   color="text.primary"
-                  _focus={{ borderColor: "input.focus.border", boxShadow: "input.focus.shadow" }}
+                  _focus={{
+                    borderColor: "input.focus.border",
+                    boxShadow: "input.focus.shadow",
+                  }}
                 />
               </Field>
             </VStack>
           </DialogBody>
           <DialogFooter>
             <Flex gap={2} w="full" justify="flex-end">
-              <Button variant="outline" onClick={handleClose}>Cancel</Button>
+              <Button variant="outline" onClick={handleClose}>
+                Cancel
+              </Button>
               <DialogActionTrigger asChild>
                 <Button
                   type="submit"
@@ -248,4 +266,3 @@ export function CreditNoteModal({
     </DialogRoot>
   )
 }
-

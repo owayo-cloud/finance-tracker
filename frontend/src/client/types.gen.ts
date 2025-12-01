@@ -82,7 +82,7 @@ export type BulkImportSessionPublic = {
     completed_at?: (string | null);
     columns?: (Array<(string)> | null);
     auto_mapping?: ({
-    [key: string]: unknown;
+    [key: string]: (string);
 } | null);
 };
 
@@ -129,7 +129,7 @@ export type CashierVariancesPublic = {
 export type ColumnMappingRequest = {
     session_id: string;
     column_mapping: {
-        [key: string]: unknown;
+        [key: string]: (string);
     };
     default_category_id?: (string | null);
     default_status_id?: (string | null);

@@ -1,4 +1,12 @@
-import { Box, Heading, VStack, HStack, Text, Icon, Badge } from "@chakra-ui/react"
+import {
+  Badge,
+  Box,
+  Heading,
+  HStack,
+  Icon,
+  Text,
+  VStack,
+} from "@chakra-ui/react"
 import { Link } from "@tanstack/react-router"
 import { FiClock } from "react-icons/fi"
 import type { IconType } from "react-icons/lib"
@@ -21,29 +29,37 @@ interface QuickAccessProps {
   mostVisitedPages: PageVisit[]
 }
 
-export function QuickAccess({ quickAccessModules, mostVisitedPages }: QuickAccessProps) {
+export function QuickAccess({
+  quickAccessModules,
+  mostVisitedPages,
+}: QuickAccessProps) {
   return (
-    <Box 
-      p={6} 
+    <Box
+      p={6}
       bg={{ base: "#1a1d29", _light: "#ffffff" }}
-      borderRadius="lg" 
+      borderRadius="lg"
       border="1px solid"
       borderColor={{ base: "rgba(255, 255, 255, 0.08)", _light: "#e5e7eb" }}
-      boxShadow={{ base: "0 2px 4px rgba(0, 0, 0, 0.2)", _light: "0 1px 3px rgba(0, 0, 0, 0.1)" }}
+      boxShadow={{
+        base: "0 2px 4px rgba(0, 0, 0, 0.2)",
+        _light: "0 1px 3px rgba(0, 0, 0, 0.1)",
+      }}
     >
-      <Heading 
-        size="md" 
+      <Heading
+        size="md"
         fontWeight="600"
         color={{ base: "#ffffff", _light: "#1a1d29" }}
         mb={4}
       >
         Quick Access
       </Heading>
-      
+
       <VStack gap={3} align="stretch" maxH="400px" overflowY="auto">
         {quickAccessModules.length > 0 ? (
           quickAccessModules.map((module) => {
-            const visitData = mostVisitedPages.find((v) => v.path === module.path)
+            const visitData = mostVisitedPages.find(
+              (v) => v.path === module.path,
+            )
             return (
               <Link
                 key={module.title}
@@ -55,38 +71,68 @@ export function QuickAccess({ quickAccessModules, mostVisitedPages }: QuickAcces
                   borderRadius="md"
                   bg={{ base: "rgba(255, 255, 255, 0.05)", _light: "#f9fafb" }}
                   border="1px solid"
-                  borderColor={{ base: "rgba(255, 255, 255, 0.08)", _light: "#e5e7eb" }}
+                  borderColor={{
+                    base: "rgba(255, 255, 255, 0.08)",
+                    _light: "#e5e7eb",
+                  }}
                   _hover={{
-                    bg: { base: "rgba(255, 255, 255, 0.08)", _light: "#f3f4f6" },
+                    bg: {
+                      base: "rgba(255, 255, 255, 0.08)",
+                      _light: "#f3f4f6",
+                    },
                     transform: "translateX(4px)",
                   }}
                   transition="all 0.2s"
                 >
                   <HStack gap={3}>
-                    <Icon as={module.icon} fontSize="lg" color={module.iconColor} />
+                    <Icon
+                      as={module.icon}
+                      fontSize="lg"
+                      color={module.iconColor}
+                    />
                     <VStack align="start" gap={0} flex={1}>
                       <HStack gap={2} w="full">
-                        <Text fontSize="sm" fontWeight="600" color={{ base: "#ffffff", _light: "#1a1d29" }}>
+                        <Text
+                          fontSize="sm"
+                          fontWeight="600"
+                          color={{ base: "#ffffff", _light: "#1a1d29" }}
+                        >
                           {module.title}
                         </Text>
                         {visitData && visitData.count > 0 && (
-                          <Badge colorPalette="blue" variant="subtle" fontSize="2xs">
+                          <Badge
+                            colorPalette="blue"
+                            variant="subtle"
+                            fontSize="2xs"
+                          >
                             {visitData.count}x
                           </Badge>
                         )}
                       </HStack>
-                      <Text fontSize="xs" color={{ base: "#9ca3af", _light: "#6b7280" }}>
+                      <Text
+                        fontSize="xs"
+                        color={{ base: "#9ca3af", _light: "#6b7280" }}
+                      >
                         {module.description}
                       </Text>
                     </VStack>
-                    <Icon as={FiClock} fontSize="sm" color={{ base: "#9ca3af", _light: "#6b7280" }} />
+                    <Icon
+                      as={FiClock}
+                      fontSize="sm"
+                      color={{ base: "#9ca3af", _light: "#6b7280" }}
+                    />
                   </HStack>
                 </Box>
               </Link>
             )
           })
         ) : (
-          <Text fontSize="sm" color={{ base: "#9ca3af", _light: "#6b7280" }} textAlign="center" py={4}>
+          <Text
+            fontSize="sm"
+            color={{ base: "#9ca3af", _light: "#6b7280" }}
+            textAlign="center"
+            py={4}
+          >
             Start visiting pages to see your quick access here
           </Text>
         )}
@@ -94,4 +140,3 @@ export function QuickAccess({ quickAccessModules, mostVisitedPages }: QuickAcces
     </Box>
   )
 }
-

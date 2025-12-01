@@ -6,16 +6,17 @@ import {
   Flex,
   Input,
   Text,
+  Textarea,
   VStack,
 } from "@chakra-ui/react"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
 import { useState } from "react"
 import { type SubmitHandler, useForm } from "react-hook-form"
-import { FiEdit } from "react-icons/fi"
 import { FaTrash } from "react-icons/fa"
+import { FiEdit } from "react-icons/fi"
 import type { ExpenseCategoryPublic } from "@/client"
-import type { ApiError } from "@/client/core/ApiError"
 import { ExpensesService } from "@/client"
+import type { ApiError } from "@/client/core/ApiError"
 import useCustomToast from "@/hooks/useCustomToast"
 import { handleError } from "@/utils"
 import {
@@ -27,7 +28,6 @@ import {
   DialogTitle,
 } from "../ui/dialog"
 import { Field } from "../ui/field"
-import { Textarea } from "@chakra-ui/react"
 
 interface EditExpenseCategoryProps {
   category: ExpenseCategoryPublic
@@ -88,7 +88,11 @@ const EditExpenseCategory = ({ category }: EditExpenseCategoryProps) => {
     },
     onError: (err: ApiError | Error) => {
       const error = err as ApiError
-      if (error.body && typeof error.body === 'object' && 'detail' in error.body) {
+      if (
+        error.body &&
+        typeof error.body === "object" &&
+        "detail" in error.body
+      ) {
         showErrorToast(error.body.detail as string)
       } else {
         handleError(error)
@@ -104,7 +108,11 @@ const EditExpenseCategory = ({ category }: EditExpenseCategoryProps) => {
   }
 
   const handleDelete = () => {
-    if (window.confirm(`Are you sure you want to delete "${category.name}"? This action cannot be undone.`)) {
+    if (
+      window.confirm(
+        `Are you sure you want to delete "${category.name}"? This action cannot be undone.`,
+      )
+    ) {
       deleteMutation.mutate()
     }
   }
@@ -151,9 +159,15 @@ const EditExpenseCategory = ({ category }: EditExpenseCategoryProps) => {
                   })}
                   bg={{ base: "#1a1d29", _light: "#ffffff" }}
                   border="1px solid"
-                  borderColor={{ base: "rgba(255, 255, 255, 0.1)", _light: "#e5e7eb" }}
+                  borderColor={{
+                    base: "rgba(255, 255, 255, 0.1)",
+                    _light: "#e5e7eb",
+                  }}
                   color={{ base: "#ffffff", _light: "#1a1d29" }}
-                  _focus={{ borderColor: "#14b8a6", boxShadow: "0 0 0 1px #14b8a6" }}
+                  _focus={{
+                    borderColor: "#14b8a6",
+                    boxShadow: "0 0 0 1px #14b8a6",
+                  }}
                 />
               </Field>
               <Field
@@ -171,9 +185,15 @@ const EditExpenseCategory = ({ category }: EditExpenseCategoryProps) => {
                   rows={3}
                   bg={{ base: "#1a1d29", _light: "#ffffff" }}
                   border="1px solid"
-                  borderColor={{ base: "rgba(255, 255, 255, 0.1)", _light: "#e5e7eb" }}
+                  borderColor={{
+                    base: "rgba(255, 255, 255, 0.1)",
+                    _light: "#e5e7eb",
+                  }}
                   color={{ base: "#ffffff", _light: "#1a1d29" }}
-                  _focus={{ borderColor: "#14b8a6", boxShadow: "0 0 0 1px #14b8a6" }}
+                  _focus={{
+                    borderColor: "#14b8a6",
+                    boxShadow: "0 0 0 1px #14b8a6",
+                  }}
                 />
               </Field>
             </VStack>
@@ -217,4 +237,3 @@ const EditExpenseCategory = ({ category }: EditExpenseCategoryProps) => {
 }
 
 export default EditExpenseCategory
-

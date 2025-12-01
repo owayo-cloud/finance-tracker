@@ -44,7 +44,7 @@ jobs:
         run: npm ci
         working-directory: frontend
       - name: Run linting
-        run: npm run lint
+        run: npx biome check --no-errors-on-unmatched --files-ignore-unknown=true ./
         working-directory: frontend
 
   test-backend:

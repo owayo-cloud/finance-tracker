@@ -1,5 +1,5 @@
 import { Box, HStack, Text } from "@chakra-ui/react"
-import { useLocation, Link } from "@tanstack/react-router"
+import { Link, useLocation } from "@tanstack/react-router"
 import { FiChevronRight, FiHome } from "react-icons/fi"
 
 interface BreadcrumbItem {
@@ -27,24 +27,24 @@ function Breadcrumbs() {
 
   // Build breadcrumb items from pathname
   const buildBreadcrumbs = (): BreadcrumbItem[] => {
-    const items: BreadcrumbItem[] = [
-      { label: "Home", path: "/" },
-    ]
+    const items: BreadcrumbItem[] = [{ label: "Home", path: "/" }]
 
     // Split pathname and create breadcrumb items
     const segments = pathname.split("/").filter(Boolean)
-    
+
     let currentPath = ""
     segments.forEach((segment, index) => {
       currentPath += `/${segment}`
       const isLast = index === segments.length - 1
-      
+
       // Get label from routeLabels or capitalize segment
-      const label = routeLabels[currentPath] || segment
-        .split("-")
-        .map((s) => s.charAt(0).toUpperCase() + s.slice(1))
-        .join(" ")
-      
+      const label =
+        routeLabels[currentPath] ||
+        segment
+          .split("-")
+          .map((s) => s.charAt(0).toUpperCase() + s.slice(1))
+          .join(" ")
+
       items.push({
         label,
         path: isLast ? undefined : currentPath, // Last item is not clickable
@@ -71,11 +71,11 @@ function Breadcrumbs() {
     >
       {breadcrumbs.map((item, index) => {
         const isLast = index === breadcrumbs.length - 1
-        
+
         return (
           <HStack key={index} gap={2}>
             {index === 0 ? (
-                  <Link to={item.path || "/"}>
+              <Link to={item.path || "/"}>
                 <Box
                   as="span"
                   display="inline-flex"
@@ -93,10 +93,7 @@ function Breadcrumbs() {
               <>
                 <FiChevronRight size={14} />
                 {isLast ? (
-                  <Text
-                    fontWeight="600"
-                    color="text.primary"
-                  >
+                  <Text fontWeight="600" color="text.primary">
                     {item.label}
                   </Text>
                 ) : (
@@ -124,4 +121,3 @@ function Breadcrumbs() {
 }
 
 export default Breadcrumbs
-

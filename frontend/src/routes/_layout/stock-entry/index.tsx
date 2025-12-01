@@ -1,23 +1,23 @@
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import {
+  Box,
   Container,
+  Flex,
+  Grid,
   Heading,
+  HStack,
+  Separator,
   Text,
   VStack,
-  HStack,
-  Box,
-  Flex,
-  Separator,
-  Grid,
-} from "@chakra-ui/react";
-import { FiEdit, FiPackage, FiUpload } from "react-icons/fi";
-import { Button } from "../../../components/ui/button";
-import AddProduct from "../../../components/Products/AddProduct";
-import useAuth from "../../../hooks/useAuth";
+} from "@chakra-ui/react"
+import { createFileRoute, useNavigate } from "@tanstack/react-router"
+import { FiEdit, FiPackage, FiUpload } from "react-icons/fi"
+import AddProduct from "../../../components/Products/AddProduct"
+import { Button } from "../../../components/ui/button"
+import useAuth from "../../../hooks/useAuth"
 
 export const Route = createFileRoute("/_layout/stock-entry/")({
   component: StockEntry,
-});
+})
 
 // Main Component
 function StockEntry() {
@@ -30,8 +30,8 @@ function StockEntry() {
         {/* Header */}
         <Flex justify="space-between" align="start">
           <Box>
-            <Heading 
-              size="2xl" 
+            <Heading
+              size="2xl"
               mb={2}
               color={{ base: "#e5e7eb", _light: "#111827" }}
             >
@@ -52,10 +52,10 @@ function StockEntry() {
             borderRadius="lg"
             bg={{ base: "gray.900", _light: "white" }}
             borderColor={{ base: "gray.700", _light: "gray.200" }}
-            _hover={{ 
+            _hover={{
               borderColor: "teal.500",
               transform: "translateY(-2px)",
-              boxShadow: "lg"
+              boxShadow: "lg",
             }}
             transition="all 0.2s"
           >
@@ -72,8 +72,8 @@ function StockEntry() {
                 Add New Product
               </Heading>
               <Text color={{ base: "#d1d5db", _light: "#6b7280" }}>
-                Create a new product entry in your inventory system. Define product details, 
-                pricing, and initial categorization.
+                Create a new product entry in your inventory system. Define
+                product details, pricing, and initial categorization.
               </Text>
               <Box pt={2}>
                 <AddProduct />
@@ -89,10 +89,10 @@ function StockEntry() {
               borderRadius="lg"
               bg={{ base: "gray.900", _light: "white" }}
               borderColor={{ base: "gray.700", _light: "gray.200" }}
-              _hover={{ 
+              _hover={{
                 borderColor: "blue.500",
                 transform: "translateY(-2px)",
-                boxShadow: "lg"
+                boxShadow: "lg",
               }}
               transition="all 0.2s"
               cursor="pointer"
@@ -107,12 +107,16 @@ function StockEntry() {
                 >
                   <FiUpload size={32} color="var(--chakra-colors-blue-500)" />
                 </Box>
-                <Heading size="md" color={{ base: "#e5e7eb", _light: "#111827" }}>
+                <Heading
+                  size="md"
+                  color={{ base: "#e5e7eb", _light: "#111827" }}
+                >
                   Bulk Import Products
                 </Heading>
                 <Text color={{ base: "#d1d5db", _light: "#6b7280" }}>
-                  Import multiple products at once using a CSV or Excel file. Perfect for 
-                  setting up your inventory quickly or updating multiple items.
+                  Import multiple products at once using a CSV or Excel file.
+                  Perfect for setting up your inventory quickly or updating
+                  multiple items.
                 </Text>
                 <Box pt={2}>
                   <Button
@@ -133,7 +137,11 @@ function StockEntry() {
 
         {/* Quick Links Section */}
         <Box>
-          <Heading size="md" mb={4} color={{ base: "#e5e7eb", _light: "#111827" }}>
+          <Heading
+            size="md"
+            mb={4}
+            color={{ base: "#e5e7eb", _light: "#111827" }}
+          >
             Quick Access
           </Heading>
           <Grid templateColumns={{ base: "1fr", md: "repeat(3, 1fr)" }} gap={4}>
@@ -144,9 +152,9 @@ function StockEntry() {
               borderRadius="md"
               bg={{ base: "gray.900", _light: "white" }}
               borderColor={{ base: "gray.700", _light: "gray.200" }}
-              _hover={{ 
+              _hover={{
                 borderColor: "purple.500",
-                bg: { base: "gray.800", _light: "gray.50" }
+                bg: { base: "gray.800", _light: "gray.50" },
               }}
               cursor="pointer"
               transition="all 0.2s"
@@ -159,7 +167,10 @@ function StockEntry() {
                   </Box>
                   <Text fontWeight="semibold">Stock Adjustment</Text>
                 </HStack>
-                <Text fontSize="sm" color={{ base: "gray.400", _light: "gray.600" }}>
+                <Text
+                  fontSize="sm"
+                  color={{ base: "gray.400", _light: "gray.600" }}
+                >
                   Adjust current stock levels and reorder points
                 </Text>
               </VStack>
@@ -172,13 +183,24 @@ function StockEntry() {
               borderRadius="md"
               bg={{ base: "gray.900", _light: "white" }}
               borderColor={{ base: "gray.700", _light: "gray.200" }}
-              _hover={{ 
+              _hover={{
                 borderColor: "teal.500",
-                bg: { base: "gray.800", _light: "gray.50" }
+                bg: { base: "gray.800", _light: "gray.50" },
               }}
               cursor="pointer"
               transition="all 0.2s"
-              onClick={() => navigate({ to: "/products", search: { page: 1, search: "", category: "", status: "", pageSize: 25 } })}
+              onClick={() =>
+                navigate({
+                  to: "/products",
+                  search: {
+                    page: 1,
+                    search: "",
+                    category: "",
+                    status: "",
+                    pageSize: 25,
+                  },
+                })
+              }
             >
               <VStack align="start" gap={2}>
                 <HStack>
@@ -187,7 +209,10 @@ function StockEntry() {
                   </Box>
                   <Text fontWeight="semibold">Products Management</Text>
                 </HStack>
-                <Text fontSize="sm" color={{ base: "gray.400", _light: "gray.600" }}>
+                <Text
+                  fontSize="sm"
+                  color={{ base: "gray.400", _light: "gray.600" }}
+                >
                   View and manage all your products
                 </Text>
               </VStack>
@@ -200,9 +225,9 @@ function StockEntry() {
               borderRadius="md"
               bg={{ base: "gray.900", _light: "white" }}
               borderColor={{ base: "gray.700", _light: "gray.200" }}
-              _hover={{ 
+              _hover={{
                 borderColor: "orange.500",
-                bg: { base: "gray.800", _light: "gray.50" }
+                bg: { base: "gray.800", _light: "gray.50" },
               }}
               cursor="pointer"
               transition="all 0.2s"
@@ -215,7 +240,10 @@ function StockEntry() {
                   </Box>
                   <Text fontWeight="semibold">Goods Receipt Note (GRN)</Text>
                 </HStack>
-                <Text fontSize="sm" color={{ base: "gray.400", _light: "gray.600" }}>
+                <Text
+                  fontSize="sm"
+                  color={{ base: "gray.400", _light: "gray.600" }}
+                >
                   Record incoming stock and deliveries
                 </Text>
               </VStack>
@@ -236,19 +264,32 @@ function StockEntry() {
               <FiPackage size={24} />
             </Box>
             <VStack align="start" gap={2}>
-              <Text fontWeight="semibold" color={{ base: "blue.300", _light: "blue.700" }}>
+              <Text
+                fontWeight="semibold"
+                color={{ base: "blue.300", _light: "blue.700" }}
+              >
                 Stock Management Workflow
               </Text>
-              <Text fontSize="sm" color={{ base: "gray.400", _light: "gray.600" }}>
-                <strong>1. Add Products:</strong> Create new product entries with pricing and details<br/>
-                <strong>2. Stock Adjustment:</strong> Set initial stock levels and reorder points<br/>
-                <strong>3. GRN:</strong> Record incoming deliveries and update stock<br/>
-                <strong>4. Monitor:</strong> Track stock levels and manage your inventory
+              <Text
+                fontSize="sm"
+                color={{ base: "gray.400", _light: "gray.600" }}
+              >
+                <strong>1. Add Products:</strong> Create new product entries
+                with pricing and details
+                <br />
+                <strong>2. Stock Adjustment:</strong> Set initial stock levels
+                and reorder points
+                <br />
+                <strong>3. GRN:</strong> Record incoming deliveries and update
+                stock
+                <br />
+                <strong>4. Monitor:</strong> Track stock levels and manage your
+                inventory
               </Text>
             </VStack>
           </HStack>
         </Box>
       </VStack>
     </Container>
-  );
+  )
 }

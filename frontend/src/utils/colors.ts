@@ -1,6 +1,6 @@
 /**
  * Color Palette Utilities
- * 
+ *
  * This file provides reusable color constants based on the theme.
  * Use theme semantic tokens where possible, but this provides common
  * color combinations and utilities.
@@ -14,17 +14,17 @@ export const colors = {
   primaryActive: "#0f766e",
   primaryLight: "#5eead4",
   primaryDark: "#134e4a",
-  
+
   // Secondary blue
   secondary: "#60a5fa",
   secondaryHover: "#3b82f6",
   secondaryActive: "#2563eb",
-  
+
   // Accent purple
   accent: "#a855f7",
   accentHover: "#9333ea",
   accentActive: "#7c3aed",
-  
+
   // Text colors
   textPrimary: {
     dark: "#ffffff",
@@ -38,7 +38,7 @@ export const colors = {
     dark: "#9ca3af",
     light: "#6b7280",
   },
-  
+
   // Background colors
   bgCanvas: {
     dark: "#1a1d29",
@@ -52,7 +52,7 @@ export const colors = {
     dark: "#363a4d",
     light: "#ffffff",
   },
-  
+
   // Border colors
   borderDefault: {
     dark: "rgba(255, 255, 255, 0.1)",
@@ -62,7 +62,7 @@ export const colors = {
     dark: "rgba(255, 255, 255, 0.12)",
     light: "#e5e7eb",
   },
-  
+
   // Status colors
   success: "#10b981",
   error: "#ef4444",
@@ -73,10 +73,10 @@ export const colors = {
 // Responsive breakpoints (matches Chakra UI default)
 export const breakpoints = {
   base: "0em",
-  sm: "30em",   // 480px
-  md: "48em",   // 768px
-  lg: "62em",   // 992px
-  xl: "80em",   // 1280px
+  sm: "30em", // 480px
+  md: "48em", // 768px
+  lg: "62em", // 992px
+  xl: "80em", // 1280px
   "2xl": "96em", // 1536px
 } as const
 
@@ -95,4 +95,3 @@ export const responsive = {
     desktop: "container.lg",
   },
 } as const
-

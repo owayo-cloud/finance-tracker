@@ -9,17 +9,11 @@ import EditPaymentMethod from "@/components/Admin/EditPaymentMethod"
 export const Route = createFileRoute("/_layout/payment-methods")({
   component: PaymentMethods,
   beforeLoad: async () => {
-    // Ensure only admins can access payment methods management
-    try {
-      const user = await UsersService.readUserMe()
-      if (!user.is_superuser) {
-        throw redirect({
-          to: "/sales",
-        })
-      }
-    } catch (error) {
-      // Re-throw redirect errors
-      throw error
+    const user = await UsersService.readUserMe()
+    if (!user.is_superuser) {
+      throw redirect({
+        to: "/sales",
+      })
     }
   },
 })
@@ -34,7 +28,11 @@ function PaymentMethodsTable() {
 
   if (isLoading) {
     return (
-      <Text color={{ base: "#9ca3af", _light: "#6b7280" }} textAlign="center" py={8}>
+      <Text
+        color={{ base: "#9ca3af", _light: "#6b7280" }}
+        textAlign="center"
+        py={8}
+      >
         Loading payment methods...
       </Text>
     )
@@ -42,7 +40,11 @@ function PaymentMethodsTable() {
 
   if (paymentMethods.length === 0) {
     return (
-      <Text color={{ base: "#9ca3af", _light: "#6b7280" }} textAlign="center" py={8}>
+      <Text
+        color={{ base: "#9ca3af", _light: "#6b7280" }}
+        textAlign="center"
+        py={8}
+      >
         No payment methods found. Create one to get started.
       </Text>
     )
@@ -52,16 +54,27 @@ function PaymentMethodsTable() {
     <Table.Root size={{ base: "sm", md: "md" }} variant="outline">
       <Table.Header>
         <Table.Row>
-          <Table.ColumnHeader color={{ base: "#ffffff", _light: "#1a1d29" }}>Name</Table.ColumnHeader>
-          <Table.ColumnHeader color={{ base: "#ffffff", _light: "#1a1d29" }}>Description</Table.ColumnHeader>
-          <Table.ColumnHeader color={{ base: "#ffffff", _light: "#1a1d29" }}>Status</Table.ColumnHeader>
-          <Table.ColumnHeader color={{ base: "#ffffff", _light: "#1a1d29" }}>Actions</Table.ColumnHeader>
+          <Table.ColumnHeader color={{ base: "#ffffff", _light: "#1a1d29" }}>
+            Name
+          </Table.ColumnHeader>
+          <Table.ColumnHeader color={{ base: "#ffffff", _light: "#1a1d29" }}>
+            Description
+          </Table.ColumnHeader>
+          <Table.ColumnHeader color={{ base: "#ffffff", _light: "#1a1d29" }}>
+            Status
+          </Table.ColumnHeader>
+          <Table.ColumnHeader color={{ base: "#ffffff", _light: "#1a1d29" }}>
+            Actions
+          </Table.ColumnHeader>
         </Table.Row>
       </Table.Header>
       <Table.Body>
         {paymentMethods.map((paymentMethod: PaymentMethodPublic) => (
           <Table.Row key={paymentMethod.id}>
-            <Table.Cell fontWeight="medium" color={{ base: "#ffffff", _light: "#1a1d29" }}>
+            <Table.Cell
+              fontWeight="medium"
+              color={{ base: "#ffffff", _light: "#1a1d29" }}
+            >
               {paymentMethod.name}
             </Table.Cell>
             <Table.Cell color={{ base: "#9ca3af", _light: "#6b7280" }}>
@@ -91,10 +104,7 @@ function PaymentMethods() {
     <Container maxW="full" minH="100vh">
       <Flex direction="column" gap={6} pt={12} pb={8}>
         <Flex justify="space-between" align="center">
-          <Heading
-            size="lg"
-            color={{ base: "#ffffff", _light: "#1a1d29" }}
-          >
+          <Heading size="lg" color={{ base: "#ffffff", _light: "#1a1d29" }}>
             Payment Methods Management
           </Heading>
           <AddPaymentMethod />
@@ -104,4 +114,3 @@ function PaymentMethods() {
     </Container>
   )
 }
-

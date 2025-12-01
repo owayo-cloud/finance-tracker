@@ -1,56 +1,63 @@
-import { createFileRoute } from "@tanstack/react-router";
-import { useState } from "react";
 import {
-  Container,
-  Heading,
-  VStack,
-  HStack,
-  Box,
-  Input,
-  Button,
-  Table,
-  IconButton,
   Badge,
-  Text,
-  DrawerRoot,
+  Box,
+  Button,
+  Container,
   DrawerBackdrop,
-  DrawerContent,
-  DrawerHeader,
   DrawerBody,
-  DrawerFooter,
-  DrawerTitle,
   DrawerCloseTrigger,
-} from "@chakra-ui/react";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { FiPlus, FiEdit2, FiTrash2 } from "react-icons/fi";
-
-import { GrnService } from "@/client";
-import type { SupplierPublic, SupplierCreate, SupplierUpdate } from "@/client";
-import useCustomToast from "@/hooks/useCustomToast";
+  DrawerContent,
+  DrawerFooter,
+  DrawerHeader,
+  DrawerRoot,
+  DrawerTitle,
+  Heading,
+  HStack,
+  IconButton,
+  Input,
+  Table,
+  Text,
+  VStack,
+} from "@chakra-ui/react"
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
+import { createFileRoute } from "@tanstack/react-router"
+import { useId, useState } from "react"
+import { FiEdit2, FiPlus, FiTrash2 } from "react-icons/fi"
+import type { SupplierCreate, SupplierPublic, SupplierUpdate } from "@/client"
+import { GrnService } from "@/client"
+import useCustomToast from "@/hooks/useCustomToast"
 
 export const Route = createFileRoute("/_layout/suppliers")({
   component: SuppliersPage,
-});
+})
 
 function SuppliersPage() {
-  const queryClient = useQueryClient();
-  const { showSuccessToast, showErrorToast } = useCustomToast();
+  const queryClient = useQueryClient()
+  const { showSuccessToast, showErrorToast } = useCustomToast()
+  const nameId = useId()
+  const contactPersonId = useId()
+  const phoneId = useId()
+  const emailId = useId()
+  const addressId = useId()
+  const activeCheckboxId = useId()
 
-  const [showDrawer, setShowDrawer] = useState(false);
-  const [editingSupplier, setEditingSupplier] = useState<SupplierPublic | null>(null);
-  const [searchTerm, setSearchTerm] = useState("");
+  const [showDrawer, setShowDrawer] = useState(false)
+  const [editingSupplier, setEditingSupplier] = useState<SupplierPublic | null>(
+    null,
+  )
+  const [searchTerm, setSearchTerm] = useState("")
 
   // Form state
-  const [name, setName] = useState("");
-  const [contactPerson, setContactPerson] = useState("");
-  const [phone, setPhone] = useState("");
-  const [email, setEmail] = useState("");
-  const [address, setAddress] = useState("");
-  const [isActive, setIsActive] = useState(true);
-  
+  const [name, setName] = useState("")
+  const [contactPerson, setContactPerson] = useState("")
+  const [phone, setPhone] = useState("")
+  const [email, setEmail] = useState("")
+  const [address, setAddress] = useState("")
+  const [isActive, setIsActive] = useState(true)
+
   // Validation state
-  const [nameError, setNameError] = useState("");
-  const [nameWarning, setNameWarning] = useState("");
+  const [nameError, setNameError] = useState("")
+  const [nameWarning, setNameWarning] = useState("")
 
   // Fetch suppliers
   const { data: suppliersData, isLoading } = useQuery({
@@ -61,140 +68,140 @@ function SuppliersPage() {
         limit: 1000,
         search: searchTerm || undefined,
       }),
-  });
+  })
 
   // Create mutation
   const createMutation = useMutation({
     mutationFn: (data: SupplierCreate) =>
       GrnService.createSupplier({ requestBody: data }),
     onSuccess: () => {
-      showSuccessToast("Supplier created successfully!");
-      queryClient.invalidateQueries({ queryKey: ["suppliers"] });
-      handleCloseDrawer();
+      showSuccessToast("Supplier created successfully!")
+      queryClient.invalidateQueries({ queryKey: ["suppliers"] })
+      handleCloseDrawer()
     },
     onError: (error: any) => {
-      const detail = error?.body?.detail || "An error occurred";
-      showErrorToast(detail);
+      const detail = error?.body?.detail || "An error occurred"
+      showErrorToast(detail)
     },
-  });
+  })
 
   // Update mutation
   const updateMutation = useMutation({
     mutationFn: ({ id, data }: { id: string; data: SupplierUpdate }) =>
       GrnService.updateSupplier({ supplierId: id, requestBody: data }),
     onSuccess: () => {
-      showSuccessToast("Supplier updated successfully!");
-      queryClient.invalidateQueries({ queryKey: ["suppliers"] });
-      handleCloseDrawer();
+      showSuccessToast("Supplier updated successfully!")
+      queryClient.invalidateQueries({ queryKey: ["suppliers"] })
+      handleCloseDrawer()
     },
     onError: (error: any) => {
-      const detail = error?.body?.detail || "An error occurred";
-      showErrorToast(detail);
+      const detail = error?.body?.detail || "An error occurred"
+      showErrorToast(detail)
     },
-  });
+  })
 
   // Delete mutation
   const deleteMutation = useMutation({
     mutationFn: (id: string) => GrnService.deleteSupplier({ supplierId: id }),
     onSuccess: () => {
-      showSuccessToast("Supplier deleted successfully!");
-      queryClient.invalidateQueries({ queryKey: ["suppliers"] });
+      showSuccessToast("Supplier deleted successfully!")
+      queryClient.invalidateQueries({ queryKey: ["suppliers"] })
     },
     onError: (error: any) => {
-      const detail = error?.body?.detail || "An error occurred";
-      showErrorToast(detail);
+      const detail = error?.body?.detail || "An error occurred"
+      showErrorToast(detail)
     },
-  });
+  })
 
   const validateSupplierName = (value: string) => {
     // Check for invalid characters (only letters, spaces, and dashes allowed)
-    const invalidChars = /[^A-Za-z\s-]/;
+    const invalidChars = /[^A-Za-z\s-]/
     if (invalidChars.test(value)) {
-      setNameError("Only letters, spaces, and dashes are allowed");
-      return false;
+      setNameError("Only letters, spaces, and dashes are allowed")
+      return false
     }
 
     // Clear error if valid
-    setNameError("");
+    setNameError("")
 
     // Check for duplicate (case-insensitive)
-    const upperValue = value.toUpperCase().trim();
+    const upperValue = value.toUpperCase().trim()
     if (upperValue && suppliersData?.data) {
       const duplicate = suppliersData.data.find(
-        (supplier) => 
-          supplier.name.toUpperCase() === upperValue && 
-          supplier.id !== editingSupplier?.id
-      );
-      
+        (supplier) =>
+          supplier.name.toUpperCase() === upperValue &&
+          supplier.id !== editingSupplier?.id,
+      )
+
       if (duplicate) {
-        setNameWarning("A supplier with this name already exists");
+        setNameWarning("A supplier with this name already exists")
       } else {
-        setNameWarning("");
+        setNameWarning("")
       }
     }
 
-    return true;
-  };
+    return true
+  }
 
   const handleNameChange = (value: string) => {
     // Convert to uppercase
-    const upperValue = value.toUpperCase();
-    setName(upperValue);
-    validateSupplierName(upperValue);
-  };
+    const upperValue = value.toUpperCase()
+    setName(upperValue)
+    validateSupplierName(upperValue)
+  }
 
   const handleOpenDrawer = (supplier?: SupplierPublic) => {
     if (supplier) {
-      setEditingSupplier(supplier);
-      setName(supplier.name);
-      setContactPerson(supplier.contact_person || "");
-      setPhone(supplier.phone || "");
-      setEmail(supplier.email || "");
-      setAddress(supplier.address || "");
-      setIsActive(supplier.is_active ?? true);
+      setEditingSupplier(supplier)
+      setName(supplier.name)
+      setContactPerson(supplier.contact_person || "")
+      setPhone(supplier.phone || "")
+      setEmail(supplier.email || "")
+      setAddress(supplier.address || "")
+      setIsActive(supplier.is_active ?? true)
     } else {
-      setEditingSupplier(null);
-      setName("");
-      setContactPerson("");
-      setPhone("");
-      setEmail("");
-      setAddress("");
-      setIsActive(true);
+      setEditingSupplier(null)
+      setName("")
+      setContactPerson("")
+      setPhone("")
+      setEmail("")
+      setAddress("")
+      setIsActive(true)
     }
-    setNameError("");
-    setNameWarning("");
-    setShowDrawer(true);
-  };
+    setNameError("")
+    setNameWarning("")
+    setShowDrawer(true)
+  }
 
   const handleCloseDrawer = () => {
-    setShowDrawer(false);
-    setEditingSupplier(null);
-    setName("");
-    setContactPerson("");
-    setPhone("");
-    setEmail("");
-    setAddress("");
-    setIsActive(true);
-    setNameError("");
-    setNameWarning("");
-  };
+    setShowDrawer(false)
+    setEditingSupplier(null)
+    setName("")
+    setContactPerson("")
+    setPhone("")
+    setEmail("")
+    setAddress("")
+    setIsActive(true)
+    setNameError("")
+    setNameWarning("")
+  }
 
   const handleSubmit = () => {
     if (!name.trim()) {
-      showErrorToast("Supplier name is required");
-      return;
+      showErrorToast("Supplier name is required")
+      return
     }
 
     // Validate name format
     if (!validateSupplierName(name)) {
-      showErrorToast("Please fix the supplier name errors");
-      return;
+      showErrorToast("Please fix the supplier name errors")
+      return
     }
 
     // Check for duplicates on submit
     if (nameWarning) {
-      showErrorToast("A supplier with this name already exists");
-      return;
+      showErrorToast("A supplier with this name already exists")
+      return
     }
 
     const supplierData = {
@@ -204,23 +211,23 @@ function SuppliersPage() {
       email: email || undefined,
       address: address || undefined,
       is_active: isActive,
-    };
+    }
 
     if (editingSupplier) {
       updateMutation.mutate({
         id: editingSupplier.id,
         data: supplierData,
-      });
+      })
     } else {
-      createMutation.mutate(supplierData);
+      createMutation.mutate(supplierData)
     }
-  };
+  }
 
   const handleDelete = (id: string) => {
     if (window.confirm("Are you sure you want to delete this supplier?")) {
-      deleteMutation.mutate(id);
+      deleteMutation.mutate(id)
     }
-  };
+  }
 
   return (
     <Container maxW="full" py={8}>
@@ -228,10 +235,7 @@ function SuppliersPage() {
         {/* Header */}
         <HStack justify="space-between">
           <Heading size="2xl">Suppliers</Heading>
-          <Button
-            colorPalette="teal"
-            onClick={() => handleOpenDrawer()}
-          >
+          <Button colorPalette="teal" onClick={() => handleOpenDrawer()}>
             <FiPlus /> Add Supplier
           </Button>
         </HStack>
@@ -274,7 +278,12 @@ function SuppliersPage() {
                 </Table.Row>
               ) : suppliersData?.data.length === 0 ? (
                 <Table.Row>
-                  <Table.Cell colSpan={7} textAlign="center" py={8} color="gray.500">
+                  <Table.Cell
+                    colSpan={7}
+                    textAlign="center"
+                    py={8}
+                    color="gray.500"
+                  >
                     No suppliers found. Click "Add Supplier" to create one.
                   </Table.Cell>
                 </Table.Row>
@@ -350,6 +359,7 @@ function SuppliersPage() {
             <VStack gap={4} align="stretch">
               <Box>
                 <label
+                  htmlFor={nameId}
                   style={{
                     fontSize: "14px",
                     fontWeight: "500",
@@ -360,6 +370,7 @@ function SuppliersPage() {
                   Supplier Name <span style={{ color: "red" }}>*</span>
                 </label>
                 <Input
+                  id={nameId}
                   value={name}
                   onChange={(e) => handleNameChange(e.target.value)}
                   placeholder="Enter supplier name (UPPERCASE)"
@@ -382,6 +393,7 @@ function SuppliersPage() {
               </Box>
               <Box>
                 <label
+                  htmlFor={contactPersonId}
                   style={{
                     fontSize: "14px",
                     fontWeight: "500",
@@ -392,6 +404,7 @@ function SuppliersPage() {
                   Contact Person
                 </label>
                 <Input
+                  id={contactPersonId}
                   value={contactPerson}
                   onChange={(e) => setContactPerson(e.target.value)}
                   placeholder="Enter contact person name"
@@ -399,6 +412,7 @@ function SuppliersPage() {
               </Box>
               <Box>
                 <label
+                  htmlFor={phoneId}
                   style={{
                     fontSize: "14px",
                     fontWeight: "500",
@@ -409,6 +423,7 @@ function SuppliersPage() {
                   Phone
                 </label>
                 <Input
+                  id={phoneId}
                   value={phone}
                   onChange={(e) => setPhone(e.target.value)}
                   placeholder="Enter phone number"
@@ -416,6 +431,7 @@ function SuppliersPage() {
               </Box>
               <Box>
                 <label
+                  htmlFor={emailId}
                   style={{
                     fontSize: "14px",
                     fontWeight: "500",
@@ -426,6 +442,7 @@ function SuppliersPage() {
                   Email
                 </label>
                 <Input
+                  id={emailId}
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
@@ -434,6 +451,7 @@ function SuppliersPage() {
               </Box>
               <Box>
                 <label
+                  htmlFor={addressId}
                   style={{
                     fontSize: "14px",
                     fontWeight: "500",
@@ -444,6 +462,7 @@ function SuppliersPage() {
                   Address
                 </label>
                 <Input
+                  id={addressId}
                   value={address}
                   onChange={(e) => setAddress(e.target.value)}
                   placeholder="Enter address"
@@ -455,10 +474,10 @@ function SuppliersPage() {
                     type="checkbox"
                     checked={isActive}
                     onChange={(e) => setIsActive(e.target.checked)}
-                    id="active-checkbox"
+                    id={activeCheckboxId}
                   />
                   <label
-                    htmlFor="active-checkbox"
+                    htmlFor={activeCheckboxId}
                     style={{ fontSize: "14px", fontWeight: "500" }}
                   >
                     Active
@@ -484,5 +503,5 @@ function SuppliersPage() {
         </DrawerContent>
       </DrawerRoot>
     </Container>
-  );
+  )
 }

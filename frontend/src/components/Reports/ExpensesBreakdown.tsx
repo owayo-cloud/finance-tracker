@@ -1,6 +1,14 @@
-import { Badge, Button, Card, Heading, HStack, Table, VStack } from "@chakra-ui/react"
+import {
+  Badge,
+  Button,
+  Card,
+  Heading,
+  HStack,
+  Table,
+  VStack,
+} from "@chakra-ui/react"
 import { FiDownload } from "react-icons/fi"
-import { formatCurrency, downloadCSV, formatDate } from "./utils"
+import { downloadCSV, formatCurrency, formatDate } from "./utils"
 
 interface ExpensesBreakdownProps {
   expenseSummary: {
@@ -12,7 +20,11 @@ interface ExpensesBreakdownProps {
   endDate: string
 }
 
-function exportExpensesToCSV(expensesData: any[], startDate: string, endDate: string) {
+function exportExpensesToCSV(
+  expensesData: any[],
+  startDate: string,
+  endDate: string,
+) {
   const headers = ["Date", "Category", "Description", "Amount", "Created By"]
   const rows = expensesData.map((expense) => [
     formatDate(expense.expense_date),
@@ -21,7 +33,10 @@ function exportExpensesToCSV(expensesData: any[], startDate: string, endDate: st
     formatCurrency(expense.amount),
     expense.created_by?.full_name || expense.created_by?.username || "Unknown",
   ])
-  downloadCSV([headers, ...rows], `expenses-report-${startDate}-to-${endDate}.csv`)
+  downloadCSV(
+    [headers, ...rows],
+    `expenses-report-${startDate}-to-${endDate}.csv`,
+  )
 }
 
 export function ExpensesBreakdown({
@@ -51,20 +66,21 @@ export function ExpensesBreakdown({
             <Button
               size="sm"
               variant="outline"
-              onClick={() => exportExpensesToCSV(expensesData, startDate, endDate)}
+              onClick={() =>
+                exportExpensesToCSV(expensesData, startDate, endDate)
+              }
             >
               <FiDownload size={14} style={{ marginRight: "4px" }} />
               Export CSV
             </Button>
           </HStack>
-          <Table.Root 
-            size="sm"
-            variant="outline"
-          >
+          <Table.Root size="sm" variant="outline">
             <Table.Header>
               <Table.Row bg="table.header.bg">
                 <Table.ColumnHeader>Category</Table.ColumnHeader>
-                <Table.ColumnHeader textAlign="right">Amount</Table.ColumnHeader>
+                <Table.ColumnHeader textAlign="right">
+                  Amount
+                </Table.ColumnHeader>
                 <Table.ColumnHeader textAlign="right">%</Table.ColumnHeader>
               </Table.Row>
             </Table.Header>
@@ -72,7 +88,7 @@ export function ExpensesBreakdown({
               {Object.entries(expenseSummary.category_totals)
                 .sort((a, b) => b[1] - a[1])
                 .map(([category, amount]) => (
-                  <Table.Row 
+                  <Table.Row
                     key={category}
                     bg="table.row.bg"
                     _hover={{ bg: "table.row.hover" }}
@@ -85,7 +101,9 @@ export function ExpensesBreakdown({
                       <Badge colorPalette="red">
                         {(
                           (amount /
-                            parseFloat(expenseSummary.total_amount?.toString() || "1")) *
+                            parseFloat(
+                              expenseSummary.total_amount?.toString() || "1",
+                            )) *
                           100
                         ).toFixed(1)}
                         %
@@ -100,4 +118,3 @@ export function ExpensesBreakdown({
     </Card.Root>
   )
 }
-

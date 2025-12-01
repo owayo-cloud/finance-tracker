@@ -1,7 +1,16 @@
-import { Box, Button, Heading, VStack, HStack, Icon, Stack, Text } from "@chakra-ui/react"
+import {
+  Box,
+  Button,
+  Heading,
+  HStack,
+  Icon,
+  Stack,
+  Text,
+  VStack,
+} from "@chakra-ui/react"
 import { useMutation } from "@tanstack/react-query"
 import { type SubmitHandler, useForm } from "react-hook-form"
-import { FiLock, FiCheck } from "react-icons/fi"
+import { FiCheck, FiLock } from "react-icons/fi"
 
 import { type ApiError, type UpdatePassword, UsersService } from "@/client"
 import useCustomToast from "@/hooks/useCustomToast"
@@ -62,7 +71,10 @@ const ChangePassword = () => {
         borderRadius="lg"
         border="1px solid"
         borderColor="border.card"
-        boxShadow={{ base: "0 2px 4px rgba(0, 0, 0, 0.2)", _light: "0 1px 3px rgba(0, 0, 0, 0.1)" }}
+        boxShadow={{
+          base: "0 2px 4px rgba(0, 0, 0, 0.2)",
+          _light: "0 1px 3px rgba(0, 0, 0, 0.1)",
+        }}
       >
         <Box as="form" onSubmit={handleSubmit(onSubmit)}>
           <VStack gap={4} align="stretch">
@@ -87,14 +99,17 @@ const ChangePassword = () => {
               placeholder="Confirm Password"
               errors={errors}
             />
-            
+
             {newPassword && (
               <Box
                 p={3}
                 borderRadius="md"
                 bg={{ base: "rgba(148, 163, 184, 0.05)", _light: "#f8fafc" }}
                 border="1px solid"
-                borderColor={{ base: "rgba(148, 163, 184, 0.15)", _light: "#e2e8f0" }}
+                borderColor={{
+                  base: "rgba(148, 163, 184, 0.15)",
+                  _light: "#e2e8f0",
+                }}
               >
                 <Stack gap={1.5}>
                   {passwordRequirements.map((req, index) => (
@@ -113,9 +128,9 @@ const ChangePassword = () => {
               </Box>
             )}
 
-            <Button 
-              variant="solid" 
-              type="submit" 
+            <Button
+              variant="solid"
+              type="submit"
               loading={isSubmitting}
               w="full"
             >

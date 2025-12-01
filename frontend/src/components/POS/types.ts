@@ -1,4 +1,4 @@
-import { ProductPublic } from "@/client"
+import type { ProductPublic } from "@/client"
 
 export interface CartItem {
   product: ProductPublic
@@ -18,4 +18,3 @@ export interface SuspendedSale {
   pricelist: string
   remarks?: string
 }
-

@@ -1,4 +1,12 @@
-import { Box, Button, Card, HStack, Input, Text, VStack } from "@chakra-ui/react"
+import {
+  Box,
+  Button,
+  Card,
+  HStack,
+  Input,
+  Text,
+  VStack,
+} from "@chakra-ui/react"
 import { FiRefreshCw } from "react-icons/fi"
 
 interface DateFiltersProps {
@@ -92,19 +100,39 @@ export function DateFilters({
             <Text fontSize="sm" fontWeight="semibold">
               Quick Select:
             </Text>
-            <Button size="sm" variant="outline" onClick={() => setDateRange("today")}>
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => setDateRange("today")}
+            >
               Today
             </Button>
-            <Button size="sm" variant="outline" onClick={() => setDateRange("week")}>
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => setDateRange("week")}
+            >
               Last 7 Days
             </Button>
-            <Button size="sm" variant="outline" onClick={() => setDateRange("month")}>
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => setDateRange("month")}
+            >
               This Month
             </Button>
-            <Button size="sm" variant="outline" onClick={() => setDateRange("quarter")}>
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => setDateRange("quarter")}
+            >
               Last Quarter
             </Button>
-            <Button size="sm" variant="outline" onClick={() => setDateRange("year")}>
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => setDateRange("year")}
+            >
               This Year
             </Button>
           </HStack>
@@ -113,4 +141,3 @@ export function DateFilters({
     </Card.Root>
   )
 }
-

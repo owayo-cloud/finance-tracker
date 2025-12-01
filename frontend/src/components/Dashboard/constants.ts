@@ -7,8 +7,8 @@ import {
   FiTrendingUp,
   FiUsers,
 } from "react-icons/fi"
-import { TbReceiptDollar } from "react-icons/tb"
 import type { IconType } from "react-icons/lib"
+import { TbReceiptDollar } from "react-icons/tb"
 
 export interface Module {
   icon: IconType
@@ -94,4 +94,3 @@ export const modules: Module[] = [
     adminOnly: true,
   },
 ]
-

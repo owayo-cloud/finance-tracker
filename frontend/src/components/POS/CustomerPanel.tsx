@@ -1,9 +1,27 @@
-import { Box, Button, Flex, Input, Stack, Text, HStack, Table, Grid, Icon, IconButton } from "@chakra-ui/react"
-import { FiPlus, FiEye, FiChevronLeft, FiChevronRight, FiPlay } from "react-icons/fi"
-import { SuspendedSale } from "./types"
-import { ThemedSelect } from "./ThemedSelect"
-import { formatCurrency } from "./utils"
+import {
+  Box,
+  Button,
+  Flex,
+  Grid,
+  HStack,
+  Icon,
+  IconButton,
+  Input,
+  Stack,
+  Table,
+  Text,
+} from "@chakra-ui/react"
+import {
+  FiChevronLeft,
+  FiChevronRight,
+  FiEye,
+  FiPlay,
+  FiPlus,
+} from "react-icons/fi"
 import useAuth from "@/hooks/useAuth"
+import { ThemedSelect } from "./ThemedSelect"
+import type { SuspendedSale } from "./types"
+import { formatCurrency } from "./utils"
 
 interface CustomerPanelProps {
   activeTab: "customer" | "suspended"
@@ -56,7 +74,7 @@ export function CustomerPanel({
 }: CustomerPanelProps) {
   const { user: currentUser } = useAuth()
   const isAdmin = currentUser?.is_superuser || false
-  
+
   return (
     <Box
       w={{ base: "100%", lg: "400px" }}
@@ -80,7 +98,12 @@ export function CustomerPanel({
           fontWeight="medium"
           size="sm"
           py={3}
-          _hover={{ bg: activeTab === "customer" ? "brand.primary.hover" : { base: "rgba(255, 255, 255, 0.05)", _light: "#f3f4f6" } }}
+          _hover={{
+            bg:
+              activeTab === "customer"
+                ? "brand.primary.hover"
+                : { base: "rgba(255, 255, 255, 0.05)", _light: "#f3f4f6" },
+          }}
         >
           Attach Customer
         </Button>
@@ -93,7 +116,12 @@ export function CustomerPanel({
           fontWeight="medium"
           size="sm"
           py={3}
-          _hover={{ bg: activeTab === "suspended" ? "brand.primary.hover" : { base: "rgba(255, 255, 255, 0.05)", _light: "#f3f4f6" } }}
+          _hover={{
+            bg:
+              activeTab === "suspended"
+                ? "brand.primary.hover"
+                : { base: "rgba(255, 255, 255, 0.05)", _light: "#f3f4f6" },
+          }}
         >
           Suspended
         </Button>
@@ -101,9 +129,20 @@ export function CustomerPanel({
 
       {/* Tab Content */}
       {activeTab === "customer" ? (
-        <Box p={{ base: 3, md: 4 }} flex={1} display="flex" flexDirection="column" overflowY="auto" minH={0}>
+        <Box
+          p={{ base: 3, md: 4 }}
+          flex={1}
+          display="flex"
+          flexDirection="column"
+          overflowY="auto"
+          minH={0}
+        >
           {/* Customer Action Buttons */}
-          <Grid templateColumns={isAdmin ? "repeat(3, 1fr)" : "repeat(2, 1fr)"} gap={2} mb={4}>
+          <Grid
+            templateColumns={isAdmin ? "repeat(3, 1fr)" : "repeat(2, 1fr)"}
+            gap={2}
+            mb={4}
+          >
             <Button
               bg="brand.secondary"
               color="white"
@@ -136,7 +175,12 @@ export function CustomerPanel({
                 onClick={onNewCustomer}
               >
                 <Icon as={FiPlus} mr={1} fontSize="xs" flexShrink={0} />
-                <Text as="span" overflow="hidden" textOverflow="ellipsis" whiteSpace="nowrap">
+                <Text
+                  as="span"
+                  overflow="hidden"
+                  textOverflow="ellipsis"
+                  whiteSpace="nowrap"
+                >
                   New Customer
                 </Text>
               </Button>
@@ -202,7 +246,9 @@ export function CustomerPanel({
               <Input
                 type="number"
                 value={customerBalance || ""}
-                onChange={(e) => onCustomerBalanceChange(parseFloat(e.target.value) || 0)}
+                onChange={(e) =>
+                  onCustomerBalanceChange(parseFloat(e.target.value) || 0)
+                }
                 placeholder=""
                 bg="transparent"
                 border="none"
@@ -265,7 +311,10 @@ export function CustomerPanel({
               color="brand.primary"
               cursor="pointer"
               onClick={onViewReceipt}
-              _hover={{ textDecoration: "underline", color: "brand.primary.hover" }}
+              _hover={{
+                textDecoration: "underline",
+                color: "brand.primary.hover",
+              }}
             >
               View Receipt
             </Text>
@@ -280,11 +329,11 @@ export function CustomerPanel({
               color="text.primary"
               borderRadius="md"
             />
-            <Button 
-              bg="brand.primary" 
-              color="white" 
-              size="sm" 
-              _hover={{ bg: "brand.primary.hover" }} 
+            <Button
+              bg="brand.primary"
+              color="white"
+              size="sm"
+              _hover={{ bg: "brand.primary.hover" }}
               fontWeight="600"
               onClick={onPreviewReceipt}
               disabled={!selectedReceiptId}
@@ -296,7 +345,13 @@ export function CustomerPanel({
         </Box>
       ) : (
         /* Suspended Sales Tab */
-        <Box flex={1} display="flex" flexDirection="column" overflow="hidden" minH={0}>
+        <Box
+          flex={1}
+          display="flex"
+          flexDirection="column"
+          overflow="hidden"
+          minH={0}
+        >
           {/* Suspended Sales Table */}
           <Box flex={1} overflowY="auto" minH={0}>
             <Table.Root size="sm">
@@ -320,24 +375,47 @@ export function CustomerPanel({
                   suspendedSales.map((sale) => {
                     const total = sale.cart.reduce((sum, item) => {
                       const price = Number(item.product.selling_price)
-                      const discountAmount = (price * item.quantity * (item.discount || 0)) / 100
+                      const discountAmount =
+                        (price * item.quantity * (item.discount || 0)) / 100
                       return sum + (price * item.quantity - discountAmount)
                     }, 0)
-                    const itemsCount = sale.cart.reduce((sum, item) => sum + item.quantity, 0)
+                    const itemsCount = sale.cart.reduce(
+                      (sum, item) => sum + item.quantity,
+                      0,
+                    )
                     const isSelected = selectedSaleId === sale.id
                     return (
                       <Table.Row
                         key={sale.id}
                         cursor="pointer"
-                        bg={isSelected ? { base: "rgba(20, 184, 166, 0.2)", _light: "rgba(20, 184, 166, 0.1)" } : "transparent"}
-                        _hover={{ bg: isSelected ? { base: "rgba(20, 184, 166, 0.25)", _light: "rgba(20, 184, 166, 0.15)" } : { base: "rgba(255, 255, 255, 0.05)", _light: "#f9fafb" } }}
+                        bg={
+                          isSelected
+                            ? {
+                                base: "rgba(20, 184, 166, 0.2)",
+                                _light: "rgba(20, 184, 166, 0.1)",
+                              }
+                            : "transparent"
+                        }
+                        _hover={{
+                          bg: isSelected
+                            ? {
+                                base: "rgba(20, 184, 166, 0.25)",
+                                _light: "rgba(20, 184, 166, 0.15)",
+                              }
+                            : {
+                                base: "rgba(255, 255, 255, 0.05)",
+                                _light: "#f9fafb",
+                              },
+                        }}
                         onClick={() => {
                           onSelectSale(sale.id)
                         }}
                       >
                         <Table.Cell>-</Table.Cell>
                         <Table.Cell>{itemsCount}</Table.Cell>
-                        <Table.Cell fontWeight="medium">Ksh {formatCurrency(total)}</Table.Cell>
+                        <Table.Cell fontWeight="medium">
+                          Ksh {formatCurrency(total)}
+                        </Table.Cell>
                         <Table.Cell>{sale.customer?.name || "-"}</Table.Cell>
                         <Table.Cell>{sale.id.slice(-6)}</Table.Cell>
                       </Table.Row>
@@ -354,7 +432,10 @@ export function CustomerPanel({
               p={{ base: 3, md: 4 }}
               borderTop="1px solid"
               borderColor="border.card"
-              bg={{ base: "rgba(20, 184, 166, 0.1)", _light: "rgba(20, 184, 166, 0.05)" }}
+              bg={{
+                base: "rgba(20, 184, 166, 0.1)",
+                _light: "rgba(20, 184, 166, 0.05)",
+              }}
             >
               <Button
                 w="full"
@@ -378,25 +459,58 @@ export function CustomerPanel({
             borderTop="1px solid"
             borderColor="border.card"
           >
-            <Flex justify="space-between" alignItems="center" mb={4} flexWrap="wrap" gap={2}>
+            <Flex
+              justify="space-between"
+              alignItems="center"
+              mb={4}
+              flexWrap="wrap"
+              gap={2}
+            >
               <Text fontSize="sm" color="text.muted">
-                Showing {suspendedSales.length > 0 ? "0" : "0"} - {suspendedSales.length > 0 ? "0" : "0"} out of {suspendedSales.length}
+                Showing {suspendedSales.length > 0 ? "0" : "0"} -{" "}
+                {suspendedSales.length > 0 ? "0" : "0"} out of{" "}
+                {suspendedSales.length}
               </Text>
               <HStack gap={2} flexWrap="wrap">
-                <IconButton size="sm" variant="ghost" aria-label="First page" disabled>
+                <IconButton
+                  size="sm"
+                  variant="ghost"
+                  aria-label="First page"
+                  disabled
+                >
                   <Icon as={FiChevronLeft} />
                 </IconButton>
-                <IconButton size="sm" variant="ghost" aria-label="Previous page" disabled>
+                <IconButton
+                  size="sm"
+                  variant="ghost"
+                  aria-label="Previous page"
+                  disabled
+                >
                   <Icon as={FiChevronLeft} />
                 </IconButton>
-                <IconButton size="sm" variant="ghost" aria-label="Next page" disabled>
+                <IconButton
+                  size="sm"
+                  variant="ghost"
+                  aria-label="Next page"
+                  disabled
+                >
                   <Icon as={FiChevronRight} />
                 </IconButton>
-                <IconButton size="sm" variant="ghost" aria-label="Last page" disabled>
+                <IconButton
+                  size="sm"
+                  variant="ghost"
+                  aria-label="Last page"
+                  disabled
+                >
                   <Icon as={FiChevronRight} />
                 </IconButton>
                 <Box w="70px">
-                  <ThemedSelect value="10" onChange={() => {}} aria-label="Items per page" title="Items per page">
+                  <ThemedSelect
+                    value="10"
+                    onChange={() => {}}
+                    aria-label="Items per page"
+                    title="Items per page"
+                  >
                     <option value="10">10</option>
                     <option value="25">25</option>
                     <option value="50">50</option>
@@ -408,7 +522,12 @@ export function CustomerPanel({
             {/* Remarks and PIN in Suspended Tab */}
             <Stack gap={3}>
               <Box>
-                <Text fontSize="sm" mb={1} fontWeight="500" color="text.primary">
+                <Text
+                  fontSize="sm"
+                  mb={1}
+                  fontWeight="500"
+                  color="text.primary"
+                >
                   REMARKS/CUSTOMER NAME:
                 </Text>
                 <Input
@@ -426,7 +545,12 @@ export function CustomerPanel({
                 />
               </Box>
               <Box>
-                <Text fontSize="sm" mb={1} fontWeight="500" color="text.primary">
+                <Text
+                  fontSize="sm"
+                  mb={1}
+                  fontWeight="500"
+                  color="text.primary"
+                >
                   CUSTOMER PIN:
                 </Text>
                 <Input
@@ -451,4 +575,3 @@ export function CustomerPanel({
     </Box>
   )
 }
-

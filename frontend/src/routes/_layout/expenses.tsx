@@ -1,32 +1,35 @@
 import {
-  Container,
-  Heading,
-  VStack,
-  HStack,
-  Text,
-  Button,
-  Box,
-  Grid,
   Badge,
+  Box,
+  Button,
+  Container,
+  createListCollection,
+  Flex,
+  Grid,
+  Heading,
+  HStack,
   Input,
-  SelectRoot,
-  SelectTrigger,
   SelectContent,
   SelectItem,
+  SelectRoot,
+  SelectTrigger,
   SelectValueText,
-  Flex,
   Skeleton,
-  createListCollection,
+  Text,
+  VStack,
 } from "@chakra-ui/react"
-import { createFileRoute, Link } from "@tanstack/react-router"
 import { useQuery } from "@tanstack/react-query"
+import { createFileRoute, Link } from "@tanstack/react-router"
 import { useState } from "react"
-import { FiPlus, FiX, FiCalendar, FiTag } from "react-icons/fi"
+import { FiCalendar, FiPlus, FiTag, FiX } from "react-icons/fi"
 
-import { ExpensesService, type ExpenseCategoryPublic, type ExpensePublic } from "@/client"
+import {
+  type ExpenseCategoryPublic,
+  type ExpensePublic,
+  ExpensesService,
+} from "@/client"
 import { formatCurrency } from "@/components/Dashboard/utils"
 import { AddExpense } from "@/components/Expenses/AddExpense"
-
 
 export const Route = createFileRoute("/_layout/expenses")({
   component: Expenses,
@@ -39,8 +42,10 @@ function Expenses() {
   const [startDate, setStartDate] = useState<string>("")
   const [endDate, setEndDate] = useState<string>("")
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false)
-  const [editingExpense, setEditingExpense] = useState<ExpensePublic | null>(null)
-  
+  const [editingExpense, setEditingExpense] = useState<ExpensePublic | null>(
+    null,
+  )
+
   const pageSize = 25
 
   // Fetch expenses
@@ -56,7 +61,7 @@ function Expenses() {
           endDate: endDate || undefined,
           search: search || undefined,
         })
-      } catch (error) {
+      } catch (_error) {
         // Fallback if client not generated yet
         return { data: [], count: 0 }
       }
@@ -69,7 +74,7 @@ function Expenses() {
     queryFn: async () => {
       try {
         return await ExpensesService.readExpenseCategories()
-      } catch (error) {
+      } catch (_error) {
         // Fallback if client not generated yet
         return { data: [], count: 0 }
       }
@@ -86,7 +91,7 @@ function Expenses() {
           endDate: endDate || undefined,
           categoryId: selectedCategory || undefined,
         })
-      } catch (error) {
+      } catch (_error) {
         // Fallback if client not generated yet
         return {
           total_amount: 0,
@@ -107,30 +112,38 @@ function Expenses() {
     average_amount: number
     category_totals: Record<string, number>
   }
-  const summary: SummaryType = (summaryData && typeof summaryData === 'object' && 'total_amount' in summaryData) 
-    ? summaryData as SummaryType
-    : { 
-        total_amount: 0, 
-        count: 0, 
-        average_amount: 0, 
-        category_totals: {}
-      }
+  const summary: SummaryType =
+    summaryData &&
+    typeof summaryData === "object" &&
+    "total_amount" in summaryData
+      ? (summaryData as SummaryType)
+      : {
+          total_amount: 0,
+          count: 0,
+          average_amount: 0,
+          category_totals: {},
+        }
 
   // Group expenses by date
-  const groupedExpenses = expenses.reduce((acc, expense) => {
-    if (expense.expense_date) {
-      const date = new Date(expense.expense_date)
-      const dateKey = date.toISOString().split('T')[0] // Format: YYYY-MM-DD
-      if (!acc[dateKey]) {
-        acc[dateKey] = []
+  const groupedExpenses = expenses.reduce(
+    (acc, expense) => {
+      if (expense.expense_date) {
+        const date = new Date(expense.expense_date)
+        const dateKey = date.toISOString().split("T")[0] // Format: YYYY-MM-DD
+        if (!acc[dateKey]) {
+          acc[dateKey] = []
+        }
+        acc[dateKey].push(expense)
       }
-      acc[dateKey].push(expense)
-    }
-    return acc
-  }, {} as Record<string, ExpensePublic[]>)
+      return acc
+    },
+    {} as Record<string, ExpensePublic[]>,
+  )
 
   // Sort dates descending
-  const sortedDates = Object.keys(groupedExpenses).sort((a, b) => b.localeCompare(a))
+  const sortedDates = Object.keys(groupedExpenses).sort((a, b) =>
+    b.localeCompare(a),
+  )
 
   const handleClearFilters = () => {
     setSearch("")
@@ -142,14 +155,16 @@ function Expenses() {
 
   return (
     <Container maxW="full" py={6} position="relative">
-      <VStack gap={6} align="stretch" filter={hasNoCategories ? "blur(4px)" : "none"} pointerEvents={hasNoCategories ? "none" : "auto"}>
+      <VStack
+        gap={6}
+        align="stretch"
+        filter={hasNoCategories ? "blur(4px)" : "none"}
+        pointerEvents={hasNoCategories ? "none" : "auto"}
+      >
         {/* Header */}
         <Flex justify="space-between" align="center" flexWrap="wrap" gap={4}>
           <VStack align="start" gap={1}>
-            <Heading
-              size="lg"
-              color="text.primary"
-            >
+            <Heading size="lg" color="text.primary">
               Expenses
             </Heading>
             <Text color="text.muted" fontSize="sm">
@@ -212,7 +227,11 @@ function Expenses() {
         >
           <Flex gap={4} flexWrap="wrap" align="end">
             <Box flex="1" minW="200px">
-              <Text fontSize="sm" mb={2} color={{ base: "#9ca3af", _light: "#6b7280" }}>
+              <Text
+                fontSize="sm"
+                mb={2}
+                color={{ base: "#9ca3af", _light: "#6b7280" }}
+              >
                 Search
               </Text>
               <Input
@@ -224,7 +243,11 @@ function Expenses() {
               />
             </Box>
             <Box flex="1" minW="200px">
-              <Text fontSize="sm" mb={2} color={{ base: "#9ca3af", _light: "#6b7280" }}>
+              <Text
+                fontSize="sm"
+                mb={2}
+                color={{ base: "#9ca3af", _light: "#6b7280" }}
+              >
                 Category
               </Text>
               <SelectRoot
@@ -239,7 +262,10 @@ function Expenses() {
               >
                 <SelectTrigger
                   bg={{ base: "#0f1419", _light: "#f9fafb" }}
-                  borderColor={{ base: "rgba(255, 255, 255, 0.1)", _light: "#e5e7eb" }}
+                  borderColor={{
+                    base: "rgba(255, 255, 255, 0.1)",
+                    _light: "#e5e7eb",
+                  }}
                 >
                   <SelectValueText placeholder="All Categories" />
                 </SelectTrigger>
@@ -248,7 +274,10 @@ function Expenses() {
                     All Categories
                   </SelectItem>
                   {categories.map((cat: ExpenseCategoryPublic) => (
-                    <SelectItem key={cat.id} item={{ label: cat.name, value: cat.id }}>
+                    <SelectItem
+                      key={cat.id}
+                      item={{ label: cat.name, value: cat.id }}
+                    >
                       {cat.name}
                     </SelectItem>
                   ))}
@@ -256,7 +285,11 @@ function Expenses() {
               </SelectRoot>
             </Box>
             <Box flex="1" minW="150px">
-              <Text fontSize="sm" mb={2} color={{ base: "#9ca3af", _light: "#6b7280" }}>
+              <Text
+                fontSize="sm"
+                mb={2}
+                color={{ base: "#9ca3af", _light: "#6b7280" }}
+              >
                 Start Date
               </Text>
               <Input
@@ -268,7 +301,11 @@ function Expenses() {
               />
             </Box>
             <Box flex="1" minW="150px">
-              <Text fontSize="sm" mb={2} color={{ base: "#9ca3af", _light: "#6b7280" }}>
+              <Text
+                fontSize="sm"
+                mb={2}
+                color={{ base: "#9ca3af", _light: "#6b7280" }}
+              >
                 End Date
               </Text>
               <Input
@@ -279,10 +316,7 @@ function Expenses() {
                 borderColor="input.border"
               />
             </Box>
-            <Button
-              variant="outline"
-              onClick={handleClearFilters}
-            >
+            <Button variant="outline" onClick={handleClearFilters}>
               <FiX style={{ marginRight: "8px" }} />
               Clear
             </Button>
@@ -352,7 +386,8 @@ function Expenses() {
               No Expense Categories
             </Heading>
             <Text color="text.muted" fontSize="md">
-              You need to create at least one expense category before you can add expenses.
+              You need to create at least one expense category before you can
+              add expenses.
             </Text>
             <Link to="/expense-categories">
               <Button
@@ -391,7 +426,10 @@ function StatCard({
       borderRadius="lg"
       border="1px solid"
       borderColor="border.card"
-      boxShadow={{ base: "0 2px 4px rgba(0, 0, 0, 0.2)", _light: "0 1px 3px rgba(0, 0, 0, 0.1)" }}
+      boxShadow={{
+        base: "0 2px 4px rgba(0, 0, 0, 0.2)",
+        _light: "0 1px 3px rgba(0, 0, 0, 0.1)",
+      }}
     >
       {isLoading ? (
         <VStack align="start" gap={2}>
@@ -400,10 +438,19 @@ function StatCard({
         </VStack>
       ) : (
         <VStack align="start" gap={1}>
-          <Text fontSize="xs" color={{ base: "#9ca3af", _light: "#6b7280" }} textTransform="uppercase" letterSpacing="0.5px">
+          <Text
+            fontSize="xs"
+            color={{ base: "#9ca3af", _light: "#6b7280" }}
+            textTransform="uppercase"
+            letterSpacing="0.5px"
+          >
             {label}
           </Text>
-          <Text fontSize="2xl" fontWeight="700" color={{ base: "#ffffff", _light: "#1a1d29" }}>
+          <Text
+            fontSize="2xl"
+            fontWeight="700"
+            color={{ base: "#ffffff", _light: "#1a1d29" }}
+          >
             {value}
           </Text>
         </VStack>
@@ -434,19 +481,45 @@ function ExpensesList({
       <VStack gap={6} align="stretch">
         {sortedDates.map((dateKey) => {
           const expenses = groupedExpenses[dateKey]
-          const dateTotal = expenses.reduce((sum, exp) => sum + Number(exp.amount), 0)
-          
+          const dateTotal = expenses.reduce(
+            (sum, exp) => sum + Number(exp.amount),
+            0,
+          )
+
           return (
             <Box key={dateKey}>
               {/* Date Header */}
-              <HStack justify="space-between" mb={3} pb={2} borderBottom="1px solid" borderColor={{ base: "rgba(255, 255, 255, 0.1)", _light: "#e5e7eb" }}>
+              <HStack
+                justify="space-between"
+                mb={3}
+                pb={2}
+                borderBottom="1px solid"
+                borderColor={{
+                  base: "rgba(255, 255, 255, 0.1)",
+                  _light: "#e5e7eb",
+                }}
+              >
                 <HStack gap={2}>
-                  <FiCalendar size={16} color="var(--chakra-colors-text-secondary)" />
-                  <Text fontWeight="600" color={{ base: "#ffffff", _light: "#111827" }}>
-                    {new Date(dateKey).toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
+                  <FiCalendar
+                    size={16}
+                    color="var(--chakra-colors-text-secondary)"
+                  />
+                  <Text
+                    fontWeight="600"
+                    color={{ base: "#ffffff", _light: "#111827" }}
+                  >
+                    {new Date(dateKey).toLocaleDateString("en-US", {
+                      weekday: "long",
+                      year: "numeric",
+                      month: "long",
+                      day: "numeric",
+                    })}
                   </Text>
                 </HStack>
-                <Text fontWeight="600" color={{ base: "#9ca3af", _light: "#6b7280" }}>
+                <Text
+                  fontWeight="600"
+                  color={{ base: "#9ca3af", _light: "#6b7280" }}
+                >
                   {formatCurrency(dateTotal)}
                 </Text>
               </HStack>
@@ -507,18 +580,32 @@ function ExpenseRow({
             {expense.description}
           </Text>
           {expense.notes && (
-            <Text fontSize="sm" color={{ base: "#9ca3af", _light: "#6b7280" }} mt={1}>
+            <Text
+              fontSize="sm"
+              color={{ base: "#9ca3af", _light: "#6b7280" }}
+              mt={1}
+            >
               {expense.notes}
             </Text>
           )}
         </Box>
       </HStack>
       <VStack align="end" gap={0}>
-        <Text fontSize="lg" fontWeight="700" color={{ base: "#ffffff", _light: "#111827" }}>
+        <Text
+          fontSize="lg"
+          fontWeight="700"
+          color={{ base: "#ffffff", _light: "#111827" }}
+        >
           {formatCurrency(Number(expense.amount))}
         </Text>
         <Text fontSize="xs" color={{ base: "#9ca3af", _light: "#6b7280" }}>
-          {expense.expense_date ? new Date(expense.expense_date).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true }) : ''}
+          {expense.expense_date
+            ? new Date(expense.expense_date).toLocaleTimeString("en-US", {
+                hour: "numeric",
+                minute: "2-digit",
+                hour12: true,
+              })
+            : ""}
         </Text>
       </VStack>
     </HStack>
@@ -550,7 +637,11 @@ function EmptyExpensesState() {
   return (
     <Box p={12} textAlign="center">
       <VStack gap={4}>
-        <Text fontSize="xl" fontWeight="600" color={{ base: "#ffffff", _light: "#111827" }}>
+        <Text
+          fontSize="xl"
+          fontWeight="600"
+          color={{ base: "#ffffff", _light: "#111827" }}
+        >
           No expenses found
         </Text>
         <Text color={{ base: "#9ca3af", _light: "#6b7280" }}>

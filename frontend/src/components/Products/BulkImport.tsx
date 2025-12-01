@@ -1,6 +1,6 @@
 /**
  * Bulk Product Import - Complete Single-File Implementation
- * 
+ *
  * This component implements a 5-stage bulk import workflow:
  * 1. Pre-Import Instructions & Template Download
  * 2. File Upload (CSV/Excel)
@@ -9,28 +9,41 @@
  * 5. Final Import & Success Summary
  */
 
-import { useState, useEffect } from "react"
-import { useNavigate } from "@tanstack/react-router"
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
 import {
+  Alert,
+  Badge,
   Box,
   Button,
   Container,
+  createListCollection,
   Flex,
+  Grid,
   Heading,
+  HStack,
+  Icon,
+  Input,
+  List,
+  Spinner,
+  Table,
   Text,
   VStack,
-  HStack,
-  Badge,
-  List,
-  Icon,
-  Alert,
-  Input,
-  Table,
-  Grid,
-  Spinner,
-  createListCollection,
 } from "@chakra-ui/react"
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
+import { useNavigate } from "@tanstack/react-router"
+import { useEffect, useId, useState } from "react"
+import {
+  FiAlertCircle,
+  FiArrowLeft,
+  FiArrowRight,
+  FiCheckCircle,
+  FiChevronRight,
+  FiEdit,
+  FiInfo,
+  FiRefreshCw,
+  FiTrash2,
+  FiUpload,
+} from "react-icons/fi"
+import { ProductsService } from "@/client"
 import {
   SelectContent,
   SelectItem,
@@ -38,20 +51,6 @@ import {
   SelectTrigger,
   SelectValueText,
 } from "@/components/ui/select"
-import {
-  FiUpload,
-  FiCheckCircle,
-  FiAlertCircle,
-  FiInfo,
-  FiArrowRight,
-  FiArrowLeft,
-  FiEdit,
-  FiRefreshCw,
-  FiChevronRight,
-  FiTrash2,
-} from "react-icons/fi"
-
-import { ProductsService } from "@/client"
 import useCustomToast from "../../hooks/useCustomToast"
 import { Field } from "../ui/field"
 import { Tooltip } from "../ui/tooltip"
@@ -107,6 +106,7 @@ interface BulkImportState {
 export function BulkImportPage() {
   const navigate = useNavigate()
   const queryClient = useQueryClient()
+  const _fileInputId = useId()
 
   const [importState, setImportState] = useState<BulkImportState>({
     currentStage: ImportStage.INSTRUCTIONS,
@@ -134,16 +134,25 @@ export function BulkImportPage() {
         currentStage: importState.currentStage - 1,
       })
     } else {
-      navigate({ to: "/products", search: { page: 1, search: "", category: "", status: "", pageSize: 25 } })
+      navigate({
+        to: "/products",
+        search: { page: 1, search: "", category: "", status: "", pageSize: 25 },
+      })
     }
   }
 
   const handleCancel = () => {
-    if (window.confirm("Are you sure you want to cancel the import? All progress will be lost.")) {
-      navigate({ to: "/products", search: { page: 1, search: "", category: "", status: "", pageSize: 25 } })
+    if (
+      window.confirm(
+        "Are you sure you want to cancel the import? All progress will be lost.",
+      )
+    ) {
+      navigate({
+        to: "/products",
+        search: { page: 1, search: "", category: "", status: "", pageSize: 25 },
+      })
     }
   }
-
 
   return (
     <Container maxW="7xl" py={8}>
@@ -159,10 +168,10 @@ export function BulkImportPage() {
         </Box>
 
         {/* Stage Progress Breadcrumbs */}
-        <Box 
-          p={4} 
-          borderWidth="1px" 
-          borderRadius="lg" 
+        <Box
+          p={4}
+          borderWidth="1px"
+          borderRadius="lg"
           bg={{ base: "gray.800", _light: "white" }}
           borderColor={{ base: "gray.700", _light: "gray.200" }}
           shadow="sm"
@@ -175,14 +184,26 @@ export function BulkImportPage() {
               { stage: ImportStage.COMPLETE, label: "Import" },
             ].map((item, index, arr) => (
               <HStack key={item.stage} gap={3}>
-                <HStack 
+                <HStack
                   gap={2}
                   px={3}
                   py={2}
                   borderRadius="md"
-                  bg={importState.currentStage === item.stage ? { base: "teal.900", _light: "teal.50" } : "transparent"}
-                  color={importState.currentStage >= item.stage ? "teal.500" : "fg.muted"}
-                  fontWeight={importState.currentStage === item.stage ? "semibold" : "medium"}
+                  bg={
+                    importState.currentStage === item.stage
+                      ? { base: "teal.900", _light: "teal.50" }
+                      : "transparent"
+                  }
+                  color={
+                    importState.currentStage >= item.stage
+                      ? "teal.500"
+                      : "fg.muted"
+                  }
+                  fontWeight={
+                    importState.currentStage === item.stage
+                      ? "semibold"
+                      : "medium"
+                  }
                   transition="all 0.2s"
                 >
                   {importState.currentStage > item.stage ? (
@@ -193,8 +214,16 @@ export function BulkImportPage() {
                       h={5}
                       borderRadius="full"
                       borderWidth={2}
-                      borderColor={importState.currentStage === item.stage ? "teal.500" : "gray.400"}
-                      bg={importState.currentStage === item.stage ? "teal.500" : "transparent"}
+                      borderColor={
+                        importState.currentStage === item.stage
+                          ? "teal.500"
+                          : "gray.400"
+                      }
+                      bg={
+                        importState.currentStage === item.stage
+                          ? "teal.500"
+                          : "transparent"
+                      }
                       display="flex"
                       alignItems="center"
                       justifyContent="center"
@@ -211,10 +240,10 @@ export function BulkImportPage() {
         </Box>
 
         {/* Stage Content */}
-        <Box 
-          p={8} 
-          borderWidth="1px" 
-          borderRadius="lg" 
+        <Box
+          p={8}
+          borderWidth="1px"
+          borderRadius="lg"
           minH="400px"
           bg={{ base: "gray.800", _light: "white" }}
           borderColor={{ base: "gray.700", _light: "gray.200" }}
@@ -223,7 +252,10 @@ export function BulkImportPage() {
           {importState.currentStage === ImportStage.INSTRUCTIONS && (
             <InstructionsStage
               onContinue={() =>
-                setImportState({ ...importState, currentStage: ImportStage.UPLOAD })
+                setImportState({
+                  ...importState,
+                  currentStage: ImportStage.UPLOAD,
+                })
               }
             />
           )}
@@ -234,7 +266,7 @@ export function BulkImportPage() {
                 filename: string,
                 totalRows: number,
                 columns: string[],
-                autoMapping: Record<string, string>
+                autoMapping: Record<string, string>,
               ) => {
                 setImportState({
                   ...importState,
@@ -262,7 +294,7 @@ export function BulkImportPage() {
                 columnMapping: Record<string, string>,
                 defaultCategoryId: string,
                 defaultStatusId: string,
-                validatedRows: ImportRow[]
+                validatedRows: ImportRow[],
               ) => {
                 setImportState({
                   ...importState,
@@ -317,7 +349,9 @@ export function BulkImportPage() {
             <HStack gap={2}>
               <Icon as={FiArrowLeft} />
               <Text>
-                {importState.currentStage === ImportStage.INSTRUCTIONS ? "Back to Products" : "Back"}
+                {importState.currentStage === ImportStage.INSTRUCTIONS
+                  ? "Back to Products"
+                  : "Back"}
               </Text>
             </HStack>
           </Button>
@@ -329,7 +363,18 @@ export function BulkImportPage() {
             {importState.currentStage === ImportStage.COMPLETE && (
               <Button
                 colorScheme="green"
-                onClick={() => navigate({ to: "/products", search: { page: 1, search: "", category: "", status: "", pageSize: 25 } })}
+                onClick={() =>
+                  navigate({
+                    to: "/products",
+                    search: {
+                      page: 1,
+                      search: "",
+                      category: "",
+                      status: "",
+                      pageSize: 25,
+                    },
+                  })
+                }
               >
                 Back to Products
               </Button>
@@ -350,14 +395,17 @@ interface InstructionsStageProps {
 function InstructionsStage({ onContinue }: InstructionsStageProps) {
   const { showSuccessToast, showErrorToast } = useCustomToast()
 
-  // @ts-ignore - may be used in future
-  const handleDownloadTemplate = async () => {
+  // @ts-expect-error - may be used in future
+  const _handleDownloadTemplate = async () => {
     try {
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/v1/products/bulk/template`, {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("access_token")}`,
+      const response = await fetch(
+        `${import.meta.env.VITE_API_URL}/api/v1/products/bulk/template`,
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("access_token")}`,
+          },
         },
-      })
+      )
 
       if (!response.ok) throw new Error("Failed to download template")
 
@@ -372,7 +420,7 @@ function InstructionsStage({ onContinue }: InstructionsStageProps) {
       document.body.removeChild(a)
 
       showSuccessToast("Template downloaded successfully!")
-    } catch (error) {
+    } catch (_error) {
       showErrorToast("Failed to download template")
     }
   }
@@ -386,15 +434,33 @@ function InstructionsStage({ onContinue }: InstructionsStageProps) {
         <Alert.Content>
           <Alert.Title>Before You Begin</Alert.Title>
           <Alert.Description>
-            Make sure you have your product data ready in CSV or Excel format. Review the guidelines below.
+            Make sure you have your product data ready in CSV or Excel format.
+            Review the guidelines below.
           </Alert.Description>
         </Alert.Content>
       </Alert.Root>
 
       {/* Compact Guidelines Grid */}
-      <Grid templateColumns={{ base: "1fr", md: "repeat(2, 1fr)", lg: "repeat(4, 1fr)" }} gap={4}>
-        <Box p={4} borderWidth="1px" borderRadius="md" bg={{ base: "gray.750", _light: "gray.50" }}>
-          <Text fontWeight="bold" fontSize="sm" mb={2} color={{ base: "blue.300", _light: "blue.600" }}>
+      <Grid
+        templateColumns={{
+          base: "1fr",
+          md: "repeat(2, 1fr)",
+          lg: "repeat(4, 1fr)",
+        }}
+        gap={4}
+      >
+        <Box
+          p={4}
+          borderWidth="1px"
+          borderRadius="md"
+          bg={{ base: "gray.750", _light: "gray.50" }}
+        >
+          <Text
+            fontWeight="bold"
+            fontSize="sm"
+            mb={2}
+            color={{ base: "blue.300", _light: "blue.600" }}
+          >
             Supported Formats
           </Text>
           <List.Root fontSize="sm" pl={4}>
@@ -403,8 +469,18 @@ function InstructionsStage({ onContinue }: InstructionsStageProps) {
           </List.Root>
         </Box>
 
-        <Box p={4} borderWidth="1px" borderRadius="md" bg={{ base: "gray.750", _light: "gray.50" }}>
-          <Text fontWeight="bold" fontSize="sm" mb={2} color={{ base: "blue.300", _light: "blue.600" }}>
+        <Box
+          p={4}
+          borderWidth="1px"
+          borderRadius="md"
+          bg={{ base: "gray.750", _light: "gray.50" }}
+        >
+          <Text
+            fontWeight="bold"
+            fontSize="sm"
+            mb={2}
+            color={{ base: "blue.300", _light: "blue.600" }}
+          >
             File Limits
           </Text>
           <List.Root fontSize="sm" pl={4}>
@@ -413,8 +489,18 @@ function InstructionsStage({ onContinue }: InstructionsStageProps) {
           </List.Root>
         </Box>
 
-        <Box p={4} borderWidth="1px" borderRadius="md" bg={{ base: "gray.750", _light: "gray.50" }}>
-          <Text fontWeight="bold" fontSize="sm" mb={2} color={{ base: "red.300", _light: "red.600" }}>
+        <Box
+          p={4}
+          borderWidth="1px"
+          borderRadius="md"
+          bg={{ base: "gray.750", _light: "gray.50" }}
+        >
+          <Text
+            fontWeight="bold"
+            fontSize="sm"
+            mb={2}
+            color={{ base: "red.300", _light: "red.600" }}
+          >
             Required Fields
           </Text>
           <List.Root fontSize="sm" pl={4}>
@@ -423,8 +509,18 @@ function InstructionsStage({ onContinue }: InstructionsStageProps) {
           </List.Root>
         </Box>
 
-        <Box p={4} borderWidth="1px" borderRadius="md" bg={{ base: "gray.750", _light: "gray.50" }}>
-          <Text fontWeight="bold" fontSize="sm" mb={2} color={{ base: "green.300", _light: "green.600" }}>
+        <Box
+          p={4}
+          borderWidth="1px"
+          borderRadius="md"
+          bg={{ base: "gray.750", _light: "gray.50" }}
+        >
+          <Text
+            fontWeight="bold"
+            fontSize="sm"
+            mb={2}
+            color={{ base: "green.300", _light: "green.600" }}
+          >
             Optional Fields
           </Text>
           <List.Root fontSize="sm" pl={4}>
@@ -441,23 +537,20 @@ function InstructionsStage({ onContinue }: InstructionsStageProps) {
         </Alert.Indicator>
         <Alert.Content>
           <Alert.Description>
-            Category and Status will be assigned during mapping. All products will initially use the same category and status.
+            Category and Status will be assigned during mapping. All products
+            will initially use the same category and status.
           </Alert.Description>
         </Alert.Content>
       </Alert.Root>
 
-      <Box 
+      <Box
         p={3}
         bg={{ base: "gray.800", _light: "white" }}
         borderRadius="lg"
         borderWidth="1px"
         borderColor={{ base: "gray.700", _light: "gray.200" }}
       >
-        <Heading
-          size="sm"
-          mb={3}
-          color={{ base: "white", _light: "gray.800" }}
-        >
+        <Heading size="sm" mb={3} color={{ base: "white", _light: "gray.800" }}>
           Example Data Format
         </Heading>
         <Box overflowX="auto">
@@ -498,12 +591,7 @@ function InstructionsStage({ onContinue }: InstructionsStageProps) {
         </Box>
       </Box>
 
-      <Button
-        colorScheme="blue"
-        size="lg"
-        width="full"
-        onClick={onContinue}
-      >
+      <Button colorScheme="blue" size="lg" width="full" onClick={onContinue}>
         <HStack gap={2}>
           <Text>Continue to Upload</Text>
           <Icon as={FiArrowRight} />
@@ -521,7 +609,7 @@ interface UploadStageProps {
     filename: string,
     totalRows: number,
     columns: string[],
-    autoMapping: Record<string, string>
+    autoMapping: Record<string, string>,
   ) => void
 }
 
@@ -536,13 +624,16 @@ function UploadStage({ onFileUploaded }: UploadStageProps) {
       const formData = new FormData()
       formData.append("file", file)
 
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/v1/products/bulk/upload`, {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("access_token")}`,
+      const response = await fetch(
+        `${import.meta.env.VITE_API_URL}/api/v1/products/bulk/upload`,
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("access_token")}`,
+          },
+          body: formData,
         },
-        body: formData,
-      })
+      )
 
       if (!response.ok) {
         const error = await response.json()
@@ -552,8 +643,16 @@ function UploadStage({ onFileUploaded }: UploadStageProps) {
       return response.json()
     },
     onSuccess: (data) => {
-      showSuccessToast(`File uploaded successfully! Found ${data.total_rows} rows.`)
-      onFileUploaded(data.id, data.filename, data.total_rows, data.columns || [], data.auto_mapping || {})
+      showSuccessToast(
+        `File uploaded successfully! Found ${data.total_rows} rows.`,
+      )
+      onFileUploaded(
+        data.id,
+        data.filename,
+        data.total_rows,
+        data.columns || [],
+        data.auto_mapping || {},
+      )
     },
     onError: (error: any) => {
       showErrorToast(error.message || "Failed to upload file")
@@ -564,13 +663,17 @@ function UploadStage({ onFileUploaded }: UploadStageProps) {
     const file = event.target.files?.[0]
     if (file) {
       if (file.size > 10 * 1024 * 1024) {
-        showErrorToast(`File too large. Maximum size is 10MB. Your file: ${(file.size / 1024 / 1024).toFixed(2)}MB`)
+        showErrorToast(
+          `File too large. Maximum size is 10MB. Your file: ${(file.size / 1024 / 1024).toFixed(2)}MB`,
+        )
         return
       }
 
       const ext = file.name.split(".").pop()?.toLowerCase()
       if (!["csv", "xlsx", "xls"].includes(ext || "")) {
-        showErrorToast("Invalid file format. Please upload CSV or Excel files only")
+        showErrorToast(
+          "Invalid file format. Please upload CSV or Excel files only",
+        )
         return
       }
 
@@ -590,10 +693,10 @@ function UploadStage({ onFileUploaded }: UploadStageProps) {
       }, 200)
 
       await uploadMutation.mutateAsync(selectedFile)
-      
+
       clearInterval(interval)
       setUploadProgress(100)
-    } catch (error) {
+    } catch (_error) {
       // Upload error handled by showErrorToast
     } finally {
       setIsUploading(false)
@@ -631,9 +734,9 @@ function UploadStage({ onFileUploaded }: UploadStageProps) {
         borderRadius="lg"
         borderStyle="dashed"
         borderColor={selectedFile ? "green.500" : "gray.200"}
-        _dark={{ 
+        _dark={{
           borderColor: selectedFile ? "green.500" : "gray.600",
-          bg: selectedFile ? "green.900" : "gray.700"
+          bg: selectedFile ? "green.900" : "gray.700",
         }}
         bg={selectedFile ? "green.50" : "gray.50"}
         textAlign="center"
@@ -646,8 +749,8 @@ function UploadStage({ onFileUploaded }: UploadStageProps) {
           borderColor: selectedFile ? "green.600" : "blue.400",
           bg: selectedFile ? "green.100" : "gray.100",
           _dark: {
-            bg: selectedFile ? "green.800" : "gray.600"
-          }
+            bg: selectedFile ? "green.800" : "gray.600",
+          },
         }}
       >
         <VStack gap={4}>
@@ -658,7 +761,11 @@ function UploadStage({ onFileUploaded }: UploadStageProps) {
           />
           {selectedFile ? (
             <>
-              <Heading size="md" color="green.700" _dark={{ color: "green.200" }}>
+              <Heading
+                size="md"
+                color="green.700"
+                _dark={{ color: "green.200" }}
+              >
                 {selectedFile.name}
               </Heading>
               <Text color="fg.muted">
@@ -689,7 +796,7 @@ function UploadStage({ onFileUploaded }: UploadStageProps) {
           )}
         </VStack>
         <input
-          id="file-input"
+          id={fileInputId}
           type="file"
           accept=".csv,.xlsx,.xls"
           hidden
@@ -701,8 +808,20 @@ function UploadStage({ onFileUploaded }: UploadStageProps) {
         <Box>
           <Text mb={2}>Uploading and processing: {uploadProgress}%</Text>
           {/* Custom Progress Bar */}
-          <Box h="8px" w="full" bg="gray.100" _dark={{ bg: "gray.700" }} borderRadius="full" overflow="hidden">
-            <Box h="full" w={`${uploadProgress}%`} bg="blue.500" transition="width 0.3s" />
+          <Box
+            h="8px"
+            w="full"
+            bg="gray.100"
+            _dark={{ bg: "gray.700" }}
+            borderRadius="full"
+            overflow="hidden"
+          >
+            <Box
+              h="full"
+              w={`${uploadProgress}%`}
+              bg="blue.500"
+              transition="width 0.3s"
+            />
           </Box>
           <Text fontSize="sm" color="fg.muted" mt={2}>
             Please wait while we parse your file...
@@ -741,7 +860,7 @@ interface MappingStageProps {
     columnMapping: Record<string, string>,
     defaultCategoryId: string,
     defaultStatusId: string,
-    validatedRows: ImportRow[]
+    validatedRows: ImportRow[],
   ) => void
 }
 
@@ -752,7 +871,8 @@ function MappingStage({
   totalRows,
   onMappingComplete,
 }: MappingStageProps) {
-  const [columnMapping, setColumnMapping] = useState<Record<string, string>>(autoMapping)
+  const [columnMapping, setColumnMapping] =
+    useState<Record<string, string>>(autoMapping)
   const [defaultCategoryId] = useState<string>("")
   const [defaultStatusId, setDefaultStatusId] = useState<string>("")
   const [sampleData, setSampleData] = useState<Record<string, any>[]>([])
@@ -771,12 +891,14 @@ function MappingStage({
   // Auto-select "Active" status when statuses are loaded
   useEffect(() => {
     if (statuses && statuses.length > 0) {
-      const activeStatus = statuses.find((s: any) => s.name.toLowerCase() === "active")
+      const activeStatus = statuses.find(
+        (s: any) => s.name.toLowerCase() === "active",
+      )
       if (activeStatus && !defaultStatusId) {
         setDefaultStatusId(activeStatus.id)
       }
     }
-  }, [statuses])
+  }, [statuses, defaultStatusId])
 
   // Fetch sample data preview
   const { isLoading: previewLoading } = useQuery({
@@ -788,7 +910,7 @@ function MappingStage({
           headers: {
             Authorization: `Bearer ${localStorage.getItem("access_token")}`,
           },
-        }
+        },
       )
       if (!response.ok) throw new Error("Failed to fetch preview")
       const data = await response.json()
@@ -811,10 +933,16 @@ function MappingStage({
           body: JSON.stringify({
             session_id: sessionId,
             column_mapping: columnMapping,
-            default_category_id: defaultCategoryId && defaultCategoryId.trim() !== "" ? defaultCategoryId : null,
-            default_status_id: defaultStatusId && defaultStatusId.trim() !== "" ? defaultStatusId : null,
+            default_category_id:
+              defaultCategoryId && defaultCategoryId.trim() !== ""
+                ? defaultCategoryId
+                : null,
+            default_status_id:
+              defaultStatusId && defaultStatusId.trim() !== ""
+                ? defaultStatusId
+                : null,
           }),
-        }
+        },
       )
 
       if (!response.ok) {
@@ -833,7 +961,7 @@ function MappingStage({
         columnMapping,
         defaultCategoryId,
         defaultStatusId,
-        []
+        [],
       )
     },
     onError: (error: any) => {
@@ -843,7 +971,8 @@ function MappingStage({
 
   const handleSubmit = () => {
     const hasName = Object.values(columnMapping).includes("name")
-    const hasSellingPrice = Object.values(columnMapping).includes("selling_price")
+    const hasSellingPrice =
+      Object.values(columnMapping).includes("selling_price")
     const hasCategory = Object.values(columnMapping).includes("category")
 
     if (!hasName) {
@@ -857,7 +986,9 @@ function MappingStage({
     }
 
     if (!hasCategory) {
-      showErrorToast("Please map the Category column - it's required for import")
+      showErrorToast(
+        "Please map the Category column - it's required for import",
+      )
       return
     }
 
@@ -870,10 +1001,30 @@ function MappingStage({
   }
 
   const systemFields = [
-    { value: "name", label: "Product Name", required: true, description: "The name of the product as it will appear in the system" },
-    { value: "category", label: "Category", required: false, description: "Product category (Bottles, Cans, Wines, etc.)" },
-    { value: "selling_price", label: "Selling Price (SP)", required: true, description: "Price at which the product is sold to customers" },
-    { value: "buying_price", label: "Buying Price (BP)", required: false, description: "Cost price paid to supplier (optional)" },
+    {
+      value: "name",
+      label: "Product Name",
+      required: true,
+      description: "The name of the product as it will appear in the system",
+    },
+    {
+      value: "category",
+      label: "Category",
+      required: false,
+      description: "Product category (Bottles, Cans, Wines, etc.)",
+    },
+    {
+      value: "selling_price",
+      label: "Selling Price (SP)",
+      required: true,
+      description: "Price at which the product is sold to customers",
+    },
+    {
+      value: "buying_price",
+      label: "Buying Price (BP)",
+      required: false,
+      description: "Cost price paid to supplier (optional)",
+    },
   ]
 
   if (categoriesLoading || statusesLoading || previewLoading) {
@@ -887,7 +1038,7 @@ function MappingStage({
 
   const getSampleValues = (csvColumn: string): string[] => {
     if (!csvColumn || sampleData.length === 0) return []
-    return sampleData.map(row => row[csvColumn] || "-")
+    return sampleData.map((row) => row[csvColumn] || "-")
   }
 
   return (
@@ -907,7 +1058,8 @@ function MappingStage({
         </Alert.Indicator>
         <Alert.Content>
           <Alert.Description>
-            Review the automatic column matching below. Fields marked with * are required.
+            Review the automatic column matching below. Fields marked with * are
+            required.
           </Alert.Description>
         </Alert.Content>
       </Alert.Root>
@@ -916,11 +1068,11 @@ function MappingStage({
         <Heading size="sm" mb={4}>
           Column Mapping
         </Heading>
-        
+
         {/* Professional 3-Column Table - Iterate over CSV columns */}
-        <Box 
-          borderWidth="1px" 
-          borderRadius="lg" 
+        <Box
+          borderWidth="1px"
+          borderRadius="lg"
           overflow="hidden"
           bg={{ base: "gray.800", _light: "white" }}
           borderColor={{ base: "gray.700", _light: "gray.200" }}
@@ -946,7 +1098,7 @@ function MappingStage({
                 const isAutoMapped = autoMapping[csvColumn] !== undefined
 
                 return (
-                  <Table.Row 
+                  <Table.Row
                     key={csvColumn}
                     _hover={{ bg: { base: "gray.750", _light: "gray.50" } }}
                   >
@@ -954,7 +1106,11 @@ function MappingStage({
                     <Table.Cell>
                       <HStack>
                         {isAutoMapped && (
-                          <Icon as={FiCheckCircle} color="green.500" boxSize={4} />
+                          <Icon
+                            as={FiCheckCircle}
+                            color="green.500"
+                            boxSize={4}
+                          />
                         )}
                         <Text fontWeight="medium">{csvColumn}</Text>
                       </HStack>
@@ -980,14 +1136,14 @@ function MappingStage({
                         borderWidth="1px"
                         borderColor="gray.200"
                         bg="white"
-                        _dark={{ 
-                          borderColor: "gray.600", 
-                          bg: "gray.700" 
+                        _dark={{
+                          borderColor: "gray.600",
+                          bg: "gray.700",
                         }}
-                        _focus={{ 
-                          borderColor: "blue.500", 
+                        _focus={{
+                          borderColor: "blue.500",
                           outline: "none",
-                          boxShadow: "0 0 0 1px var(--chakra-colors-blue-500)"
+                          boxShadow: "0 0 0 1px var(--chakra-colors-blue-500)",
                         }}
                         css={{
                           "&": {
@@ -996,8 +1152,8 @@ function MappingStage({
                             backgroundPosition: "right 0.5rem center",
                             backgroundRepeat: "no-repeat",
                             backgroundSize: "1.5em 1.5em",
-                            paddingRight: "2.5rem"
-                          }
+                            paddingRight: "2.5rem",
+                          },
                         }}
                       >
                         <option value="">-- Select System Field --</option>
@@ -1014,14 +1170,16 @@ function MappingStage({
                       {sampleValues.length > 0 ? (
                         <VStack align="start" gap={1}>
                           {sampleValues.map((value, idx) => (
-                            <Text 
-                              key={idx} 
-                              fontSize="xs" 
+                            <Text
+                              key={idx}
+                              fontSize="xs"
                               color="fg.muted"
                               fontFamily="mono"
                               lineClamp={1}
                             >
-                              {value.length > 40 ? `${value.substring(0, 40)}...` : value}
+                              {value.length > 40
+                                ? `${value.substring(0, 40)}...`
+                                : value}
                             </Text>
                           ))}
                         </VStack>
@@ -1045,23 +1203,29 @@ function MappingStage({
           </Alert.Indicator>
           <Alert.Content>
             <Alert.Description>
-              <strong>Required mappings:</strong> Product Name, Selling Price. 
+              <strong>Required mappings:</strong> Product Name, Selling Price.
               <br />
-              <strong>Note:</strong> If "Category" is not in your CSV, all products will use the default category selected below.
+              <strong>Note:</strong> If "Category" is not in your CSV, all
+              products will use the default category selected below.
             </Alert.Description>
           </Alert.Content>
         </Alert.Root>
       </Box>
 
-      <Box 
-        p={4} 
-        borderWidth="1px" 
-        borderRadius="lg" 
-        bg="blue.50" 
+      <Box
+        p={4}
+        borderWidth="1px"
+        borderRadius="lg"
+        bg="blue.50"
         _dark={{ bg: "blue.900", borderColor: "blue.800" }}
         borderColor="blue.100"
       >
-        <Heading size="sm" mb={4} color="blue.800" _dark={{ color: "blue.200" }}>
+        <Heading
+          size="sm"
+          mb={4}
+          color="blue.800"
+          _dark={{ color: "blue.200" }}
+        >
           Default Values (Applied to all imported products)
         </Heading>
         <VStack gap={4} align="stretch">
@@ -1069,16 +1233,18 @@ function MappingStage({
             <Box
               as="select"
               defaultValue={defaultStatusId}
-              onChange={(e: any) => setDefaultStatusId((e.target as HTMLSelectElement).value)}
+              onChange={(e: any) =>
+                setDefaultStatusId((e.target as HTMLSelectElement).value)
+              }
               w="full"
               p={2}
               borderRadius="md"
               borderWidth="1px"
               borderColor={!defaultStatusId ? "red.300" : "gray.200"}
               bg="white"
-              _dark={{ 
-                borderColor: !defaultStatusId ? "red.500" : "gray.600", 
-                bg: "gray.700" 
+              _dark={{
+                borderColor: !defaultStatusId ? "red.500" : "gray.600",
+                bg: "gray.700",
               }}
               _focus={{ borderColor: "blue.500", outline: "none" }}
             >
@@ -1116,7 +1282,11 @@ interface ValidationStageProps {
   errorRows: number
   duplicateRows: number
   validatedRows: ImportRow[]
-  onImportComplete: (successCount: number, errorCount: number, duplicateCount: number) => void
+  onImportComplete: (
+    successCount: number,
+    errorCount: number,
+    duplicateCount: number,
+  ) => void
   duplicateAction: "skip" | "update" | "create"
   onDuplicateActionChange: (action: "skip" | "update" | "create") => void
 }
@@ -1139,10 +1309,14 @@ function ValidationStage({
   const [pageSize] = useState(25)
   const [isImporting, setIsImporting] = useState(false)
   const [importProgress, setImportProgress] = useState(0)
-  
+
   const { showSuccessToast, showErrorToast } = useCustomToast()
 
-  const { data: validationData, isLoading, refetch } = useQuery({
+  const {
+    data: validationData,
+    isLoading,
+    refetch,
+  } = useQuery({
     queryKey: ["bulk-import-validation", sessionId, filter],
     queryFn: async () => {
       const response = await fetch(
@@ -1151,7 +1325,7 @@ function ValidationStage({
           headers: {
             Authorization: `Bearer ${localStorage.getItem("access_token")}`,
           },
-        }
+        },
       )
 
       if (!response.ok) {
@@ -1166,9 +1340,16 @@ function ValidationStage({
   const validatedRows = validationData?.rows || initialValidatedRows
 
   // Calculate dynamic error/duplicate counts based on deleted rows
-  const activeErrorRows = validatedRows.filter((r: ImportRow) => r.status === "error" && !deletedRows.has(r.row_number)).length
-  const activeDuplicateRows = validatedRows.filter((r: ImportRow) => r.status === "duplicate" && !deletedRows.has(r.row_number)).length
-  const activeValidRows = validatedRows.filter((r: ImportRow) => r.status === "valid" && !deletedRows.has(r.row_number)).length
+  const activeErrorRows = validatedRows.filter(
+    (r: ImportRow) => r.status === "error" && !deletedRows.has(r.row_number),
+  ).length
+  const activeDuplicateRows = validatedRows.filter(
+    (r: ImportRow) =>
+      r.status === "duplicate" && !deletedRows.has(r.row_number),
+  ).length
+  const activeValidRows = validatedRows.filter(
+    (r: ImportRow) => r.status === "valid" && !deletedRows.has(r.row_number),
+  ).length
 
   // Fetch categories for the dropdown
   const { data: categoriesData } = useQuery({
@@ -1180,7 +1361,13 @@ function ValidationStage({
   const categories = categoriesData?.data || []
 
   const fixRowMutation = useMutation({
-    mutationFn: async ({ rowNumber, updatedData }: { rowNumber: number; updatedData: Record<string, any> }) => {
+    mutationFn: async ({
+      rowNumber,
+      updatedData,
+    }: {
+      rowNumber: number
+      updatedData: Record<string, any>
+    }) => {
       const response = await fetch(
         `${import.meta.env.VITE_API_URL}/api/v1/products/bulk/fix-row/${sessionId}`,
         {
@@ -1194,7 +1381,7 @@ function ValidationStage({
             row_number: rowNumber,
             updated_data: updatedData,
           }),
-        }
+        },
       )
 
       if (!response.ok) {
@@ -1247,7 +1434,7 @@ function ValidationStage({
             tags: [],
             notes: "",
           }),
-        }
+        },
       )
 
       if (!response.ok) {
@@ -1257,8 +1444,14 @@ function ValidationStage({
       return response.json()
     },
     onSuccess: (data) => {
-      showSuccessToast(`Import complete! ${data.success_count} products imported successfully.`)
-      onImportComplete(data.success_count, data.error_count, data.duplicate_count)
+      showSuccessToast(
+        `Import complete! ${data.success_count} products imported successfully.`,
+      )
+      onImportComplete(
+        data.success_count,
+        data.error_count,
+        data.duplicate_count,
+      )
     },
     onError: () => {
       showErrorToast("Import failed")
@@ -1285,7 +1478,11 @@ function ValidationStage({
   }
 
   const handleDeleteRow = (rowNumber: number) => {
-    if (window.confirm(`Are you sure you want to exclude row ${rowNumber} from the import?`)) {
+    if (
+      window.confirm(
+        `Are you sure you want to exclude row ${rowNumber} from the import?`,
+      )
+    ) {
       deleteRowMutation.mutate(rowNumber)
     }
   }
@@ -1324,43 +1521,55 @@ function ValidationStage({
     }
   }
 
-  const getCellError = (row: ImportRow, field: string): ValidationError | undefined => {
-    return row.errors.find(e => e.field === field)
+  const getCellError = (
+    row: ImportRow,
+    field: string,
+  ): ValidationError | undefined => {
+    return row.errors.find((e) => e.field === field)
   }
 
   // Helper function to format column names for display
   const formatColumnName = (column: string): string => {
     const specialNames: Record<string, string> = {
-      'name': 'Product Name',
-      'selling_price': 'Selling Price',
-      'buying_price': 'Buying Price',
-      'category': 'Category',
-      'category_id': 'Category ID',
-      'status_id': 'Status ID',
-      'current_stock': 'Current Stock',
-      'reorder_level': 'Reorder Level',
-      'description': 'Description',
+      name: "Product Name",
+      selling_price: "Selling Price",
+      buying_price: "Buying Price",
+      category: "Category",
+      category_id: "Category ID",
+      status_id: "Status ID",
+      current_stock: "Current Stock",
+      reorder_level: "Reorder Level",
+      description: "Description",
     }
 
-    return specialNames[column] || column
-      .split('_')
-      .map(word => word.charAt(0).toUpperCase() + word.slice(1))
-      .join(' ')
+    return (
+      specialNames[column] ||
+      column
+        .split("_")
+        .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+        .join(" ")
+    )
   }
 
-  const filteredRows = validatedRows.filter((r: ImportRow) => !deletedRows.has(r.row_number))
+  const filteredRows = validatedRows.filter(
+    (r: ImportRow) => !deletedRows.has(r.row_number),
+  )
 
   const totalPages = Math.ceil(filteredRows.length / pageSize)
   const paginatedRows = filteredRows.slice(
     (currentPage - 1) * pageSize,
-    currentPage * pageSize
+    currentPage * pageSize,
   )
 
   // Get all unique column names from the data, excluding internal fields
-  const allColumns = paginatedRows.length > 0 
-    ? Object.keys(paginatedRows[0].mapped_data || paginatedRows[0].data)
-        .filter(col => !['current_stock', 'status_id', 'category_id'].includes(col))
-    : []
+  const allColumns =
+    paginatedRows.length > 0
+      ? Object.keys(
+          paginatedRows[0].mapped_data || paginatedRows[0].data,
+        ).filter(
+          (col) => !["current_stock", "status_id", "category_id"].includes(col),
+        )
+      : []
 
   if (isLoading) {
     return (
@@ -1383,10 +1592,10 @@ function ValidationStage({
       </Box>
 
       {/* Clean Summary Card */}
-      <Box 
-        p={6} 
-        borderWidth="1px" 
-        borderRadius="lg" 
+      <Box
+        p={6}
+        borderWidth="1px"
+        borderRadius="lg"
         bg={{ base: "gray.800", _light: "white" }}
         borderColor={{ base: "gray.700", _light: "gray.200" }}
       >
@@ -1398,15 +1607,16 @@ function ValidationStage({
                 Import Status
               </Text>
               <Heading size="lg">
-                {activeValidRows} of {validatedRows.length - deletedRows.size} rows ready
+                {activeValidRows} of {validatedRows.length - deletedRows.size}{" "}
+                rows ready
               </Heading>
             </VStack>
-            
+
             {activeValidRows > 0 && (
-              <Badge 
-                colorScheme="green" 
-                fontSize="md" 
-                px={4} 
+              <Badge
+                colorScheme="green"
+                fontSize="md"
+                px={4}
                 py={2}
                 borderRadius="full"
               >
@@ -1420,9 +1630,9 @@ function ValidationStage({
 
           {/* Issues Summary - Only show if there are problems */}
           {(activeErrorRows > 0 || activeDuplicateRows > 0) && (
-            <Box 
-              p={4} 
-              borderRadius="md" 
+            <Box
+              p={4}
+              borderRadius="md"
               bg={{ base: "gray.750", _light: "gray.50" }}
               borderWidth="1px"
               borderColor={{ base: "gray.600", _light: "gray.200" }}
@@ -1441,23 +1651,19 @@ function ValidationStage({
 
               <VStack gap={2} align="stretch">
                 {activeErrorRows > 0 && (
-                  <HStack 
-                    justify="space-between" 
-                    p={3} 
+                  <HStack
+                    justify="space-between"
+                    p={3}
                     borderRadius="md"
                     bg={{ base: "red.950", _light: "red.50" }}
                     borderWidth="1px"
                     borderColor={{ base: "red.900", _light: "red.200" }}
                   >
                     <HStack gap={3}>
-                      <Box
-                        w={2}
-                        h={2}
-                        borderRadius="full"
-                        bg="red.500"
-                      />
+                      <Box w={2} h={2} borderRadius="full" bg="red.500" />
                       <Text fontWeight="medium">
-                        {activeErrorRows} row{activeErrorRows !== 1 ? 's' : ''} with errors
+                        {activeErrorRows} row{activeErrorRows !== 1 ? "s" : ""}{" "}
+                        with errors
                       </Text>
                     </HStack>
                     <HStack gap={2}>
@@ -1474,14 +1680,22 @@ function ValidationStage({
                         variant="ghost"
                         onClick={() => {
                           const errorRowNumbers = validatedRows
-                            .filter((r: ImportRow) => r.status === "error" && !deletedRows.has(r.row_number))
+                            .filter(
+                              (r: ImportRow) =>
+                                r.status === "error" &&
+                                !deletedRows.has(r.row_number),
+                            )
                             .map((r: ImportRow) => r.row_number)
-                          
+
                           const newDeletedRows = new Set(deletedRows)
-                          errorRowNumbers.forEach((rowNum: number) => newDeletedRows.add(rowNum))
+                          errorRowNumbers.forEach((rowNum: number) => {
+                            newDeletedRows.add(rowNum)
+                          })
                           setDeletedRows(newDeletedRows)
                           setSelectedRows(new Set())
-                          showSuccessToast(`${errorRowNumbers.length} error rows excluded`)
+                          showSuccessToast(
+                            `${errorRowNumbers.length} error rows excluded`,
+                          )
                         }}
                       >
                         <Icon as={FiTrash2} mr={2} />
@@ -1492,23 +1706,19 @@ function ValidationStage({
                 )}
 
                 {activeDuplicateRows > 0 && (
-                  <HStack 
-                    justify="space-between" 
-                    p={3} 
+                  <HStack
+                    justify="space-between"
+                    p={3}
                     borderRadius="md"
                     bg={{ base: "orange.950", _light: "orange.50" }}
                     borderWidth="1px"
                     borderColor={{ base: "orange.900", _light: "orange.200" }}
                   >
                     <HStack gap={3}>
-                      <Box
-                        w={2}
-                        h={2}
-                        borderRadius="full"
-                        bg="orange.500"
-                      />
+                      <Box w={2} h={2} borderRadius="full" bg="orange.500" />
                       <Text fontWeight="medium">
-                        {activeDuplicateRows} duplicate{activeDuplicateRows !== 1 ? 's' : ''} found
+                        {activeDuplicateRows} duplicate
+                        {activeDuplicateRows !== 1 ? "s" : ""} found
                       </Text>
                     </HStack>
                     <Button
@@ -1526,14 +1736,20 @@ function ValidationStage({
 
           {deletedRows.size > 0 && (
             <Text fontSize="sm" color="fg.muted">
-              {deletedRows.size} row{deletedRows.size !== 1 ? 's' : ''} excluded from import
+              {deletedRows.size} row{deletedRows.size !== 1 ? "s" : ""} excluded
+              from import
             </Text>
           )}
         </VStack>
       </Box>
 
       {/* Refined Filter Tabs */}
-      <HStack gap={2} borderBottomWidth="2px" borderColor={{ base: "gray.700", _light: "gray.200" }} pb={-2}>
+      <HStack
+        gap={2}
+        borderBottomWidth="2px"
+        borderColor={{ base: "gray.700", _light: "gray.200" }}
+        pb={-2}
+      >
         <Button
           variant="ghost"
           size="sm"
@@ -1546,7 +1762,7 @@ function ValidationStage({
         >
           All Rows ({validatedRows.length - deletedRows.size})
         </Button>
-        
+
         {activeErrorRows > 0 && (
           <Button
             variant="ghost"
@@ -1566,14 +1782,16 @@ function ValidationStage({
             </HStack>
           </Button>
         )}
-        
+
         {activeDuplicateRows > 0 && (
           <Button
             variant="ghost"
             size="sm"
             onClick={() => setFilter("duplicates")}
             borderBottomWidth="2px"
-            borderBottomColor={filter === "duplicates" ? "orange.500" : "transparent"}
+            borderBottomColor={
+              filter === "duplicates" ? "orange.500" : "transparent"
+            }
             borderRadius={0}
             pb={2}
             fontWeight={filter === "duplicates" ? "semibold" : "normal"}
@@ -1589,22 +1807,34 @@ function ValidationStage({
       </HStack>
 
       {duplicateRows > 0 && (
-        <Box 
-          p={4} 
-          borderWidth="1px" 
-          borderRadius="lg" 
-          bg="orange.50" 
+        <Box
+          p={4}
+          borderWidth="1px"
+          borderRadius="lg"
+          bg="orange.50"
           _dark={{ bg: "orange.900", borderColor: "orange.800" }}
           borderColor="orange.100"
         >
-          <Heading size="sm" mb={3} color="orange.800" _dark={{ color: "orange.200" }}>
+          <Heading
+            size="sm"
+            mb={3}
+            color="orange.800"
+            _dark={{ color: "orange.200" }}
+          >
             Duplicate Handling
           </Heading>
           <Field label="What should we do with duplicates?">
             <Box
               as="select"
               defaultValue={duplicateAction}
-              onChange={(e: any) => onDuplicateActionChange((e.target as HTMLSelectElement).value as "skip" | "update" | "create")}
+              onChange={(e: any) =>
+                onDuplicateActionChange(
+                  (e.target as HTMLSelectElement).value as
+                    | "skip"
+                    | "update"
+                    | "create",
+                )
+              }
               w="full"
               p={2}
               borderRadius="md"
@@ -1614,28 +1844,57 @@ function ValidationStage({
               _dark={{ borderColor: "gray.600", bg: "gray.700" }}
               _focus={{ borderColor: "blue.500", outline: "none" }}
             >
-              <option value="skip">Skip duplicates (keep existing products)</option>
-              <option value="update">Update existing products with new data</option>
-              <option value="create">Import as new products (create duplicates)</option>
+              <option value="skip">
+                Skip duplicates (keep existing products)
+              </option>
+              <option value="update">
+                Update existing products with new data
+              </option>
+              <option value="create">
+                Import as new products (create duplicates)
+              </option>
             </Box>
           </Field>
         </Box>
       )}
 
       {/* Enhanced Validation Table with Dynamic Columns */}
-      <Box borderWidth="1px" borderRadius="lg" overflow="hidden" bg={{ base: "gray.800", _light: "white" }}>
+      <Box
+        borderWidth="1px"
+        borderRadius="lg"
+        overflow="hidden"
+        bg={{ base: "gray.800", _light: "white" }}
+      >
         <Box maxH="600px" overflowX="auto" overflowY="auto">
           <Table.Root size="sm" variant="outline">
-            <Table.Header bg={{ base: "gray.700", _light: "gray.50" }} position="sticky" top={0} zIndex={1}>
+            <Table.Header
+              bg={{ base: "gray.700", _light: "gray.50" }}
+              position="sticky"
+              top={0}
+              zIndex={1}
+            >
               <Table.Row>
-                <Table.ColumnHeader width="50px" position="sticky" left={0} bg={{ base: "gray.700", _light: "gray.50" }}>
+                <Table.ColumnHeader
+                  width="50px"
+                  position="sticky"
+                  left={0}
+                  bg={{ base: "gray.700", _light: "gray.50" }}
+                >
                   <input
                     type="checkbox"
-                    checked={selectedRows.size === filteredRows.length && filteredRows.length > 0}
+                    checked={
+                      selectedRows.size === filteredRows.length &&
+                      filteredRows.length > 0
+                    }
                     onChange={toggleSelectAll}
                   />
                 </Table.ColumnHeader>
-                <Table.ColumnHeader width="60px" position="sticky" left="50px" bg={{ base: "gray.700", _light: "gray.50" }}>
+                <Table.ColumnHeader
+                  width="60px"
+                  position="sticky"
+                  left="50px"
+                  bg={{ base: "gray.700", _light: "gray.50" }}
+                >
                   Row
                 </Table.ColumnHeader>
                 {allColumns.map((column) => (
@@ -1648,20 +1907,28 @@ function ValidationStage({
             </Table.Header>
             <Table.Body>
               {paginatedRows.map((row: ImportRow) => (
-                <Table.Row 
+                <Table.Row
                   key={row.row_number}
-                  borderLeftWidth={row.status === "error" || row.status === "duplicate" ? "3px" : "0"}
+                  borderLeftWidth={
+                    row.status === "error" || row.status === "duplicate"
+                      ? "3px"
+                      : "0"
+                  }
                   borderLeftColor={
-                    row.status === "error" 
+                    row.status === "error"
                       ? "red.500"
                       : row.status === "duplicate"
-                      ? "orange.500"
-                      : "transparent"
+                        ? "orange.500"
+                        : "transparent"
                   }
                   _hover={{ bg: { base: "gray.750", _light: "gray.100" } }}
                 >
                   {/* Selection Checkbox with Status Icon - Sticky */}
-                  <Table.Cell position="sticky" left={0} bg={{ base: "gray.800", _light: "white" }}>
+                  <Table.Cell
+                    position="sticky"
+                    left={0}
+                    bg={{ base: "gray.800", _light: "white" }}
+                  >
                     <HStack gap={2}>
                       <input
                         type="checkbox"
@@ -1699,15 +1966,21 @@ function ValidationStage({
                   </Table.Cell>
 
                   {/* Row Number - Sticky */}
-                  <Table.Cell position="sticky" left="50px" fontWeight="medium" bg={{ base: "gray.800", _light: "white" }}>
+                  <Table.Cell
+                    position="sticky"
+                    left="50px"
+                    fontWeight="medium"
+                    bg={{ base: "gray.800", _light: "white" }}
+                  >
                     {row.row_number}
                   </Table.Cell>
 
                   {/* Dynamic Data Columns */}
                   {allColumns.map((column) => {
-                    const cellData = row.mapped_data?.[column] || row.data[column] || "-"
+                    const cellData =
+                      row.mapped_data?.[column] || row.data[column] || "-"
                     const cellError = getCellError(row, column)
-                    
+
                     return (
                       <Table.Cell
                         key={column}
@@ -1716,23 +1989,29 @@ function ValidationStage({
                         borderLeftColor={cellError ? "red.500" : "transparent"}
                       >
                         {editingRow === row.row_number ? (
-                          column === 'category' ? (
+                          column === "category" ? (
                             <SelectRoot
                               collection={createListCollection({
                                 items: categories
-                                  .filter((cat: any) => 
-                                    !categorySearch || 
-                                    cat.name.toLowerCase().includes(categorySearch.toLowerCase())
+                                  .filter(
+                                    (cat: any) =>
+                                      !categorySearch ||
+                                      cat.name
+                                        .toLowerCase()
+                                        .includes(categorySearch.toLowerCase()),
                                   )
-                                  .map((cat: any) => ({ 
-                                    label: cat.name, 
-                                    value: cat.name 
-                                  }))
+                                  .map((cat: any) => ({
+                                    label: cat.name,
+                                    value: cat.name,
+                                  })),
                               })}
                               size="sm"
                               value={[editedData[column] || cellData]}
                               onValueChange={(e) => {
-                                setEditedData({ ...editedData, [column]: e.value[0] })
+                                setEditedData({
+                                  ...editedData,
+                                  [column]: e.value[0],
+                                })
                               }}
                             >
                               <SelectTrigger>
@@ -1743,17 +2022,28 @@ function ValidationStage({
                                   size="sm"
                                   placeholder="Search categories..."
                                   value={categorySearch}
-                                  onChange={(e) => setCategorySearch(e.target.value)}
+                                  onChange={(e) =>
+                                    setCategorySearch(e.target.value)
+                                  }
                                   mb={2}
                                   mx={2}
                                 />
                                 {categories
-                                  .filter((cat: any) => 
-                                    !categorySearch || 
-                                    cat.name.toLowerCase().includes(categorySearch.toLowerCase())
+                                  .filter(
+                                    (cat: any) =>
+                                      !categorySearch ||
+                                      cat.name
+                                        .toLowerCase()
+                                        .includes(categorySearch.toLowerCase()),
                                   )
                                   .map((cat: any) => (
-                                    <SelectItem key={cat.id} item={{ label: cat.name, value: cat.name }}>
+                                    <SelectItem
+                                      key={cat.id}
+                                      item={{
+                                        label: cat.name,
+                                        value: cat.name,
+                                      }}
+                                    >
                                       {cat.name}
                                     </SelectItem>
                                   ))}
@@ -1763,12 +2053,19 @@ function ValidationStage({
                             <Input
                               size="sm"
                               value={editedData[column] || cellData}
-                              onChange={(e) => setEditedData({ ...editedData, [column]: e.target.value })}
+                              onChange={(e) =>
+                                setEditedData({
+                                  ...editedData,
+                                  [column]: e.target.value,
+                                })
+                              }
                             />
                           )
                         ) : (
                           <HStack gap={2} justify="space-between">
-                            <Text lineClamp={2} flex="1">{String(cellData)}</Text>
+                            <Text lineClamp={2} flex="1">
+                              {String(cellData)}
+                            </Text>
                             {cellError && (
                               <Tooltip content={cellError.message}>
                                 <Box
@@ -1851,17 +2148,19 @@ function ValidationStage({
 
         {/* Enhanced Pagination */}
         {totalPages > 1 && (
-          <Box 
-            p={4} 
-            borderTopWidth="1px" 
+          <Box
+            p={4}
+            borderTopWidth="1px"
             bg={{ base: "gray.750", _light: "gray.50" }}
             borderColor={{ base: "gray.700", _light: "gray.200" }}
           >
             <HStack justify="space-between">
               <Text fontSize="sm" color="fg.muted">
-                Showing {((currentPage - 1) * pageSize) + 1} to {Math.min(currentPage * pageSize, filteredRows.length)} of {filteredRows.length} rows
+                Showing {(currentPage - 1) * pageSize + 1} to{" "}
+                {Math.min(currentPage * pageSize, filteredRows.length)} of{" "}
+                {filteredRows.length} rows
               </Text>
-              
+
               <HStack gap={2}>
                 <Button
                   size="sm"
@@ -1871,7 +2170,7 @@ function ValidationStage({
                 >
                   Previous
                 </Button>
-                
+
                 <HStack gap={1}>
                   <Text fontSize="sm">Page</Text>
                   <Input
@@ -1881,7 +2180,7 @@ function ValidationStage({
                     max={totalPages}
                     value={currentPage}
                     onChange={(e) => {
-                      const page = parseInt(e.target.value)
+                      const page = parseInt(e.target.value, 10)
                       if (page >= 1 && page <= totalPages) {
                         setCurrentPage(page)
                       }
@@ -1891,11 +2190,13 @@ function ValidationStage({
                   />
                   <Text fontSize="sm">of {totalPages}</Text>
                 </HStack>
-                
+
                 <Button
                   size="sm"
                   variant="outline"
-                  onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
+                  onClick={() =>
+                    setCurrentPage(Math.min(totalPages, currentPage + 1))
+                  }
                   disabled={currentPage === totalPages}
                 >
                   Next
@@ -1907,9 +2208,9 @@ function ValidationStage({
       </Box>
 
       {isImporting && (
-        <Box 
-          p={6} 
-          borderWidth="1px" 
+        <Box
+          p={6}
+          borderWidth="1px"
           borderRadius="lg"
           bg={{ base: "blue.950", _light: "blue.50" }}
           borderColor={{ base: "blue.900", _light: "blue.200" }}
@@ -1920,11 +2221,17 @@ function ValidationStage({
               <Text fontWeight="semibold">Importing products...</Text>
             </HStack>
             <Box w="full">
-              <Box h="6px" w="full" bg={{ base: "gray.700", _light: "gray.200" }} borderRadius="full" overflow="hidden">
-                <Box 
-                  h="full" 
-                  w={`${importProgress}%`} 
-                  bg="blue.500" 
+              <Box
+                h="6px"
+                w="full"
+                bg={{ base: "gray.700", _light: "gray.200" }}
+                borderRadius="full"
+                overflow="hidden"
+              >
+                <Box
+                  h="full"
+                  w={`${importProgress}%`}
+                  bg="blue.500"
                   transition="width 0.3s"
                   borderRadius="full"
                 />
@@ -1938,9 +2245,9 @@ function ValidationStage({
       )}
 
       {/* Import Action Section */}
-      <Box 
-        p={6} 
-        borderWidth="1px" 
+      <Box
+        p={6}
+        borderWidth="1px"
         borderRadius="lg"
         bg={{ base: "gray.800", _light: "white" }}
         borderColor={{ base: "gray.700", _light: "gray.200" }}
@@ -1951,8 +2258,10 @@ function ValidationStage({
               Ready to Import
             </Text>
             <Text fontSize="sm" color="fg.muted">
-              {activeValidRows} product{activeValidRows !== 1 ? 's' : ''} will be imported
-              {activeErrorRows > 0 && ` • ${activeErrorRows} row${activeErrorRows !== 1 ? 's' : ''} will be skipped`}
+              {activeValidRows} product{activeValidRows !== 1 ? "s" : ""} will
+              be imported
+              {activeErrorRows > 0 &&
+                ` • ${activeErrorRows} row${activeErrorRows !== 1 ? "s" : ""} will be skipped`}
             </Text>
           </VStack>
 
@@ -1990,7 +2299,7 @@ function CompleteStage({
   return (
     <VStack gap={8} align="center" py={8}>
       <Icon as={FiCheckCircle} boxSize={24} color="green.500" />
-      
+
       <Heading size="2xl">Import Complete!</Heading>
 
       <Box textAlign="center">
@@ -2038,7 +2347,9 @@ function CompleteStage({
           colorScheme="blue"
           size="lg"
           width="full"
-          onClick={() => window.location.href = "/products"}
+          onClick={() => {
+            window.location.href = "/products"
+          }}
         >
           View Imported Products
         </Button>

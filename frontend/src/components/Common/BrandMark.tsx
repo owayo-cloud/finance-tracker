@@ -1,4 +1,4 @@
-import { Box, HStack, Text, type BoxProps } from "@chakra-ui/react"
+import { Box, type BoxProps, HStack, Text } from "@chakra-ui/react"
 
 type BrandMarkProps = BoxProps & {
   /**
@@ -21,13 +21,28 @@ function BrandMark({ fontSize = "md", ...boxProps }: BrandMarkProps) {
       {...boxProps}
     >
       <HStack gap={0.5} alignItems="center" justifyContent="center">
-        <Text fontSize={fontSize} fontWeight="800" color="#14b8a6" lineHeight="1">
+        <Text
+          fontSize={fontSize}
+          fontWeight="800"
+          color="#14b8a6"
+          lineHeight="1"
+        >
           W
         </Text>
-        <Text fontSize={fontSize} fontWeight="800" color="#60a5fa" lineHeight="1">
+        <Text
+          fontSize={fontSize}
+          fontWeight="800"
+          color="#60a5fa"
+          lineHeight="1"
+        >
           M
         </Text>
-        <Text fontSize={fontSize} fontWeight="800" color="#a855f7" lineHeight="1">
+        <Text
+          fontSize={fontSize}
+          fontWeight="800"
+          color="#a855f7"
+          lineHeight="1"
+        >
           P
         </Text>
       </HStack>
@@ -36,4 +51,3 @@ function BrandMark({ fontSize = "md", ...boxProps }: BrandMarkProps) {
 }
 
 export default BrandMark
-

@@ -2,24 +2,24 @@ import {
   Box,
   Button,
   Flex,
+  HStack,
   Input,
   Stack,
-  Text,
-  HStack,
   Table,
+  Text,
   VStack,
 } from "@chakra-ui/react"
+import { useMemo, useState } from "react"
 import { Checkbox } from "@/components/ui/checkbox"
 import {
-  DialogRoot,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
   DialogBody,
   DialogCloseTrigger,
+  DialogContent,
+  DialogHeader,
+  DialogRoot,
+  DialogTitle,
 } from "@/components/ui/dialog"
-import { CartItem } from "./types"
-import { useMemo, useState } from "react"
+import type { CartItem } from "./types"
 import { formatCurrency } from "./utils"
 
 interface PaymentMethod {
@@ -34,8 +34,12 @@ interface PaymentModalProps {
   cart: CartItem[]
   totalAmount: number
   paymentMethods?: PaymentMethod[]
-  onSave: (payments: Record<string, { amount: number; refNo?: string }>) => Promise<void>
-  onSaveAndPrint: (payments: Record<string, { amount: number; refNo?: string }>) => Promise<void>
+  onSave: (
+    payments: Record<string, { amount: number; refNo?: string }>,
+  ) => Promise<void>
+  onSaveAndPrint: (
+    payments: Record<string, { amount: number; refNo?: string }>,
+  ) => Promise<void>
   isProcessing?: boolean
   isLoadingPaymentMethods?: boolean
   paymentMethodsError?: Error | null
@@ -57,9 +61,13 @@ export function PaymentModal({
   customerName,
   customerBalance = 0,
 }: PaymentModalProps) {
-  const [paymentAmounts, setPaymentAmounts] = useState<Record<string, number>>({})
+  const [paymentAmounts, setPaymentAmounts] = useState<Record<string, number>>(
+    {},
+  )
   const [paymentRefs, setPaymentRefs] = useState<Record<string, string>>({})
-  const [selectedMethods, setSelectedMethods] = useState<Record<string, boolean>>({})
+  const [selectedMethods, setSelectedMethods] = useState<
+    Record<string, boolean>
+  >({})
 
   // Calculate totals
   const totalItems = useMemo(() => {
@@ -75,7 +83,10 @@ export function PaymentModal({
   }, [totalAmount, netTotal])
 
   const totalPaid = useMemo(() => {
-    return Object.values(paymentAmounts).reduce((sum, amount) => sum + (amount || 0), 0)
+    return Object.values(paymentAmounts).reduce(
+      (sum, amount) => sum + (amount || 0),
+      0,
+    )
   }, [paymentAmounts])
 
   const changeDue = useMemo(() => {
@@ -86,14 +97,13 @@ export function PaymentModal({
   const isPaymentSufficient = useMemo(() => {
     // Check if customer is actually selected (handle empty string, null, undefined)
     const hasCustomer = customerName && customerName.trim().length > 0
-    
+
     if (!hasCustomer) {
       // No customer: require full payment (allow small rounding differences)
       return totalPaid >= totalAmount - 0.01
-    } else {
-      // Customer selected: allow partial or zero payment (entire amount can be debt)
-      return totalPaid >= 0
     }
+    // Customer selected: allow partial or zero payment (entire amount can be debt)
+    return totalPaid >= 0
   }, [totalPaid, totalAmount, customerName])
 
   const paymentShortfall = useMemo(() => {
@@ -172,7 +182,6 @@ export function PaymentModal({
     onClose()
   }
 
-
   return (
     <DialogRoot
       size="full"
@@ -188,7 +197,9 @@ export function PaymentModal({
           </DialogTitle>
           {customerName && (
             <Text fontSize="sm" color="white" opacity={0.9} mt={1}>
-              Customer: {customerName} {customerBalance > 0 && `(Balance: ${formatCurrency(customerBalance)})`}
+              Customer: {customerName}{" "}
+              {customerBalance > 0 &&
+                `(Balance: ${formatCurrency(customerBalance)})`}
             </Text>
           )}
         </DialogHeader>
@@ -200,7 +211,12 @@ export function PaymentModal({
                 {/* Summary Fields */}
                 <HStack gap={4}>
                   <Box flex={1}>
-                    <Text fontSize="sm" fontWeight="medium" mb={1} color="text.primary">
+                    <Text
+                      fontSize="sm"
+                      fontWeight="medium"
+                      mb={1}
+                      color="text.primary"
+                    >
                       TOTAL ITEMS
                     </Text>
                     <Input
@@ -213,7 +229,12 @@ export function PaymentModal({
                     />
                   </Box>
                   <Box flex={1}>
-                    <Text fontSize="sm" fontWeight="medium" mb={1} color="text.primary">
+                    <Text
+                      fontSize="sm"
+                      fontWeight="medium"
+                      mb={1}
+                      color="text.primary"
+                    >
                       AMOUNT DUE
                     </Text>
                     <Input
@@ -226,7 +247,12 @@ export function PaymentModal({
                     />
                   </Box>
                   <Box flex={1}>
-                    <Text fontSize="sm" fontWeight="medium" mb={1} color="text.primary">
+                    <Text
+                      fontSize="sm"
+                      fontWeight="medium"
+                      mb={1}
+                      color="text.primary"
+                    >
                       CHANGE DUE
                     </Text>
                     <Input
@@ -242,130 +268,222 @@ export function PaymentModal({
 
                 {/* Payment Methods */}
                 <Box mt={4}>
-                  <Text fontSize="sm" fontWeight="bold" mb={3} color="text.primary">
+                  <Text
+                    fontSize="sm"
+                    fontWeight="bold"
+                    mb={3}
+                    color="text.primary"
+                  >
                     Payment Methods
                   </Text>
                   <Stack gap={4}>
                     {isLoadingPaymentMethods ? (
-                      <Text fontSize="sm" color="text.muted" textAlign="center" py={4}>
+                      <Text
+                        fontSize="sm"
+                        color="text.muted"
+                        textAlign="center"
+                        py={4}
+                      >
                         Loading payment methods...
                       </Text>
                     ) : paymentMethodsError ? (
-                      <Text fontSize="sm" color="red.500" textAlign="center" py={4}>
+                      <Text
+                        fontSize="sm"
+                        color="red.500"
+                        textAlign="center"
+                        py={4}
+                      >
                         Error loading payment methods. Please refresh the page.
                       </Text>
                     ) : paymentMethods.length === 0 ? (
-                      <Text fontSize="sm" color="text.muted" textAlign="center" py={4}>
-                        No payment methods available. Please configure payment methods in the system.
+                      <Text
+                        fontSize="sm"
+                        color="text.muted"
+                        textAlign="center"
+                        py={4}
+                      >
+                        No payment methods available. Please configure payment
+                        methods in the system.
                       </Text>
                     ) : (
                       paymentMethods.map((method) => (
-                          <Box key={method.id} p={3} borderRadius="md" border="1px solid" borderColor="border.default" bg="item.bg">
+                        <Box
+                          key={method.id}
+                          p={3}
+                          borderRadius="md"
+                          border="1px solid"
+                          borderColor="border.default"
+                          bg="item.bg"
+                        >
                           <HStack gap={2} mb={2} alignItems="center">
                             <Checkbox
                               checked={selectedMethods[method.id] || false}
-                              onCheckedChange={({ checked }) => handleMethodToggle(method.id, checked as boolean)}
+                              onCheckedChange={({ checked }) =>
+                                handleMethodToggle(
+                                  method.id,
+                                  checked as boolean,
+                                )
+                              }
                               colorPalette="blue"
                             />
-                            <Text fontSize="sm" fontWeight="medium" color="text.primary" flex={1}>
-                              {method.name} {method.type !== "OTHER" && `(${method.type})`}
+                            <Text
+                              fontSize="sm"
+                              fontWeight="medium"
+                              color="text.primary"
+                              flex={1}
+                            >
+                              {method.name}{" "}
+                              {method.type !== "OTHER" && `(${method.type})`}
                             </Text>
                           </HStack>
-                          {selectedMethods[method.id] && (
-                        <>
-                          {method.type === "MPESA" ? (
-                            <VStack gap={2} align="stretch">
+                          {selectedMethods[method.id] &&
+                            (method.type === "MPESA" ? (
+                              <VStack gap={2} align="stretch">
+                                <Input
+                                  type="number"
+                                  placeholder="0.00"
+                                  value={paymentAmounts[method.id] || ""}
+                                  onChange={(e) =>
+                                    handleAmountChange(
+                                      method.id,
+                                      e.target.value,
+                                    )
+                                  }
+                                  step="0.01"
+                                  min="0"
+                                  bg="input.bg"
+                                  border="1px solid"
+                                  borderColor="input.border"
+                                  color="text.primary"
+                                  _focus={{
+                                    borderColor: "input.focus.border",
+                                    boxShadow: "input.focus.shadow",
+                                  }}
+                                />
+                                <HStack gap={2} align="end">
+                                  <Button
+                                    size="sm"
+                                    bg="brand.secondary"
+                                    color="white"
+                                    _hover={{ bg: "brand.secondary.hover" }}
+                                    flexShrink={0}
+                                  >
+                                    Validate Mpesa Paid
+                                  </Button>
+                                  <Box flex={1}>
+                                    <Text
+                                      fontSize="xs"
+                                      mb={1}
+                                      fontWeight="medium"
+                                      color="text.muted"
+                                    >
+                                      PAYMENT REF NO:
+                                    </Text>
+                                    <Input
+                                      placeholder=""
+                                      value={paymentRefs[method.id] || ""}
+                                      onChange={(e) =>
+                                        handleRefChange(
+                                          method.id,
+                                          e.target.value,
+                                        )
+                                      }
+                                      size="sm"
+                                      bg="input.bg"
+                                      border="1px solid"
+                                      borderColor="input.border"
+                                      color="text.primary"
+                                      _focus={{
+                                        borderColor: "input.focus.border",
+                                        boxShadow: "input.focus.shadow",
+                                      }}
+                                    />
+                                  </Box>
+                                </HStack>
+                              </VStack>
+                            ) : method.type === "CREDIT_NOTE" ? (
                               <Input
                                 type="number"
                                 placeholder="0.00"
                                 value={paymentAmounts[method.id] || ""}
-                                onChange={(e) => handleAmountChange(method.id, e.target.value)}
+                                onChange={(e) =>
+                                  handleAmountChange(method.id, e.target.value)
+                                }
                                 step="0.01"
                                 min="0"
-                                bg="input.bg"
+                                bg={{ base: "#1a1d29", _light: "#ffffff" }}
                                 border="1px solid"
-                                borderColor="input.border"
-                                color="text.primary"
-                                _focus={{ borderColor: "input.focus.border", boxShadow: "input.focus.shadow" }}
+                                borderColor={{
+                                  base: "rgba(255, 255, 255, 0.1)",
+                                  _light: "#e5e7eb",
+                                }}
+                                color={{ base: "#ffffff", _light: "#1a1d29" }}
+                                _focus={{
+                                  borderColor: "input.focus.border",
+                                  boxShadow: "input.focus.shadow",
+                                }}
                               />
+                            ) : (
                               <HStack gap={2} align="end">
-                                <Button
-                                  size="sm"
-                                  bg="brand.secondary"
-                                  color="white"
-                                  _hover={{ bg: "brand.secondary.hover" }}
-                                  flexShrink={0}
-                                >
-                                  Validate Mpesa Paid
-                                </Button>
+                                <Input
+                                  type="number"
+                                  placeholder="0.00"
+                                  value={paymentAmounts[method.id] || ""}
+                                  onChange={(e) =>
+                                    handleAmountChange(
+                                      method.id,
+                                      e.target.value,
+                                    )
+                                  }
+                                  step="0.01"
+                                  min="0"
+                                  bg="input.bg"
+                                  border="1px solid"
+                                  borderColor="input.border"
+                                  color="text.primary"
+                                  _focus={{
+                                    borderColor: "input.focus.border",
+                                    boxShadow: "input.focus.shadow",
+                                  }}
+                                  flex={1}
+                                />
                                 <Box flex={1}>
-                                  <Text fontSize="xs" mb={1} fontWeight="medium" color="text.muted">
+                                  <Text
+                                    fontSize="xs"
+                                    mb={1}
+                                    fontWeight="medium"
+                                    color={{
+                                      base: "#9ca3af",
+                                      _light: "#6b7280",
+                                    }}
+                                  >
                                     PAYMENT REF NO:
                                   </Text>
                                   <Input
                                     placeholder=""
                                     value={paymentRefs[method.id] || ""}
-                                    onChange={(e) => handleRefChange(method.id, e.target.value)}
+                                    onChange={(e) =>
+                                      handleRefChange(method.id, e.target.value)
+                                    }
                                     size="sm"
                                     bg="input.bg"
                                     border="1px solid"
-                                    borderColor="input.border"
-                                    color="text.primary"
-                                    _focus={{ borderColor: "input.focus.border", boxShadow: "input.focus.shadow" }}
+                                    borderColor={{
+                                      base: "rgba(255, 255, 255, 0.1)",
+                                      _light: "#e5e7eb",
+                                    }}
+                                    color={{
+                                      base: "#ffffff",
+                                      _light: "#1a1d29",
+                                    }}
+                                    _focus={{
+                                      borderColor: "input.focus.border",
+                                      boxShadow: "input.focus.shadow",
+                                    }}
                                   />
                                 </Box>
                               </HStack>
-                            </VStack>
-                          ) : method.type === "CREDIT_NOTE" ? (
-                            <Input
-                              type="number"
-                              placeholder="0.00"
-                              value={paymentAmounts[method.id] || ""}
-                              onChange={(e) => handleAmountChange(method.id, e.target.value)}
-                              step="0.01"
-                              min="0"
-                              bg={{ base: "#1a1d29", _light: "#ffffff" }}
-                              border="1px solid"
-                              borderColor={{ base: "rgba(255, 255, 255, 0.1)", _light: "#e5e7eb" }}
-                              color={{ base: "#ffffff", _light: "#1a1d29" }}
-                              _focus={{ borderColor: "input.focus.border", boxShadow: "input.focus.shadow" }}
-                            />
-                          ) : (
-                            <HStack gap={2} align="end">
-                              <Input
-                                type="number"
-                                placeholder="0.00"
-                                value={paymentAmounts[method.id] || ""}
-                                onChange={(e) => handleAmountChange(method.id, e.target.value)}
-                                step="0.01"
-                                min="0"
-                                bg="input.bg"
-                                border="1px solid"
-                                borderColor="input.border"
-                                color="text.primary"
-                                _focus={{ borderColor: "input.focus.border", boxShadow: "input.focus.shadow" }}
-                                flex={1}
-                              />
-                              <Box flex={1}>
-                                <Text fontSize="xs" mb={1} fontWeight="medium" color={{ base: "#9ca3af", _light: "#6b7280" }}>
-                                  PAYMENT REF NO:
-                                </Text>
-                                <Input
-                                  placeholder=""
-                                  value={paymentRefs[method.id] || ""}
-                                  onChange={(e) => handleRefChange(method.id, e.target.value)}
-                                  size="sm"
-                                  bg="input.bg"
-                                  border="1px solid"
-                                  borderColor={{ base: "rgba(255, 255, 255, 0.1)", _light: "#e5e7eb" }}
-                                  color={{ base: "#ffffff", _light: "#1a1d29" }}
-                                  _focus={{ borderColor: "input.focus.border", boxShadow: "input.focus.shadow" }}
-                                />
-                              </Box>
-                            </HStack>
-                          )}
-                        </>
-                      )}
+                            ))}
                         </Box>
                       ))
                     )}
@@ -385,32 +503,58 @@ export function PaymentModal({
             >
               <VStack gap={4} align="stretch">
                 {/* Header */}
-                 <Text fontSize="lg" fontWeight="bold" textAlign="center" mb={2} color="brand.primary">
-                   WISEMAN PALACE
-                 </Text>
+                <Text
+                  fontSize="lg"
+                  fontWeight="bold"
+                  textAlign="center"
+                  mb={2}
+                  color="brand.primary"
+                >
+                  WISEMAN PALACE
+                </Text>
 
                 {/* Product Table */}
                 <Box overflowX="auto" bg="bg.surface" borderRadius="md" p={2}>
                   <Table.Root size="sm">
                     <Table.Header>
                       <Table.Row>
-                        <Table.ColumnHeader color="text.primary">Product Name</Table.ColumnHeader>
-                        <Table.ColumnHeader color="text.primary">Unit Price</Table.ColumnHeader>
-                        <Table.ColumnHeader color="text.primary">Qty</Table.ColumnHeader>
-                        <Table.ColumnHeader color="text.primary">Total</Table.ColumnHeader>
+                        <Table.ColumnHeader color="text.primary">
+                          Product Name
+                        </Table.ColumnHeader>
+                        <Table.ColumnHeader color="text.primary">
+                          Unit Price
+                        </Table.ColumnHeader>
+                        <Table.ColumnHeader color="text.primary">
+                          Qty
+                        </Table.ColumnHeader>
+                        <Table.ColumnHeader color="text.primary">
+                          Total
+                        </Table.ColumnHeader>
                       </Table.Row>
                     </Table.Header>
                     <Table.Body>
                       {cart.map((item) => {
                         const price = Number(item.product.selling_price)
-                        const discountAmount = (price * item.quantity * (item.discount || 0)) / 100
+                        const discountAmount =
+                          (price * item.quantity * (item.discount || 0)) / 100
                         const itemTotal = price * item.quantity - discountAmount
                         return (
                           <Table.Row key={item.product.id}>
-                            <Table.Cell color="text.primary">{item.product.name}</Table.Cell>
-                            <Table.Cell color="text.primary">{price.toFixed(2)}</Table.Cell>
-                            <Table.Cell color="text.primary">{item.quantity.toFixed(2)}</Table.Cell>
-                            <Table.Cell color="text.primary" fontWeight="medium">{itemTotal.toFixed(2)}</Table.Cell>
+                            <Table.Cell color="text.primary">
+                              {item.product.name}
+                            </Table.Cell>
+                            <Table.Cell color="text.primary">
+                              {price.toFixed(2)}
+                            </Table.Cell>
+                            <Table.Cell color="text.primary">
+                              {item.quantity.toFixed(2)}
+                            </Table.Cell>
+                            <Table.Cell
+                              color="text.primary"
+                              fontWeight="medium"
+                            >
+                              {itemTotal.toFixed(2)}
+                            </Table.Cell>
                           </Table.Row>
                         )
                       })}
@@ -421,57 +565,123 @@ export function PaymentModal({
                 {/* Financial Summary */}
                 <VStack gap={2} align="stretch" fontSize="sm">
                   <HStack justify="space-between">
-                    <Text fontWeight="medium" color={{ base: "#ffffff", _light: "#1a1d29" }}>Vat Rate:</Text>
-                    <Text color={{ base: "#ffffff", _light: "#1a1d29" }}>{vatRate.toFixed(2)}</Text>
+                    <Text
+                      fontWeight="medium"
+                      color={{ base: "#ffffff", _light: "#1a1d29" }}
+                    >
+                      Vat Rate:
+                    </Text>
+                    <Text color={{ base: "#ffffff", _light: "#1a1d29" }}>
+                      {vatRate.toFixed(2)}
+                    </Text>
                   </HStack>
                   <HStack justify="space-between">
-                    <Text fontWeight="medium" color={{ base: "#ffffff", _light: "#1a1d29" }}>Net Total:</Text>
-                    <Text color={{ base: "#ffffff", _light: "#1a1d29" }}>{netTotal.toFixed(2)}</Text>
+                    <Text
+                      fontWeight="medium"
+                      color={{ base: "#ffffff", _light: "#1a1d29" }}
+                    >
+                      Net Total:
+                    </Text>
+                    <Text color={{ base: "#ffffff", _light: "#1a1d29" }}>
+                      {netTotal.toFixed(2)}
+                    </Text>
                   </HStack>
                   <HStack justify="space-between">
-                    <Text fontWeight="medium" color={{ base: "#ffffff", _light: "#1a1d29" }}>Vat Amount:</Text>
-                    <Text color={{ base: "#ffffff", _light: "#1a1d29" }}>{vatAmount.toFixed(2)}</Text>
+                    <Text
+                      fontWeight="medium"
+                      color={{ base: "#ffffff", _light: "#1a1d29" }}
+                    >
+                      Vat Amount:
+                    </Text>
+                    <Text color={{ base: "#ffffff", _light: "#1a1d29" }}>
+                      {vatAmount.toFixed(2)}
+                    </Text>
                   </HStack>
                   <HStack justify="space-between">
-                    <Text fontWeight="medium" color={{ base: "#ffffff", _light: "#1a1d29" }}>Gross Amount:</Text>
-                    <Text fontWeight="bold" color={{ base: "#ffffff", _light: "#1a1d29" }}>{totalAmount.toFixed(2)}</Text>
+                    <Text
+                      fontWeight="medium"
+                      color={{ base: "#ffffff", _light: "#1a1d29" }}
+                    >
+                      Gross Amount:
+                    </Text>
+                    <Text
+                      fontWeight="bold"
+                      color={{ base: "#ffffff", _light: "#1a1d29" }}
+                    >
+                      {totalAmount.toFixed(2)}
+                    </Text>
                   </HStack>
-                  <Box borderTop="1px solid" borderColor={{ base: "rgba(255, 255, 255, 0.1)", _light: "#e5e7eb" }} pt={2} mt={2}>
-                  {paymentMethods.map((method) => {
-                    const amount = paymentAmounts[method.id] || 0
-                    if (amount <= 0) return null
-                    return (
-                      <HStack key={method.id} justify="space-between" mb={1}>
-                        <Text fontWeight="medium" color="text.primary">
-                          {method.name}:
+                  <Box
+                    borderTop="1px solid"
+                    borderColor={{
+                      base: "rgba(255, 255, 255, 0.1)",
+                      _light: "#e5e7eb",
+                    }}
+                    pt={2}
+                    mt={2}
+                  >
+                    {paymentMethods.map((method) => {
+                      const amount = paymentAmounts[method.id] || 0
+                      if (amount <= 0) return null
+                      return (
+                        <HStack key={method.id} justify="space-between" mb={1}>
+                          <Text fontWeight="medium" color="text.primary">
+                            {method.name}:
+                          </Text>
+                          <Text color="text.primary">{amount.toFixed(2)}</Text>
+                        </HStack>
+                      )
+                    })}
+                    {changeDue > 0 && (
+                      <HStack justify="space-between" mt={2}>
+                        <Text fontWeight="bold" fontSize="md" color="#22c55e">
+                          Change Due:
                         </Text>
-                        <Text color="text.primary">
-                          {amount.toFixed(2)}
+                        <Text fontWeight="bold" fontSize="md" color="#22c55e">
+                          {changeDue.toFixed(2)}
                         </Text>
                       </HStack>
-                    )
-                  })}
-                  {changeDue > 0 && (
-                    <HStack justify="space-between" mt={2}>
-                      <Text fontWeight="bold" fontSize="md" color="#22c55e">Change Due:</Text>
-                      <Text fontWeight="bold" fontSize="md" color="#22c55e">{changeDue.toFixed(2)}</Text>
-                    </HStack>
-                  )}
+                    )}
                   </Box>
-                  <Box borderTop="1px solid" borderColor={{ base: "rgba(255, 255, 255, 0.1)", _light: "#e5e7eb" }} pt={2} mt={2}>
+                  <Box
+                    borderTop="1px solid"
+                    borderColor={{
+                      base: "rgba(255, 255, 255, 0.1)",
+                      _light: "#e5e7eb",
+                    }}
+                    pt={2}
+                    mt={2}
+                  >
                     <HStack justify="space-between">
-                      <Text fontWeight="medium" color="text.primary">Total Items:</Text>
-                      <Text color={{ base: "#ffffff", _light: "#1a1d29" }}>{totalItems.toFixed(2)}</Text>
+                      <Text fontWeight="medium" color="text.primary">
+                        Total Items:
+                      </Text>
+                      <Text color={{ base: "#ffffff", _light: "#1a1d29" }}>
+                        {totalItems.toFixed(2)}
+                      </Text>
                     </HStack>
                     <HStack justify="space-between">
-                      <Text fontWeight="medium" color="text.primary">VATABLE AMT:</Text>
-                      <Text fontWeight="bold" color={{ base: "#ffffff", _light: "#1a1d29" }}>{totalAmount.toFixed(2)}</Text>
+                      <Text fontWeight="medium" color="text.primary">
+                        VATABLE AMT:
+                      </Text>
+                      <Text
+                        fontWeight="bold"
+                        color={{ base: "#ffffff", _light: "#1a1d29" }}
+                      >
+                        {totalAmount.toFixed(2)}
+                      </Text>
                     </HStack>
                   </Box>
                 </VStack>
-                
+
                 {/* Action Buttons */}
-                <HStack gap={2} mt={4} pt={4} borderTop="1px solid" borderColor="border.default">
+                <HStack
+                  gap={2}
+                  mt={4}
+                  pt={4}
+                  borderTop="1px solid"
+                  borderColor="border.default"
+                >
                   <Button
                     variant="solid"
                     bg="button.success"
@@ -497,19 +707,33 @@ export function PaymentModal({
                     Save Only
                   </Button>
                 </HStack>
-                {(!customerName || customerName.trim().length === 0) && paymentShortfall > 0 && (
-                  <Text fontSize="xs" color="red.500" textAlign="center" mt={2} fontWeight="medium">
-                    Full payment required: Please add {formatCurrency(paymentShortfall)} more
-                  </Text>
-                )}
-                {customerName && customerName.trim().length > 0 && totalPaid < totalAmount && (
-                  <Text fontSize="xs" color="orange.500" textAlign="center" mt={2}>
-                    {totalPaid === 0 
-                      ? `Full amount (${formatCurrency(totalAmount)}) will be recorded as debt`
-                      : `Partial payment: ${formatCurrency(totalAmount - totalPaid)} will be recorded as debt`
-                    }
-                  </Text>
-                )}
+                {(!customerName || customerName.trim().length === 0) &&
+                  paymentShortfall > 0 && (
+                    <Text
+                      fontSize="xs"
+                      color="red.500"
+                      textAlign="center"
+                      mt={2}
+                      fontWeight="medium"
+                    >
+                      Full payment required: Please add{" "}
+                      {formatCurrency(paymentShortfall)} more
+                    </Text>
+                  )}
+                {customerName &&
+                  customerName.trim().length > 0 &&
+                  totalPaid < totalAmount && (
+                    <Text
+                      fontSize="xs"
+                      color="orange.500"
+                      textAlign="center"
+                      mt={2}
+                    >
+                      {totalPaid === 0
+                        ? `Full amount (${formatCurrency(totalAmount)}) will be recorded as debt`
+                        : `Partial payment: ${formatCurrency(totalAmount - totalPaid)} will be recorded as debt`}
+                    </Text>
+                  )}
               </VStack>
             </Box>
           </Flex>
@@ -518,4 +742,3 @@ export function PaymentModal({
     </DialogRoot>
   )
 }
-

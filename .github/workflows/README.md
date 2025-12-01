@@ -27,17 +27,21 @@ This document describes the CI/CD pipeline structure and flow for the finance-tr
 **Purpose**: End-to-end testing with Playwright
 
 **Triggers**:
-- Push to `master` or `develop` branches
-- Pull requests targeting `master` or `develop`
+- Pull requests targeting `master` or `develop` that are labeled `run-playwright`
+- Nightly schedule at 06:00 UTC
 - Manual dispatch
 
 **Jobs**:
 1. **changes**: Detects if relevant files changed (backend, frontend, docker-compose, etc.)
-2. **test-playwright**: Runs Playwright tests in 4 parallel shards (only if changes detected)
-3. **merge-playwright-reports**: Merges test reports from all shards into HTML report
-4. **alls-green-playwright**: Ensures all shards completed (for branch protection)
+2. **run-playwright-gate**: Determines whether the suite should run (label, schedule, or manual trigger)
+3. **test-playwright**: Runs Playwright tests in 4 parallel shards (only if changes detected *and* the gate allows execution)
+4. **merge-playwright-reports**: Merges test reports from all shards into HTML report
+5. **alls-green-playwright**: Ensures all shards completed (for branch protection)
 
-**Flow**: Tests only run if relevant files changed, improving efficiency.
+**Flow**: Tests run when relevant files changed **and** one of the following is true:
+- The PR is labeled `run-playwright`
+- The nightly schedule triggered the workflow
+- The workflow was manually dispatched
 
 ---
 
@@ -154,7 +158,7 @@ CI Workflow runs (parallel):
     ├─ test-backend ✓
     └─ test-docker-compose ✓
     ↓
-Playwright Tests run (if relevant files changed):
+Playwright Tests run (if relevant files changed *and* the gate allows execution):
     ├─ Run E2E tests in 4 shards
     └─ Merge reports ✓
     ↓
@@ -172,7 +176,7 @@ Production deployment:
 
 - **`master`**: Production branch
   - Protected branch
-  - Requires CI + Playwright to pass before deployment
+  - Requires CI to pass before deployment. Playwright must also pass when explicitly requested (label/schedule/manual)
   - Auto-deploys to production after successful tests
 
 - **`develop`**: Development/staging branch

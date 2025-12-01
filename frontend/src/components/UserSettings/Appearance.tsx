@@ -1,6 +1,6 @@
-import { Heading, Stack, Box, HStack, Text, Icon } from "@chakra-ui/react"
+import { Box, Heading, HStack, Icon, Stack, Text } from "@chakra-ui/react"
 import { useTheme } from "next-themes"
-import { FiMonitor, FiSun, FiMoon } from "react-icons/fi"
+import { FiMonitor, FiMoon, FiSun } from "react-icons/fi"
 
 import { Radio, RadioGroup } from "@/components/ui/radio"
 
@@ -20,7 +20,6 @@ const Appearance = () => {
     }
   }
 
-
   return (
     <Box maxW="md">
       <Heading size="sm" mb={4} color="text.primary">
@@ -32,7 +31,10 @@ const Appearance = () => {
         borderRadius="lg"
         border="1px solid"
         borderColor="border.card"
-        boxShadow={{ base: "0 2px 4px rgba(0, 0, 0, 0.2)", _light: "0 1px 3px rgba(0, 0, 0, 0.1)" }}
+        boxShadow={{
+          base: "0 2px 4px rgba(0, 0, 0, 0.2)",
+          _light: "0 1px 3px rgba(0, 0, 0, 0.1)",
+        }}
       >
         <RadioGroup
           onValueChange={(e) => setTheme(e.value ?? "system")}
@@ -46,8 +48,16 @@ const Appearance = () => {
                 <HStack key={value} gap={3}>
                   <Radio value={value} />
                   <Icon as={IconComponent} fontSize="md" color="text.muted" />
-                  <Text fontSize="sm" color="text.primary" textTransform="capitalize">
-                    {value === "system" ? "System" : value === "light" ? "Light Mode" : "Dark Mode"}
+                  <Text
+                    fontSize="sm"
+                    color="text.primary"
+                    textTransform="capitalize"
+                  >
+                    {value === "system"
+                      ? "System"
+                      : value === "light"
+                        ? "Light Mode"
+                        : "Dark Mode"}
                   </Text>
                 </HStack>
               )

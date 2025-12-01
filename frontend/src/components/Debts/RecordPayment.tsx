@@ -1,20 +1,20 @@
 import {
+  Badge,
   Box,
   Button,
-  DialogRoot,
-  DialogContent,
-  DialogHeader,
   DialogBody,
-  DialogFooter,
-  DialogTitle,
   DialogCloseTrigger,
-  Input,
-  VStack,
-  Text,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogRoot,
+  DialogTitle,
   Flex,
-  Textarea,
   HStack,
-  Badge,
+  Input,
+  Text,
+  Textarea,
+  VStack,
 } from "@chakra-ui/react"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
 import { useState } from "react"
@@ -22,8 +22,8 @@ import { type SubmitHandler, useForm } from "react-hook-form"
 
 import {
   type ApiError,
-  type DebtPublic,
   type DebtPaymentCreate,
+  type DebtPublic,
   DebtsService,
 } from "../../client"
 import useCustomToast from "../../hooks/useCustomToast"
@@ -69,7 +69,10 @@ export default function RecordPayment({
   })
 
   const paymentAmount = watch("amount")
-  const paymentAmountNum = typeof paymentAmount === "string" ? parseFloat(paymentAmount) : (paymentAmount || 0)
+  const paymentAmountNum =
+    typeof paymentAmount === "string"
+      ? parseFloat(paymentAmount)
+      : paymentAmount || 0
   const remainingBalance =
     parseFloat(debt.balance?.toString() || "0") - paymentAmountNum
 
@@ -125,7 +128,10 @@ export default function RecordPayment({
                 bg={{ base: "#0f1117", _light: "#f9fafb" }}
                 borderRadius="md"
                 border="1px solid"
-                borderColor={{ base: "rgba(255, 255, 255, 0.08)", _light: "#e5e7eb" }}
+                borderColor={{
+                  base: "rgba(255, 255, 255, 0.08)",
+                  _light: "#e5e7eb",
+                }}
               >
                 <Flex justify="space-between" mb={2}>
                   <Text
@@ -302,7 +308,10 @@ export default function RecordPayment({
                   {...register("notes")}
                   bg={{ base: "#0f1117", _light: "#f9fafb" }}
                   border="1px solid"
-                  borderColor={{ base: "rgba(255, 255, 255, 0.08)", _light: "#e5e7eb" }}
+                  borderColor={{
+                    base: "rgba(255, 255, 255, 0.08)",
+                    _light: "#e5e7eb",
+                  }}
                 />
               </Box>
             </VStack>

@@ -13,8 +13,8 @@ import { useState } from "react"
 import { type SubmitHandler, useForm } from "react-hook-form"
 import { FiEdit } from "react-icons/fi"
 import type { PaymentMethodPublic } from "@/client"
-import type { ApiError } from "@/client/core/ApiError"
 import { OpenAPI } from "@/client"
+import type { ApiError } from "@/client/core/ApiError"
 import useCustomToast from "@/hooks/useCustomToast"
 import { handleError } from "@/utils"
 import { Checkbox } from "../ui/checkbox"
@@ -69,7 +69,7 @@ const EditPaymentMethod = ({ paymentMethod }: EditPaymentMethodProps) => {
             Authorization: `Bearer ${token}`,
           },
           body: JSON.stringify(data),
-        }
+        },
       )
       if (!response.ok) {
         const error = await response.json()
@@ -136,9 +136,15 @@ const EditPaymentMethod = ({ paymentMethod }: EditPaymentMethodProps) => {
                   })}
                   bg={{ base: "#1a1d29", _light: "#ffffff" }}
                   border="1px solid"
-                  borderColor={{ base: "rgba(255, 255, 255, 0.1)", _light: "#e5e7eb" }}
+                  borderColor={{
+                    base: "rgba(255, 255, 255, 0.1)",
+                    _light: "#e5e7eb",
+                  }}
                   color={{ base: "#ffffff", _light: "#1a1d29" }}
-                  _focus={{ borderColor: "#14b8a6", boxShadow: "0 0 0 1px #14b8a6" }}
+                  _focus={{
+                    borderColor: "#14b8a6",
+                    boxShadow: "0 0 0 1px #14b8a6",
+                  }}
                 />
               </Field>
               <Field
@@ -155,9 +161,15 @@ const EditPaymentMethod = ({ paymentMethod }: EditPaymentMethodProps) => {
                   })}
                   bg={{ base: "#1a1d29", _light: "#ffffff" }}
                   border="1px solid"
-                  borderColor={{ base: "rgba(255, 255, 255, 0.1)", _light: "#e5e7eb" }}
+                  borderColor={{
+                    base: "rgba(255, 255, 255, 0.1)",
+                    _light: "#e5e7eb",
+                  }}
                   color={{ base: "#ffffff", _light: "#1a1d29" }}
-                  _focus={{ borderColor: "#14b8a6", boxShadow: "0 0 0 1px #14b8a6" }}
+                  _focus={{
+                    borderColor: "#14b8a6",
+                    boxShadow: "0 0 0 1px #14b8a6",
+                  }}
                 />
               </Field>
               <Field label="Status">
@@ -197,4 +209,3 @@ const EditPaymentMethod = ({ paymentMethod }: EditPaymentMethodProps) => {
 }
 
 export default EditPaymentMethod
-

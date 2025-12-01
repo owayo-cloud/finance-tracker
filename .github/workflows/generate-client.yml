@@ -21,9 +21,9 @@ jobs:
     steps:
     # For PRs from forks
     - uses: actions/checkout@v5
-    # For PRs from the same repo
+    # For PRs from the same repo (token available)
     - uses: actions/checkout@v5
-      if: ( github.event_name != 'pull_request' || github.secret_source == 'Actions' )
+      if: ( github.event_name == 'pull_request' && github.secret_source == 'Actions' )
       with:
         ref: ${{ github.head_ref }}
         token: ${{ secrets.FULL_STACK_FASTAPI_TEMPLATE_REPO_TOKEN }}
@@ -45,7 +45,6 @@ jobs:
       working-directory: backend
     - run: uv run bash scripts/generate-client.sh
       env:
-        VIRTUAL_ENV: backend/.venv
         SECRET_KEY: just-for-generating-client
         POSTGRES_PASSWORD: just-for-generating-client
         FIRST_SUPERUSER_PASSWORD: just-for-generating-client

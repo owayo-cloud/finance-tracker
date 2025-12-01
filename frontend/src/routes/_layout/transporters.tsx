@@ -1,49 +1,57 @@
-import { createFileRoute } from "@tanstack/react-router";
-import { useState } from "react";
 import {
-  Container,
-  Heading,
-  VStack,
-  HStack,
-  Box,
-  Input,
-  Button,
-  Table,
-  IconButton,
   Badge,
-  DrawerRoot,
+  Box,
+  Button,
+  Container,
   DrawerBackdrop,
-  DrawerContent,
-  DrawerHeader,
   DrawerBody,
-  DrawerFooter,
-  DrawerTitle,
   DrawerCloseTrigger,
-} from "@chakra-ui/react";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { FiPlus, FiEdit2, FiTrash2 } from "react-icons/fi";
-
-import { GrnService } from "@/client";
-import type { TransporterPublic, TransporterCreate, TransporterUpdate } from "@/client";
-import useCustomToast from "@/hooks/useCustomToast";
+  DrawerContent,
+  DrawerFooter,
+  DrawerHeader,
+  DrawerRoot,
+  DrawerTitle,
+  Heading,
+  HStack,
+  IconButton,
+  Input,
+  Table,
+  VStack,
+} from "@chakra-ui/react"
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
+import { createFileRoute } from "@tanstack/react-router"
+import { useId, useState } from "react"
+import { FiEdit2, FiPlus, FiTrash2 } from "react-icons/fi"
+import type {
+  TransporterCreate,
+  TransporterPublic,
+  TransporterUpdate,
+} from "@/client"
+import { GrnService } from "@/client"
+import useCustomToast from "@/hooks/useCustomToast"
 
 export const Route = createFileRoute("/_layout/transporters")({
   component: TransportersPage,
-});
+})
 
 function TransportersPage() {
-  const queryClient = useQueryClient();
-  const { showSuccessToast, showErrorToast } = useCustomToast();
+  const queryClient = useQueryClient()
+  const { showSuccessToast, showErrorToast } = useCustomToast()
+  const nameId = useId()
+  const contactPersonId = useId()
+  const phoneId = useId()
+  const activeCheckboxId = useId()
 
-  const [showDrawer, setShowDrawer] = useState(false);
-  const [editingTransporter, setEditingTransporter] = useState<TransporterPublic | null>(null);
-  const [searchTerm, setSearchTerm] = useState("");
+  const [showDrawer, setShowDrawer] = useState(false)
+  const [editingTransporter, setEditingTransporter] =
+    useState<TransporterPublic | null>(null)
+  const [searchTerm, setSearchTerm] = useState("")
 
   // Form state
-  const [name, setName] = useState("");
-  const [contactPerson, setContactPerson] = useState("");
-  const [phone, setPhone] = useState("");
-  const [isActive, setIsActive] = useState(true);
+  const [name, setName] = useState("")
+  const [contactPerson, setContactPerson] = useState("")
+  const [phone, setPhone] = useState("")
+  const [isActive, setIsActive] = useState(true)
 
   // Fetch transporters
   const { data: transportersData, isLoading } = useQuery({
@@ -54,81 +62,82 @@ function TransportersPage() {
         limit: 1000,
         search: searchTerm || undefined,
       }),
-  });
+  })
 
   // Create mutation
   const createMutation = useMutation({
     mutationFn: (data: TransporterCreate) =>
       GrnService.createTransporter({ requestBody: data }),
     onSuccess: () => {
-      showSuccessToast("Transporter created successfully!");
-      queryClient.invalidateQueries({ queryKey: ["transporters"] });
-      handleCloseDrawer();
+      showSuccessToast("Transporter created successfully!")
+      queryClient.invalidateQueries({ queryKey: ["transporters"] })
+      handleCloseDrawer()
     },
     onError: (error: any) => {
-      const detail = error?.body?.detail || "An error occurred";
-      showErrorToast(detail);
+      const detail = error?.body?.detail || "An error occurred"
+      showErrorToast(detail)
     },
-  });
+  })
 
   // Update mutation
   const updateMutation = useMutation({
     mutationFn: ({ id, data }: { id: string; data: TransporterUpdate }) =>
       GrnService.updateTransporter({ transporterId: id, requestBody: data }),
     onSuccess: () => {
-      showSuccessToast("Transporter updated successfully!");
-      queryClient.invalidateQueries({ queryKey: ["transporters"] });
-      handleCloseDrawer();
+      showSuccessToast("Transporter updated successfully!")
+      queryClient.invalidateQueries({ queryKey: ["transporters"] })
+      handleCloseDrawer()
     },
     onError: (error: any) => {
-      const detail = error?.body?.detail || "An error occurred";
-      showErrorToast(detail);
+      const detail = error?.body?.detail || "An error occurred"
+      showErrorToast(detail)
     },
-  });
+  })
 
   // Delete mutation
   const deleteMutation = useMutation({
-    mutationFn: (id: string) => GrnService.deleteTransporter({ transporterId: id }),
+    mutationFn: (id: string) =>
+      GrnService.deleteTransporter({ transporterId: id }),
     onSuccess: () => {
-      showSuccessToast("Transporter deleted successfully!");
-      queryClient.invalidateQueries({ queryKey: ["transporters"] });
+      showSuccessToast("Transporter deleted successfully!")
+      queryClient.invalidateQueries({ queryKey: ["transporters"] })
     },
     onError: (error: any) => {
-      const detail = error?.body?.detail || "An error occurred";
-      showErrorToast(detail);
+      const detail = error?.body?.detail || "An error occurred"
+      showErrorToast(detail)
     },
-  });
+  })
 
   const handleOpenDrawer = (transporter?: TransporterPublic) => {
     if (transporter) {
-      setEditingTransporter(transporter);
-      setName(transporter.name);
-      setContactPerson(transporter.contact_person || "");
-      setPhone(transporter.phone || "");
-      setIsActive(transporter.is_active ?? true);
+      setEditingTransporter(transporter)
+      setName(transporter.name)
+      setContactPerson(transporter.contact_person || "")
+      setPhone(transporter.phone || "")
+      setIsActive(transporter.is_active ?? true)
     } else {
-      setEditingTransporter(null);
-      setName("");
-      setContactPerson("");
-      setPhone("");
-      setIsActive(true);
+      setEditingTransporter(null)
+      setName("")
+      setContactPerson("")
+      setPhone("")
+      setIsActive(true)
     }
-    setShowDrawer(true);
-  };
+    setShowDrawer(true)
+  }
 
   const handleCloseDrawer = () => {
-    setShowDrawer(false);
-    setEditingTransporter(null);
-    setName("");
-    setContactPerson("");
-    setPhone("");
-    setIsActive(true);
-  };
+    setShowDrawer(false)
+    setEditingTransporter(null)
+    setName("")
+    setContactPerson("")
+    setPhone("")
+    setIsActive(true)
+  }
 
   const handleSubmit = () => {
     if (!name.trim()) {
-      showErrorToast("Transporter name is required");
-      return;
+      showErrorToast("Transporter name is required")
+      return
     }
 
     const transporterData = {
@@ -136,23 +145,23 @@ function TransportersPage() {
       contact_person: contactPerson || undefined,
       phone: phone || undefined,
       is_active: isActive,
-    };
+    }
 
     if (editingTransporter) {
       updateMutation.mutate({
         id: editingTransporter.id,
         data: transporterData,
-      });
+      })
     } else {
-      createMutation.mutate(transporterData);
+      createMutation.mutate(transporterData)
     }
-  };
+  }
 
   const handleDelete = (id: string) => {
     if (window.confirm("Are you sure you want to delete this transporter?")) {
-      deleteMutation.mutate(id);
+      deleteMutation.mutate(id)
     }
-  };
+  }
 
   return (
     <Container maxW="full" py={8}>
@@ -160,10 +169,7 @@ function TransportersPage() {
         {/* Header */}
         <HStack justify="space-between">
           <Heading size="2xl">Transporters</Heading>
-          <Button
-            colorPalette="teal"
-            onClick={() => handleOpenDrawer()}
-          >
+          <Button colorPalette="teal" onClick={() => handleOpenDrawer()}>
             <FiPlus /> Add Transporter
           </Button>
         </HStack>
@@ -204,8 +210,14 @@ function TransportersPage() {
                 </Table.Row>
               ) : transportersData?.data.length === 0 ? (
                 <Table.Row>
-                  <Table.Cell colSpan={5} textAlign="center" py={8} color="gray.500">
-                    No transporters found. Click "Add Transporter" to create one.
+                  <Table.Cell
+                    colSpan={5}
+                    textAlign="center"
+                    py={8}
+                    color="gray.500"
+                  >
+                    No transporters found. Click "Add Transporter" to create
+                    one.
                   </Table.Cell>
                 </Table.Row>
               ) : (
@@ -278,6 +290,7 @@ function TransportersPage() {
             <VStack gap={4} align="stretch">
               <Box>
                 <label
+                  htmlFor={nameId}
                   style={{
                     fontSize: "14px",
                     fontWeight: "500",
@@ -288,6 +301,7 @@ function TransportersPage() {
                   Transporter Name <span style={{ color: "red" }}>*</span>
                 </label>
                 <Input
+                  id={nameId}
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   placeholder="Enter transporter name"
@@ -295,6 +309,7 @@ function TransportersPage() {
               </Box>
               <Box>
                 <label
+                  htmlFor={contactPersonId}
                   style={{
                     fontSize: "14px",
                     fontWeight: "500",
@@ -305,6 +320,7 @@ function TransportersPage() {
                   Contact Person
                 </label>
                 <Input
+                  id={contactPersonId}
                   value={contactPerson}
                   onChange={(e) => setContactPerson(e.target.value)}
                   placeholder="Enter contact person name"
@@ -312,6 +328,7 @@ function TransportersPage() {
               </Box>
               <Box>
                 <label
+                  htmlFor={phoneId}
                   style={{
                     fontSize: "14px",
                     fontWeight: "500",
@@ -322,6 +339,7 @@ function TransportersPage() {
                   Phone
                 </label>
                 <Input
+                  id={phoneId}
                   value={phone}
                   onChange={(e) => setPhone(e.target.value)}
                   placeholder="Enter phone number"
@@ -333,10 +351,10 @@ function TransportersPage() {
                     type="checkbox"
                     checked={isActive}
                     onChange={(e) => setIsActive(e.target.checked)}
-                    id="active-checkbox"
+                    id={activeCheckboxId}
                   />
                   <label
-                    htmlFor="active-checkbox"
+                    htmlFor={activeCheckboxId}
                     style={{ fontSize: "14px", fontWeight: "500" }}
                   >
                     Active
@@ -362,5 +380,5 @@ function TransportersPage() {
         </DrawerContent>
       </DrawerRoot>
     </Container>
-  );
+  )
 }

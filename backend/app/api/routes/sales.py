@@ -8,6 +8,7 @@ from pydantic import BaseModel
 from sqlmodel import func, select, and_, or_
 from sqlalchemy.orm import selectinload
 from sqlalchemy.sql import ColumnElement
+from sqlalchemy import desc
 
 from app.api.deps import AdminUser, CurrentUser, SessionDep
 from app.core.logging_config import get_logger
@@ -620,7 +621,7 @@ def read_sales(
         )
         .offset(skip)
         .limit(limit)
-        .order_by(Sale.sale_date.desc())
+        .order_by(desc(Sale.sale_date))
     )
     
     # Apply filters

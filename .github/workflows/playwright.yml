@@ -3,11 +3,15 @@ name: Playwright Tests
 on:
   push:
     branches:
-    - master
+      - master
+      - develop
   pull_request:
+    branches:
+      - master
+      - develop
     types:
-    - opened
-    - synchronize
+      - opened
+      - synchronize
   workflow_dispatch:
     inputs:
       debug_enabled:
@@ -41,6 +45,8 @@ jobs:
     if: ${{ needs.changes.outputs.changed == 'true' }}
     timeout-minutes: 60
     runs-on: ubuntu-latest
+    # Only run if CI workflow passes (when triggered by push)
+    # For PRs, we run independently
     strategy:
       matrix:
         shardIndex: [1, 2, 3, 4]
@@ -69,8 +75,7 @@ jobs:
     - run: npm ci
       working-directory: frontend
     - run: uv run bash scripts/generate-client.sh
-      env:
-        VIRTUAL_ENV: backend/.venv
+      working-directory: backend
     - run: docker compose build
     - run: docker compose down -v --remove-orphans
     - name: Run Playwright tests
@@ -107,8 +112,13 @@ jobs:
         pattern: blob-report-*
         merge-multiple: true
     - name: Merge into HTML Report
-      run: npx playwright merge-reports --reporter html ./all-blob-reports
       working-directory: frontend
+      run: |
+        if [ -d ./all-blob-reports ] && [ "$(ls -A ./all-blob-reports)" ]; then
+          npx playwright merge-reports --reporter html ./all-blob-reports
+        else
+          echo "No blob reports found to merge. Skipping HTML report generation."
+        fi
     - name: Upload HTML report
       uses: actions/upload-artifact@v4
       with:

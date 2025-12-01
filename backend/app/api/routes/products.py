@@ -3,7 +3,6 @@ import uuid
 
 from fastapi import APIRouter, HTTPException
 from sqlmodel import func, select, and_
-from sqlalchemy.orm import selectinload
 from sqlalchemy.sql import ColumnElement
 
 from app.api.deps import AdminUser, CurrentUser, SessionDep
@@ -13,6 +12,7 @@ from app.models import (
     ProductCategory, ProductCategoriesPublic,
     ProductStatus, ProductStatusPublic,
 )
+from app.utils.sqlalchemy_helpers import qload
 
 
 router = APIRouter(prefix="/products", tags=["products"])
@@ -67,9 +67,9 @@ def read_products(
     """
     # Build base query
     statement = select(Product).options(
-        selectinload(Product.category),
-        selectinload(Product.status),
-        selectinload(Product.image)
+        qload(Product.category),
+        qload(Product.status),
+        qload(Product.image),
     )
 
     # Build count query
@@ -136,10 +136,10 @@ def read_product(session: SessionDep, current_user: CurrentUser, id: uuid.UUID) 
         select(Product)
         .where(Product.id == id)
         .options(
-            selectinload(Product.category),
-            selectinload(Product.status),
-            selectinload(Product.tag),
-            selectinload(Product.image)
+            qload(Product.category),
+            qload(Product.status),
+            qload(Product.tag),
+            qload(Product.image),
         )
     )
     product = session.exec(statement).first()
@@ -161,9 +161,9 @@ def update_product(
         select(Product)
         .where(Product.id == id)
         .options(
-            selectinload(Product.category),
-            selectinload(Product.status),
-            selectinload(Product.image)
+            qload(Product.category),
+            qload(Product.status),
+            qload(Product.image),
         )
     )
     product = session.exec(statement).first()

@@ -17,7 +17,7 @@ branch_labels = None
 depends_on = None
 
 
-def upgrade():
+def upgrade() -> None:
     # Create sale_payment table
     op.create_table('sale_payment',
         sa.Column('sale_id', postgresql.UUID(as_uuid=True), nullable=False),
@@ -35,7 +35,7 @@ def upgrade():
     op.create_index('ix_sale_payment_sale_id', 'sale_payment', ['sale_id'], unique=False)
 
 
-def downgrade():
+def downgrade() -> None:
     # Drop index
     op.drop_index('ix_sale_payment_sale_id', table_name='sale_payment')
     # Drop table

@@ -5,6 +5,7 @@ Revises: 6a72763fceb5
 Create Date: 2025-01-18 12:00:00.000000
 
 """
+from typing import Any
 from alembic import op
 import sqlalchemy as sa
 from sqlalchemy import inspect
@@ -17,14 +18,14 @@ branch_labels = None
 depends_on = None
 
 
-def _index_exists(connection, index_name, table_name):
+def _index_exists(connection: Any, index_name: str, table_name: str) -> bool:
     """Check if an index exists"""
     inspector = inspect(connection)
     indexes = inspector.get_indexes(table_name)
     return any(idx['name'] == index_name for idx in indexes)
 
 
-def upgrade():
+def upgrade() -> None:
     connection = op.get_bind()
     
     # Add indexes for frequently queried date fields (only if they don't exist)
@@ -45,7 +46,7 @@ def upgrade():
             op.create_index(index_name, table_name, columns, unique=False)
 
 
-def downgrade():
+def downgrade() -> None:
     connection = op.get_bind()
     
     # Remove indexes in reverse order (only if they exist)

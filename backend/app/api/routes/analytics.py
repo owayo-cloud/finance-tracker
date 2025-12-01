@@ -6,11 +6,11 @@ from fastapi import APIRouter, Query
 from pydantic import BaseModel
 from sqlmodel import func, select, and_, or_
 from sqlalchemy import cast, Date
-from sqlalchemy.orm import selectinload
 from sqlalchemy.sql import ColumnElement
 
 from app.api.deps import CurrentUser, SessionDep
 from app.models import Sale, Expense, Product, ProductStatus, PaymentMethod, User
+from app.utils.sqlalchemy_helpers import qload
 
 
 router = APIRouter(prefix="/analytics", tags=["analytics"])
@@ -69,8 +69,8 @@ def get_sales_summary(
     # Get all sales
     sales = session.exec(
         base_query.options(
-            selectinload(Sale.payment_method),
-            selectinload(Sale.created_by)
+            qload(Sale.payment_method),
+            qload(Sale.created_by),
         )
     ).all()
     
@@ -164,8 +164,8 @@ def get_stock_summary(
     products = session.exec(
         select(Product)
         .options(
-            selectinload(Product.category),
-            selectinload(Product.status)
+            qload(Product.category),
+            qload(Product.status),
         )
     ).all()
     

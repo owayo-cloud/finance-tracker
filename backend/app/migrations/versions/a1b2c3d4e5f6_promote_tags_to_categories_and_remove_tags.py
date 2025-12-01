@@ -18,7 +18,7 @@ branch_labels = None
 depends_on = None
 
 
-def upgrade():
+def upgrade() -> None:
     """
     This migration:
     1. Creates new product categories based on the old tag system
@@ -102,7 +102,7 @@ def upgrade():
     op.drop_table('product_tag')
 
 
-def downgrade():
+def downgrade() -> None:
     """
     Downgrade is complex because we're merging data.
     This creates the tag table back but doesn't restore the original tag associations.

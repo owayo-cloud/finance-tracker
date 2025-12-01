@@ -59,7 +59,7 @@ def read_shift_reconciliations(
         .options(selectinload(ShiftReconciliation.created_by))
         .offset(skip)
         .limit(limit)
-        .order_by(ShiftReconciliation.shift_date.desc())
+        .order_by(desc(ShiftReconciliation.shift_date))
     )
     
     conditions: list[ColumnElement[bool]] = []

@@ -5,7 +5,7 @@ from decimal import Decimal
 
 from fastapi import APIRouter, HTTPException, Query
 from sqlmodel import func, select, and_, or_, col
-from sqlalchemy.orm import selectinload
+from sqlalchemy import desc
 
 from app.api.deps import AdminUser, CurrentUser, SessionDep
 from app.core.logging_config import get_logger
@@ -14,6 +14,7 @@ from app.models import (
     DebtPayment, DebtPaymentCreate, DebtPaymentPublic, DebtPaymentsPublic,
     PaymentMethod, Sale
 )
+from app.utils.sqlalchemy_helpers import qload, qload_chain
 
 logger = get_logger(__name__)
 
@@ -73,12 +74,12 @@ def read_debts(
     statement = (
         select(Debt)
         .options(
-            selectinload(Debt.sale).selectinload(Sale.product)  # Load sale and product relationships
+            qload_chain(Debt.sale, Sale.product)  # Load sale and product relationships
         )
     )
     if conditions:
         statement = statement.where(and_(*conditions))
-    statement = statement.order_by(Debt.debt_date.desc()).offset(skip).limit(limit)
+    statement = statement.order_by(desc(Debt.debt_date)).offset(skip).limit(limit)
     
     debts = session.exec(statement).all()
     
@@ -309,8 +310,8 @@ def create_debt_payment(
         select(DebtPayment)
         .where(DebtPayment.id == payment.id)
         .options(
-            selectinload(DebtPayment.payment_method),
-            selectinload(DebtPayment.debt)
+            qload(DebtPayment.payment_method),
+            qload(DebtPayment.debt),
         )
     ).first()
     
@@ -342,9 +343,9 @@ def read_debt_payments(
         select(DebtPayment)
         .where(DebtPayment.debt_id == debt_id)
         .options(
-            selectinload(DebtPayment.payment_method)
+            qload(DebtPayment.payment_method),
         )
-        .order_by(DebtPayment.payment_date.desc())
+        .order_by(desc(DebtPayment.payment_date))
         .offset(skip)
         .limit(limit)
     )

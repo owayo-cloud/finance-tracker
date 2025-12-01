@@ -2,9 +2,16 @@ name: Generate Client
 
 on:
   pull_request:
+    branches:
+      - master
+      - develop
     types:
-    - opened
-    - synchronize
+      - opened
+      - synchronize
+  push:
+    branches:
+      - master
+      - develop
 
 jobs:
   generate-client:

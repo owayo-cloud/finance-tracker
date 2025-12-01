@@ -3,8 +3,7 @@ from typing import Any
 import uuid
 
 from fastapi import APIRouter, HTTPException, Query
-from sqlalchemy import and_, func, or_
-from sqlalchemy.orm import selectinload
+from sqlalchemy import and_, func, or_, desc
 from sqlalchemy.sql import ColumnElement
 from sqlmodel import select
 
@@ -29,6 +28,7 @@ from app.models import (
     TransportersPublic,
     TransporterUpdate,
 )
+from app.utils.sqlalchemy_helpers import qload, qload_chain
 
 router = APIRouter(prefix="/grn", tags=["grn"])
 
@@ -322,8 +322,8 @@ def read_grns(
     """
     # Build query with eager loading
     statement = select(GRN).options(
-        selectinload(GRN.supplier),
-        selectinload(GRN.transporter),
+        qload(GRN.supplier),
+        qload(GRN.transporter),
     )
     
     # Apply filters
@@ -356,7 +356,7 @@ def read_grns(
     count = session.exec(count_statement).one()
     
     # Apply pagination and ordering (newest first)
-    statement = statement.order_by(GRN.created_at.desc()).offset(skip).limit(limit)
+    statement = statement.order_by(desc(GRN.created_at)).offset(skip).limit(limit)
     grns = session.exec(statement).all()
     
     # Add computed fields
@@ -456,9 +456,9 @@ def read_grn(
         select(GRN)
         .where(GRN.id == grn_id)
         .options(
-            selectinload(GRN.supplier),
-            selectinload(GRN.transporter),
-            selectinload(GRN.items).selectinload(GRNItem.product),
+            qload(GRN.supplier),
+            qload(GRN.transporter),
+            qload_chain(GRN.items, GRNItem.product),
         )
     )
     grn = session.exec(statement).first()
@@ -552,8 +552,8 @@ def approve_grn(
         select(GRN)
         .where(GRN.id == grn_id)
         .options(
-            selectinload(GRN.supplier),
-            selectinload(GRN.items).selectinload(GRNItem.product),
+            qload(GRN.supplier),
+            qload_chain(GRN.items, GRNItem.product),
         )
     )
     grn = session.exec(statement).first()

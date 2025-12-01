@@ -216,7 +216,7 @@ def list_reminder_logs(
     statement = (
         select(ReminderLog)
         .where(ReminderLog.user_id == current_user.id)
-        .order_by(ReminderLog.created_at.desc())
+        .order_by(desc(ReminderLog.created_at))
     )
     
     if status:
@@ -269,7 +269,7 @@ def get_reminder_statistics(
         select(ReminderLog)
         .where(ReminderLog.user_id == current_user.id)
         .where(ReminderLog.status == "sent")
-        .order_by(ReminderLog.created_at.desc())
+        .order_by(desc(ReminderLog.created_at))
         .limit(1)
     )
     last_sent = session.exec(last_sent_statement).first()

@@ -1,20 +1,19 @@
 name: Add to Project
 
+# Disabled workflow - this was for the FastAPI org project board
+# To enable: update project-url to your own project and set PROJECTS_TOKEN secret
 on:
-  pull_request_target:
-  issues:
-    types:
-      - opened
-      - reopened
+  workflow_dispatch:
 
 jobs:
   add-to-project:
     name: Add to project
     runs-on: ubuntu-latest
-    # Disabled - update project-url to your own GitHub project and set PROJECTS_TOKEN secret to enable
-    if: false
     steps:
-      - uses: actions/add-to-project@v1.0.2
-        with:
-          project-url: https://github.com/orgs/fastapi/projects/2
-          github-token: ${{ secrets.PROJECTS_TOKEN }}
+      - name: Workflow disabled
+        run: |
+          echo "This workflow is disabled. To enable it:"
+          echo "1. Create a GitHub Project in your account/org"
+          echo "2. Update project-url in this workflow"
+          echo "3. Create a PROJECTS_TOKEN secret with project write permissions"
+          echo "4. Change the 'on' trigger back to pull_request_target/issues"

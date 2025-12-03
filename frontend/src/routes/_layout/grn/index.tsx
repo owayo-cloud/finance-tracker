@@ -120,7 +120,7 @@ function GRNCreatePage() {
   const newTransporterContactId = useId()
   const newTransporterPhoneId = useId()
   const newTransporterVehicleId = useId()
-  const _approvedCheckboxId = useId()
+  const approvedCheckboxId = useId()
 
   const [formData, setFormData] = useState<GRNFormData>({
     supplier_id: "",

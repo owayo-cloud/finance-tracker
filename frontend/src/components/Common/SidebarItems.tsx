@@ -22,16 +22,9 @@ import {
 } from "react-icons/fi"
 import type { IconType } from "react-icons/lib"
 import { TbReceiptDollar } from "react-icons/tb"
-import type { UserPublic } from "@/client"
+import { TillService, type UserPublic } from "@/client"
 import { MenuContent, MenuItem, MenuRoot, MenuTrigger } from "../ui/menu"
 import { Tooltip } from "../ui/tooltip"
-
-const _API_BASE = import.meta.env.VITE_API_URL || ""
-
-const _getAuthHeaders = () => ({
-  "Content-Type": "application/json",
-  Authorization: `Bearer ${localStorage.getItem("access_token") || ""}`,
-})
 
 interface SidebarMenuItem {
   icon: IconType

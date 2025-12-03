@@ -106,7 +106,7 @@ interface BulkImportState {
 export function BulkImportPage() {
   const navigate = useNavigate()
   const queryClient = useQueryClient()
-  const _fileInputId = useId()
+  const fileInputId = useId()
 
   const [importState, setImportState] = useState<BulkImportState>({
     currentStage: ImportStage.INSTRUCTIONS,

@@ -14,7 +14,7 @@ import { ReceiptDetails } from "@/components/POS/ReceiptDetails"
 import { ReceiptPreviewModal } from "@/components/POS/ReceiptPreviewModal"
 import { RecentReceiptsModal } from "@/components/POS/RecentReceiptsModal"
 import type { CartItem, SuspendedSale } from "@/components/POS/types"
-import { OpenAPI, type ProductPublic, SalesService } from "../../client"
+import { OpenAPI, type ProductPublic, SalesService, TillService } from "../../client"
 import useAuth from "../../hooks/useAuth"
 import useCustomToast from "../../hooks/useCustomToast"
 
@@ -198,7 +198,6 @@ function Sales() {
   }, [refetchTillStatus])
 
   const isTillOpen = tillStatus?.is_open === true
-  const _hasNoTill = !isLoadingTillStatus && !isTillOpen
 
   // Fetch payment methods
   const {

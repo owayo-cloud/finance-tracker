@@ -1,5 +1,4 @@
 import {
-  // @ts-expect-error - used in JSX
   Box,
   Button,
   createListCollection,
@@ -21,7 +20,6 @@ import {
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { useEffect, useMemo, useRef, useState } from "react"
 import { type SubmitHandler, useForm } from "react-hook-form"
-// @ts-expect-error - used in JSX
 import { FaInfoCircle, FaPlus } from "react-icons/fa"
 
 import { MediaService, type ProductCreate, ProductsService } from "@/client"
@@ -42,7 +40,6 @@ import { Field } from "../ui/field"
 const AddProduct = () => {
   const [isOpen, setIsOpen] = useState(false)
   const [imageFile, setImageFile] = useState<File | null>(null)
-  // @ts-expect-error - used in JSX
   const [_imagePreview, setImagePreview] = useState<string | null>(null)
   const [uploadingImage, setUploadingImage] = useState(false)
   const [buyingPriceDisplay, setBuyingPriceDisplay] = useState("")

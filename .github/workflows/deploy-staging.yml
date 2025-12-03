@@ -71,8 +71,36 @@ jobs:
           IMAGE_TAG: ${{ inputs.image_tag || 'staging' }}
           SKIP_PULL: ${{ inputs.skip_pull }}
         run: |
-          ssh -A -o StrictHostKeyChecking=accept-new -o SendEnv="APP_DIR STACK_NAME REPO_DEPLOY_KEY GIT_REPOSITORY DOMAIN FRONTEND_HOST BACKEND_CORS_ORIGINS SECRET_KEY FIRST_SUPERUSER FIRST_SUPERUSER_PASSWORD SMTP_HOST SMTP_USER SMTP_PASSWORD EMAILS_FROM_EMAIL POSTGRES_PORT POSTGRES_DB POSTGRES_USER POSTGRES_PASSWORD SENTRY_DSN GITHUB_TOKEN GITHUB_ACTOR IMAGE_TAG SKIP_PULL" ${SERVER_USER}@${SERVER_HOST} 'bash -s' << 'ENDSSH'
+          # Pass deploy key through stdin, other vars as arguments
+          echo "$REPO_DEPLOY_KEY" | ssh -A -o StrictHostKeyChecking=accept-new ${SERVER_USER}@${SERVER_HOST} bash -s "$APP_DIR" "$STACK_NAME" "$GIT_REPOSITORY" "$DOMAIN" "$FRONTEND_HOST" "$BACKEND_CORS_ORIGINS" "$SECRET_KEY" "$FIRST_SUPERUSER" "$FIRST_SUPERUSER_PASSWORD" "$SMTP_HOST" "$SMTP_USER" "$SMTP_PASSWORD" "$EMAILS_FROM_EMAIL" "$POSTGRES_PORT" "$POSTGRES_DB" "$POSTGRES_USER" "$POSTGRES_PASSWORD" "$SENTRY_DSN" "$GITHUB_TOKEN" "$GITHUB_ACTOR" "$IMAGE_TAG" "$SKIP_PULL" << 'ENDSSH'
             set -e
+            # Read arguments
+            APP_DIR="$1"
+            STACK_NAME="$2"
+            GIT_REPOSITORY="$3"
+            DOMAIN="$4"
+            FRONTEND_HOST="$5"
+            BACKEND_CORS_ORIGINS="$6"
+            SECRET_KEY="$7"
+            FIRST_SUPERUSER="$8"
+            FIRST_SUPERUSER_PASSWORD="$9"
+            SMTP_HOST="${10}"
+            SMTP_USER="${11}"
+            SMTP_PASSWORD="${12}"
+            EMAILS_FROM_EMAIL="${13}"
+            POSTGRES_PORT="${14}"
+            POSTGRES_DB="${15}"
+            POSTGRES_USER="${16}"
+            POSTGRES_PASSWORD="${17}"
+            SENTRY_DSN="${18}"
+            GITHUB_TOKEN="${19}"
+            GITHUB_ACTOR="${20}"
+            IMAGE_TAG="${21}"
+            SKIP_PULL="${22}"
+            
+            # Read deploy key from stdin
+            REPO_DEPLOY_KEY=$(cat)
+            
             APP_DIR_PATH="${APP_DIR:-/root/code/finance-tracker-staging}"
             
             # Setup deploy key for GitHub if provided
@@ -144,10 +172,15 @@ jobs:
           STACK_NAME: ${{ secrets.STACK_NAME_STAGING || 'staging' }}
           APP_DIR: ${{ secrets.APP_DIR_STAGING || secrets.APP_DIR }}
         run: |
-          ssh -o StrictHostKeyChecking=accept-new -o SendEnv="APP_DIR STACK_NAME DOMAIN" ${SERVER_USER}@${SERVER_HOST} 'bash -s' << 'ENDSSH'
+          ssh -o StrictHostKeyChecking=accept-new ${SERVER_USER}@${SERVER_HOST} bash -s "$APP_DIR" "$STACK_NAME" "$DOMAIN" << 'ENDSSH'
             set -e
+            # Read arguments
+            APP_DIR="$1"
+            STACK_NAME="$2"
+            DOMAIN="$3"
+            
             APP_DIR_PATH="${APP_DIR:-/root/code/finance-tracker-staging}"
-            cd "\${APP_DIR_PATH}"
+            cd "${APP_DIR_PATH}"
             
             echo "=== Checking service status ==="
             docker compose --project-name ${STACK_NAME} ps

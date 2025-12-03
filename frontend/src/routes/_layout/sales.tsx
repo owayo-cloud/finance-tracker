@@ -14,7 +14,12 @@ import { ReceiptDetails } from "@/components/POS/ReceiptDetails"
 import { ReceiptPreviewModal } from "@/components/POS/ReceiptPreviewModal"
 import { RecentReceiptsModal } from "@/components/POS/RecentReceiptsModal"
 import type { CartItem, SuspendedSale } from "@/components/POS/types"
-import { OpenAPI, type ProductPublic, SalesService, TillService } from "../../client"
+import {
+  OpenAPI,
+  type ProductPublic,
+  SalesService,
+  TillService,
+} from "../../client"
 import useAuth from "../../hooks/useAuth"
 import useCustomToast from "../../hooks/useCustomToast"
 
@@ -168,11 +173,7 @@ function Sales() {
   ])
 
   // Check till status
-  const {
-    data: tillStatus,
-    isLoading: isLoadingTillStatus,
-    refetch: refetchTillStatus,
-  } = useQuery({
+  const { refetch: refetchTillStatus } = useQuery({
     queryKey: ["till-status"],
     queryFn: async () => {
       try {
@@ -196,8 +197,6 @@ function Sales() {
     window.addEventListener("focus", handleFocus)
     return () => window.removeEventListener("focus", handleFocus)
   }, [refetchTillStatus])
-
-  const isTillOpen = tillStatus?.is_open === true
 
   // Fetch payment methods
   const {

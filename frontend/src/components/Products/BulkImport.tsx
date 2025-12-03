@@ -106,7 +106,6 @@ interface BulkImportState {
 export function BulkImportPage() {
   const navigate = useNavigate()
   const queryClient = useQueryClient()
-  const fileInputId = useId()
 
   const [importState, setImportState] = useState<BulkImportState>({
     currentStage: ImportStage.INSTRUCTIONS,
@@ -614,6 +613,7 @@ interface UploadStageProps {
 }
 
 function UploadStage({ onFileUploaded }: UploadStageProps) {
+  const fileInputId = useId()
   const [isUploading, setIsUploading] = useState(false)
   const [uploadProgress, setUploadProgress] = useState(0)
   const [selectedFile, setSelectedFile] = useState<File | null>(null)

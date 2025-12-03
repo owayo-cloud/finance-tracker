@@ -41,86 +41,75 @@ jobs:
           SERVER_USER: ${{ secrets.SERVER_USER }}
           SERVER_HOST: ${{ secrets.SERVER_HOST }}
           APP_DIR: ${{ secrets.APP_DIR }}
-          REPO_DEPLOY_KEY_B64: ${{ secrets.REPO_DEPLOY_KEY_B64 || '' }}
           REPO_DEPLOY_KEY: ${{ secrets.REPO_DEPLOY_KEY || '' }}
-          REPO_PAT: ${{ secrets.REPO_PAT || '' }}
           GIT_REPOSITORY: ${{ github.repository }}
+          DOMAIN: ${{ secrets.DOMAIN_PRODUCTION }}
+          FRONTEND_HOST: ${{ secrets.FRONTEND_HOST }}
+          BACKEND_CORS_ORIGINS: ${{ secrets.BACKEND_CORS_ORIGINS }}
+          SECRET_KEY: ${{ secrets.SECRET_KEY }}
+          FIRST_SUPERUSER: ${{ secrets.FIRST_SUPERUSER }}
+          FIRST_SUPERUSER_PASSWORD: ${{ secrets.FIRST_SUPERUSER_PASSWORD }}
+          SMTP_HOST: ${{ secrets.SMTP_HOST }}
+          SMTP_USER: ${{ secrets.SMTP_USER }}
+          SMTP_PASSWORD: ${{ secrets.SMTP_PASSWORD }}
+          EMAILS_FROM_EMAIL: ${{ secrets.EMAILS_FROM_EMAIL }}
+          POSTGRES_PORT: ${{ secrets.POSTGRES_PORT || '5432' }}
+          POSTGRES_DB: ${{ secrets.POSTGRES_DB || 'app' }}
+          POSTGRES_USER: ${{ secrets.POSTGRES_USER || 'postgres' }}
+          POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
+          SENTRY_DSN: ${{ secrets.SENTRY_DSN || '' }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_ACTOR: ${{ github.actor }}
+          IMAGE_TAG: ${{ inputs.image_tag || 'latest' }}
+          SKIP_PULL: ${{ inputs.skip_pull }}
         run: |
-          ssh ${SERVER_USER}@${SERVER_HOST} << ENDSSH
+          ssh -A -o StrictHostKeyChecking=accept-new -o SendEnv="APP_DIR REPO_DEPLOY_KEY GIT_REPOSITORY DOMAIN FRONTEND_HOST BACKEND_CORS_ORIGINS SECRET_KEY FIRST_SUPERUSER FIRST_SUPERUSER_PASSWORD SMTP_HOST SMTP_USER SMTP_PASSWORD EMAILS_FROM_EMAIL POSTGRES_PORT POSTGRES_DB POSTGRES_USER POSTGRES_PASSWORD SENTRY_DSN GITHUB_TOKEN GITHUB_ACTOR IMAGE_TAG SKIP_PULL" ${SERVER_USER}@${SERVER_HOST} 'bash -s' << 'ENDSSH'
             set -e
             APP_DIR_PATH="${APP_DIR:-/root/code/finance-tracker}"
             
-            # Setup deploy key/authentication first (needed for both clone and fetch)
-            if [ -n "${REPO_DEPLOY_KEY_B64}" ]; then
-              echo "Setting up base64 deploy key..."
-              mkdir -p ~/.ssh
-              echo "${REPO_DEPLOY_KEY_B64}" | base64 --decode > ~/.ssh/github_deploy_key
-              chmod 600 ~/.ssh/github_deploy_key
-              ssh-keyscan -H github.com >> ~/.ssh/known_hosts 2>/dev/null
-              export GIT_SSH_COMMAND="ssh -i ~/.ssh/github_deploy_key -o StrictHostKeyChecking=yes"
-            elif [ -n "${REPO_DEPLOY_KEY}" ]; then
+            # Setup deploy key for GitHub if provided
+            if [ -n "${REPO_DEPLOY_KEY}" ]; then
               echo "Setting up deploy key..."
               mkdir -p ~/.ssh
               echo "${REPO_DEPLOY_KEY}" > ~/.ssh/github_deploy_key
               chmod 600 ~/.ssh/github_deploy_key
               ssh-keyscan -H github.com >> ~/.ssh/known_hosts 2>/dev/null
-              export GIT_SSH_COMMAND="ssh -i ~/.ssh/github_deploy_key -o StrictHostKeyChecking=yes"
-            elif [ -n "${REPO_PAT}" ]; then
-              echo "Using PAT for authentication..."
-              export GIT_AUTH_URL="https://x-access-token:${REPO_PAT}@github.com/${GIT_REPOSITORY}.git"
+              export GIT_SSH_COMMAND="ssh -i ~/.ssh/github_deploy_key -o StrictHostKeyChecking=accept-new"
             fi
             
             # Clone repository if it doesn't exist
-            if [ ! -d "\${APP_DIR_PATH}/.git" ]; then
+            if [ ! -d "${APP_DIR_PATH}/.git" ]; then
               echo "Repository not found on server. Cloning fresh copy..."
-              rm -rf "\${APP_DIR_PATH}"
-              mkdir -p "\${APP_DIR_PATH}"
-              if [ -n "\${GIT_AUTH_URL}" ]; then
-                git clone "\${GIT_AUTH_URL}" "\${APP_DIR_PATH}"
-              elif [ -n "\${GIT_SSH_COMMAND}" ]; then
-                git clone "git@github.com:${GIT_REPOSITORY}.git" "\${APP_DIR_PATH}"
+              rm -rf "${APP_DIR_PATH}"
+              mkdir -p "${APP_DIR_PATH}"
+              if [ -n "${GIT_SSH_COMMAND}" ]; then
+                git clone "git@github.com:${GIT_REPOSITORY}.git" "${APP_DIR_PATH}"
               else
                 echo "No authentication configured - attempting HTTPS clone (requires public repo)..."
-                git clone "https://github.com/${GIT_REPOSITORY}.git" "\${APP_DIR_PATH}"
+                git clone "https://github.com/${GIT_REPOSITORY}.git" "${APP_DIR_PATH}"
               fi
             fi
             
-            cd "\${APP_DIR_PATH}"
+            cd "${APP_DIR_PATH}"
             
             # Pull latest code from GitHub
             echo "Fetching latest code..."
             git fetch origin
             git reset --hard origin/master
             
-            # Set environment variables
-            export DOMAIN=${{ secrets.DOMAIN_PRODUCTION }}
-            export STACK_NAME=${{ secrets.STACK_NAME_PRODUCTION }}
+            # Set environment variables for docker-compose
             export ENVIRONMENT=production
-            export FRONTEND_HOST=${{ secrets.FRONTEND_HOST }}
-            export BACKEND_CORS_ORIGINS=${{ secrets.BACKEND_CORS_ORIGINS }}
-            export SECRET_KEY=${{ secrets.SECRET_KEY }}
-            export FIRST_SUPERUSER=${{ secrets.FIRST_SUPERUSER }}
-            export FIRST_SUPERUSER_PASSWORD=${{ secrets.FIRST_SUPERUSER_PASSWORD }}
-            export SMTP_HOST=${{ secrets.SMTP_HOST }}
-            export SMTP_USER=${{ secrets.SMTP_USER }}
-            export SMTP_PASSWORD=${{ secrets.SMTP_PASSWORD }}
-            export EMAILS_FROM_EMAIL=${{ secrets.EMAILS_FROM_EMAIL }}
             export POSTGRES_SERVER=db
-            export POSTGRES_PORT=${{ secrets.POSTGRES_PORT || '5432' }}
-            export POSTGRES_DB=${{ secrets.POSTGRES_DB || 'app' }}
-            export POSTGRES_USER=${{ secrets.POSTGRES_USER || 'postgres' }}
-            export POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }}
-            export SENTRY_DSN=${{ secrets.SENTRY_DSN || '' }}
-            export DOCKER_IMAGE_BACKEND=ghcr.io/${{ github.repository }}-backend
-            export DOCKER_IMAGE_FRONTEND=ghcr.io/${{ github.repository }}-frontend
-            export TAG=${{ inputs.image_tag || 'latest' }}
+            export DOCKER_IMAGE_BACKEND=ghcr.io/${GIT_REPOSITORY}-backend
+            export DOCKER_IMAGE_FRONTEND=ghcr.io/${GIT_REPOSITORY}-frontend
+            export TAG=${IMAGE_TAG:-latest}
             
             # Pull pre-built images from GitHub Container Registry (unless skipped)
-            if [ "${{ inputs.skip_pull }}" != "true" ]; then
+            if [ "${SKIP_PULL}" != "true" ]; then
               echo "Pulling Docker images from registry..."
-              echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
-              docker pull \${DOCKER_IMAGE_BACKEND}:\${TAG} || echo "Warning: Failed to pull backend image"
-              docker pull \${DOCKER_IMAGE_FRONTEND}:\${TAG} || echo "Warning: Failed to pull frontend image"
+              echo "${GITHUB_TOKEN}" | docker login ghcr.io -u ${GITHUB_ACTOR} --password-stdin
+              docker pull ${DOCKER_IMAGE_BACKEND}:${TAG} || echo "Warning: Failed to pull backend image"
+              docker pull ${DOCKER_IMAGE_FRONTEND}:${TAG} || echo "Warning: Failed to pull frontend image"
             else
               echo "Skipping image pull (using existing images)..."
             fi
@@ -131,7 +120,7 @@ jobs:
             # Restart supervisor processes in backend container
             echo "Restarting supervisor processes..."
             BACKEND_CONTAINER=$(docker compose ps -q backend)
-            if [ ! -z "$BACKEND_CONTAINER" ]; then
+            if [ -n "$BACKEND_CONTAINER" ]; then
               docker exec $BACKEND_CONTAINER supervisorctl restart all || true
             fi
             
@@ -143,12 +132,10 @@ jobs:
 
       - name: Verify deployment
         env:
-          SERVER_USER: ${{ secrets.SERVER_USER }}
-          SERVER_HOST: ${{ secrets.SERVER_HOST }}
           APP_DIR: ${{ secrets.APP_DIR }}
           DOMAIN: ${{ secrets.DOMAIN_PRODUCTION }}
         run: |
-          ssh ${SERVER_USER}@${SERVER_HOST} << ENDSSH
+          ssh -o StrictHostKeyChecking=accept-new -o SendEnv="APP_DIR DOMAIN" ${SERVER_USER}@${SERVER_HOST} 'bash -s' << 'ENDSSH'
             set -e
             APP_DIR_PATH="${APP_DIR:-/root/code/finance-tracker}"
             cd "\${APP_DIR_PATH}"

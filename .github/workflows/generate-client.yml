@@ -21,6 +21,8 @@ jobs:
     steps:
     # For PRs from forks
     - uses: actions/checkout@v5
+      with:
+        token: ${{ secrets.GITHUB_TOKEN }}
     # For PRs from the same repo (token available)
     - uses: actions/checkout@v5
       if: ( github.event_name == 'pull_request' && github.secret_source == 'Actions' )

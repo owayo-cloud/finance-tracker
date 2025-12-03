@@ -28,6 +28,8 @@ jobs:
       changed: ${{ steps.filter.outputs.changed }}
     steps:
     - uses: actions/checkout@v5
+      with:
+        token: ${{ secrets.GITHUB_TOKEN }}
     # For pull requests it's not necessary to checkout the code but for the main branch it is
     - uses: dorny/paths-filter@v3
       id: filter
@@ -78,6 +80,8 @@ jobs:
       fail-fast: false
     steps:
     - uses: actions/checkout@v5
+      with:
+        token: ${{ secrets.GITHUB_TOKEN }}
     - uses: actions/setup-node@v6
       with:
         node-version: lts/*
@@ -126,6 +130,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v5
+      with:
+        token: ${{ secrets.GITHUB_TOKEN }}
     - uses: actions/setup-node@v6
       with:
         node-version: 20

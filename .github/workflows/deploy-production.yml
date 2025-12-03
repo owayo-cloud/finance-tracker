@@ -63,34 +63,31 @@ jobs:
           IMAGE_TAG: ${{ inputs.image_tag || 'latest' }}
           SKIP_PULL: ${{ inputs.skip_pull }}
         run: |
-          # Pass deploy key through stdin, other vars as arguments
-          echo "$REPO_DEPLOY_KEY" | ssh -A -o StrictHostKeyChecking=accept-new ${SERVER_USER}@${SERVER_HOST} bash -s "$APP_DIR" "$GIT_REPOSITORY" "$DOMAIN" "$FRONTEND_HOST" "$BACKEND_CORS_ORIGINS" "$SECRET_KEY" "$FIRST_SUPERUSER" "$FIRST_SUPERUSER_PASSWORD" "$SMTP_HOST" "$SMTP_USER" "$SMTP_PASSWORD" "$EMAILS_FROM_EMAIL" "$POSTGRES_PORT" "$POSTGRES_DB" "$POSTGRES_USER" "$POSTGRES_PASSWORD" "$SENTRY_DSN" "$GITHUB_TOKEN" "$GITHUB_ACTOR" "$IMAGE_TAG" "$SKIP_PULL" << 'ENDSSH'
+          ssh -A -o StrictHostKeyChecking=accept-new ${SERVER_USER}@${SERVER_HOST} \
+            "APP_DIR='$APP_DIR' \
+             GIT_REPOSITORY='$GIT_REPOSITORY' \
+             DOMAIN='$DOMAIN' \
+             FRONTEND_HOST='$FRONTEND_HOST' \
+             BACKEND_CORS_ORIGINS='$BACKEND_CORS_ORIGINS' \
+             SECRET_KEY='$SECRET_KEY' \
+             FIRST_SUPERUSER='$FIRST_SUPERUSER' \
+             FIRST_SUPERUSER_PASSWORD='$FIRST_SUPERUSER_PASSWORD' \
+             SMTP_HOST='$SMTP_HOST' \
+             SMTP_USER='$SMTP_USER' \
+             SMTP_PASSWORD='$SMTP_PASSWORD' \
+             EMAILS_FROM_EMAIL='$EMAILS_FROM_EMAIL' \
+             POSTGRES_PORT='$POSTGRES_PORT' \
+             POSTGRES_DB='$POSTGRES_DB' \
+             POSTGRES_USER='$POSTGRES_USER' \
+             POSTGRES_PASSWORD='$POSTGRES_PASSWORD' \
+             SENTRY_DSN='$SENTRY_DSN' \
+             GITHUB_TOKEN='$GITHUB_TOKEN' \
+             GITHUB_ACTOR='$GITHUB_ACTOR' \
+             IMAGE_TAG='$IMAGE_TAG' \
+             SKIP_PULL='$SKIP_PULL' \
+             REPO_DEPLOY_KEY='$REPO_DEPLOY_KEY' \
+             bash -s" << 'ENDSSH'
             set -e
-            # Read arguments
-            APP_DIR="$1"
-            GIT_REPOSITORY="$2"
-            DOMAIN="$3"
-            FRONTEND_HOST="$4"
-            BACKEND_CORS_ORIGINS="$5"
-            SECRET_KEY="$6"
-            FIRST_SUPERUSER="$7"
-            FIRST_SUPERUSER_PASSWORD="$8"
-            SMTP_HOST="$9"
-            SMTP_USER="${10}"
-            SMTP_PASSWORD="${11}"
-            EMAILS_FROM_EMAIL="${12}"
-            POSTGRES_PORT="${13}"
-            POSTGRES_DB="${14}"
-            POSTGRES_USER="${15}"
-            POSTGRES_PASSWORD="${16}"
-            SENTRY_DSN="${17}"
-            GITHUB_TOKEN="${18}"
-            GITHUB_ACTOR="${19}"
-            IMAGE_TAG="${20}"
-            SKIP_PULL="${21}"
-            
-            # Read deploy key from stdin
-            REPO_DEPLOY_KEY=$(cat)
             
             APP_DIR_PATH="${APP_DIR:-/root/code/finance-tracker}"
             
@@ -162,11 +159,11 @@ jobs:
           APP_DIR: ${{ secrets.APP_DIR }}
           DOMAIN: ${{ secrets.DOMAIN_PRODUCTION }}
         run: |
-          ssh -o StrictHostKeyChecking=accept-new ${SERVER_USER}@${SERVER_HOST} bash -s "$APP_DIR" "$DOMAIN" << 'ENDSSH'
+          ssh -o StrictHostKeyChecking=accept-new ${SERVER_USER}@${SERVER_HOST} \
+            "APP_DIR='$APP_DIR' \
+             DOMAIN='$DOMAIN' \
+             bash -s" << 'ENDSSH'
             set -e
-            # Read arguments
-            APP_DIR="$1"
-            DOMAIN="$2"
             
             APP_DIR_PATH="${APP_DIR:-/root/code/finance-tracker}"
             cd "${APP_DIR_PATH}"

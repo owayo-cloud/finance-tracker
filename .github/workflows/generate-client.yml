@@ -4,14 +4,14 @@ on:
   pull_request:
     branches:
       - master
-      - develop
+      - dev
     types:
       - opened
       - synchronize
   push:
     branches:
       - master
-      - develop
+      - dev
 
 jobs:
   generate-client:

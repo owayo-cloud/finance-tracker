@@ -1,4 +1,4 @@
-name: Deploy to Production
+name:  Deploy to Production
 
 on:
   push:
@@ -53,35 +53,46 @@ jobs:
           ssh ${SERVER_USER}@${SERVER_HOST} << ENDSSH
             set -e
             APP_DIR_PATH="${APP_DIR:-/root/code/finance-tracker}"
+            
+            # Setup deploy key/authentication first (needed for both clone and fetch)
+            if [ -n "${REPO_DEPLOY_KEY_B64}" ]; then
+              echo "Setting up base64 deploy key..."
+              mkdir -p ~/.ssh
+              echo "${REPO_DEPLOY_KEY_B64}" | base64 --decode > ~/.ssh/github_deploy_key
+              chmod 600 ~/.ssh/github_deploy_key
+              ssh-keyscan -H github.com >> ~/.ssh/known_hosts 2>/dev/null
+              export GIT_SSH_COMMAND="ssh -i ~/.ssh/github_deploy_key -o StrictHostKeyChecking=yes"
+            elif [ -n "${REPO_DEPLOY_KEY}" ]; then
+              echo "Setting up deploy key..."
+              mkdir -p ~/.ssh
+              echo "${REPO_DEPLOY_KEY}" > ~/.ssh/github_deploy_key
+              chmod 600 ~/.ssh/github_deploy_key
+              ssh-keyscan -H github.com >> ~/.ssh/known_hosts 2>/dev/null
+              export GIT_SSH_COMMAND="ssh -i ~/.ssh/github_deploy_key -o StrictHostKeyChecking=yes"
+            elif [ -n "${REPO_PAT}" ]; then
+              echo "Using PAT for authentication..."
+              export GIT_AUTH_URL="https://x-access-token:${REPO_PAT}@github.com/${GIT_REPOSITORY}.git"
+            fi
+            
+            # Clone repository if it doesn't exist
             if [ ! -d "\${APP_DIR_PATH}/.git" ]; then
               echo "Repository not found on server. Cloning fresh copy..."
               rm -rf "\${APP_DIR_PATH}"
               mkdir -p "\${APP_DIR_PATH}"
-              if [ -n "${REPO_DEPLOY_KEY_B64}" ]; then
-                echo "Using base64 deploy key for SSH clone..."
-                mkdir -p ~/.ssh
-                echo "${REPO_DEPLOY_KEY_B64}" | base64 --decode > ~/.ssh/github_deploy_key
-                chmod 600 ~/.ssh/github_deploy_key
-                ssh-keyscan -H github.com >> ~/.ssh/known_hosts
-                GIT_SSH_COMMAND="ssh -i ~/.ssh/github_deploy_key -o StrictHostKeyChecking=yes" git clone "git@github.com:${GIT_REPOSITORY}.git" "\${APP_DIR_PATH}"
-              elif [ -n "${REPO_DEPLOY_KEY}" ]; then
-                echo "Using deploy key for SSH clone..."
-                mkdir -p ~/.ssh
-                echo "${REPO_DEPLOY_KEY}" > ~/.ssh/github_deploy_key
-                chmod 600 ~/.ssh/github_deploy_key
-                ssh-keyscan -H github.com >> ~/.ssh/known_hosts
-                GIT_SSH_COMMAND="ssh -i ~/.ssh/github_deploy_key -o StrictHostKeyChecking=yes" git clone "git@github.com:${GIT_REPOSITORY}.git" "\${APP_DIR_PATH}"
-              elif [ -n "${REPO_PAT}" ]; then
-                echo "Using PAT for HTTPS clone..."
-                git clone "https://x-access-token:${REPO_PAT}@github.com/${GIT_REPOSITORY}.git" "\${APP_DIR_PATH}"
+              if [ -n "\${GIT_AUTH_URL}" ]; then
+                git clone "\${GIT_AUTH_URL}" "\${APP_DIR_PATH}"
+              elif [ -n "\${GIT_SSH_COMMAND}" ]; then
+                git clone "git@github.com:${GIT_REPOSITORY}.git" "\${APP_DIR_PATH}"
               else
-                echo "No deploy key provided - attempting HTTPS clone (requires public repo or PAT in URL)..."
+                echo "No authentication configured - attempting HTTPS clone (requires public repo)..."
                 git clone "https://github.com/${GIT_REPOSITORY}.git" "\${APP_DIR_PATH}"
               fi
             fi
+            
             cd "\${APP_DIR_PATH}"
             
             # Pull latest code from GitHub
+            echo "Fetching latest code..."
             git fetch origin
             git reset --hard origin/master
             

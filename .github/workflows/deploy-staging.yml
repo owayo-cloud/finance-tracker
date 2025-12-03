@@ -1,16 +1,13 @@
 name: Deploy to Staging
 
 on:
-  push:
-    branches:
-      - dev
-  workflow_dispatch: # Allow manual triggering
   workflow_run:
-    workflows: ["CI"]
+    workflows: ["Build and Push Images"]
     types:
       - completed
     branches:
       - dev
+  workflow_dispatch: # Allow manual triggering
 
 jobs:
   deploy:
@@ -122,13 +119,15 @@ jobs:
             export POSTGRES_USER=${{ secrets.POSTGRES_USER || 'postgres' }}
             export POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }}
             export SENTRY_DSN=${{ secrets.SENTRY_DSN || '' }}
-            export DOCKER_IMAGE_BACKEND=${{ secrets.DOCKER_IMAGE_BACKEND || 'finance-tracker-backend' }}
-            export DOCKER_IMAGE_FRONTEND=${{ secrets.DOCKER_IMAGE_FRONTEND || 'finance-tracker-frontend' }}
-            export TAG=latest
+            export DOCKER_IMAGE_BACKEND=ghcr.io/${{ github.repository }}-backend
+            export DOCKER_IMAGE_FRONTEND=ghcr.io/${{ github.repository }}-frontend
+            export TAG=staging
             
-            # Build and restart services
-            echo "Building Docker images..."
-            docker compose -f docker-compose.yml --project-name ${STACK_NAME} build
+            # Pull pre-built images from GitHub Container Registry
+            echo "Pulling Docker images from registry..."
+            echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+            docker pull \${DOCKER_IMAGE_BACKEND}:\${TAG}
+            docker pull \${DOCKER_IMAGE_FRONTEND}:\${TAG}
             
             echo "Starting services..."
             docker compose -f docker-compose.yml --project-name ${STACK_NAME} up -d

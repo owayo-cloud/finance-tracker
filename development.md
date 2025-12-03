@@ -51,7 +51,7 @@ docker compose logs backend
 To watch logs from both backend and frontend services simultaneously:
 
 ```bash
-docker compose logs -f backend frontend
+docker compose logs -f 'backend frontend'
 ```
 
 Or use the provided helper script:

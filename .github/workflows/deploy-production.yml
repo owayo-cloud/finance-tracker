@@ -153,18 +153,33 @@ jobs:
             echo "=== Checking service status ==="
             docker compose ps
             
-            echo "=== Checking backend container health ==="
+            echo "=== Waiting for backend container to be healthy ==="
             BACKEND_CONTAINER=$(docker compose ps -q backend)
             if [ -z "$BACKEND_CONTAINER" ]; then
               echo "ERROR: Backend container not found!"
               exit 1
             fi
             
+            # Wait for Docker healthcheck to pass
+            echo "Waiting for backend container health check..."
+            for i in {1..60}; do
+              HEALTH_STATUS=$(docker inspect --format='{{.State.Health.Status}}' $BACKEND_CONTAINER 2>/dev/null || echo "no-health")
+              if [ "$HEALTH_STATUS" = "healthy" ]; then
+                echo "✓ Backend container is healthy"
+                break
+              fi
+              if [ $i -eq 60 ]; then
+                echo "WARNING: Backend container health check timeout (waited 2 minutes)"
+                echo "Current status: $HEALTH_STATUS"
+                echo "Continuing with manual health checks..."
+              else
+                echo "Attempt $i/60: Container status: $HEALTH_STATUS (waiting...)"
+                sleep 2
+              fi
+            done
+            
             echo "=== Checking supervisor processes ==="
             docker exec $BACKEND_CONTAINER supervisorctl status || true
-            
-            echo "=== Waiting for services to be ready ==="
-            sleep 10
             
             echo "=== Checking backend health endpoint (internal) ==="
             for i in {1..30}; do

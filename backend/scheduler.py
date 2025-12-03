@@ -23,9 +23,9 @@ from apscheduler.triggers.cron import CronTrigger
 sys.path.insert(0, str(Path(__file__).parent))
 
 from app.background_services import (
+    cleanup_old_notifications,
     send_debt_reminder_emails,
     send_reorder_alerts,
-    cleanup_old_notifications,
 )
 
 # Configure logging - use stdout/stderr which supervisor captures
@@ -50,7 +50,7 @@ def job_wrapper(job_name: str, job_func):
             logger.info(f"Completed job: {job_name}")
         except Exception as e:
             logger.error(f"Error in job {job_name}: {str(e)}", exc_info=True)
-    
+
     return wrapper
 
 
@@ -58,9 +58,9 @@ def main():
     """Initialize and start the scheduler"""
     # Initialize scheduler
     scheduler = BlockingScheduler(timezone="Africa/Nairobi")  # Adjust timezone as needed
-    
+
     logger.info("Initializing background job scheduler...")
-    
+
     # Job 1: Send Debt Reminder Emails
     # Runs daily at 8:00 AM
     scheduler.add_job(
@@ -71,7 +71,7 @@ def main():
         replace_existing=True,
     )
     logger.info("✓ Scheduled: Debt Reminder Emails (Daily at 8:00 AM)")
-    
+
     # Job 2: Send Reorder Alerts
     # Runs daily at 9:00 AM
     scheduler.add_job(
@@ -82,7 +82,7 @@ def main():
         replace_existing=True,
     )
     logger.info("✓ Scheduled: Reorder Alerts (Daily at 9:00 AM)")
-    
+
     # Job 3: Cleanup Old Notifications
     # Runs weekly on Sunday at midnight
     scheduler.add_job(
@@ -93,24 +93,24 @@ def main():
         replace_existing=True,
     )
     logger.info("✓ Scheduled: Notification Cleanup (Weekly on Sunday at 12:00 AM)")
-    
+
     # Optional: Run jobs immediately on startup (for testing)
     # Uncomment the lines below to test jobs when starting the scheduler
     # logger.info("Running initial jobs...")
     # send_reorder_alerts()
     # logger.info("Initial jobs completed")
-    
+
     logger.info("=" * 60)
     logger.info("Background Job Scheduler Started Successfully")
     logger.info(f"Current Time: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
     logger.info("Waiting for scheduled jobs...")
     logger.info("=" * 60)
-    
+
     # Print next run times
     for job in scheduler.get_jobs():
         next_run = job.next_run_time if hasattr(job, 'next_run_time') else "Not scheduled yet"
         logger.info(f"Next run: {job.name} at {next_run}")
-    
+
     try:
         # Start the scheduler (blocking)
         scheduler.start()

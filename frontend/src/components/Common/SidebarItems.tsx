@@ -26,9 +26,9 @@ import type { UserPublic } from "@/client"
 import { MenuContent, MenuItem, MenuRoot, MenuTrigger } from "../ui/menu"
 import { Tooltip } from "../ui/tooltip"
 
-const API_BASE = import.meta.env.VITE_API_URL || ""
+const _API_BASE = import.meta.env.VITE_API_URL || ""
 
-const getAuthHeaders = () => ({
+const _getAuthHeaders = () => ({
   "Content-Type": "application/json",
   Authorization: `Bearer ${localStorage.getItem("access_token") || ""}`,
 })

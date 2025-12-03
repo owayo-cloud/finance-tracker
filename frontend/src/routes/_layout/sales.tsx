@@ -18,7 +18,6 @@ import { OpenAPI, type ProductPublic, SalesService } from "../../client"
 import useAuth from "../../hooks/useAuth"
 import useCustomToast from "../../hooks/useCustomToast"
 
-
 export const Route = createFileRoute("/_layout/sales")({
   component: Sales,
 })
@@ -169,7 +168,11 @@ function Sales() {
   ])
 
   // Check till status
-  const { data: tillStatus, isLoading: isLoadingTillStatus, refetch: refetchTillStatus } = useQuery({
+  const {
+    data: tillStatus,
+    isLoading: isLoadingTillStatus,
+    refetch: refetchTillStatus,
+  } = useQuery({
     queryKey: ["till-status"],
     queryFn: async () => {
       try {
@@ -195,7 +198,7 @@ function Sales() {
   }, [refetchTillStatus])
 
   const isTillOpen = tillStatus?.is_open === true
-  const hasNoTill = !isLoadingTillStatus && !isTillOpen
+  const _hasNoTill = !isLoadingTillStatus && !isTillOpen
 
   // Fetch payment methods
   const {

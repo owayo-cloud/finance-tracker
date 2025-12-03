@@ -1,4 +1,4 @@
-name: Generate Client
+name: 🔄 Generate Client
 
 on:
   pull_request:

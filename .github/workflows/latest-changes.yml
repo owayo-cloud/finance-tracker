@@ -1,4 +1,4 @@
-name: Latest Changes
+name: 📝 Latest Changes
 
 on:
   pull_request_target:

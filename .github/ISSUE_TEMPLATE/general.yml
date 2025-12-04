@@ -4,7 +4,7 @@ body:
   - type: markdown
     attributes:
       value: |
-        Thanks for your interest in this project! 🚀
+        Thanks for your interest in this project!
 
         Before creating an issue, please check if a similar issue already exists. When reporting bugs or suggesting features, please provide as much detail as possible to help us understand and address your concern.
   - type: textarea

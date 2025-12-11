@@ -1,5 +1,6 @@
 import uuid
 from datetime import datetime, timezone
+from decimal import Decimal
 from typing import Any
 
 from fastapi import APIRouter, HTTPException
@@ -21,6 +22,7 @@ from app.models import (
     GRNUpdate,
     Supplier,
     SupplierCreate,
+    SupplierDebt,
     SupplierPublic,
     SuppliersPublic,
     SupplierUpdate,
@@ -76,7 +78,25 @@ def read_suppliers(
     statement = statement.order_by(Supplier.name).offset(skip).limit(limit)
     suppliers = session.exec(statement).all()
 
-    return SuppliersPublic(data=suppliers, count=count)
+    # Calculate outstanding debt for each supplier
+    suppliers_with_debt = []
+    for supplier in suppliers:
+        # Calculate total outstanding debt (sum of balances where status != "paid")
+        debt_statement = (
+            select(func.sum(SupplierDebt.balance))
+            .where(SupplierDebt.supplier_id == supplier.id)
+            .where(SupplierDebt.status != "paid")
+        )
+        total_debt = session.exec(debt_statement).one()
+        outstanding_debt = total_debt if total_debt is not None else Decimal("0")
+
+        # Create SupplierPublic with outstanding_debt
+        supplier_dict = supplier.model_dump()
+        supplier_dict["outstanding_debt"] = outstanding_debt
+        supplier_public = SupplierPublic(**supplier_dict)
+        suppliers_with_debt.append(supplier_public)
+
+    return SuppliersPublic(data=suppliers_with_debt, count=count)
 
 
 @router.post("/suppliers", response_model=SupplierPublic)

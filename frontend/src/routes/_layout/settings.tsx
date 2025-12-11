@@ -34,7 +34,7 @@ function UserSettings() {
         size="lg"
         textAlign={{ base: "center", md: "left" }}
         py={12}
-        color={{ base: "#e5e7eb", _light: "#111827" }}
+        color="text.primary"
       >
         User Settings
       </Heading>

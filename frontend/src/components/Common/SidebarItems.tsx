@@ -57,11 +57,8 @@ const menuItems: SidebarMenuItem[] = [
   {
     icon: FiPackage,
     title: "Products",
+    path: "/products",
     adminOnly: true,
-    submenu: [
-      { title: "Products", path: "/products" },
-      { title: "Stock Adjustment", path: "/stock-adjustment" },
-    ],
   },
   { icon: FiBarChart2, title: "Reports", path: "/reports", adminOnly: true },
   {
@@ -73,7 +70,7 @@ const menuItems: SidebarMenuItem[] = [
       { title: "Categories", path: "/expense-categories" },
     ],
   },
-  { icon: FiTrendingUp, title: "Invoices", path: "/invoices", adminOnly: true },
+  { icon: FiTrendingUp, title: "Invoices", path: "/invoices" },
   {
     icon: FiCreditCard,
     title: "Payment Methods",
@@ -143,9 +140,7 @@ const SidebarItems = ({ onClose, isCollapsed = false }: SidebarItemsProps) => {
       location.pathname === "/stock-entry" ||
       location.pathname === "/suppliers" ||
       location.pathname === "/transporters",
-    Products:
-      location.pathname === "/products" ||
-      location.pathname === "/stock-adjustment",
+    Products: location.pathname === "/products",
   })
 
   // Check till status for POS link

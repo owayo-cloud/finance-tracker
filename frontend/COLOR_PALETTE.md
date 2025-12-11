@@ -6,20 +6,20 @@ This document describes the reusable color palette system for the Finance Tracke
 
 ### Primary Brand Colors
 
-The application uses a **Teal/Cyan** color scheme as the primary brand identity:
+The application uses a **Blue** color scheme as the primary brand identity:
 
-- **Primary**: `#14b8a6` - Main brand color for buttons, links, and accents
-- **Primary Hover**: `#0d9488` - Darker shade for hover states
-- **Primary Active**: `#0f766e` - Even darker for active/pressed states
-- **Primary Light**: `#5eead4` - Lighter variant for subtle accents
-- **Primary Dark**: `#134e4a` - Dark variant for backgrounds
+- **Primary**: `#2563eb` - Main brand color for buttons, links, and accents
+- **Primary Hover**: `#1d4ed8` - Darker shade for hover states
+- **Primary Active**: `#1e40af` - Even darker for active/pressed states
+- **Primary Light**: `#60a5fa` - Lighter variant for subtle accents
+- **Primary Dark**: `#1e3a8a` - Dark variant for backgrounds
 
 ### Secondary Colors
 
-- **Secondary**: `#60a5fa` - Blue accent for secondary actions
-- **Secondary Hover**: `#3b82f6` - Hover state
-- **Accent**: `#a855f7` - Purple accent for highlights
-- **Accent Hover**: `#9333ea` - Hover state
+- **Secondary**: `#0ea5e9` - Cyan accent for secondary actions
+- **Secondary Hover**: `#0284c7` - Hover state
+- **Accent**: `#3b82f6` - Blue accent for highlights
+- **Accent Hover**: `#2563eb` - Hover state
 
 ### Using Theme Tokens
 
@@ -32,9 +32,9 @@ Always use semantic tokens from the theme instead of hardcoded color values:
 <Box bg="bg.canvas" borderColor="border.default">
 
 // ❌ BAD - Hardcoded colors
-<Button bg="#14b8a6" _hover={{ bg: "#0d9488" }}>
+<Button bg="#2563eb" _hover={{ bg: "#1d4ed8" }}>
 <Text color="#ffffff">
-<Box bg="#1a1d29" borderColor="rgba(255, 255, 255, 0.1)">
+<Box bg="#0c1c2e" borderColor="rgba(255, 255, 255, 0.1)">
 ```
 
 ## Available Theme Tokens
@@ -43,11 +43,11 @@ Always use semantic tokens from the theme instead of hardcoded color values:
 - `text.primary` - Main text color (white in dark mode, dark gray in light mode)
 - `text.secondary` - Secondary text (muted)
 - `text.muted` - Muted text (`#9ca3af` / `#6b7280`)
-- `text.brand` - Brand colored text (`#14b8a6`)
+- `text.brand` - Brand colored text (`#2563eb`)
 - `text.link` - Link color (`#60a5fa` / `#2563eb`)
 
 ### Background Colors
-- `bg.canvas` - Main background (`#1a1d29` / `#f3f4f6`)
+- `bg.canvas` - Main background (`#0c1c2e` / `#f0f9ff`)
 - `bg.surface` - Card/panel background (`#2d3142` / `#ffffff`)
 - `bg.elevated` - Elevated surface (`#363a4d` / `#ffffff`)
 

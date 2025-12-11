@@ -1,16 +1,16 @@
-import logging
-
 from sqlmodel import Session, create_engine, select
 
 from app import crud
 from app.core.config import settings
 from app.core.logging_config import get_logger
-from app.models import User, UserCreate, ProductCategory, ProductStatus, PaymentMethod
+from app.models import PaymentMethod, ProductCategory, ProductStatus, User, UserCreate
 
 logger = get_logger(__name__)
 
 engine = create_engine(str(settings.SQLALCHEMY_DATABASE_URI))
-logger.info(f"Database engine created: {settings.POSTGRES_SERVER}:{settings.POSTGRES_PORT}/{settings.POSTGRES_DB}")
+logger.info(
+    f"Database engine created: {settings.POSTGRES_SERVER}:{settings.POSTGRES_PORT}/{settings.POSTGRES_DB}"
+)
 
 
 # make sure all SQLModel models are imported (app.models) before initializing DB
@@ -21,7 +21,7 @@ logger.info(f"Database engine created: {settings.POSTGRES_SERVER}:{settings.POST
 def init_db(session: Session) -> None:
     """Initialize database with initial data"""
     logger.info("Initializing database...")
-    
+
     # Tables should be created with Alembic migrations
     # But if you don't want to use migrations, create
     # the tables un-commenting the next lines
@@ -41,7 +41,7 @@ def init_db(session: Session) -> None:
             is_superuser=True,
         )
         user = crud.create_user(session=session, user_create=user_in)
-        logger.info(f"Superuser created successfully")
+        logger.info("Superuser created successfully")
     else:
         logger.info(f"Superuser already exists: {settings.FIRST_SUPERUSER}")
 
@@ -50,8 +50,8 @@ def init_db(session: Session) -> None:
     _seed_payment_methods(session)
     logger.info("Database initialization complete")
 
-def _seed_product_categories(session: Session) -> None:
 
+def _seed_product_categories(session: Session) -> None:
     categories = [
         {"name": "Whisky", "description": "Whisky and whiskey products"},
         {"name": "Vodka", "description": "Vodka products"},
@@ -89,7 +89,6 @@ def _seed_product_categories(session: Session) -> None:
 
 
 def _seed_product_statuses(session: Session) -> None:
-
     statuses = [
         {"name": "Active", "description": "Product is active and available for sale"},
         {
@@ -128,23 +127,41 @@ def _seed_product_statuses(session: Session) -> None:
 def _seed_payment_methods(session: Session) -> None:
     """Seed initial payment methods if they don't exist"""
     payment_methods = [
-        {"name": "POS Cash Acc", "description": "Cash payments at point of sale", "is_active": True},
-        {"name": "POS Mpesa", "description": "M-Pesa mobile money payments", "is_active": True},
-        {"name": "POS KCB PAYBILL", "description": "KCB Bank paybill payments", "is_active": True},
-        {"name": "POS Equity PAYBILL", "description": "Equity Bank paybill payments", "is_active": True},
-        {"name": "Credit Note", "description": "Credit note payments", "is_active": True},
+        {
+            "name": "POS Cash Acc",
+            "description": "Cash payments at point of sale",
+            "is_active": True,
+        },
+        {
+            "name": "POS Mpesa",
+            "description": "M-Pesa mobile money payments",
+            "is_active": True,
+        },
+        {
+            "name": "POS KCB PAYBILL",
+            "description": "KCB Bank paybill payments",
+            "is_active": True,
+        },
+        {
+            "name": "POS Equity PAYBILL",
+            "description": "Equity Bank paybill payments",
+            "is_active": True,
+        },
+        {
+            "name": "Credit Note",
+            "description": "Credit note payments",
+            "is_active": True,
+        },
     ]
-    
+
     for pm_data in payment_methods:
-        statement = select(PaymentMethod).where(
-            PaymentMethod.name == pm_data["name"]
-        )
+        statement = select(PaymentMethod).where(PaymentMethod.name == pm_data["name"])
         existing_pm = session.exec(statement).first()
-        
+
         if not existing_pm:
             payment_method = PaymentMethod(**pm_data)
             session.add(payment_method)
             logger.info(f"Created payment method: {pm_data['name']}")
-    
+
     session.commit()
     logger.info("Payment methods seeded successfully")

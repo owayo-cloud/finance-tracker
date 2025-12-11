@@ -1736,6 +1736,10 @@ export type SalesCreateSaleResponse = (SalePublic);
 
 export type SalesReadSalesData = {
     /**
+     * Filter by cashier name (searches full_name and username)
+     */
+    cashierName?: (string | null);
+    /**
      * Filter by product category
      */
     categoryId?: (string | null);
@@ -1743,6 +1747,10 @@ export type SalesReadSalesData = {
      * Filter sales until this date
      */
     endDate?: (string | null);
+    /**
+     * Exclude sales that have associated debts (for receipts view)
+     */
+    excludeWithDebt?: boolean;
     limit?: number;
     /**
      * Filter by payment method
@@ -1752,6 +1760,10 @@ export type SalesReadSalesData = {
      * Filter by product ID
      */
     productId?: (string | null);
+    /**
+     * Search by receipt number (last 6 chars) or notes
+     */
+    search?: (string | null);
     skip?: number;
     /**
      * Filter sales from this date

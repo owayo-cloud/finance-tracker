@@ -41,6 +41,8 @@ const AddUser = () => {
     handleSubmit,
     reset,
     getValues,
+    setValue,
+    watch,
     formState: { errors, isValid, isSubmitting },
   } = useForm<UserCreateForm>({
     mode: "onBlur",
@@ -53,9 +55,12 @@ const AddUser = () => {
       confirm_password: "",
       is_superuser: false,
       is_auditor: false,
-      is_active: false,
     },
   })
+
+  const isSuperuser = watch("is_superuser")
+  const isAuditor = watch("is_auditor")
+  const isCashier = !isSuperuser && !isAuditor
 
   const mutation = useMutation({
     mutationFn: (data: UserCreate) =>
@@ -188,6 +193,9 @@ const AddUser = () => {
             </VStack>
 
             <Flex mt={4} direction="column" gap={4}>
+              <Text fontSize="sm" fontWeight="medium" mb={2}>
+                User Role
+              </Text>
               <Controller
                 control={control}
                 name="is_superuser"
@@ -195,7 +203,12 @@ const AddUser = () => {
                   <Field disabled={field.disabled} colorPalette="teal">
                     <Checkbox
                       checked={field.value}
-                      onCheckedChange={({ checked }) => field.onChange(checked)}
+                      onCheckedChange={({ checked }) => {
+                        field.onChange(checked)
+                        if (checked) {
+                          setValue("is_auditor", false)
+                        }
+                      }}
                     >
                       Admin (Full access)
                     </Checkbox>
@@ -209,27 +222,31 @@ const AddUser = () => {
                   <Field disabled={field.disabled} colorPalette="teal">
                     <Checkbox
                       checked={field.value}
-                      onCheckedChange={({ checked }) => field.onChange(checked)}
+                      onCheckedChange={({ checked }) => {
+                        field.onChange(checked)
+                        if (checked) {
+                          setValue("is_superuser", false)
+                        }
+                      }}
                     >
                       Auditor (Read-only access)
                     </Checkbox>
                   </Field>
                 )}
               />
-              <Controller
-                control={control}
-                name="is_active"
-                render={({ field }) => (
-                  <Field disabled={field.disabled} colorPalette="teal">
-                    <Checkbox
-                      checked={field.value}
-                      onCheckedChange={({ checked }) => field.onChange(checked)}
-                    >
-                      Is active?
-                    </Checkbox>
-                  </Field>
-                )}
-              />
+              <Field colorPalette="teal">
+                <Checkbox
+                  checked={isCashier}
+                  onCheckedChange={({ checked }) => {
+                    if (checked) {
+                      setValue("is_superuser", false)
+                      setValue("is_auditor", false)
+                    }
+                  }}
+                >
+                  Cashier (Sales access)
+                </Checkbox>
+              </Field>
             </Flex>
           </DialogBody>
 

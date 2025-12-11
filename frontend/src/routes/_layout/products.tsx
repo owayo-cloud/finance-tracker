@@ -559,7 +559,7 @@ function Products() {
     <Container maxW="full" minH="100vh">
       <Flex direction="column" gap={6} pt={12} pb={8}>
         <Flex justify="space-between" align="center">
-          <Heading size="lg" color={{ base: "#e5e7eb", _light: "#111827" }}>
+          <Heading size="lg" color="text.primary">
             Products Catalog
           </Heading>
         </Flex>

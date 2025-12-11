@@ -13,6 +13,7 @@ import {
   DrawerTitle,
   Heading,
   HStack,
+  Icon,
   IconButton,
   Input,
   Table,
@@ -21,8 +22,14 @@ import {
 } from "@chakra-ui/react"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { createFileRoute } from "@tanstack/react-router"
-import { useId, useState } from "react"
-import { FiEdit2, FiPlus, FiTrash2 } from "react-icons/fi"
+import { useId, useMemo, useState } from "react"
+import {
+  FiArrowDown,
+  FiArrowUp,
+  FiEdit2,
+  FiPlus,
+  FiTrash2,
+} from "react-icons/fi"
 import type { SupplierCreate, SupplierPublic, SupplierUpdate } from "@/client"
 import { GrnService } from "@/client"
 import useCustomToast from "@/hooks/useCustomToast"
@@ -46,6 +53,9 @@ function SuppliersPage() {
     null,
   )
   const [searchTerm, setSearchTerm] = useState("")
+  const [debtSortDirection, setDebtSortDirection] = useState<
+    "asc" | "desc" | null
+  >(null)
 
   // Form state
   const [name, setName] = useState("")
@@ -69,6 +79,33 @@ function SuppliersPage() {
         search: searchTerm || undefined,
       }),
   })
+
+  // Sort suppliers by outstanding debt if sorting is enabled
+  const sortedSuppliers = useMemo(() => {
+    if (!suppliersData?.data || !debtSortDirection) {
+      return suppliersData?.data || []
+    }
+    const sorted = [...suppliersData.data].sort((a, b) => {
+      const debtA = (a as any).outstanding_debt
+        ? parseFloat((a as any).outstanding_debt)
+        : 0
+      const debtB = (b as any).outstanding_debt
+        ? parseFloat((b as any).outstanding_debt)
+        : 0
+      return debtSortDirection === "asc" ? debtA - debtB : debtB - debtA
+    })
+    return sorted
+  }, [suppliersData?.data, debtSortDirection])
+
+  const handleDebtSort = () => {
+    if (debtSortDirection === null) {
+      setDebtSortDirection("desc")
+    } else if (debtSortDirection === "desc") {
+      setDebtSortDirection("asc")
+    } else {
+      setDebtSortDirection(null)
+    }
+  }
 
   // Create mutation
   const createMutation = useMutation({
@@ -265,6 +302,18 @@ function SuppliersPage() {
                 <Table.ColumnHeader>Phone</Table.ColumnHeader>
                 <Table.ColumnHeader>Email</Table.ColumnHeader>
                 <Table.ColumnHeader>Address</Table.ColumnHeader>
+                <Table.ColumnHeader
+                  textAlign="right"
+                  cursor="pointer"
+                  onClick={handleDebtSort}
+                  _hover={{ bg: { base: "gray.700", _light: "gray.200" } }}
+                >
+                  <HStack justify="flex-end" gap={1}>
+                    <Text>Outstanding Debt</Text>
+                    {debtSortDirection === "asc" && <Icon as={FiArrowUp} />}
+                    {debtSortDirection === "desc" && <Icon as={FiArrowDown} />}
+                  </HStack>
+                </Table.ColumnHeader>
                 <Table.ColumnHeader>Status</Table.ColumnHeader>
                 <Table.ColumnHeader>Actions</Table.ColumnHeader>
               </Table.Row>
@@ -272,14 +321,14 @@ function SuppliersPage() {
             <Table.Body>
               {isLoading ? (
                 <Table.Row>
-                  <Table.Cell colSpan={7} textAlign="center" py={8}>
+                  <Table.Cell colSpan={8} textAlign="center" py={8}>
                     Loading...
                   </Table.Cell>
                 </Table.Row>
               ) : suppliersData?.data.length === 0 ? (
                 <Table.Row>
                   <Table.Cell
-                    colSpan={7}
+                    colSpan={8}
                     textAlign="center"
                     py={8}
                     color="gray.500"
@@ -288,43 +337,63 @@ function SuppliersPage() {
                   </Table.Cell>
                 </Table.Row>
               ) : (
-                suppliersData?.data.map((supplier: SupplierPublic) => (
-                  <Table.Row key={supplier.id}>
-                    <Table.Cell fontWeight="500">{supplier.name}</Table.Cell>
-                    <Table.Cell>{supplier.contact_person || "-"}</Table.Cell>
-                    <Table.Cell>{supplier.phone || "-"}</Table.Cell>
-                    <Table.Cell>{supplier.email || "-"}</Table.Cell>
-                    <Table.Cell>{supplier.address || "-"}</Table.Cell>
-                    <Table.Cell>
-                      <Badge
-                        colorPalette={supplier.is_active ? "green" : "red"}
-                        size="sm"
+                sortedSuppliers.map((supplier: SupplierPublic) => {
+                  const outstandingDebt = (supplier as any).outstanding_debt
+                    ? parseFloat((supplier as any).outstanding_debt)
+                    : 0
+                  const formattedDebt = outstandingDebt.toLocaleString(
+                    "en-US",
+                    {
+                      minimumFractionDigits: 2,
+                      maximumFractionDigits: 2,
+                    },
+                  )
+                  return (
+                    <Table.Row key={supplier.id}>
+                      <Table.Cell fontWeight="500">{supplier.name}</Table.Cell>
+                      <Table.Cell>{supplier.contact_person || "-"}</Table.Cell>
+                      <Table.Cell>{supplier.phone || "-"}</Table.Cell>
+                      <Table.Cell>{supplier.email || "-"}</Table.Cell>
+                      <Table.Cell>{supplier.address || "-"}</Table.Cell>
+                      <Table.Cell
+                        textAlign="right"
+                        fontWeight={outstandingDebt > 0 ? "600" : "normal"}
                       >
-                        {supplier.is_active ? "Active" : "Inactive"}
-                      </Badge>
-                    </Table.Cell>
-                    <Table.Cell>
-                      <HStack gap={1}>
-                        <IconButton
+                        {outstandingDebt > 0
+                          ? `KES ${formattedDebt}`
+                          : "KES 0.00"}
+                      </Table.Cell>
+                      <Table.Cell>
+                        <Badge
+                          colorPalette={supplier.is_active ? "green" : "red"}
                           size="sm"
-                          variant="ghost"
-                          colorPalette="blue"
-                          onClick={() => handleOpenDrawer(supplier)}
                         >
-                          <FiEdit2 />
-                        </IconButton>
-                        <IconButton
-                          size="sm"
-                          variant="ghost"
-                          colorPalette="red"
-                          onClick={() => handleDelete(supplier.id)}
-                        >
-                          <FiTrash2 />
-                        </IconButton>
-                      </HStack>
-                    </Table.Cell>
-                  </Table.Row>
-                ))
+                          {supplier.is_active ? "Active" : "Inactive"}
+                        </Badge>
+                      </Table.Cell>
+                      <Table.Cell>
+                        <HStack gap={1}>
+                          <IconButton
+                            size="sm"
+                            variant="ghost"
+                            colorPalette="blue"
+                            onClick={() => handleOpenDrawer(supplier)}
+                          >
+                            <FiEdit2 />
+                          </IconButton>
+                          <IconButton
+                            size="sm"
+                            variant="ghost"
+                            colorPalette="red"
+                            onClick={() => handleDelete(supplier.id)}
+                          >
+                            <FiTrash2 />
+                          </IconButton>
+                        </HStack>
+                      </Table.Cell>
+                    </Table.Row>
+                  )
+                })
               )}
             </Table.Body>
           </Table.Root>

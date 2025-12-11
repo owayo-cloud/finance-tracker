@@ -1,11 +1,12 @@
 import { useState } from "react"
 import { BsThreeDotsVertical } from "react-icons/bs"
-import { FiEdit, FiTrash } from "react-icons/fi"
+import { FiEdit, FiPackage, FiTrash } from "react-icons/fi"
 
 import type { ProductPublic } from "@/client"
 import { MenuContent, MenuItem, MenuRoot, MenuTrigger } from "../ui/menu"
 import DeleteProduct from "./DeleteProduct"
 import EditProduct from "./EditProduct"
+import StockAdjustmentDrawer from "./StockAdjustmentDrawer"
 
 interface ProductActionsMenuProps {
   product: ProductPublic
@@ -14,11 +15,17 @@ interface ProductActionsMenuProps {
 const ProductActionsMenu = ({ product }: ProductActionsMenuProps) => {
   const [editDrawerOpen, setEditDrawerOpen] = useState(false)
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
+  const [stockAdjustmentOpen, setStockAdjustmentOpen] = useState(false)
   const [menuOpen, setMenuOpen] = useState(false)
 
   const handleEditClick = () => {
     setMenuOpen(false) // Close menu first
     setTimeout(() => setEditDrawerOpen(true), 100) // Small delay to ensure menu closes
+  }
+
+  const handleStockAdjustmentClick = () => {
+    setMenuOpen(false) // Close menu first
+    setTimeout(() => setStockAdjustmentOpen(true), 100) // Small delay to ensure menu closes
   }
 
   const handleDeleteClick = () => {
@@ -50,6 +57,14 @@ const ProductActionsMenu = ({ product }: ProductActionsMenuProps) => {
             Edit Product
           </MenuItem>
           <MenuItem
+            value="adjust-stock"
+            onClick={handleStockAdjustmentClick}
+            data-testid="adjust-stock-menu-item"
+          >
+            <FiPackage fontSize={16} />
+            Adjust Stock
+          </MenuItem>
+          <MenuItem
             value="delete"
             color="red.500"
             onClick={handleDeleteClick}
@@ -67,6 +82,13 @@ const ProductActionsMenu = ({ product }: ProductActionsMenuProps) => {
         isOpen={editDrawerOpen}
         onOpenChange={setEditDrawerOpen}
         data-testid="edit-product-drawer"
+      />
+
+      {/* Controlled Stock Adjustment Drawer */}
+      <StockAdjustmentDrawer
+        product={product}
+        isOpen={stockAdjustmentOpen}
+        onOpenChange={setStockAdjustmentOpen}
       />
 
       {/* Controlled Delete Dialog */}

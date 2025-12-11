@@ -227,11 +227,7 @@ function Expenses() {
         >
           <Flex gap={4} flexWrap="wrap" align="end">
             <Box flex="1" minW="200px">
-              <Text
-                fontSize="sm"
-                mb={2}
-                color={{ base: "#9ca3af", _light: "#6b7280" }}
-              >
+              <Text fontSize="sm" mb={2} color="text.muted">
                 Search
               </Text>
               <Input
@@ -243,11 +239,7 @@ function Expenses() {
               />
             </Box>
             <Box flex="1" minW="200px">
-              <Text
-                fontSize="sm"
-                mb={2}
-                color={{ base: "#9ca3af", _light: "#6b7280" }}
-              >
+              <Text fontSize="sm" mb={2} color="text.muted">
                 Category
               </Text>
               <SelectRoot
@@ -260,13 +252,7 @@ function Expenses() {
                   })),
                 })}
               >
-                <SelectTrigger
-                  bg={{ base: "#0f1419", _light: "#f9fafb" }}
-                  borderColor={{
-                    base: "rgba(255, 255, 255, 0.1)",
-                    _light: "#e5e7eb",
-                  }}
-                >
+                <SelectTrigger bg="input.bg" borderColor="input.border">
                   <SelectValueText placeholder="All Categories" />
                 </SelectTrigger>
                 <SelectContent>
@@ -382,7 +368,7 @@ function Expenses() {
         >
           <VStack gap={4}>
             <FiTag size={48} color="var(--chakra-colors-text-secondary)" />
-            <Heading size="lg" color={{ base: "#ffffff", _light: "#111827" }}>
+            <Heading size="lg" color="text.primary">
               No Expense Categories
             </Heading>
             <Text color="text.muted" fontSize="md">
@@ -391,9 +377,9 @@ function Expenses() {
             </Text>
             <Link to="/expense-categories">
               <Button
-                bg={{ base: "#009688", _light: "#009688" }}
+                bg="brand.primary"
                 color="white"
-                _hover={{ bg: { base: "#00796b", _light: "#00796b" } }}
+                _hover={{ bg: "brand.primary.hover" }}
                 size="lg"
                 mt={2}
               >
@@ -440,17 +426,13 @@ function StatCard({
         <VStack align="start" gap={1}>
           <Text
             fontSize="xs"
-            color={{ base: "#9ca3af", _light: "#6b7280" }}
+            color="text.muted"
             textTransform="uppercase"
             letterSpacing="0.5px"
           >
             {label}
           </Text>
-          <Text
-            fontSize="2xl"
-            fontWeight="700"
-            color={{ base: "#ffffff", _light: "#1a1d29" }}
-          >
+          <Text fontSize="2xl" fontWeight="700" color="text.primary">
             {value}
           </Text>
         </VStack>
@@ -494,20 +476,14 @@ function ExpensesList({
                 mb={3}
                 pb={2}
                 borderBottom="1px solid"
-                borderColor={{
-                  base: "rgba(255, 255, 255, 0.1)",
-                  _light: "#e5e7eb",
-                }}
+                borderColor="border.default"
               >
                 <HStack gap={2}>
                   <FiCalendar
                     size={16}
                     color="var(--chakra-colors-text-secondary)"
                   />
-                  <Text
-                    fontWeight="600"
-                    color={{ base: "#ffffff", _light: "#111827" }}
-                  >
+                  <Text fontWeight="600" color="text.primary">
                     {new Date(dateKey).toLocaleDateString("en-US", {
                       weekday: "long",
                       year: "numeric",
@@ -516,10 +492,7 @@ function ExpensesList({
                     })}
                   </Text>
                 </HStack>
-                <Text
-                  fontWeight="600"
-                  color={{ base: "#9ca3af", _light: "#6b7280" }}
-                >
+                <Text fontWeight="600" color="text.muted">
                   {formatCurrency(dateTotal)}
                 </Text>
               </HStack>
@@ -576,26 +549,18 @@ function ExpenseRow({
               {categoryName}
             </Badge>
           </HStack>
-          <Text fontWeight="500" color={{ base: "#ffffff", _light: "#111827" }}>
+          <Text fontWeight="500" color="text.primary">
             {expense.description}
           </Text>
           {expense.notes && (
-            <Text
-              fontSize="sm"
-              color={{ base: "#9ca3af", _light: "#6b7280" }}
-              mt={1}
-            >
+            <Text fontSize="sm" color="text.muted" mt={1}>
               {expense.notes}
             </Text>
           )}
         </Box>
       </HStack>
       <VStack align="end" gap={0}>
-        <Text
-          fontSize="lg"
-          fontWeight="700"
-          color={{ base: "#ffffff", _light: "#111827" }}
-        >
+        <Text fontSize="lg" fontWeight="700" color="text.primary">
           {formatCurrency(Number(expense.amount))}
         </Text>
         <Text fontSize="xs" color={{ base: "#9ca3af", _light: "#6b7280" }}>

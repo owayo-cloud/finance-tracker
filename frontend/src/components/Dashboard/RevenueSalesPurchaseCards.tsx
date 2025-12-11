@@ -40,6 +40,7 @@ export function RevenueSalesPurchaseCards({
         limit: 1000,
         startDate: firstDayOfMonth.toISOString().split("T")[0],
         endDate: today.toISOString().split("T")[0],
+        excludeWithDebt: true, // Exclude unpaid debt sales from revenue
       }),
   })
 
@@ -56,6 +57,7 @@ export function RevenueSalesPurchaseCards({
         limit: 1000,
         startDate: firstDayOfLastMonth.toISOString().split("T")[0],
         endDate: lastDayOfLastMonth.toISOString().split("T")[0],
+        excludeWithDebt: true, // Exclude unpaid debt sales from revenue
       }),
   })
 

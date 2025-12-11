@@ -2826,16 +2826,14 @@ export const ImportRowSchema = {
                 '$ref': '#/components/schemas/ValidationError'
             },
             type: 'array',
-            title: 'Errors',
-            default: []
+            title: 'Errors'
         },
         warnings: {
             items: {
                 type: 'string'
             },
             type: 'array',
-            title: 'Warnings',
-            default: []
+            title: 'Warnings'
         },
         is_duplicate: {
             type: 'boolean',

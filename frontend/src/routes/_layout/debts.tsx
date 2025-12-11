@@ -8,15 +8,10 @@ export const Route = createFileRoute("/_layout/debts")({
 function Debts() {
   return (
     <Container maxW="full">
-      <Heading
-        size="lg"
-        pt={12}
-        mb={4}
-        color={{ base: "#e5e7eb", _light: "#111827" }}
-      >
-        Debts & Credit Management
+      <Heading size="lg" pt={12} mb={4} color="text.primary">
+        Debts & Credits
       </Heading>
-      <Text color={{ base: "#d1d5db", _light: "#6b7280" }}>
+      <Text color="text.muted">
         Track credit sales, customer account balances, payment history, and
         aging reports.
       </Text>

@@ -72,7 +72,7 @@ const UserInformation = () => {
     if (currentUser?.is_superuser) {
       return (
         <Badge
-          bg="linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%)"
+          bg="gradient.role.admin"
           color="white"
           fontSize="xs"
           fontWeight="700"
@@ -88,7 +88,7 @@ const UserInformation = () => {
     if (currentUser?.is_auditor) {
       return (
         <Badge
-          bg="linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)"
+          bg="gradient.role.auditor"
           color="white"
           fontSize="xs"
           fontWeight="700"
@@ -103,7 +103,7 @@ const UserInformation = () => {
     }
     return (
       <Badge
-        bg="linear-gradient(135deg, #22c55e 0%, #16a34a 100%)"
+        bg="gradient.role.cashier"
         color="white"
         fontSize="xs"
         fontWeight="700"

@@ -27,23 +27,23 @@ export const system = createSystem(defaultConfig, {
     tokens: {
       colors: {
         ui: {
-          main: { value: "#14b8a6" },
-          "main.hover": { value: "#0d9488" },
-          "main.active": { value: "#0f766e" },
-          "main.light": { value: "#5eead4" },
-          "main.dark": { value: "#134e4a" },
+          main: { value: "#2563eb" },
+          "main.hover": { value: "#1d4ed8" },
+          "main.active": { value: "#1e40af" },
+          "main.light": { value: "#60a5fa" },
+          "main.dark": { value: "#1e3a8a" },
         },
-        // Primary brand colors (Teal/Cyan theme)
+        // Primary brand colors (Blue theme)
         brand: {
-          primary: { value: "#14b8a6" },
-          "primary.hover": { value: "#0d9488" },
-          "primary.active": { value: "#0f766e" },
-          "primary.light": { value: "#5eead4" },
-          "primary.dark": { value: "#134e4a" },
-          secondary: { value: "#60a5fa" },
-          "secondary.hover": { value: "#3b82f6" },
-          accent: { value: "#a855f7" },
-          "accent.hover": { value: "#9333ea" },
+          primary: { value: "#2563eb" },
+          "primary.hover": { value: "#1d4ed8" },
+          "primary.active": { value: "#1e40af" },
+          "primary.light": { value: "#60a5fa" },
+          "primary.dark": { value: "#1e3a8a" },
+          secondary: { value: "#0ea5e9" },
+          "secondary.hover": { value: "#0284c7" },
+          accent: { value: "#3b82f6" },
+          "accent.hover": { value: "#2563eb" },
         },
       },
     },
@@ -61,38 +61,38 @@ export const system = createSystem(defaultConfig, {
         // Primary brand color tokens
         "brand.primary": {
           value: {
-            base: "#14b8a6",
-            _light: "#14b8a6",
-            _dark: "#14b8a6",
+            base: "#2563eb",
+            _light: "#2563eb",
+            _dark: "#2563eb",
           },
         },
         "brand.primary.hover": {
           value: {
-            base: "#0d9488",
-            _light: "#0d9488",
-            _dark: "#0d9488",
+            base: "#1d4ed8",
+            _light: "#1d4ed8",
+            _dark: "#1d4ed8",
           },
         },
         "brand.primary.active": {
           value: {
-            base: "#0f766e",
-            _light: "#0f766e",
-            _dark: "#0f766e",
+            base: "#1e40af",
+            _light: "#1e40af",
+            _dark: "#1e40af",
           },
         },
         // Button colors
         "button.primary": {
           value: {
-            base: "#14b8a6",
-            _light: "#14b8a6",
-            _dark: "#14b8a6",
+            base: "#2563eb",
+            _light: "#2563eb",
+            _dark: "#2563eb",
           },
         },
         "button.primary.hover": {
           value: {
-            base: "#0d9488",
-            _light: "#0d9488",
-            _dark: "#0d9488",
+            base: "#1d4ed8",
+            _light: "#1d4ed8",
+            _dark: "#1d4ed8",
           },
         },
         "button.success": {
@@ -140,37 +140,59 @@ export const system = createSystem(defaultConfig, {
         // Gradient colors
         "gradient.primary": {
           value: {
-            base: "linear-gradient(120deg, #14b8a6 0%, #60a5fa 60%, #a855f7 100%)",
+            base: "linear-gradient(120deg, #2563eb 0%, #60a5fa 60%, #0ea5e9 100%)",
             _light:
-              "linear-gradient(120deg, #14b8a6 0%, #60a5fa 60%, #a855f7 100%)",
+              "linear-gradient(120deg, #2563eb 0%, #60a5fa 60%, #0ea5e9 100%)",
             _dark:
-              "linear-gradient(120deg, #14b8a6 0%, #60a5fa 60%, #a855f7 100%)",
+              "linear-gradient(120deg, #2563eb 0%, #60a5fa 60%, #0ea5e9 100%)",
           },
         },
         "gradient.primary.hover": {
           value: {
-            base: "linear-gradient(120deg, #0d9488 0%, #3b82f6 60%, #9333ea 100%)",
+            base: "linear-gradient(120deg, #1d4ed8 0%, #3b82f6 60%, #0284c7 100%)",
             _light:
-              "linear-gradient(120deg, #0d9488 0%, #3b82f6 60%, #9333ea 100%)",
+              "linear-gradient(120deg, #1d4ed8 0%, #3b82f6 60%, #0284c7 100%)",
             _dark:
-              "linear-gradient(120deg, #0d9488 0%, #3b82f6 60%, #9333ea 100%)",
+              "linear-gradient(120deg, #1d4ed8 0%, #3b82f6 60%, #0284c7 100%)",
           },
         },
         "gradient.canvas": {
           value: {
-            base: "linear-gradient(135deg, #0f172a 0%, #111827 40%, #1f1b2e 100%)",
+            base: "linear-gradient(135deg, #0c1c2e 0%, #1a2847 40%, #142a4a 100%)",
             _light:
-              "linear-gradient(135deg, #f8fafc 0%, #dbeafe 45%, #ede9fe 100%)",
+              "linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 45%, #e0e7ff 100%)",
             _dark:
-              "linear-gradient(135deg, #0f172a 0%, #111827 40%, #1f1b2e 100%)",
+              "linear-gradient(135deg, #0c1c2e 0%, #1a2847 40%, #142a4a 100%)",
+          },
+        },
+        // Role-based badge gradients
+        "gradient.role.admin": {
+          value: {
+            base: "linear-gradient(135deg, #1e40af 0%, #2563eb 100%)",
+            _light: "linear-gradient(135deg, #1e40af 0%, #2563eb 100%)",
+            _dark: "linear-gradient(135deg, #1e40af 0%, #2563eb 100%)",
+          },
+        },
+        "gradient.role.auditor": {
+          value: {
+            base: "linear-gradient(135deg, #0284c7 0%, #0ea5e9 100%)",
+            _light: "linear-gradient(135deg, #0284c7 0%, #0ea5e9 100%)",
+            _dark: "linear-gradient(135deg, #0284c7 0%, #0ea5e9 100%)",
+          },
+        },
+        "gradient.role.cashier": {
+          value: {
+            base: "linear-gradient(135deg, #60a5fa 0%, #3b82f6 100%)",
+            _light: "linear-gradient(135deg, #60a5fa 0%, #3b82f6 100%)",
+            _dark: "linear-gradient(135deg, #60a5fa 0%, #3b82f6 100%)",
           },
         },
         // Text colors for brand
         "text.brand": {
           value: {
-            base: "#14b8a6",
-            _light: "#14b8a6",
-            _dark: "#14b8a6",
+            base: "#2563eb",
+            _light: "#2563eb",
+            _dark: "#2563eb",
           },
         },
         "text.link": {
@@ -263,16 +285,16 @@ export const system = createSystem(defaultConfig, {
         },
         "input.focus.border": {
           value: {
-            base: "#14b8a6",
-            _light: "#14b8a6",
-            _dark: "#14b8a6",
+            base: "#2563eb",
+            _light: "#2563eb",
+            _dark: "#2563eb",
           },
         },
         "input.focus.shadow": {
           value: {
-            base: "0 0 0 1px #14b8a6",
-            _light: "0 0 0 1px #14b8a6",
-            _dark: "0 0 0 1px #14b8a6",
+            base: "0 0 0 1px #2563eb",
+            _light: "0 0 0 1px #2563eb",
+            _dark: "0 0 0 1px #2563eb",
           },
         },
         // Table colors

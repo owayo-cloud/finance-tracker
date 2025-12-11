@@ -1895,6 +1895,9 @@ export class SalesService {
      * @param data.startDate Filter sales from this date
      * @param data.endDate Filter sales until this date
      * @param data.categoryId Filter by product category
+     * @param data.cashierName Filter by cashier name (searches full_name and username)
+     * @param data.search Search by receipt number (last 6 chars) or notes
+     * @param data.excludeWithDebt Exclude sales that have associated debts (for receipts view)
      * @returns SalesPublic Successful Response
      * @throws ApiError
      */
@@ -1909,7 +1912,10 @@ export class SalesService {
                 payment_method_id: data.paymentMethodId,
                 start_date: data.startDate,
                 end_date: data.endDate,
-                category_id: data.categoryId
+                category_id: data.categoryId,
+                cashier_name: data.cashierName,
+                search: data.search,
+                exclude_with_debt: data.excludeWithDebt
             },
             errors: {
                 422: 'Validation Error'

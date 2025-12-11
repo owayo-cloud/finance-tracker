@@ -168,12 +168,9 @@ const Sidebar = ({
               {/* User Profile Footer - Fixed */}
               <Box
                 borderTop="1px solid"
-                borderColor={{
-                  base: "rgba(255, 255, 255, 0.1)",
-                  _light: "gray.200",
-                }}
+                borderColor="border.default"
                 p={4}
-                bg={{ base: "rgba(0, 0, 0, 0.2)", _light: "gray.50" }}
+                bg="bg.surface"
                 flexShrink={0}
               >
                 {currentUser && (
@@ -258,9 +255,9 @@ const Sidebar = ({
       {/* Desktop */}
       <Flex
         display={{ base: "none", md: "flex" }}
-        bg={{ base: "#1a1d29", _light: "#ffffff" }}
+        bg="bg.surface"
         borderRight="1px solid"
-        borderColor={{ base: "rgba(255, 255, 255, 0.08)", _light: "#e5e7eb" }}
+        borderColor="border.default"
         w={isCollapsed ? "70px" : "260px"}
         h="100%"
         direction="column"
@@ -277,14 +274,11 @@ const Sidebar = ({
         {currentUser && !isCollapsed && (
           <Box
             p={4}
-            bg={{ base: "#1a1d29", _light: "#ffffff" }}
+            bg="bg.surface"
             minW="260px"
             flexShrink={0}
             borderBottom="1px solid"
-            borderColor={{
-              base: "rgba(255, 255, 255, 0.08)",
-              _light: "#e5e7eb",
-            }}
+            borderColor="border.default"
           >
             <HStack gap={3} justify="space-between" align="center">
               <HStack gap={3} flex={1}>
@@ -323,10 +317,10 @@ const Sidebar = ({
                     py={0.5}
                     bg={
                       currentUser.is_superuser
-                        ? "linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%)" // Purple for Admin
+                        ? "gradient.role.admin"
                         : currentUser.is_auditor
-                          ? "linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)" // Blue for Auditor
-                          : "linear-gradient(135deg, #22c55e 0%, #16a34a 100%)" // Green for Cashier
+                          ? "gradient.role.auditor"
+                          : "gradient.role.cashier"
                     }
                     color="white"
                     fontSize="2xs"

@@ -39,6 +39,8 @@ export function StatsCards({ isMounted }: StatsCardsProps) {
   const expenseChange = dashboardStats?.expense_change_percent || 0
   const currentNetProfit = dashboardStats?.net_profit || 0
   const potentialGrowthChange = dashboardStats?.net_profit_change_percent || 0
+  const unpaidDebtsTotal = dashboardStats?.unpaid_debts_total || 0
+  const unpaidDebtsCount = dashboardStats?.unpaid_debts_count || 0
 
   return (
     <Box
@@ -51,7 +53,7 @@ export function StatsCards({ isMounted }: StatsCardsProps) {
         templateColumns={{
           base: "repeat(1, 1fr)",
           md: "repeat(2, 1fr)",
-          lg: "repeat(4, 1fr)",
+          lg: "repeat(5, 1fr)",
         }}
         gap={4}
       >
@@ -289,6 +291,61 @@ export function StatsCards({ isMounted }: StatsCardsProps) {
             </Text>
             <Text fontSize="xs" color={{ base: "#9ca3af", _light: "#6b7280" }}>
               vs last month
+            </Text>
+          </HStack>
+        </Box>
+
+        {/* Unpaid Debts Card */}
+        <Box
+          p={5}
+          bg="bg.surface"
+          borderRadius="lg"
+          border="1px solid"
+          borderColor="border.card"
+          boxShadow={{
+            base: "0 2px 4px rgba(0, 0, 0, 0.2)",
+            _light: "0 1px 3px rgba(0, 0, 0, 0.1)",
+          }}
+          transition="all 0.3s ease"
+          _hover={{
+            shadow: {
+              base: "0 4px 12px rgba(0, 0, 0, 0.3)",
+              _light: "0 4px 12px rgba(0, 0, 0, 0.15)",
+            },
+            transform: "translateY(-2px)",
+          }}
+          position="relative"
+          overflow="hidden"
+        >
+          <HStack justify="space-between" mb={2} align="start">
+            <VStack align="start" gap={0}>
+              <Text
+                fontSize="xs"
+                color="text.muted"
+                fontWeight="500"
+                textTransform="uppercase"
+                letterSpacing="0.5px"
+              >
+                Unpaid Debts
+              </Text>
+              <Text
+                fontSize="2xl"
+                fontWeight="700"
+                color="button.warning"
+                mt={1}
+              >
+                {formatCurrency(unpaidDebtsTotal)}
+              </Text>
+            </VStack>
+            <Icon as={FiArrowDown} color="button.warning" fontSize="lg" />
+          </HStack>
+          <HStack gap={1}>
+            <Text fontSize="xs" color="text.muted" fontWeight="600">
+              {unpaidDebtsCount}{" "}
+              {unpaidDebtsCount === 1 ? "invoice" : "invoices"}
+            </Text>
+            <Text fontSize="xs" color={{ base: "#9ca3af", _light: "#6b7280" }}>
+              pending
             </Text>
           </HStack>
         </Box>

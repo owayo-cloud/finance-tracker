@@ -1,8 +1,8 @@
 import { Box, Container, Grid } from "@chakra-ui/react"
 import { useQuery } from "@tanstack/react-query"
-import { createFileRoute, redirect } from "@tanstack/react-router"
+import { createFileRoute } from "@tanstack/react-router"
 import { useEffect, useState } from "react"
-import { SalesService, UsersService } from "@/client"
+import { SalesService } from "@/client"
 import { DashboardHeader } from "@/components/Dashboard/DashboardHeader"
 import { PendingDebtsTable } from "@/components/Dashboard/PendingDebtsTable"
 import { RecentActivity } from "@/components/Dashboard/RecentActivity"
@@ -13,16 +13,7 @@ import useAuth from "@/hooks/useAuth"
 
 export const Route = createFileRoute("/_layout/")({
   component: Dashboard,
-  beforeLoad: async () => {
-    const user = await UsersService.readUserMe()
-
-    // If user is a cashier (not superuser), redirect to sales dashboard
-    if (!user.is_superuser) {
-      throw redirect({
-        to: "/sales",
-      })
-    }
-  },
+  // Allow all authenticated users (including cashiers) to access dashboard
 })
 
 function Dashboard() {
@@ -33,15 +24,20 @@ function Dashboard() {
     setIsMounted(true)
   }, [])
 
-  // Fetch recent sales for RevenueSalesPurchaseCards
+  // Fetch recent sales for RevenueSalesPurchaseCards (exclude unpaid debt sales)
   const { data: recentSalesData } = useQuery({
     queryKey: ["recentSales"],
-    queryFn: () => SalesService.readSales({ skip: 0, limit: 100 }),
+    queryFn: () =>
+      SalesService.readSales({
+        skip: 0,
+        limit: 100,
+        excludeWithDebt: true, // Exclude sales with unpaid debts from revenue
+      }),
   })
 
   const recentSales = recentSalesData?.data || []
 
-  // Calculate totals for RevenueSalesPurchaseCards
+  // Calculate totals for RevenueSalesPurchaseCards (only paid sales)
   const totalRevenue = recentSales.reduce(
     (sum, sale) => sum + parseFloat(sale.total_amount || "0"),
     0,

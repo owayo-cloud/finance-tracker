@@ -10,7 +10,7 @@ import {
   VStack,
 } from "@chakra-ui/react"
 import { createFileRoute, useNavigate } from "@tanstack/react-router"
-import { FiEdit, FiPackage, FiUpload } from "react-icons/fi"
+import { FiPackage, FiUpload } from "react-icons/fi"
 import AddProduct from "../../../components/Products/AddProduct"
 import { Button } from "../../../components/ui/button"
 import useAuth from "../../../hooks/useAuth"
@@ -30,14 +30,10 @@ function StockEntry() {
         {/* Header */}
         <Flex justify="space-between" align="start">
           <Box>
-            <Heading
-              size="2xl"
-              mb={2}
-              color={{ base: "#e5e7eb", _light: "#111827" }}
-            >
+            <Heading size="2xl" mb={2} color="text.primary">
               Stock Entry Management
             </Heading>
-            <Text color={{ base: "#d1d5db", _light: "#6b7280" }} fontSize="lg">
+            <Text color="text.muted" fontSize="lg">
               Manage your product inventory and stock operations
             </Text>
           </Box>
@@ -68,7 +64,7 @@ function StockEntry() {
               >
                 <FiPackage size={32} color="var(--chakra-colors-teal-500)" />
               </Box>
-              <Heading size="md" color={{ base: "#e5e7eb", _light: "#111827" }}>
+              <Heading size="md" color="text.primary">
                 Add New Product
               </Heading>
               <Text color={{ base: "#d1d5db", _light: "#6b7280" }}>
@@ -145,37 +141,6 @@ function StockEntry() {
             Quick Access
           </Heading>
           <Grid templateColumns={{ base: "1fr", md: "repeat(3, 1fr)" }} gap={4}>
-            {/* Stock Adjustment Link */}
-            <Box
-              p={6}
-              borderWidth="1px"
-              borderRadius="md"
-              bg={{ base: "gray.900", _light: "white" }}
-              borderColor={{ base: "gray.700", _light: "gray.200" }}
-              _hover={{
-                borderColor: "purple.500",
-                bg: { base: "gray.800", _light: "gray.50" },
-              }}
-              cursor="pointer"
-              transition="all 0.2s"
-              onClick={() => navigate({ to: "/stock-adjustment" })}
-            >
-              <VStack align="start" gap={2}>
-                <HStack>
-                  <Box color="purple.500">
-                    <FiEdit size={20} />
-                  </Box>
-                  <Text fontWeight="semibold">Stock Adjustment</Text>
-                </HStack>
-                <Text
-                  fontSize="sm"
-                  color={{ base: "gray.400", _light: "gray.600" }}
-                >
-                  Adjust current stock levels and reorder points
-                </Text>
-              </VStack>
-            </Box>
-
             {/* Products Management Link */}
             <Box
               p={6}

@@ -5,7 +5,7 @@ from typing import Any
 
 from fastapi import APIRouter, HTTPException, Query
 from pydantic import BaseModel
-from sqlalchemy import desc
+from sqlalchemy import Date, String, cast, desc, exists
 from sqlalchemy.orm import selectinload
 from sqlalchemy.sql import ColumnElement
 from sqlmodel import and_, func, or_, select
@@ -218,6 +218,14 @@ def create_sale(
         raise HTTPException(
             status_code=403, detail="User is not active or not authenticated"
         )
+
+    # ROLE-BASED ACCESS CONTROL: Auditors cannot create sales
+    if current_user.is_auditor:
+        raise HTTPException(
+            status_code=403,
+            detail="Auditors have read-only access. Sales creation is not allowed.",
+        )
+
     # Validate product exists and lock row to prevent race conditions
     product = session.exec(
         select(Product).where(Product.id == sale_in.product_id).with_for_update()
@@ -346,6 +354,14 @@ def create_sale_with_multiple_payments(
         raise HTTPException(
             status_code=403, detail="User is not active or not authenticated"
         )
+
+    # ROLE-BASED ACCESS CONTROL: Auditors cannot create sales
+    if current_user.is_auditor:
+        raise HTTPException(
+            status_code=403,
+            detail="Auditors have read-only access. Sales creation is not allowed.",
+        )
+
     # Validate product exists and lock row to prevent race conditions
     product = session.exec(
         select(Product).where(Product.id == sale_in.product_id).with_for_update()
@@ -631,6 +647,9 @@ def read_sales(
     start_date: date | None = Query(None, description="Filter sales from this date"),
     end_date: date | None = Query(None, description="Filter sales until this date"),
     category_id: str | None = Query(None, description="Filter by product category"),
+    cashier_name: str | None = Query(None, description="Filter by cashier name (searches full_name and username)"),
+    search: str | None = Query(None, description="Search by receipt number (last 6 chars) or notes"),
+    exclude_with_debt: bool = Query(False, description="Exclude sales that have associated debts (for receipts view)"),
 ) -> Any:
     """
     Retrieve sales with optional filtering.
@@ -655,8 +674,9 @@ def read_sales(
     # Apply filters
     conditions: list[ColumnElement[bool]] = []
 
-    # Cashiers only see their own sales (unless admin/superuser)
-    if not current_user.is_superuser:
+    # Cashiers only see their own sales (unless admin/superuser or auditor)
+    # Auditors can see all sales for auditing purposes
+    if not current_user.is_superuser and not current_user.is_auditor:
         conditions.append(Sale.created_by_id == current_user.id)  # type: ignore[arg-type]
         count_statement = count_statement.where(Sale.created_by_id == current_user.id)
 
@@ -667,15 +687,58 @@ def read_sales(
         conditions.append(Sale.payment_method_id == payment_method_id)  # type: ignore[arg-type]
 
     if start_date:
-        conditions.append(Sale.sale_date >= start_date)  # type: ignore[arg-type]
+        # Cast datetime to date for comparison to properly match dates
+        conditions.append(cast(Sale.sale_date, Date) >= start_date)  # type: ignore[arg-type]
 
     if end_date:
-        conditions.append(Sale.sale_date <= end_date)  # type: ignore[arg-type]
+        # Cast datetime to date for comparison to include entire day
+        conditions.append(cast(Sale.sale_date, Date) <= end_date)  # type: ignore[arg-type]
 
     # Category filter requires joining with Product
-    if category_id:
+    needs_product_join = category_id is not None
+    needs_user_join = cashier_name is not None
+
+    if needs_product_join:
         statement = statement.join(Product, Sale.product_id == Product.id)
         conditions.append(Product.category_id == category_id)  # type: ignore[arg-type]
+
+    # Cashier filter - filter by cashier name (searches full_name and username)
+    if cashier_name:
+        from app.models import User
+        cashier_search_term = cashier_name.strip().lower()
+        # Join with User table to search by name (only if not already joined)
+        # User is already loaded via selectinload, but we need to join for filtering
+        if not needs_user_join or "User" not in str(statement):
+            statement = statement.join(User, Sale.created_by_id == User.id)  # type: ignore[arg-type]
+        # Search in both full_name and username
+        cashier_conditions = or_(
+            cast(User.full_name, String).ilike(f"%{cashier_search_term}%"),  # type: ignore[attr-defined]
+            cast(User.username, String).ilike(f"%{cashier_search_term}%"),  # type: ignore[attr-defined]
+        )
+        conditions.append(cashier_conditions)  # type: ignore[arg-type]
+
+    # Search filter - search in notes (receipt number search done after fetch)
+    if search:
+        search_term = search.strip()
+        if search_term:
+            # Search in notes using ILIKE for case-insensitive search
+            conditions.append(
+                or_(
+                    cast(Sale.notes, String).ilike(f"%{search_term}%"),  # type: ignore[attr-defined]
+                )
+            )
+
+    # Exclude sales with associated debts (for receipts view - debt sales should appear in invoices)
+    if exclude_with_debt:
+        # Exclude sales that have associated debts using NOT EXISTS
+        debt_exists = exists().where(
+            and_(
+                Debt.sale_id == Sale.id,
+                Debt.sale_id.isnot(None)
+            )
+        )
+        conditions.append(~debt_exists)  # type: ignore[arg-type]
+        count_statement = count_statement.where(~debt_exists)  # type: ignore[arg-type]
 
     if conditions:
         statement = statement.where(and_(*conditions))
@@ -683,6 +746,24 @@ def read_sales(
 
     count = session.exec(count_statement).one()
     sales = session.exec(statement).all()
+
+    # Apply receipt number search filter if provided (search by last 6 chars of ID)
+    # This is done after fetch because UUID string conversion is easier in Python
+    if search:
+        search_term = search.strip().lower()
+        if search_term:
+            filtered_sales = []
+            for sale in sales:
+                # Check notes (already filtered in SQL above)
+                notes_match = sale.notes and search_term in sale.notes.lower()
+                # Also check receipt number (last 6 chars of UUID as string)
+                receipt_no = str(sale.id)[-6:].lower()
+                receipt_match = search_term in receipt_no
+                if notes_match or receipt_match:
+                    filtered_sales.append(sale)
+            sales = filtered_sales
+            # Update count to reflect filtered results
+            count = len(sales)
 
     return SalesPublic(data=sales, count=count)
 

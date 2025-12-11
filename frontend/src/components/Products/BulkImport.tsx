@@ -361,7 +361,7 @@ export function BulkImportPage() {
             </Button>
             {importState.currentStage === ImportStage.COMPLETE && (
               <Button
-                colorScheme="green"
+                colorPalette="teal"
                 onClick={() =>
                   navigate({
                     to: "/products",
@@ -518,7 +518,7 @@ function InstructionsStage({ onContinue }: InstructionsStageProps) {
             fontWeight="bold"
             fontSize="sm"
             mb={2}
-            color={{ base: "green.300", _light: "green.600" }}
+            color={{ base: "teal.300", _light: "teal.600" }}
           >
             Optional Fields
           </Text>
@@ -590,7 +590,7 @@ function InstructionsStage({ onContinue }: InstructionsStageProps) {
         </Box>
       </Box>
 
-      <Button colorScheme="blue" size="lg" width="full" onClick={onContinue}>
+      <Button colorPalette="teal" size="lg" width="full" onClick={onContinue}>
         <HStack gap={2}>
           <Text>Continue to Upload</Text>
           <Icon as={FiArrowRight} />
@@ -647,7 +647,7 @@ function UploadStage({ onFileUploaded }: UploadStageProps) {
         `File uploaded successfully! Found ${data.total_rows} rows.`,
       )
       onFileUploaded(
-        data.id,
+        String(data.id), // Ensure session ID is a string
         data.filename,
         data.total_rows,
         data.columns || [],
@@ -733,23 +733,23 @@ function UploadStage({ onFileUploaded }: UploadStageProps) {
         borderWidth="2px"
         borderRadius="lg"
         borderStyle="dashed"
-        borderColor={selectedFile ? "green.500" : "gray.200"}
+        borderColor={selectedFile ? "teal.500" : "gray.200"}
         _dark={{
-          borderColor: selectedFile ? "green.500" : "gray.600",
-          bg: selectedFile ? "green.900" : "gray.700",
+          borderColor: selectedFile ? "teal.500" : "gray.600",
+          bg: selectedFile ? "teal.900" : "gray.700",
         }}
-        bg={selectedFile ? "green.50" : "gray.50"}
+        bg={selectedFile ? "teal.50" : "gray.50"}
         textAlign="center"
         cursor="pointer"
         onDragOver={handleDragOver}
         onDrop={handleDrop}
-        onClick={() => document.getElementById("file-input")?.click()}
+        onClick={() => document.getElementById(fileInputId)?.click()}
         transition="all 0.2s"
         _hover={{
-          borderColor: selectedFile ? "green.600" : "blue.400",
-          bg: selectedFile ? "green.100" : "gray.100",
+          borderColor: selectedFile ? "teal.600" : "teal.400",
+          bg: selectedFile ? "teal.100" : "gray.100",
           _dark: {
-            bg: selectedFile ? "green.800" : "gray.600",
+            bg: selectedFile ? "teal.800" : "gray.600",
           },
         }}
       >
@@ -757,15 +757,11 @@ function UploadStage({ onFileUploaded }: UploadStageProps) {
           <Icon
             as={selectedFile ? FiCheckCircle : FiUpload}
             boxSize={16}
-            color={selectedFile ? "green.500" : "gray.400"}
+            color={selectedFile ? "teal.500" : "gray.400"}
           />
           {selectedFile ? (
             <>
-              <Heading
-                size="md"
-                color="green.700"
-                _dark={{ color: "green.200" }}
-              >
+              <Heading size="md" color="teal.700" _dark={{ color: "teal.200" }}>
                 {selectedFile.name}
               </Heading>
               <Text color="fg.muted">
@@ -786,7 +782,14 @@ function UploadStage({ onFileUploaded }: UploadStageProps) {
             <>
               <Heading size="md">Drag & drop your file here</Heading>
               <Text color="fg.muted">or</Text>
-              <Button colorScheme="blue" size="lg">
+              <Button
+                colorPalette="teal"
+                size="lg"
+                onClick={(e) => {
+                  e.stopPropagation()
+                  document.getElementById(fileInputId)?.click()
+                }}
+              >
                 Select File
               </Button>
               <Text fontSize="sm" color="fg.muted">
@@ -831,7 +834,7 @@ function UploadStage({ onFileUploaded }: UploadStageProps) {
 
       {selectedFile && !isUploading && (
         <Button
-          colorScheme="blue"
+          colorPalette="teal"
           size="lg"
           onClick={handleUpload}
           loading={uploadMutation.isPending}
@@ -952,17 +955,62 @@ function MappingStage({
 
       return response.json()
     },
-    onSuccess: (data) => {
+    onSuccess: async (data) => {
       showSuccessToast("Column mapping complete! Validation successful.")
-      onMappingComplete(
-        data.valid_rows,
-        data.error_rows,
-        data.duplicate_rows,
-        columnMapping,
-        defaultCategoryId,
-        defaultStatusId,
-        [],
-      )
+
+      // Small delay to ensure backend has finished processing
+      await new Promise((resolve) => setTimeout(resolve, 500))
+
+      // Fetch full validation results after mapping
+      try {
+        const sessionIdStr = String(sessionId) // Ensure session ID is a string
+        const response = await fetch(
+          `${import.meta.env.VITE_API_URL}/api/v1/products/bulk/validate/${sessionIdStr}?filter=all&limit=1000`,
+          {
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem("access_token")}`,
+            },
+          },
+        )
+
+        if (!response.ok) {
+          const errorData = await response.json().catch(() => ({}))
+          const errorMessage =
+            errorData.detail ||
+            errorData.message ||
+            "Failed to fetch validation results"
+          throw new Error(errorMessage)
+        }
+
+        const validationData = await response.json()
+
+        onMappingComplete(
+          data.valid_rows,
+          data.error_rows,
+          data.duplicate_rows,
+          columnMapping,
+          defaultCategoryId,
+          defaultStatusId,
+          validationData.rows || [],
+        )
+      } catch (error: any) {
+        // If fetch fails, show error but still proceed - validation stage will retry
+        console.error("Failed to fetch validation results:", error)
+        showErrorToast(
+          error.message ||
+            "Failed to fetch validation results. Please try again.",
+        )
+        // Still proceed to validation stage - it will fetch the data
+        onMappingComplete(
+          data.valid_rows,
+          data.error_rows,
+          data.duplicate_rows,
+          columnMapping,
+          defaultCategoryId,
+          defaultStatusId,
+          [],
+        )
+      }
     },
     onError: (error: any) => {
       showErrorToast(error.message || "Failed to map columns")
@@ -1108,7 +1156,7 @@ function MappingStage({
                         {isAutoMapped && (
                           <Icon
                             as={FiCheckCircle}
-                            color="green.500"
+                            color="teal.500"
                             boxSize={4}
                           />
                         )}
@@ -1260,7 +1308,7 @@ function MappingStage({
       </Box>
 
       <Button
-        colorScheme="blue"
+        colorPalette="teal"
         size="lg"
         onClick={handleSubmit}
         loading={mapColumnsMutation.isPending}
@@ -1319,8 +1367,9 @@ function ValidationStage({
   } = useQuery({
     queryKey: ["bulk-import-validation", sessionId, filter],
     queryFn: async () => {
+      const sessionIdStr = String(sessionId) // Ensure session ID is a string
       const response = await fetch(
-        `${import.meta.env.VITE_API_URL}/api/v1/products/bulk/validate/${sessionId}?filter=${filter}&limit=1000`,
+        `${import.meta.env.VITE_API_URL}/api/v1/products/bulk/validate/${sessionIdStr}?filter=${filter}&limit=1000`,
         {
           headers: {
             Authorization: `Bearer ${localStorage.getItem("access_token")}`,
@@ -1329,12 +1378,19 @@ function ValidationStage({
       )
 
       if (!response.ok) {
-        throw new Error("Failed to fetch validation results")
+        const errorData = await response.json().catch(() => ({}))
+        const errorMessage =
+          errorData.detail ||
+          errorData.message ||
+          "Failed to fetch validation results"
+        throw new Error(errorMessage)
       }
 
       return response.json()
     },
-    enabled: initialValidatedRows.length === 0,
+    enabled: initialValidatedRows.length === 0 && !!sessionId,
+    retry: 2,
+    retryDelay: 1000,
   })
 
   const validatedRows = validationData?.rows || initialValidatedRows
@@ -1614,7 +1670,7 @@ function ValidationStage({
 
             {activeValidRows > 0 && (
               <Badge
-                colorScheme="green"
+                colorScheme="teal"
                 fontSize="md"
                 px={4}
                 py={2}
@@ -1958,7 +2014,7 @@ function ValidationStage({
                           w={2}
                           h={2}
                           borderRadius="full"
-                          bg="green.500"
+                          bg="teal.500"
                           title="Valid"
                         />
                       )}
@@ -2099,7 +2155,7 @@ function ValidationStage({
                       <HStack gap={1}>
                         <Button
                           size="xs"
-                          colorScheme="green"
+                          colorPalette="teal"
                           onClick={() => handleSaveEdit(row.row_number)}
                           loading={fixRowMutation.isPending}
                         >
@@ -2266,7 +2322,7 @@ function ValidationStage({
           </VStack>
 
           <Button
-            colorScheme="green"
+            colorPalette="teal"
             size="lg"
             onClick={handleImport}
             loading={importMutation.isPending || isImporting}
@@ -2298,7 +2354,7 @@ function CompleteStage({
 }: CompleteStageProps) {
   return (
     <VStack gap={8} align="center" py={8}>
-      <Icon as={FiCheckCircle} boxSize={24} color="green.500" />
+      <Icon as={FiCheckCircle} boxSize={24} color="teal.500" />
 
       <Heading size="2xl">Import Complete!</Heading>
 
@@ -2308,7 +2364,7 @@ function CompleteStage({
         </Text>
         <VStack gap={3}>
           <HStack>
-            <Badge colorScheme="green" px={4} py={2} fontSize="md">
+            <Badge colorScheme="teal" px={4} py={2} fontSize="md">
               <HStack gap={2}>
                 <Icon as={FiCheckCircle} />
                 <Text>{validRows} products imported successfully</Text>
@@ -2344,7 +2400,7 @@ function CompleteStage({
 
       <VStack gap={3} width="100%" maxW="md">
         <Button
-          colorScheme="blue"
+          colorPalette="teal"
           size="lg"
           width="full"
           onClick={() => {

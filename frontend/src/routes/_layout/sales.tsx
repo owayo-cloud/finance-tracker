@@ -14,6 +14,7 @@ import { ReceiptDetails } from "@/components/POS/ReceiptDetails"
 import { ReceiptPreviewModal } from "@/components/POS/ReceiptPreviewModal"
 import { RecentReceiptsModal } from "@/components/POS/RecentReceiptsModal"
 import type { CartItem, SuspendedSale } from "@/components/POS/types"
+import { toaster } from "@/components/ui/toaster"
 import {
   OpenAPI,
   type ProductPublic,
@@ -30,7 +31,22 @@ export const Route = createFileRoute("/_layout/sales")({
 function Sales() {
   const queryClient = useQueryClient()
   const showToast = useCustomToast()
-  const { logout } = useAuth()
+  const { user } = useAuth()
+  const isAuditor = user?.is_auditor ?? false
+
+  // Show toast notification for auditors on mount
+  useEffect(() => {
+    if (isAuditor) {
+      toaster.create({
+        title: "Read-Only Access",
+        description:
+          "You have auditor privileges. You can view sales data but cannot create new sales or modify existing ones.",
+        type: "info",
+        duration: 6000,
+      })
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isAuditor])
 
   // State management
   const [searchQuery, setSearchQuery] = useState("")
@@ -173,7 +189,7 @@ function Sales() {
   ])
 
   // Check till status
-  const { refetch: refetchTillStatus } = useQuery({
+  const { data: tillStatus, refetch: refetchTillStatus } = useQuery({
     queryKey: ["till-status"],
     queryFn: async () => {
       try {
@@ -363,6 +379,13 @@ function Sales() {
       showToast.showErrorToast("Cart is empty")
       return
     }
+    // Check if till is open
+    if (!tillStatus?.is_open) {
+      showToast.showErrorToast(
+        "POS is locked. Please open a till before making sales.",
+      )
+      return
+    }
     setIsPaymentModalOpen(true)
   }
 
@@ -540,52 +563,9 @@ function Sales() {
         }
       }
 
-      // Create debt if customer is selected and payment is less than total
-      if (customerName && totalPaid < cartTotal) {
-        const debtAmount = cartTotal - totalPaid
-
-        try {
-          // Create one debt for the entire cart (linked to first sale)
-          const debtResponse = await fetch(`${apiBase}/api/v1/debts/`, {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: `Bearer ${token}`,
-            },
-            body: JSON.stringify({
-              customer_name: customerName,
-              customer_contact: customerTel || null,
-              sale_id: firstSaleId || null,
-              amount: debtAmount,
-              amount_paid: 0,
-              balance: debtAmount,
-              debt_date: new Date().toISOString(),
-              due_date: null,
-              status: "pending",
-              notes:
-                remarks ||
-                `Credit sale - ${cart.length} item(s), Balance: ${debtAmount.toFixed(2)}`,
-            }),
-          })
-
-          if (!debtResponse.ok) {
-            const errorText = await debtResponse.text()
-            // Don't throw - sale was successful, debt creation is secondary
-            showToast.showErrorToast(
-              `Sale completed but failed to record debt: ${errorText}`,
-            )
-          } else {
-            showToast.showSuccessToast(
-              `Sale completed. Debt of ${debtAmount.toFixed(2)} recorded for ${customerName}`,
-            )
-          }
-        } catch (error: any) {
-          // Don't throw - sale was successful
-          showToast.showErrorToast(
-            `Sale completed but failed to record debt: ${error.message || "Unknown error"}`,
-          )
-        }
-      }
+      // Note: Debt creation is handled automatically by the backend in create_sale_with_multiple_payments
+      // The backend creates a debt for each sale when customer is provided and payment < total
+      // No need to manually create debt here to avoid duplication
 
       // Store the last sale ID for receipt printing (we'll get it from the response)
       // Note: Since we process multiple items, we'll use the most recent sale
@@ -740,7 +720,6 @@ function Sales() {
       overflow={{ base: "auto", lg: "hidden" }}
     >
       <ActionButtons
-        onLogout={logout}
         onReset={resetSale}
         onSuspendSale={suspendSale}
         onResumeSale={() => {
@@ -755,6 +734,8 @@ function Sales() {
         cartLength={cart.length}
         selectedSaleId={selectedSaleId}
         isPending={createSale.isPending}
+        isAuditor={isAuditor}
+        isTillOpen={Boolean(tillStatus?.is_open ?? false)}
       />
 
       <PaymentModal
@@ -834,6 +815,7 @@ function Sales() {
             onUpdateDiscount={updateDiscount}
             searchResults={searchProducts.data}
             cartTotal={cartTotal}
+            isAuditor={isAuditor}
           />
         </Box>
 

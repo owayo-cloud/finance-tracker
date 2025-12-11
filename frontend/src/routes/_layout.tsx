@@ -28,12 +28,14 @@ export const Route = createFileRoute("/_layout")({
 
       // Define role-specific allowed paths
       const cashierAllowedPaths = [
+        "/",
         "/sales",
         "/settings",
         "/stock-entry",
         "/shift-reconciliation",
         "/debts",
         "/reports",
+        "/invoices",
       ]
       const auditorAllowedPaths = [
         "/products",
@@ -74,11 +76,21 @@ export const Route = createFileRoute("/_layout")({
         }
       } else {
         // CASHIER: Can only access specific paths
-        const isAllowedPath = cashierAllowedPaths.some(
-          (path) =>
-            location.pathname === path ||
-            location.pathname.startsWith(`${path}/`),
-        )
+        // Normalize pathname to remove trailing slashes (except root)
+        const normalizedPathname =
+          location.pathname === "/" ? "/" : location.pathname.replace(/\/$/, "")
+
+        const isAllowedPath = cashierAllowedPaths.some((path) => {
+          // Handle root path specially
+          if (path === "/") {
+            return normalizedPathname === "/"
+          }
+          // For other paths, check exact match or if pathname starts with the path followed by /
+          return (
+            normalizedPathname === path ||
+            normalizedPathname.startsWith(`${path}/`)
+          )
+        })
 
         if (!isAllowedPath) {
           // Cashier trying to access admin routes, redirect to sales dashboard

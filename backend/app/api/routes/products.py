@@ -1,10 +1,12 @@
 import uuid
+from datetime import datetime, timezone
 from typing import Any
 
 from fastapi import APIRouter, HTTPException
 from sqlalchemy.sql import ColumnElement
 from sqlmodel import and_, func, select
 
+from app import crud
 from app.api.deps import AdminUser, CurrentUser, SessionDep
 from app.crud import product as product_crud
 from app.models import (
@@ -205,7 +207,68 @@ def update_product(
                 detail="Selling price must be greater than buying price",
             )
 
+    # Track stock changes for notification
+    old_stock = product.current_stock
+    new_stock = update_data.get("current_stock")
+    stock_changed = new_stock is not None and new_stock != old_stock
+
     product = product_crud.update(db=session, db_obj=product, obj_in=product_in)
+
+    # Create notification if stock was adjusted
+    if stock_changed and new_stock is not None:
+        stock_change = new_stock - old_stock
+        change_text = (
+            f"increased by {stock_change}" if stock_change > 0
+            else f"decreased by {abs(stock_change)}"
+        )
+        adjusted_by = admin_user.full_name or admin_user.email
+        adjusted_at = datetime.now(timezone.utc).isoformat()
+
+        # Create notification for the user who made the adjustment
+        crud.create_notification(
+            session=session,
+            user_id=admin_user.id,
+            notification_type="stock_adjustment",
+            title="Stock Adjusted",
+            message=(
+                f"You {change_text} units for product '{product.name}'. "
+                f"Previous: {old_stock}, New: {new_stock}"
+            ),
+            priority="info",
+            link_url="/products",
+            link_text="View Products",
+            extra_data={
+                "product_id": str(product.id),
+                "product_name": product.name,
+                "previous_stock": old_stock,
+                "new_stock": new_stock,
+                "adjusted_by": adjusted_by,
+                "adjusted_at": adjusted_at,
+            },
+        )
+
+        # Create notification for all admins about stock adjustment
+        crud.create_notification_for_admins(
+            session=session,
+            notification_type="stock_adjustment",
+            title="Stock Adjusted",
+            message=(
+                f"{adjusted_by} {change_text} units "
+                f"for product '{product.name}'. Previous: {old_stock}, New: {new_stock}"
+            ),
+            priority="info",
+            link_url="/products",
+            link_text="View Products",
+            extra_data={
+                "product_id": str(product.id),
+                "product_name": product.name,
+                "previous_stock": old_stock,
+                "new_stock": new_stock,
+                "adjusted_by": adjusted_by,
+                "adjusted_at": adjusted_at,
+            },
+        )
+
     return product
 
 

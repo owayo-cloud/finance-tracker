@@ -189,7 +189,11 @@ export function PaymentModal({
       open={isOpen}
       onOpenChange={({ open }) => !open && handleClose()}
     >
-      <DialogContent maxW="90vw" maxH="90vh" overflow="hidden">
+      <DialogContent
+        maxW={{ base: "95vw", md: "90vw" }}
+        maxH={{ base: "95vh", md: "90vh" }}
+        overflow="hidden"
+      >
         <DialogCloseTrigger />
         <DialogHeader bg="brand.secondary" color="white" py={3} px={6}>
           <DialogTitle color="white" fontSize="md" fontWeight="600">
@@ -204,9 +208,18 @@ export function PaymentModal({
           )}
         </DialogHeader>
         <DialogBody p={0} overflow="hidden">
-          <Flex h="calc(90vh - 120px)" overflow="hidden">
+          <Flex
+            h={{ base: "calc(95vh - 120px)", md: "calc(90vh - 120px)" }}
+            overflow="hidden"
+            direction={{ base: "column", md: "row" }}
+          >
             {/* Left Section - Payment Input (60%) */}
-            <Box flex="0 0 60%" p={6} overflowY="auto" bg="bg.canvas">
+            <Box
+              flex={{ base: "1", md: "0 0 60%" }}
+              p={{ base: 4, md: 6 }}
+              overflowY="auto"
+              bg="bg.canvas"
+            >
               <VStack gap={4} align="stretch">
                 {/* Summary Fields */}
                 <HStack gap={4}>
@@ -494,11 +507,12 @@ export function PaymentModal({
 
             {/* Right Section - Order Summary (40%) */}
             <Box
-              flex="0 0 40%"
-              p={6}
+              flex={{ base: "1", md: "0 0 40%" }}
+              p={{ base: 4, md: 6 }}
               overflowY="auto"
               bg="bg.canvas"
-              borderLeft="3px solid"
+              borderLeft={{ base: "none", md: "3px solid" }}
+              borderTop={{ base: "3px solid", md: "none" }}
               borderColor="brand.primary"
             >
               <VStack gap={4} align="stretch">

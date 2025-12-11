@@ -106,7 +106,7 @@ export default function DebtList() {
   return (
     <Container maxW="full" px={0}>
       <Flex justify="space-between" align="center" mb={6}>
-        <Heading size="lg" color={{ base: "#e5e7eb", _light: "#111827" }}>
+        <Heading size="lg" color="text.primary">
           Customer Debts
         </Heading>
       </Flex>
@@ -115,10 +115,10 @@ export default function DebtList() {
       <Box
         mb={6}
         p={4}
-        bg={{ base: "#1a1d29", _light: "#ffffff" }}
+        bg="bg.surface"
         borderRadius="lg"
         border="1px solid"
-        borderColor={{ base: "rgba(255, 255, 255, 0.08)", _light: "#e5e7eb" }}
+        borderColor="border.default"
       >
         <Flex gap={4} wrap="wrap">
           <Box flex="1" minW="250px">
@@ -126,12 +126,9 @@ export default function DebtList() {
               placeholder="Search by customer or debt ID..."
               value={searchTerm}
               onChange={(e) => handleSearch(e.target.value)}
-              bg={{ base: "#0f1117", _light: "#f9fafb" }}
+              bg="bg.elevated"
               border="1px solid"
-              borderColor={{
-                base: "rgba(255, 255, 255, 0.08)",
-                _light: "#e5e7eb",
-              }}
+              borderColor="border.default"
             />
           </Box>
 
@@ -181,10 +178,10 @@ export default function DebtList() {
 
       {/* Debts Table */}
       <Box
-        bg={{ base: "#1a1d29", _light: "#ffffff" }}
+        bg="bg.surface"
         borderRadius="lg"
         border="1px solid"
-        borderColor={{ base: "rgba(255, 255, 255, 0.08)", _light: "#e5e7eb" }}
+        borderColor="border.default"
         overflow="hidden"
       >
         {isLoading ? (
@@ -202,7 +199,7 @@ export default function DebtList() {
                 <Table.Header>
                   <Table.Row>
                     <Table.ColumnHeader
-                      color={{ base: "#9ca3af", _light: "#6b7280" }}
+                      color="text.muted"
                       fontWeight="600"
                       fontSize="xs"
                       textTransform="uppercase"
@@ -210,7 +207,7 @@ export default function DebtList() {
                       Customer
                     </Table.ColumnHeader>
                     <Table.ColumnHeader
-                      color={{ base: "#9ca3af", _light: "#6b7280" }}
+                      color="text.muted"
                       fontWeight="600"
                       fontSize="xs"
                       textTransform="uppercase"
@@ -218,7 +215,7 @@ export default function DebtList() {
                       Contact
                     </Table.ColumnHeader>
                     <Table.ColumnHeader
-                      color={{ base: "#9ca3af", _light: "#6b7280" }}
+                      color="text.muted"
                       fontWeight="600"
                       fontSize="xs"
                       textTransform="uppercase"
@@ -226,7 +223,7 @@ export default function DebtList() {
                       Total Amount
                     </Table.ColumnHeader>
                     <Table.ColumnHeader
-                      color={{ base: "#9ca3af", _light: "#6b7280" }}
+                      color="text.muted"
                       fontWeight="600"
                       fontSize="xs"
                       textTransform="uppercase"
@@ -234,7 +231,7 @@ export default function DebtList() {
                       Amount Paid
                     </Table.ColumnHeader>
                     <Table.ColumnHeader
-                      color={{ base: "#9ca3af", _light: "#6b7280" }}
+                      color="text.muted"
                       fontWeight="600"
                       fontSize="xs"
                       textTransform="uppercase"
@@ -242,7 +239,7 @@ export default function DebtList() {
                       Balance
                     </Table.ColumnHeader>
                     <Table.ColumnHeader
-                      color={{ base: "#9ca3af", _light: "#6b7280" }}
+                      color="text.muted"
                       fontWeight="600"
                       fontSize="xs"
                       textTransform="uppercase"
@@ -250,7 +247,7 @@ export default function DebtList() {
                       Date
                     </Table.ColumnHeader>
                     <Table.ColumnHeader
-                      color={{ base: "#9ca3af", _light: "#6b7280" }}
+                      color="text.muted"
                       fontWeight="600"
                       fontSize="xs"
                       textTransform="uppercase"
@@ -258,7 +255,7 @@ export default function DebtList() {
                       Due Date
                     </Table.ColumnHeader>
                     <Table.ColumnHeader
-                      color={{ base: "#9ca3af", _light: "#6b7280" }}
+                      color="text.muted"
                       fontWeight="600"
                       fontSize="xs"
                       textTransform="uppercase"
@@ -266,7 +263,7 @@ export default function DebtList() {
                       Status
                     </Table.ColumnHeader>
                     <Table.ColumnHeader
-                      color={{ base: "#9ca3af", _light: "#6b7280" }}
+                      color="text.muted"
                       fontWeight="600"
                       fontSize="xs"
                       textTransform="uppercase"
@@ -278,42 +275,25 @@ export default function DebtList() {
                 <Table.Body>
                   {filteredDebts.map((debt) => (
                     <Table.Row key={debt.id}>
-                      <Table.Cell
-                        color={{ base: "#e5e7eb", _light: "#374151" }}
-                        fontWeight="500"
-                      >
+                      <Table.Cell color="text.primary" fontWeight="500">
                         {debt.customer_name}
                       </Table.Cell>
-                      <Table.Cell
-                        color={{ base: "#9ca3af", _light: "#6b7280" }}
-                      >
+                      <Table.Cell color="text.muted">
                         {debt.customer_contact || "—"}
                       </Table.Cell>
-                      <Table.Cell
-                        color={{ base: "#e5e7eb", _light: "#374151" }}
-                        fontWeight="500"
-                      >
+                      <Table.Cell color="text.primary" fontWeight="500">
                         {formatCurrency(debt.amount)}
                       </Table.Cell>
-                      <Table.Cell
-                        color={{ base: "#9ca3af", _light: "#6b7280" }}
-                      >
+                      <Table.Cell color="text.muted">
                         {formatCurrency(debt.amount_paid || 0)}
                       </Table.Cell>
-                      <Table.Cell
-                        color={{ base: "#fbbf24", _light: "#f59e0b" }}
-                        fontWeight="600"
-                      >
+                      <Table.Cell color="button.warning" fontWeight="600">
                         {formatCurrency(debt.balance)}
                       </Table.Cell>
-                      <Table.Cell
-                        color={{ base: "#9ca3af", _light: "#6b7280" }}
-                      >
+                      <Table.Cell color="text.muted">
                         {debt.debt_date ? formatDate(debt.debt_date) : "—"}
                       </Table.Cell>
-                      <Table.Cell
-                        color={{ base: "#9ca3af", _light: "#6b7280" }}
-                      >
+                      <Table.Cell color="text.muted">
                         {debt.due_date ? formatDate(debt.due_date) : "—"}
                       </Table.Cell>
                       <Table.Cell>

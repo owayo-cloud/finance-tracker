@@ -23,6 +23,7 @@ interface ProductTableProps {
   onUpdateDiscount: (productId: string, discount: number) => void
   searchResults?: ProductPublic[]
   cartTotal: number
+  isAuditor?: boolean
 }
 
 export function ProductTable({
@@ -35,6 +36,7 @@ export function ProductTable({
   onUpdateDiscount,
   searchResults,
   cartTotal,
+  isAuditor = false,
 }: ProductTableProps) {
   return (
     <>
@@ -83,16 +85,7 @@ export function ProductTable({
                     {item.product.current_stock || 0}
                   </Table.Cell>
                   <Table.Cell>
-                    <HStack gap={1} justify="center">
-                      <IconButton
-                        size="xs"
-                        onClick={() => onUpdateQuantity(item.product.id, -1)}
-                        aria-label="Decrease"
-                        variant="ghost"
-                        color="text.primary"
-                      >
-                        <FiMinus />
-                      </IconButton>
+                    {isAuditor ? (
                       <Text
                         minW="40px"
                         textAlign="center"
@@ -101,44 +94,70 @@ export function ProductTable({
                       >
                         {item.quantity}
                       </Text>
-                      <IconButton
-                        size="xs"
-                        onClick={() => onUpdateQuantity(item.product.id, 1)}
-                        aria-label="Increase"
-                        variant="ghost"
-                        color="text.primary"
-                      >
-                        <FiPlus />
-                      </IconButton>
-                    </HStack>
+                    ) : (
+                      <HStack gap={1} justify="center">
+                        <IconButton
+                          size="xs"
+                          onClick={() => onUpdateQuantity(item.product.id, -1)}
+                          aria-label="Decrease"
+                          variant="ghost"
+                          color="text.primary"
+                        >
+                          <FiMinus />
+                        </IconButton>
+                        <Text
+                          minW="40px"
+                          textAlign="center"
+                          fontWeight="medium"
+                          color="text.primary"
+                        >
+                          {item.quantity}
+                        </Text>
+                        <IconButton
+                          size="xs"
+                          onClick={() => onUpdateQuantity(item.product.id, 1)}
+                          aria-label="Increase"
+                          variant="ghost"
+                          color="text.primary"
+                        >
+                          <FiPlus />
+                        </IconButton>
+                      </HStack>
+                    )}
                   </Table.Cell>
                   <Table.Cell textAlign="center" color="text.primary">
                     Ksh {formatCurrency(price)}
                   </Table.Cell>
                   <Table.Cell>
-                    <Input
-                      type="number"
-                      value={item.discount || 0}
-                      onChange={(e) =>
-                        onUpdateDiscount(
-                          item.product.id,
-                          parseFloat(e.target.value) || 0,
-                        )
-                      }
-                      size="sm"
-                      w="80px"
-                      min={0}
-                      max={100}
-                      step="0.001"
-                      textAlign="center"
-                      bg="input.bg"
-                      borderColor="input.border"
-                      color="text.primary"
-                      _focus={{
-                        borderColor: "input.focus.border",
-                        boxShadow: "input.focus.shadow",
-                      }}
-                    />
+                    {isAuditor ? (
+                      <Text textAlign="center" color="text.primary">
+                        {item.discount || 0}%
+                      </Text>
+                    ) : (
+                      <Input
+                        type="number"
+                        value={item.discount || 0}
+                        onChange={(e) =>
+                          onUpdateDiscount(
+                            item.product.id,
+                            parseFloat(e.target.value) || 0,
+                          )
+                        }
+                        size="sm"
+                        w="80px"
+                        min={0}
+                        max={100}
+                        step="0.001"
+                        textAlign="center"
+                        bg="input.bg"
+                        borderColor="input.border"
+                        color="text.primary"
+                        _focus={{
+                          borderColor: "input.focus.border",
+                          boxShadow: "input.focus.shadow",
+                        }}
+                      />
+                    )}
                   </Table.Cell>
                   <Table.Cell
                     fontWeight="bold"
@@ -148,141 +167,152 @@ export function ProductTable({
                     Ksh {formatCurrency(total)}
                   </Table.Cell>
                   <Table.Cell textAlign="center">
-                    <Text
-                      as="button"
-                      color="button.danger"
-                      fontSize="sm"
-                      fontWeight="500"
-                      onClick={() => onRemoveFromCart(item.product.id)}
-                      _hover={{
-                        textDecoration: "underline",
-                        color: "button.danger.hover",
-                      }}
-                    >
-                      Remove
-                    </Text>
+                    {!isAuditor && (
+                      <Text
+                        as="button"
+                        color="button.danger"
+                        fontSize="sm"
+                        fontWeight="500"
+                        onClick={() => onRemoveFromCart(item.product.id)}
+                        _hover={{
+                          textDecoration: "underline",
+                          color: "button.danger.hover",
+                        }}
+                      >
+                        Remove
+                      </Text>
+                    )}
                   </Table.Cell>
                 </Table.Row>
               )
             })}
 
             {/* Empty row for new product entry */}
-            <Table.Row>
-              <Table.Cell>
-                <Input
-                  placeholder=":"
-                  value={searchQuery}
-                  onChange={(e) => onSearchQueryChange(e.target.value)}
-                  onKeyDown={(e) => {
-                    if (
-                      e.key === "Enter" &&
-                      searchQuery &&
-                      searchResults &&
-                      searchResults.length > 0
-                    ) {
-                      onAddToCart(searchResults[0])
-                      onSearchQueryChange("")
-                    }
-                  }}
-                  bg="input.bg"
-                  borderColor="input.border"
-                  color="text.primary"
-                  border="none"
-                  _focus={{ border: "none", boxShadow: "none" }}
-                  size="sm"
-                />
-              </Table.Cell>
-              <Table.Cell />
-              <Table.Cell />
-              <Table.Cell />
-              <Table.Cell textAlign="right" fontWeight="medium">
-                0.000
-              </Table.Cell>
-              <Table.Cell />
-              <Table.Cell textAlign="center">
-                <IconButton
-                  size="sm"
-                  variant="ghost"
-                  onClick={() => {
-                    if (
-                      searchQuery &&
-                      searchResults &&
-                      searchResults.length > 0
-                    ) {
-                      onAddToCart(searchResults[0])
-                      onSearchQueryChange("")
-                    }
-                  }}
-                  aria-label="Add product"
-                  border="2px solid"
-                  borderColor="brand.primary"
-                  color="brand.primary"
-                  borderRadius="md"
-                  _hover={{
-                    bg: "rgba(20, 184, 166, 0.1)",
-                    borderColor: "brand.primary.hover",
-                    color: "brand.primary.hover",
-                  }}
-                >
-                  <FiPlus />
-                </IconButton>
-              </Table.Cell>
-            </Table.Row>
+            {!isAuditor && (
+              <Table.Row>
+                <Table.Cell>
+                  <Input
+                    placeholder=":"
+                    value={searchQuery}
+                    onChange={(e) => onSearchQueryChange(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (
+                        e.key === "Enter" &&
+                        searchQuery &&
+                        searchResults &&
+                        searchResults.length > 0
+                      ) {
+                        onAddToCart(searchResults[0])
+                        onSearchQueryChange("")
+                      }
+                    }}
+                    bg="input.bg"
+                    borderColor="input.border"
+                    color="text.primary"
+                    border="none"
+                    _focus={{ border: "none", boxShadow: "none" }}
+                    size="sm"
+                  />
+                </Table.Cell>
+                <Table.Cell />
+                <Table.Cell />
+                <Table.Cell />
+                <Table.Cell textAlign="right" fontWeight="medium">
+                  0.000
+                </Table.Cell>
+                <Table.Cell />
+                <Table.Cell textAlign="center">
+                  <IconButton
+                    size="sm"
+                    variant="ghost"
+                    onClick={() => {
+                      if (
+                        searchQuery &&
+                        searchResults &&
+                        searchResults.length > 0
+                      ) {
+                        onAddToCart(searchResults[0])
+                        onSearchQueryChange("")
+                      }
+                    }}
+                    aria-label="Add product"
+                    border="2px solid"
+                    borderColor="brand.primary"
+                    color="brand.primary"
+                    borderRadius="md"
+                    _hover={{
+                      bg: "rgba(20, 184, 166, 0.1)",
+                      borderColor: "brand.primary.hover",
+                      color: "brand.primary.hover",
+                    }}
+                  >
+                    <FiPlus />
+                  </IconButton>
+                </Table.Cell>
+              </Table.Row>
+            )}
           </Table.Body>
         </Table.Root>
 
         {/* Product Search Results Dropdown */}
-        {searchQuery && searchResults && searchResults.length > 0 && (
-          <Box
-            mt={2}
-            mx={{ base: 2, md: 4 }}
-            p={3}
-            borderRadius="md"
-            bg="bg.surface"
-            border="1px solid"
-            borderColor="border.default"
-            boxShadow="lg"
-            maxH="300px"
-            overflowY="auto"
-          >
-            <Stack gap={1}>
-              {searchResults.slice(0, 10).map((product) => (
-                <Box
-                  key={product.id}
-                  p={2}
-                  borderRadius="sm"
-                  cursor="pointer"
-                  _hover={{
-                    bg: {
-                      base: "rgba(255, 255, 255, 0.05)",
-                      _light: "#f3f4f6",
-                    },
-                  }}
-                  onClick={() => {
-                    onAddToCart(product)
-                    onSearchQueryChange("")
-                  }}
-                >
-                  <HStack justify="space-between">
-                    <Text
-                      fontSize="sm"
-                      fontWeight="medium"
-                      color="text.primary"
-                    >
-                      {product.name}
+        {!isAuditor &&
+          searchQuery &&
+          searchResults &&
+          searchResults.length > 0 && (
+            <Box
+              mt={2}
+              mx={{ base: 2, md: 4 }}
+              p={3}
+              borderRadius="md"
+              bg="bg.surface"
+              border="1px solid"
+              borderColor="border.default"
+              boxShadow="lg"
+              maxH="300px"
+              overflowY="auto"
+            >
+              <Stack gap={1}>
+                {searchResults.slice(0, 10).map((product) => (
+                  <Box
+                    key={product.id}
+                    p={2}
+                    borderRadius="sm"
+                    cursor="pointer"
+                    _hover={{
+                      bg: {
+                        base: "rgba(255, 255, 255, 0.05)",
+                        _light: "#f3f4f6",
+                      },
+                    }}
+                    onClick={() => {
+                      onAddToCart(product)
+                      onSearchQueryChange("")
+                    }}
+                  >
+                    <HStack justify="space-between">
+                      <Text
+                        fontSize="sm"
+                        fontWeight="medium"
+                        color="text.primary"
+                      >
+                        {product.name}
+                      </Text>
+                      <Text
+                        fontSize="sm"
+                        color="brand.primary"
+                        fontWeight="600"
+                      >
+                        Ksh {formatCurrency(Number(product.selling_price))}
+                      </Text>
+                    </HStack>
+                    <Text fontSize="xs" color="text.muted">
+                      Stock: {product.current_stock || 0}
                     </Text>
-                    <Text fontSize="sm" color="brand.primary" fontWeight="600">
-                      Ksh {formatCurrency(Number(product.selling_price))}
-                    </Text>
-                  </HStack>
-                  <Text fontSize="xs" color="text.muted">
-                    Stock: {product.current_stock || 0}
-                  </Text>
-                </Box>
-              ))}
-            </Stack>
-          </Box>
-        )}
+                  </Box>
+                ))}
+              </Stack>
+            </Box>
+          )}
       </Box>
 
       {/* Totals Section */}

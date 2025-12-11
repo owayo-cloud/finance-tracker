@@ -157,7 +157,7 @@ export function PendingDebtsTable({ isMounted }: PendingDebtsTableProps) {
                   return (
                     <Table.Row key={debt.id}>
                       <Table.Cell color="text.primary">
-                        {debt.customer_name || "N/A"}
+                        {(debt.customer_name || "N/A").toUpperCase()}
                       </Table.Cell>
                       <Table.Cell color="text.primary" fontSize="sm">
                         {productName}

@@ -550,7 +550,7 @@ class SaleUpdate(SQLModel):
     quantity: int | None = Field(default=None, gt=0)
     unit_price: Decimal | None = Field(default=None, decimal_places=2, gt=0)
     total_amount: Decimal | None = Field(default=None, decimal_places=2, gt=0)
-    payment_method_id: uuid.UUID | None = None  # FIXED
+    payment_method_id: uuid.UUID | None = Field(default=None)
     customer_name: str | None = None
     notes: str | None = None
 
@@ -682,7 +682,7 @@ class ExpenseCreate(ExpenseBase):
 
 
 class ExpenseUpdate(SQLModel):
-    category_id: uuid.UUID | None = None  # FIXED
+    category_id: uuid.UUID | None = Field(default=None)
     amount: Decimal | None = Field(default=None, decimal_places=2, gt=0)
     description: str | None = Field(default=None, max_length=1000)
     expense_date: datetime | None = None
@@ -816,7 +816,7 @@ class DebtPaymentCreate(DebtPaymentBase):
 
 class DebtPaymentUpdate(SQLModel):
     amount: Decimal | None = Field(default=None, decimal_places=2, gt=0)
-    payment_method_id: uuid.UUID | None = None  # FIXED
+    payment_method_id: uuid.UUID | None = Field(default=None)
     payment_date: datetime | None = None
     notes: str | None = None
 
@@ -1127,8 +1127,8 @@ class ImportRow(SQLModel):
     row_number: int
     data: dict[str, Any]  # Raw data from uploaded file
     mapped_data: dict[str, Any] | None = None  # Data after column mapping
-    errors: list[ValidationError] = []
-    warnings: list[str] = []
+    errors: list[ValidationError] = Field(default_factory=list)
+    warnings: list[str] = Field(default_factory=list)
     is_duplicate: bool = False
     duplicate_product_id: uuid.UUID | None = None
     status: str = ImportRowStatus.VALID  # valid, error, warning, duplicate
@@ -1316,6 +1316,7 @@ class Supplier(SupplierBase, table=True):
 
 class SupplierPublic(SupplierBase):
     id: uuid.UUID
+    outstanding_debt: Decimal | None = None
 
 
 class SuppliersPublic(SQLModel):

@@ -704,10 +704,18 @@ export const DashboardStatsSchema = {
         net_profit_change_percent: {
             type: 'number',
             title: 'Net Profit Change Percent'
+        },
+        unpaid_debts_total: {
+            type: 'number',
+            title: 'Unpaid Debts Total'
+        },
+        unpaid_debts_count: {
+            type: 'integer',
+            title: 'Unpaid Debts Count'
         }
     },
     type: 'object',
-    required: ['current_month_revenue', 'previous_month_revenue', 'today_revenue', 'yesterday_revenue', 'current_month_expenses', 'previous_month_expenses', 'revenue_change_percent', 'daily_income_change_percent', 'expense_change_percent', 'net_profit', 'previous_net_profit', 'net_profit_change_percent'],
+    required: ['current_month_revenue', 'previous_month_revenue', 'today_revenue', 'yesterday_revenue', 'current_month_expenses', 'previous_month_expenses', 'revenue_change_percent', 'daily_income_change_percent', 'expense_change_percent', 'net_profit', 'previous_net_profit', 'net_profit_change_percent', 'unpaid_debts_total', 'unpaid_debts_count'],
     title: 'DashboardStats'
 } as const;
 
@@ -6137,6 +6145,18 @@ export const SupplierPublicSchema = {
             type: 'string',
             format: 'uuid',
             title: 'Id'
+        },
+        outstanding_debt: {
+            anyOf: [
+                {
+                    type: 'string',
+                    pattern: '^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Outstanding Debt'
         }
     },
     type: 'object',

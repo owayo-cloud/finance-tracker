@@ -647,9 +647,16 @@ def read_sales(
     start_date: date | None = Query(None, description="Filter sales from this date"),
     end_date: date | None = Query(None, description="Filter sales until this date"),
     category_id: str | None = Query(None, description="Filter by product category"),
-    cashier_name: str | None = Query(None, description="Filter by cashier name (searches full_name and username)"),
-    search: str | None = Query(None, description="Search by receipt number (last 6 chars) or notes"),
-    exclude_with_debt: bool = Query(False, description="Exclude sales that have associated debts (for receipts view)"),
+    cashier_name: str | None = Query(
+        None, description="Filter by cashier name (searches full_name and username)"
+    ),
+    search: str | None = Query(
+        None, description="Search by receipt number (last 6 chars) or notes"
+    ),
+    exclude_with_debt: bool = Query(
+        False,
+        description="Exclude sales that have associated debts (for receipts view)",
+    ),
 ) -> Any:
     """
     Retrieve sales with optional filtering.
@@ -705,6 +712,7 @@ def read_sales(
     # Cashier filter - filter by cashier name (searches full_name and username)
     if cashier_name:
         from app.models import User
+
         cashier_search_term = cashier_name.strip().lower()
         # Join with User table to search by name (only if not already joined)
         # User is already loaded via selectinload, but we need to join for filtering
@@ -732,10 +740,7 @@ def read_sales(
     if exclude_with_debt:
         # Exclude sales that have associated debts using NOT EXISTS
         debt_exists = exists().where(
-            and_(
-                Debt.sale_id == Sale.id,
-                Debt.sale_id.isnot(None)
-            )
+            and_(Debt.sale_id == Sale.id, Debt.sale_id.isnot(None))
         )
         conditions.append(~debt_exists)  # type: ignore[arg-type]
         count_statement = count_statement.where(~debt_exists)  # type: ignore[arg-type]

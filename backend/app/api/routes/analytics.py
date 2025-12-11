@@ -78,16 +78,14 @@ def get_sales_summary(
     all_debts = session.exec(select(Debt)).all()
     # Create a set of sale IDs that have unpaid debts (using UUID objects for comparison)
     unpaid_debt_sale_ids = {
-        debt.sale_id for debt in all_debts
+        debt.sale_id
+        for debt in all_debts
         if debt.sale_id and debt.status != "paid" and debt.balance > 0
     }
 
     # Filter out sales with unpaid debts from revenue calculation
     # Only count sales as income if they don't have unpaid debts, or if the debt is fully paid
-    paid_sales = [
-        sale for sale in sales
-        if sale.id not in unpaid_debt_sale_ids
-    ]
+    paid_sales = [sale for sale in sales if sale.id not in unpaid_debt_sale_ids]
 
     # Calculate totals (only from paid sales)
     total_sales = len(paid_sales)
@@ -398,10 +396,10 @@ def get_dashboard_stats(
 
     # Get unpaid debts total (debts that are not fully paid)
     from decimal import Decimal as Dec
+
     # Query unpaid debts - any debt with balance > 0 and status != "paid"
     unpaid_debts_query = select(
-        func.count(Debt.id).label("count"),
-        func.sum(Debt.balance).label("total")
+        func.count(Debt.id).label("count"), func.sum(Debt.balance).label("total")
     ).where(
         and_(
             Debt.status != "paid",  # type: ignore[arg-type]
@@ -410,7 +408,9 @@ def get_dashboard_stats(
     )
     unpaid_debts_result = session.exec(unpaid_debts_query).first()
     unpaid_debts_count = unpaid_debts_result[0] or 0 if unpaid_debts_result else 0
-    unpaid_debts_total = float(unpaid_debts_result[1] or Dec("0")) if unpaid_debts_result else 0.0
+    unpaid_debts_total = (
+        float(unpaid_debts_result[1] or Dec("0")) if unpaid_debts_result else 0.0
+    )
 
     return DashboardStats(
         current_month_revenue=current_month_revenue,

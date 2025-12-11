@@ -1,5 +1,16 @@
 import json
 import logging
+import os
+
+# Set required environment variables for OpenAPI generation
+# These are only used during schema generation, not at runtime
+os.environ.setdefault("PROJECT_NAME", "Finance Tracker")
+os.environ.setdefault("POSTGRES_SERVER", "localhost")
+os.environ.setdefault("POSTGRES_USER", "postgres")
+os.environ.setdefault("POSTGRES_PASSWORD", "postgres")
+os.environ.setdefault("FIRST_SUPERUSER", "admin@example.com")
+os.environ.setdefault("FIRST_SUPERUSER_PASSWORD", "changethis")
+os.environ.setdefault("SECRET_KEY", "just-for-generate-client-secret-key-for-generating-client")
 
 from app.main import app
 

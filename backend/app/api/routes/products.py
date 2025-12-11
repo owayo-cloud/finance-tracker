@@ -218,7 +218,8 @@ def update_product(
     if stock_changed and new_stock is not None:
         stock_change = new_stock - old_stock
         change_text = (
-            f"increased by {stock_change}" if stock_change > 0
+            f"increased by {stock_change}"
+            if stock_change > 0
             else f"decreased by {abs(stock_change)}"
         )
         adjusted_by = admin_user.full_name or admin_user.email

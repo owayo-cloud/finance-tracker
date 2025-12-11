@@ -9,7 +9,7 @@ from sqlalchemy.sql import ColumnElement
 from sqlmodel import and_, func, select
 
 from app.api.deps import CurrentUser, SessionDep
-from app.models import Expense, Product, Sale
+from app.models import Debt, Expense, Product, Sale
 from app.utils.sqlalchemy_helpers import qload
 
 router = APIRouter(prefix="/analytics", tags=["analytics"])
@@ -74,15 +74,30 @@ def get_sales_summary(
         )
     ).all()
 
-    # Calculate totals
-    total_sales = len(sales)
-    total_amount = sum(float(sale.total_amount or Decimal("0")) for sale in sales)
-    total_items = sum(sale.quantity for sale in sales)
+    # Get all debts to identify which sales have unpaid debts
+    all_debts = session.exec(select(Debt)).all()
+    # Create a set of sale IDs that have unpaid debts (using UUID objects for comparison)
+    unpaid_debt_sale_ids = {
+        debt.sale_id for debt in all_debts
+        if debt.sale_id and debt.status != "paid" and debt.balance > 0
+    }
+
+    # Filter out sales with unpaid debts from revenue calculation
+    # Only count sales as income if they don't have unpaid debts, or if the debt is fully paid
+    paid_sales = [
+        sale for sale in sales
+        if sale.id not in unpaid_debt_sale_ids
+    ]
+
+    # Calculate totals (only from paid sales)
+    total_sales = len(paid_sales)
+    total_amount = sum(float(sale.total_amount or Decimal("0")) for sale in paid_sales)
+    total_items = sum(sale.quantity for sale in paid_sales)
     average_sale = total_amount / total_sales if total_sales > 0 else 0.0
 
-    # Payment method breakdown
+    # Payment method breakdown (only from paid sales)
     payment_method_map: dict[str, dict[str, Any]] = {}
-    for sale in sales:
+    for sale in paid_sales:
         method_name = sale.payment_method.name if sale.payment_method else "Unknown"
         if method_name not in payment_method_map:
             payment_method_map[method_name] = {"count": 0, "amount": 0.0}
@@ -98,9 +113,9 @@ def get_sales_summary(
         for method, data in payment_method_map.items()
     ]
 
-    # Cashier breakdown
+    # Cashier breakdown (only from paid sales)
     cashier_map: dict[str, dict[str, Any]] = {}
-    for sale in sales:
+    for sale in paid_sales:
         cashier_name = (
             sale.created_by.full_name
             if sale.created_by and sale.created_by.full_name
@@ -293,6 +308,8 @@ class DashboardStats(BaseModel):
     net_profit: float
     previous_net_profit: float
     net_profit_change_percent: float
+    unpaid_debts_total: float
+    unpaid_debts_count: int
 
 
 @router.get("/dashboard-stats", response_model=DashboardStats)
@@ -379,6 +396,22 @@ def get_dashboard_stats(
         net_profit, previous_net_profit
     )
 
+    # Get unpaid debts total (debts that are not fully paid)
+    from decimal import Decimal as Dec
+    # Query unpaid debts - any debt with balance > 0 and status != "paid"
+    unpaid_debts_query = select(
+        func.count(Debt.id).label("count"),
+        func.sum(Debt.balance).label("total")
+    ).where(
+        and_(
+            Debt.status != "paid",  # type: ignore[arg-type]
+            Debt.balance > 0,  # type: ignore[arg-type]
+        )
+    )
+    unpaid_debts_result = session.exec(unpaid_debts_query).first()
+    unpaid_debts_count = unpaid_debts_result[0] or 0 if unpaid_debts_result else 0
+    unpaid_debts_total = float(unpaid_debts_result[1] or Dec("0")) if unpaid_debts_result else 0.0
+
     return DashboardStats(
         current_month_revenue=current_month_revenue,
         previous_month_revenue=previous_month_revenue,
@@ -392,4 +425,6 @@ def get_dashboard_stats(
         net_profit=net_profit,
         previous_net_profit=previous_net_profit,
         net_profit_change_percent=net_profit_change_percent,
+        unpaid_debts_total=unpaid_debts_total,
+        unpaid_debts_count=unpaid_debts_count,
     )

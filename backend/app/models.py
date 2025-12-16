@@ -424,12 +424,30 @@ class StockEntriesPublic(SQLModel):
 # JSON payload containing access token
 class Token(SQLModel):
     access_token: str
+    refresh_token: str | None = None
     token_type: str = "bearer"
 
 
 # Contents of JWT token
 class TokenPayload(SQLModel):
     sub: str | None = None
+
+
+class RefreshToken(SQLModel, table=True):
+    __tablename__ = "refreshtoken"
+    id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
+    user_id: uuid.UUID = Field(foreign_key="user.id", index=True)
+    token: str = Field(unique=True, index=True)
+    expires_at: datetime
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    revoked: bool = Field(default=False)
+
+    # Relationship
+    user: User = Relationship()
+
+
+class RefreshTokenRequest(SQLModel):
+    refresh_token: str
 
 
 class NewPassword(SQLModel):

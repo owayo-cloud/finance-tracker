@@ -16,6 +16,7 @@ from app.models import (
     Product,
     ProductCreate,
     ProductUpdate,
+    RefreshToken,
     Supplier,
     SupplierCreate,
     SupplierUpdate,
@@ -466,5 +467,20 @@ def delete_old_notifications(*, session: Session, days: int = 30) -> int:
     for notification in old_notifications:
         session.delete(notification)
 
+    session.commit()
+    return count
+
+
+def cleanup_expired_refresh_tokens(*, session: Session) -> int:
+    """Delete expired refresh tokens. Returns count of deleted tokens."""
+    expired_tokens = (
+        session.query(RefreshToken)
+        .filter(RefreshToken.expires_at < datetime.now(timezone.utc))
+        .all()
+    )
+
+    count = len(expired_tokens)
+    for token in expired_tokens:
+        session.delete(token)
     session.commit()
     return count

@@ -3825,6 +3825,18 @@ export const ProductsPublicSchema = {
     title: 'ProductsPublic'
 } as const;
 
+export const RefreshTokenRequestSchema = {
+    properties: {
+        refresh_token: {
+            type: 'string',
+            title: 'Refresh Token'
+        }
+    },
+    type: 'object',
+    required: ['refresh_token'],
+    title: 'RefreshTokenRequest'
+} as const;
+
 export const ReminderLogPublicSchema = {
     properties: {
         reminder_setting_id: {
@@ -6471,6 +6483,17 @@ export const TokenSchema = {
         access_token: {
             type: 'string',
             title: 'Access Token'
+        },
+        refresh_token: {
+            anyOf: [
+                {
+                    type: 'string'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Refresh Token'
         },
         token_type: {
             type: 'string',

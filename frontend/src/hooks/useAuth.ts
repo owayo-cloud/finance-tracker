@@ -12,6 +12,13 @@ import {
 } from "@/client"
 import { handleError } from "@/utils"
 
+// Extended Token type with refresh_token (will be in client after regeneration)
+type TokenWithRefresh = {
+  access_token: string
+  refresh_token?: string
+  token_type?: string
+}
+
 const isLoggedIn = () => {
   return localStorage.getItem("access_token") !== null
 }
@@ -42,10 +49,13 @@ const useAuth = () => {
   })
 
   const login = async (data: AccessToken) => {
-    const response = await LoginService.loginAccessToken({
+    const response = (await LoginService.loginAccessToken({
       formData: data,
-    })
+    })) as TokenWithRefresh
     localStorage.setItem("access_token", response.access_token)
+    if (response.refresh_token) {
+      localStorage.setItem("refresh_token", response.refresh_token)
+    }
   }
 
   const loginMutation = useMutation({
@@ -62,14 +72,52 @@ const useAuth = () => {
     },
   })
 
-  const logout = () => {
+  const refreshTokenMutation = useMutation({
+    mutationFn: async () => {
+      const refreshToken = localStorage.getItem("refresh_token")
+      if (!refreshToken) {
+        throw new Error("No refresh token available")
+      }
+      // refreshAccessToken will be available after client regeneration
+      const response = (await (LoginService as any).refreshAccessToken({
+        requestBody: { refresh_token: refreshToken },
+      })) as TokenWithRefresh
+      localStorage.setItem("access_token", response.access_token)
+      if (response.refresh_token) {
+        localStorage.setItem("refresh_token", response.refresh_token)
+      }
+      return response
+    },
+    onError: () => {
+      // If refresh fails, logout user
+      localStorage.removeItem("access_token")
+      localStorage.removeItem("refresh_token")
+      navigate({ to: "/login" })
+    },
+  })
+
+  const logout = async () => {
+    const refreshToken = localStorage.getItem("refresh_token")
+    if (refreshToken) {
+      try {
+        // revokeRefreshToken will be available after client regeneration
+        await (LoginService as any).revokeRefreshToken({
+          requestBody: { refresh_token: refreshToken },
+        })
+      } catch (error) {
+        // Ignore errors during logout
+        console.error("Error revoking refresh token:", error)
+      }
+    }
     localStorage.removeItem("access_token")
+    localStorage.removeItem("refresh_token")
     navigate({ to: "/login" })
   }
 
   return {
     signUpMutation,
     loginMutation,
+    refreshTokenMutation,
     logout,
     user,
     error,

@@ -661,6 +661,10 @@ export type ProductUpdate = {
     image_id?: (string | null);
 };
 
+export type RefreshTokenRequest = {
+    refresh_token: string;
+};
+
 export type ReminderLogPublic = {
     reminder_setting_id?: (string | null);
     user_id: string;
@@ -1099,6 +1103,7 @@ export type TillShiftsPublic = {
 
 export type Token = {
     access_token: string;
+    refresh_token?: (string | null);
     token_type?: string;
 };
 
@@ -1524,6 +1529,18 @@ export type LoginLoginAccessTokenData = {
 };
 
 export type LoginLoginAccessTokenResponse = (Token);
+
+export type LoginRefreshTokenData = {
+    requestBody: RefreshTokenRequest;
+};
+
+export type LoginRefreshTokenResponse = (Token);
+
+export type LoginRevokeRefreshTokenData = {
+    requestBody: RefreshTokenRequest;
+};
+
+export type LoginRevokeRefreshTokenResponse = (Message);
 
 export type LoginTestTokenResponse = (UserPublic);
 

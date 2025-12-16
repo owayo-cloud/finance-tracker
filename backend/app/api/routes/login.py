@@ -1,4 +1,6 @@
 from datetime import timedelta
+import datetime
+from time import timezone
 from typing import Annotated, Any
 
 from fastapi import APIRouter, Depends, HTTPException
@@ -9,8 +11,8 @@ from app import crud
 from app.api.deps import CurrentUser, SessionDep, get_current_active_superuser
 from app.core import security
 from app.core.config import settings
-from app.core.security import get_password_hash
-from app.models import Message, NewPassword, Token, UserPublic
+from app.core.security import create_refresh_token, get_password_hash
+from app.models import User, Message, NewPassword, RefreshToken, RefreshTokenRequest, Token, UserPublic
 from app.utils import (
     generate_password_reset_token,
     generate_reset_password_email,
@@ -37,11 +39,86 @@ def login_access_token(
     elif not user.is_active:
         raise HTTPException(status_code=400, detail="Inactive user")
     access_token_expires = timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
-    return Token(
-        access_token=security.create_access_token(
-            user.id, expires_delta=access_token_expires
-        )
+    access_token = security.create_access_token(
+        user.id, expires_delta=access_token_expires
     )
+
+    # create refresh token
+    refresh_token_value = create_refresh_token()
+    refresh_token_expires = datetime.now(timezone.utc) + timedelta(
+        days=settings.REFRESH_TOKEN_EXPIRE_DAYS
+    )
+
+    refresh_token = RefreshToken(
+        user_id=user.id,
+        token=refresh_token_value,
+        expires_at=refresh_token_expires,
+    )
+    session.add(refresh_token)
+    session.commit()
+
+    return Token(
+        access_token=access_token,
+        refresh_token=refresh_token_value,
+    )
+
+
+@router.post("/login/refresh-token")
+def refresh_token(session: SessionDep, body: RefreshTokenRequest) -> Token:
+    """
+    Refresh access token using refresh token
+    """
+
+    refresh_token = (
+        session.query(RefreshToken)
+        .filter(
+            RefreshToken.token == body.refresh_token,
+            not RefreshToken.revoked,
+            RefreshToken.expires_at > datetime.now(timezone.utc),
+        )
+        .first()
+    )
+    if not refresh_token:
+        raise HTTPException(status_code=400, detail="Invalid or expired refresh token")
+
+    # Get user
+    user = session.get(User, refresh_token.user_id)
+    if not user or user.is_active:
+        raise HTTPException(status_code=404, detail="User not found or inactive")
+
+    # Create new access token
+    access_token_expires = timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
+    access_token = security.create_access_token(
+        user.id, expires_delta=access_token_expires
+    )
+
+    return Token(
+        access_token=access_token,
+        refresh_token=body.refresh_token,
+    )
+
+
+@router.post("/login/revoke-refresh-token")
+def revoke_refresh_token(
+    session: SessionDep, body: RefreshTokenRequest, current_user: CurrentUser
+) -> Message:
+    """
+    Revoke a refresh token (logout)
+    """
+    refresh_token = (
+        session.query(RefreshToken)
+        .filter(
+            RefreshToken.token == body.refresh_token,
+            RefreshToken.user_id == current_user.id,
+        )
+        .first()
+    )
+    if refresh_token:
+        refresh_token.revoked = True
+        session.add(refresh_token)
+        session.commit()
+
+    return Message(message="Refresh token revoked successfully")
 
 
 @router.post("/login/test-token", response_model=UserPublic)

@@ -12,18 +12,32 @@ import ErrorBoundary from "./components/Common/ErrorBoundary"
 import { CustomProvider } from "./components/ui/provider"
 import { REFRESH_INTERVALS } from "./hooks/useAutoRefresh"
 import { routeTree } from "./routeTree.gen"
+import { getAccessToken, refreshAccessToken } from "./utils/tokenRefresh"
 
 OpenAPI.BASE = import.meta.env.VITE_API_URL
 OpenAPI.TOKEN = async () => {
-  return localStorage.getItem("access_token") || ""
+  const token = await getAccessToken()
+  return token || ""
 }
 
-const handleApiError = (error: Error) => {
+const handleApiError = async (error: Error) => {
   if (error instanceof ApiError) {
     // Handle authentication errors (401 - Unauthorized)
     if (error.status === 401) {
+      // Try to refresh token first
+      try {
+        const newToken = await refreshAccessToken()
+        if (newToken) {
+          // Token refreshed, retry the request
+          return
+        }
+      } catch {
+        // Refresh failed, proceed with logout
+      }
+
       // Clear authentication state
       localStorage.removeItem("access_token")
+      localStorage.removeItem("refresh_token")
 
       // Redirect to login page
       window.location.href = "/login"
@@ -42,13 +56,23 @@ const handleApiError = (error: Error) => {
         errDetail === "Could not validate credentials" ||
         errDetail?.includes("validate credentials")
       ) {
+        // Try to refresh token first
+        try {
+          const newToken = await refreshAccessToken()
+          if (newToken) {
+            // Token refreshed, retry the request
+            return
+          }
+        } catch {
+          // Refresh failed, proceed with logout
+        }
+
         localStorage.removeItem("access_token")
+        localStorage.removeItem("refresh_token")
         window.location.href = "/login"
       } else {
-        // For genuine permission issues, optionally redirect to home or show a message
-        // For now, we'll let the component handle displaying the error
-        // but we could redirect to home if needed:
-        // window.location.href = "/"
+        // For genuine permission issues, show error message
+        console.error("Access denied:", errDetail)
       }
       return
     }

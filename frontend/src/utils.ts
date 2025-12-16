@@ -52,7 +52,9 @@ export const handleError = (err: ApiError) => {
   if (err.status === 403) {
     if (
       errDetail === "Not authenticated" ||
-      errDetail?.includes("authenticated")
+      errDetail?.includes("authenticated") ||
+      errDetail === "Could not validate credentials" ||
+      errDetail?.includes("validate credentials")
     ) {
       showErrorToast("Your session has expired. Please log in again.")
     } else {

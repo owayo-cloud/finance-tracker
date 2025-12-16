@@ -178,8 +178,6 @@ export type DashboardStats = {
     net_profit: number;
     previous_net_profit: number;
     net_profit_change_percent: number;
-    unpaid_debts_total: number;
-    unpaid_debts_count: number;
 };
 
 /**
@@ -1044,7 +1042,6 @@ export type SupplierPublic = {
     current_credit_used?: string;
     is_active?: boolean;
     id: string;
-    outstanding_debt?: (string | null);
 };
 
 export type SuppliersPublic = {
@@ -1750,10 +1747,6 @@ export type SalesReadSalesData = {
      * Filter sales until this date
      */
     endDate?: (string | null);
-    /**
-     * Exclude sales that have associated debts (for receipts view)
-     */
-    excludeWithDebt?: boolean;
     limit?: number;
     /**
      * Filter by payment method

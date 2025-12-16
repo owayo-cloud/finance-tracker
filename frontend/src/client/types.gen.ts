@@ -178,6 +178,8 @@ export type DashboardStats = {
     net_profit: number;
     previous_net_profit: number;
     net_profit_change_percent: number;
+    unpaid_debts_total: number;
+    unpaid_debts_count: number;
 };
 
 /**
@@ -659,6 +661,10 @@ export type ProductUpdate = {
     image_id?: (string | null);
 };
 
+export type RefreshTokenRequest = {
+    refresh_token: string;
+};
+
 export type ReminderLogPublic = {
     reminder_setting_id?: (string | null);
     user_id: string;
@@ -1042,6 +1048,7 @@ export type SupplierPublic = {
     current_credit_used?: string;
     is_active?: boolean;
     id: string;
+    outstanding_debt?: (string | null);
 };
 
 export type SuppliersPublic = {
@@ -1096,6 +1103,7 @@ export type TillShiftsPublic = {
 
 export type Token = {
     access_token: string;
+    refresh_token?: (string | null);
     token_type?: string;
 };
 
@@ -1522,6 +1530,18 @@ export type LoginLoginAccessTokenData = {
 
 export type LoginLoginAccessTokenResponse = (Token);
 
+export type LoginRefreshTokenData = {
+    requestBody: RefreshTokenRequest;
+};
+
+export type LoginRefreshTokenResponse = (Token);
+
+export type LoginRevokeRefreshTokenData = {
+    requestBody: RefreshTokenRequest;
+};
+
+export type LoginRevokeRefreshTokenResponse = (Message);
+
 export type LoginTestTokenResponse = (UserPublic);
 
 export type LoginRecoverPasswordData = {
@@ -1747,6 +1767,10 @@ export type SalesReadSalesData = {
      * Filter sales until this date
      */
     endDate?: (string | null);
+    /**
+     * Exclude sales that have associated debts (for receipts view)
+     */
+    excludeWithDebt?: boolean;
     limit?: number;
     /**
      * Filter by payment method

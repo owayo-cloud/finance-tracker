@@ -41,6 +41,6 @@
     "dotenv": "^17.2.2",
     "rollup-plugin-visualizer": "^6.0.5",
     "typescript": "^5.2.2",
-    "vite": "^7.1.11"
+    "vite": "^7.3.0"
   }
 }

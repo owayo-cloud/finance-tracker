@@ -1,5 +1,5 @@
-from datetime import timedelta
 import datetime
+from datetime import timedelta
 from time import timezone
 from typing import Annotated, Any
 
@@ -12,7 +12,15 @@ from app.api.deps import CurrentUser, SessionDep, get_current_active_superuser
 from app.core import security
 from app.core.config import settings
 from app.core.security import create_refresh_token, get_password_hash
-from app.models import User, Message, NewPassword, RefreshToken, RefreshTokenRequest, Token, UserPublic
+from app.models import (
+    Message,
+    NewPassword,
+    RefreshToken,
+    RefreshTokenRequest,
+    Token,
+    User,
+    UserPublic,
+)
 from app.utils import (
     generate_password_reset_token,
     generate_reset_password_email,

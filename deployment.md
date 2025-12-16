@@ -189,6 +189,11 @@ With the environment variables in place, you can deploy with Docker Compose:
 docker compose -f docker-compose.yml up -d
 ```
 
+**Security note:** Do **not** forward the runner's `GITHUB_TOKEN` (or other CI tokens) directly to your server—if a token is echoed or the server is compromised the token can be abused. Prefer one of these approaches:
+
+- Use a server-side, scoped read-only token for GHCR (configured as a secret on the server) or store a minimal GHCR PAT as a repo secret (`GHCR_TOKEN`) and let the runner pull images and securely transfer them to the server (the workflow now supports this pattern).
+- Or use a deploy key on the server for repository access and avoid sending runner tokens over SSH.
+
 For production you wouldn't want to have the overrides in `docker-compose.override.yml`, that's why we explicitly specify `docker-compose.yml` as the file to use.
 
 ### Verify Deployment

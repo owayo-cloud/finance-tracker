@@ -59,6 +59,11 @@ jobs:
         uses: actions/checkout@v5
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Prepare .env for docker-compose
+        run: |
+          if [ -f .env.example ]; then cp .env.example .env; else echo "POSTGRES_PASSWORD=postgres" > .env; fi
+
       - name: Set up Python
         uses: actions/setup-python@v6
         with:
@@ -92,6 +97,11 @@ jobs:
         uses: actions/checkout@v5
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Prepare .env for docker-compose
+        run: |
+          if [ -f .env.example ]; then cp .env.example .env; else echo "POSTGRES_PASSWORD=postgres" > .env; fi
+
       - run: docker compose build
       - run: docker compose down -v --remove-orphans
       - run: docker compose up -d --wait backend frontend adminer

@@ -129,7 +129,7 @@ jobs:
     if: ${{ needs.test-backend.result == 'success' }}
     steps:
       - name: Download coverage artifact
-        uses: actions/download-artifact@v5
+        uses: actions/download-artifact@v7
         with:
           name: coverage-html
           path: backend/htmlcov

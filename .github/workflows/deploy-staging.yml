@@ -15,6 +15,9 @@ on:
 
 jobs:
   deploy:
+    concurrency:
+      group: deploy-staging
+      cancel-in-progress: true
     runs-on: ubuntu-latest
     timeout-minutes: 15
     environment: staging
@@ -43,6 +46,42 @@ jobs:
           mkdir -p ~/.ssh
           ssh-keyscan -H "$SERVER_HOST" >> ~/.ssh/known_hosts 2>/dev/null || echo "Warning: Could not add $SERVER_HOST to known_hosts"
 
+      - name: Validate required secrets
+        run: |
+          if [ -z "$SERVER_HOST" ]; then echo "SERVER_HOST not set"; exit 1; fi
+          if [ -z "$SERVER_USER" ]; then echo "SERVER_USER not set"; exit 1; fi
+          if [ -z "$APP_DIR" ]; then echo "APP_DIR not set"; exit 1; fi
+        env:
+          SERVER_HOST: ${{ secrets.SERVER_HOST_STAGING || secrets.SERVER_HOST }}
+          SERVER_USER: ${{ secrets.SERVER_USER_STAGING || secrets.SERVER_USER }}
+          APP_DIR: ${{ secrets.APP_DIR_STAGING || secrets.APP_DIR }}
+
+      - name: Login to GHCR (runner)
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GHCR_TOKEN || secrets.GITHUB_TOKEN }}
+
+      - name: Pull and save images (runner)
+        run: |
+          TAG=${{ inputs.image_tag || 'staging' }}
+          BACKEND_IMAGE=ghcr.io/${{ github.repository }}-backend:${TAG}
+          FRONTEND_IMAGE=ghcr.io/${{ github.repository }}-frontend:${TAG}
+          set -x
+          docker pull $BACKEND_IMAGE || true
+          docker pull $FRONTEND_IMAGE || true
+          docker save -o backend.tar $BACKEND_IMAGE || true
+          docker save -o frontend.tar $FRONTEND_IMAGE || true
+
+      - name: Copy images to server (runner)
+        run: |
+          if [ -f backend.tar ]; then scp -o StrictHostKeyChecking=accept-new backend.tar ${SERVER_USER}@${SERVER_HOST}:/tmp/backend.tar || echo "Warning: scp backend failed"; fi
+          if [ -f frontend.tar ]; then scp -o StrictHostKeyChecking=accept-new frontend.tar ${SERVER_USER}@${SERVER_HOST}:/tmp/frontend.tar || echo "Warning: scp frontend failed"; fi
+        env:
+          SERVER_USER: ${{ secrets.SERVER_USER_STAGING || secrets.SERVER_USER }}
+          SERVER_HOST: ${{ secrets.SERVER_HOST_STAGING || secrets.SERVER_HOST }}
+
       - name: Deploy to staging server
         env:
           SERVER_USER: ${{ secrets.SERVER_USER_STAGING || secrets.SERVER_USER }}
@@ -66,7 +105,6 @@ jobs:
           POSTGRES_USER: ${{ secrets.POSTGRES_USER || 'postgres' }}
           POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
           SENTRY_DSN: ${{ secrets.SENTRY_DSN || '' }}
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GITHUB_ACTOR: ${{ github.actor }}
           IMAGE_TAG: ${{ inputs.image_tag || 'staging' }}
           SKIP_PULL: ${{ inputs.skip_pull }}
@@ -90,13 +128,16 @@ jobs:
              POSTGRES_USER='$POSTGRES_USER' \
              POSTGRES_PASSWORD='$POSTGRES_PASSWORD' \
              SENTRY_DSN='$SENTRY_DSN' \
-             GITHUB_TOKEN='$GITHUB_TOKEN' \
              GITHUB_ACTOR='$GITHUB_ACTOR' \
              IMAGE_TAG='$IMAGE_TAG' \
              SKIP_PULL='$SKIP_PULL' \
              REPO_DEPLOY_KEY='$REPO_DEPLOY_KEY' \
              bash -s" << 'ENDSSH'
-            set -e
+            set -euo pipefail
+            
+            # Validate required envs
+            if [ -z "${DOMAIN:-}" ]; then echo "ERROR: DOMAIN is not set"; exit 1; fi
+            if [ -z "${SECRET_KEY:-}" ]; then echo "ERROR: SECRET_KEY is not set"; exit 1; fi
             
             APP_DIR_PATH="${APP_DIR:-/root/code/finance-tracker-staging}"
             
@@ -137,10 +178,27 @@ jobs:
             export DOCKER_IMAGE_FRONTEND=ghcr.io/${GIT_REPOSITORY}-frontend
             export TAG=${IMAGE_TAG:-staging}
             
-            # Pull pre-built images from GitHub Container Registry (unless skipped)
+            # Move any uploaded images from /tmp into the app dir
+            if [ -f "/tmp/backend.tar" ]; then
+              mv /tmp/backend.tar "${APP_DIR_PATH}/backend.tar" || true
+            fi
+            if [ -f "/tmp/frontend.tar" ]; then
+              mv /tmp/frontend.tar "${APP_DIR_PATH}/frontend.tar" || true
+            fi
+            
+            # Load images if provided by runner (backend.tar/frontend.tar)
+            if [ -f "${APP_DIR_PATH}/backend.tar" ]; then
+              echo "Loading backend image from tar..."
+              docker load -i "${APP_DIR_PATH}/backend.tar" || echo "Warning: Failed to load backend image"
+              rm -f "${APP_DIR_PATH}/backend.tar" || true
+            fi
+            if [ -f "${APP_DIR_PATH}/frontend.tar" ]; then
+              echo "Loading frontend image from tar..."
+              docker load -i "${APP_DIR_PATH}/frontend.tar" || echo "Warning: Failed to load frontend image"
+              rm -f "${APP_DIR_PATH}/frontend.tar" || true
+            fi
             if [ "${SKIP_PULL}" != "true" ]; then
-              echo "Pulling Docker images from registry..."
-              echo "${GITHUB_TOKEN}" | docker login ghcr.io -u ${GITHUB_ACTOR} --password-stdin
+              echo "Attempting to pull images from registry as a fallback..."
               docker pull ${DOCKER_IMAGE_BACKEND}:${TAG} || echo "Warning: Failed to pull backend image"
               docker pull ${DOCKER_IMAGE_FRONTEND}:${TAG} || echo "Warning: Failed to pull frontend image"
             else
@@ -174,7 +232,7 @@ jobs:
              STACK_NAME='$STACK_NAME' \
              DOMAIN='$DOMAIN' \
              bash -s" << 'ENDSSH'
-            set -e
+            set -euo pipefail
             
             APP_DIR_PATH="${APP_DIR:-/root/code/finance-tracker-staging}"
             cd "${APP_DIR_PATH}"

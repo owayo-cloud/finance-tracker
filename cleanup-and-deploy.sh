@@ -1,0 +1,66 @@
+#!/bin/bash
+
+echo "=========================================="
+echo "Memory Cleanup and Deployment Helper"
+echo "=========================================="
+echo ""
+
+echo "Current Memory Status:"
+free -h
+echo ""
+
+echo "Current Disk Usage:"
+df -h | head -5
+echo ""
+
+echo "Docker Disk Usage:"
+docker system df
+echo ""
+
+echo "=========================================="
+echo "OPTION 1: Quick Cleanup (Recommended First)"
+echo "=========================================="
+echo ""
+echo "Run these commands:"
+echo ""
+echo "# 1. Remove unused Docker resources (safe)"
+echo "docker system prune -f"
+echo ""
+echo "# 2. Remove unused images (be careful - removes unused images)"
+echo "docker image prune -a -f"
+echo ""
+echo "# 3. Remove build cache (safe, can be rebuilt)"
+echo "docker builder prune -a -f"
+echo ""
+echo "# 4. Check memory after cleanup"
+echo "free -h"
+echo ""
+
+echo "=========================================="
+echo "OPTION 2: Find Large Files/Processes"
+echo "=========================================="
+echo ""
+echo "# Check top memory-consuming processes"
+echo "ps aux --sort=-%mem | head -10"
+echo ""
+echo "# Check Docker container memory usage"
+echo "docker stats --no-stream"
+echo ""
+
+echo "=========================================="
+echo "OPTION 3: Deployment Steps"
+echo "=========================================="
+echo ""
+echo "After cleanup, deploy with these steps:"
+echo ""
+echo "# 1. Find where your deployment files are"
+echo "find /root -name 'docker-compose.yml' 2>/dev/null"
+echo "find /root -name '.git' -type d 2>/dev/null"
+echo ""
+echo "# 2. Check current container image sources"
+echo "docker inspect finance-tracker-backend-1 | grep -i image"
+echo "docker inspect finance-tracker-frontend-1 | grep -i image"
+echo ""
+echo "# 3. If using GitHub Actions, check deployment workflow"
+echo "# 4. If manual, rebuild images from updated code"
+

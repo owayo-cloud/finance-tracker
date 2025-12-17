@@ -1,5 +1,0 @@
-blank_issues_enabled: true
-contact_links:
-  - name: Feature Request
-    about: To suggest an idea or ask about a feature, please create an issue describing what you would like to achieve. Before submitting, please search existing issues to see if your idea has already been discussed. Include details about the problem you're trying to solve and why this feature would be valuable.
-    url: https://github.com/owayo-cloud/finance-tracker/issues/new/choose

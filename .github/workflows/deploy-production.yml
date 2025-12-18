@@ -136,26 +136,23 @@ jobs:
           
           # Build and deploy using found docker command
           echo "Building Docker images..."
-          $DOCKER_CMD compose -f docker-compose.yml build 2>/dev/null || \
-          $DOCKER_CMD-compose -f docker-compose.yml build 2>/dev/null || \
-          docker-compose -f docker-compose.yml build
+          # Use docker compose (plugin) - this is what's installed with modern Docker
+          $DOCKER_CMD compose -f docker-compose.yml build
           
           echo "Starting services..."
-          $DOCKER_CMD compose -f docker-compose.yml up -d 2>/dev/null || \
-          $DOCKER_CMD-compose -f docker-compose.yml up -d 2>/dev/null || \
-          docker-compose -f docker-compose.yml up -d
+          $DOCKER_CMD compose -f docker-compose.yml up -d
           
           # Restart supervisor processes in backend container
           echo "Restarting supervisor processes..."
-          BACKEND_CONTAINER=$(docker compose ps -q backend 2>/dev/null || docker-compose ps -q backend 2>/dev/null || docker ps -q -f name=backend)
+          BACKEND_CONTAINER=$($DOCKER_CMD compose ps -q backend 2>/dev/null || $DOCKER_CMD ps -q -f name=backend)
           if [ -n "$BACKEND_CONTAINER" ]; then
-            docker exec $BACKEND_CONTAINER supervisorctl restart all || true
+            $DOCKER_CMD exec $BACKEND_CONTAINER supervisorctl restart all || true
           fi
           
           echo "Deployment completed successfully!"
           
           # Show service status
-          docker compose ps 2>/dev/null || docker-compose ps 2>/dev/null || docker ps
+          $DOCKER_CMD compose ps
           ENDSSH
 
       - name: Verify deployment
@@ -165,5 +162,5 @@ jobs:
           APP_DIR: ${{ secrets.APP_DIR || '/root/code/finance-tracker' }}
         run: |
           ssh -o StrictHostKeyChecking=accept-new ${SERVER_USER}@${SERVER_HOST} \
-            "cd ${APP_DIR} && docker compose ps && docker compose logs --tail=20 backend"
+            "export PATH=\$PATH:/usr/bin:/usr/local/bin && cd ${APP_DIR} && docker compose ps && docker compose logs --tail=20 backend"
 

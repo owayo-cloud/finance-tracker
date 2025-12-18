@@ -71,6 +71,21 @@ jobs:
              bash -s" << 'ENDSSH'
           set -euo pipefail
           
+          # Ensure Docker is in PATH for non-interactive shells
+          # Try common Docker installation locations
+          for docker_path in /usr/bin/docker /usr/local/bin/docker /snap/bin/docker $(command -v docker); do
+            if [ -x "$docker_path" ] 2>/dev/null; then
+              export PATH="$(dirname $docker_path):$PATH"
+              break
+            fi
+          done
+          
+          export PATH=$PATH:/usr/bin:/usr/local/bin:/snap/bin
+          
+          # Load environment if .bashrc or .profile exists
+          [ -f ~/.bashrc ] && source ~/.bashrc || true
+          [ -f ~/.profile ] && source ~/.profile || true
+          
           # Validate required envs
           if [ -z "${DOMAIN:-}" ]; then echo "ERROR: DOMAIN is not set"; exit 1; fi
           if [ -z "${SECRET_KEY:-}" ]; then echo "ERROR: SECRET_KEY is not set"; exit 1; fi
@@ -99,16 +114,40 @@ jobs:
           export DOCKER_IMAGE_FRONTEND=wiseman-palace-frontend
           export TAG=${TAG:-latest}
           
-          # Build and deploy
+          # Verify Docker is available - try multiple methods
+          echo "Checking Docker installation..."
+          DOCKER_CMD=""
+          for cmd in docker /usr/bin/docker /usr/local/bin/docker /snap/bin/docker; do
+            if $cmd --version &>/dev/null; then
+              DOCKER_CMD="$cmd"
+              echo "Docker found at: $DOCKER_CMD"
+              $cmd --version
+              break
+            fi
+          done
+          
+          if [ -z "$DOCKER_CMD" ]; then
+            echo "ERROR: Docker command not found"
+            echo "PATH: $PATH"
+            echo "Trying to find docker..."
+            find /usr -name docker -type f 2>/dev/null | head -3
+            exit 1
+          fi
+          
+          # Build and deploy using found docker command
           echo "Building Docker images..."
-          docker compose -f docker-compose.yml build
+          $DOCKER_CMD compose -f docker-compose.yml build 2>/dev/null || \
+          $DOCKER_CMD-compose -f docker-compose.yml build 2>/dev/null || \
+          docker-compose -f docker-compose.yml build
           
           echo "Starting services..."
-          docker compose -f docker-compose.yml up -d
+          $DOCKER_CMD compose -f docker-compose.yml up -d 2>/dev/null || \
+          $DOCKER_CMD-compose -f docker-compose.yml up -d 2>/dev/null || \
+          docker-compose -f docker-compose.yml up -d
           
           # Restart supervisor processes in backend container
           echo "Restarting supervisor processes..."
-          BACKEND_CONTAINER=$(docker compose ps -q backend)
+          BACKEND_CONTAINER=$(docker compose ps -q backend 2>/dev/null || docker-compose ps -q backend 2>/dev/null || docker ps -q -f name=backend)
           if [ -n "$BACKEND_CONTAINER" ]; then
             docker exec $BACKEND_CONTAINER supervisorctl restart all || true
           fi
@@ -116,7 +155,7 @@ jobs:
           echo "Deployment completed successfully!"
           
           # Show service status
-          docker compose ps
+          docker compose ps 2>/dev/null || docker-compose ps 2>/dev/null || docker ps
           ENDSSH
 
       - name: Verify deployment

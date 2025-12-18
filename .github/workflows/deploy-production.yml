@@ -173,6 +173,15 @@ jobs:
             exit 1
           fi
           
+          # Create traefik-public network if it doesn't exist
+          echo "Checking traefik-public network..."
+          if ! $DOCKER_CMD network inspect traefik-public &>/dev/null; then
+            echo "Creating traefik-public network..."
+            $DOCKER_CMD network create traefik-public
+          else
+            echo "traefik-public network already exists"
+          fi
+          
           # Build and deploy using found docker command
           echo "Building Docker images..."
           # Use docker compose (plugin) - this is what's installed with modern Docker

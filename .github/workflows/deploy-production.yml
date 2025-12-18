@@ -72,14 +72,10 @@ jobs:
              SENTRY_DSN='$SENTRY_DSN' \
              STACK_NAME='$STACK_NAME' \
              TAG='$TAG' \
-             SMTP_PORT='${SMTP_PORT:-587}' \
-             SMTP_TLS='${SMTP_TLS:-True}' \
-             SMTP_SSL='${SMTP_SSL:-False}' \
-             EMAILS_FROM_NAME='${EMAILS_FROM_NAME:-Finance Tracker}' \
-             SMTP_PORT='${{ secrets.SMTP_PORT || '587' }}' \
-             SMTP_TLS='${{ secrets.SMTP_TLS || 'True' }}' \
-             SMTP_SSL='${{ secrets.SMTP_SSL || 'False' }}' \
-             EMAILS_FROM_NAME='${{ secrets.EMAILS_FROM_NAME || 'Finance Tracker' }}' \
+             SMTP_PORT='$SMTP_PORT' \
+             SMTP_TLS='$SMTP_TLS' \
+             SMTP_SSL='$SMTP_SSL' \
+             EMAILS_FROM_NAME='$EMAILS_FROM_NAME' \
              bash -s" << 'ENDSSH'
           set -euo pipefail
           
@@ -128,33 +124,33 @@ jobs:
           
           # Create .env file from environment variables
           echo "Creating .env file..."
-          cat > .env << EOF
-DOMAIN=${DOMAIN}
-FRONTEND_HOST=${FRONTEND_HOST}
-ENVIRONMENT=${ENVIRONMENT}
-STACK_NAME=${STACK_NAME:-wiseman-palace-production}
-BACKEND_CORS_ORIGINS=${BACKEND_CORS_ORIGINS}
-SECRET_KEY=${SECRET_KEY}
-FIRST_SUPERUSER=${FIRST_SUPERUSER}
-FIRST_SUPERUSER_PASSWORD=${FIRST_SUPERUSER_PASSWORD}
-SMTP_HOST=${SMTP_HOST:-}
-SMTP_USER=${SMTP_USER:-}
-SMTP_PASSWORD=${SMTP_PASSWORD:-}
-SMTP_PORT=${SMTP_PORT:-587}
-SMTP_TLS=${SMTP_TLS:-True}
-SMTP_SSL=${SMTP_SSL:-False}
-EMAILS_FROM_EMAIL=${EMAILS_FROM_EMAIL:-}
-EMAILS_FROM_NAME=${EMAILS_FROM_NAME:-Finance Tracker}
-POSTGRES_SERVER=${POSTGRES_SERVER}
-POSTGRES_PORT=${POSTGRES_PORT}
-POSTGRES_DB=${POSTGRES_DB}
-POSTGRES_USER=${POSTGRES_USER}
-POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
-SENTRY_DSN=${SENTRY_DSN:-}
-DOCKER_IMAGE_BACKEND=${DOCKER_IMAGE_BACKEND}
-DOCKER_IMAGE_FRONTEND=${DOCKER_IMAGE_FRONTEND}
-TAG=${TAG}
-EOF
+          {
+            echo "DOMAIN=${DOMAIN}"
+            echo "FRONTEND_HOST=${FRONTEND_HOST}"
+            echo "ENVIRONMENT=production"
+            echo "STACK_NAME=${STACK_NAME:-wiseman-palace-production}"
+            echo "BACKEND_CORS_ORIGINS=${BACKEND_CORS_ORIGINS}"
+            echo "SECRET_KEY=${SECRET_KEY}"
+            echo "FIRST_SUPERUSER=${FIRST_SUPERUSER}"
+            echo "FIRST_SUPERUSER_PASSWORD=${FIRST_SUPERUSER_PASSWORD}"
+            echo "SMTP_HOST=${SMTP_HOST:-}"
+            echo "SMTP_USER=${SMTP_USER:-}"
+            echo "SMTP_PASSWORD=${SMTP_PASSWORD:-}"
+            echo "SMTP_PORT=${SMTP_PORT:-587}"
+            echo "SMTP_TLS=${SMTP_TLS:-True}"
+            echo "SMTP_SSL=${SMTP_SSL:-False}"
+            echo "EMAILS_FROM_EMAIL=${EMAILS_FROM_EMAIL:-}"
+            echo "EMAILS_FROM_NAME=${EMAILS_FROM_NAME:-Finance Tracker}"
+            echo "POSTGRES_SERVER=db"
+            echo "POSTGRES_PORT=${POSTGRES_PORT}"
+            echo "POSTGRES_DB=${POSTGRES_DB}"
+            echo "POSTGRES_USER=${POSTGRES_USER}"
+            echo "POSTGRES_PASSWORD=${POSTGRES_PASSWORD}"
+            echo "SENTRY_DSN=${SENTRY_DSN:-}"
+            echo "DOCKER_IMAGE_BACKEND=${DOCKER_IMAGE_BACKEND}"
+            echo "DOCKER_IMAGE_FRONTEND=${DOCKER_IMAGE_FRONTEND}"
+            echo "TAG=${TAG}"
+          } > .env
           echo ".env file created"
           
           # Verify Docker is available - try multiple methods

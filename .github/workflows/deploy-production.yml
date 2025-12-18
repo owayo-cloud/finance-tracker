@@ -1,0 +1,130 @@
+name: Deploy to Production
+
+on:
+  workflow_dispatch:
+    inputs:
+      image_tag:
+        description: 'Image tag to deploy'
+        required: false
+        default: 'latest'
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      SERVER_USER: ${{ secrets.SERVER_USER }}
+      SERVER_HOST: ${{ secrets.SERVER_HOST }}
+      APP_DIR: ${{ secrets.APP_DIR || '/root/code/finance-tracker' }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup SSH
+        uses: webfactory/ssh-agent@v0.9.0
+        with:
+          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+
+      - name: Deploy to production server
+        env:
+          SERVER_USER: ${{ secrets.SERVER_USER }}
+          SERVER_HOST: ${{ secrets.SERVER_HOST }}
+          APP_DIR: ${{ secrets.APP_DIR || '/root/code/finance-tracker' }}
+          DOMAIN: ${{ secrets.DOMAIN_PRODUCTION }}
+          FRONTEND_HOST: ${{ secrets.FRONTEND_HOST || format('https://dashboard.{0}', secrets.DOMAIN_PRODUCTION) }}
+          BACKEND_CORS_ORIGINS: ${{ secrets.BACKEND_CORS_ORIGINS || format('https://dashboard.{0},https://api.{0}', secrets.DOMAIN_PRODUCTION) }}
+          SECRET_KEY: ${{ secrets.SECRET_KEY }}
+          FIRST_SUPERUSER: ${{ secrets.FIRST_SUPERUSER }}
+          FIRST_SUPERUSER_PASSWORD: ${{ secrets.FIRST_SUPERUSER_PASSWORD }}
+          SMTP_HOST: ${{ secrets.SMTP_HOST }}
+          SMTP_USER: ${{ secrets.SMTP_USER }}
+          SMTP_PASSWORD: ${{ secrets.SMTP_PASSWORD }}
+          EMAILS_FROM_EMAIL: ${{ secrets.EMAILS_FROM_EMAIL }}
+          POSTGRES_PORT: ${{ secrets.POSTGRES_PORT || '5432' }}
+          POSTGRES_DB: ${{ secrets.POSTGRES_DB || 'app' }}
+          POSTGRES_USER: ${{ secrets.POSTGRES_USER || 'postgres' }}
+          POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
+          SENTRY_DSN: ${{ secrets.SENTRY_DSN || '' }}
+          STACK_NAME: ${{ secrets.STACK_NAME || 'wiseman-palace-production' }}
+          TAG: ${{ inputs.image_tag || 'latest' }}
+        run: |
+          ssh -o StrictHostKeyChecking=accept-new ${SERVER_USER}@${SERVER_HOST} \
+            "APP_DIR='$APP_DIR' \
+             GIT_REPOSITORY='${{ github.repository }}' \
+             DOMAIN='$DOMAIN' \
+             FRONTEND_HOST='$FRONTEND_HOST' \
+             BACKEND_CORS_ORIGINS='$BACKEND_CORS_ORIGINS' \
+             SECRET_KEY='$SECRET_KEY' \
+             FIRST_SUPERUSER='$FIRST_SUPERUSER' \
+             FIRST_SUPERUSER_PASSWORD='$FIRST_SUPERUSER_PASSWORD' \
+             SMTP_HOST='$SMTP_HOST' \
+             SMTP_USER='$SMTP_USER' \
+             SMTP_PASSWORD='$SMTP_PASSWORD' \
+             EMAILS_FROM_EMAIL='$EMAILS_FROM_EMAIL' \
+             POSTGRES_PORT='$POSTGRES_PORT' \
+             POSTGRES_DB='$POSTGRES_DB' \
+             POSTGRES_USER='$POSTGRES_USER' \
+             POSTGRES_PASSWORD='$POSTGRES_PASSWORD' \
+             SENTRY_DSN='$SENTRY_DSN' \
+             STACK_NAME='$STACK_NAME' \
+             TAG='$TAG' \
+             bash -s" << 'ENDSSH'
+          set -euo pipefail
+          
+          # Validate required envs
+          if [ -z "${DOMAIN:-}" ]; then echo "ERROR: DOMAIN is not set"; exit 1; fi
+          if [ -z "${SECRET_KEY:-}" ]; then echo "ERROR: SECRET_KEY is not set"; exit 1; fi
+          
+          APP_DIR_PATH="${APP_DIR:-/root/code/finance-tracker}"
+          
+          # Clone repository if it doesn't exist
+          if [ ! -d "${APP_DIR_PATH}/.git" ]; then
+            echo "Repository not found on server. Cloning fresh copy..."
+            rm -rf "${APP_DIR_PATH}"
+            mkdir -p "${APP_DIR_PATH}"
+            git clone "https://github.com/${GIT_REPOSITORY}.git" "${APP_DIR_PATH}"
+          fi
+          
+          cd "${APP_DIR_PATH}"
+          
+          # Pull latest code from GitHub
+          echo "Fetching latest code..."
+          git fetch origin
+          git reset --hard origin/master || git reset --hard origin/main
+          
+          # Set environment variables for docker-compose
+          export ENVIRONMENT=production
+          export POSTGRES_SERVER=db
+          export DOCKER_IMAGE_BACKEND=wiseman-palace-backend
+          export DOCKER_IMAGE_FRONTEND=wiseman-palace-frontend
+          export TAG=${TAG:-latest}
+          
+          # Build and deploy
+          echo "Building Docker images..."
+          docker compose -f docker-compose.yml build
+          
+          echo "Starting services..."
+          docker compose -f docker-compose.yml up -d
+          
+          # Restart supervisor processes in backend container
+          echo "Restarting supervisor processes..."
+          BACKEND_CONTAINER=$(docker compose ps -q backend)
+          if [ -n "$BACKEND_CONTAINER" ]; then
+            docker exec $BACKEND_CONTAINER supervisorctl restart all || true
+          fi
+          
+          echo "Deployment completed successfully!"
+          
+          # Show service status
+          docker compose ps
+          ENDSSH
+
+      - name: Verify deployment
+        env:
+          SERVER_USER: ${{ secrets.SERVER_USER }}
+          SERVER_HOST: ${{ secrets.SERVER_HOST }}
+          APP_DIR: ${{ secrets.APP_DIR || '/root/code/finance-tracker' }}
+        run: |
+          ssh -o StrictHostKeyChecking=accept-new ${SERVER_USER}@${SERVER_HOST} \
+            "cd ${APP_DIR} && docker compose ps && docker compose logs --tail=20 backend"
+

@@ -188,7 +188,34 @@ jobs:
           $DOCKER_CMD compose -f docker-compose.yml build
           
           echo "Starting services..."
-          $DOCKER_CMD compose -f docker-compose.yml up -d
+          # Start services and capture output
+          if ! $DOCKER_CMD compose -f docker-compose.yml up -d; then
+            echo "ERROR: Services failed to start"
+            echo "Checking prestart logs..."
+            $DOCKER_CMD compose logs prestart 2>&1 || true
+            echo "Checking all service status..."
+            $DOCKER_CMD compose ps -a
+            exit 1
+          fi
+          
+          # Wait a moment for services to initialize
+          sleep 5
+          
+          # Check prestart container status and logs
+          echo "Checking prestart service status..."
+          PRESTART_CONTAINER=$($DOCKER_CMD compose ps -q prestart 2>/dev/null || true)
+          if [ -n "$PRESTART_CONTAINER" ]; then
+            PRESTART_STATUS=$($DOCKER_CMD inspect $PRESTART_CONTAINER --format='{{.State.Status}}' 2>/dev/null || echo "unknown")
+            if [ "$PRESTART_STATUS" = "exited" ]; then
+              PRESTART_EXIT=$($DOCKER_CMD inspect $PRESTART_CONTAINER --format='{{.State.ExitCode}}' 2>/dev/null || echo "unknown")
+              if [ "$PRESTART_EXIT" != "0" ] && [ "$PRESTART_EXIT" != "unknown" ]; then
+                echo "ERROR: Prestart service failed with exit code $PRESTART_EXIT"
+                echo "Prestart logs:"
+                $DOCKER_CMD compose logs prestart 2>&1
+                exit 1
+              fi
+            fi
+          fi
           
           # Restart supervisor processes in backend container
           echo "Restarting supervisor processes..."

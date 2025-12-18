@@ -128,6 +128,7 @@ jobs:
             echo "DOMAIN=${DOMAIN}"
             echo "FRONTEND_HOST=${FRONTEND_HOST}"
             echo "ENVIRONMENT=production"
+            echo "PROJECT_NAME=Finance Tracker"
             echo "STACK_NAME=${STACK_NAME:-wiseman-palace-production}"
             echo "BACKEND_CORS_ORIGINS=${BACKEND_CORS_ORIGINS}"
             echo "SECRET_KEY=${SECRET_KEY}"

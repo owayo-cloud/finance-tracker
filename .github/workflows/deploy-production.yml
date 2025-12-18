@@ -105,15 +105,45 @@ jobs:
             echo "Repository not found on server. Cloning fresh copy..."
             rm -rf "${APP_DIR_PATH}"
             mkdir -p "${APP_DIR_PATH}"
-            git clone "https://github.com/${GIT_REPOSITORY}.git" "${APP_DIR_PATH}"
+            
+            # Try HTTPS first, fallback to SSH if available
+            if ! git clone "https://github.com/${GIT_REPOSITORY}.git" "${APP_DIR_PATH}" 2>&1; then
+              echo "HTTPS clone failed, trying SSH..."
+              if ! git clone "git@github.com:${GIT_REPOSITORY}.git" "${APP_DIR_PATH}" 2>&1; then
+                echo "ERROR: Failed to clone repository via both HTTPS and SSH"
+                echo "This might be a network connectivity issue or authentication problem"
+                exit 1
+              fi
+            fi
           fi
           
           cd "${APP_DIR_PATH}"
           
-          # Pull latest code from GitHub
+          # Pull latest code from GitHub with retry logic
           echo "Fetching latest code..."
-          git fetch origin
-          git reset --hard origin/master || git reset --hard origin/main
+          MAX_RETRIES=3
+          RETRY_COUNT=0
+          while [ $RETRY_COUNT -lt $MAX_RETRIES ]; do
+            if git fetch origin 2>&1; then
+              break
+            else
+              RETRY_COUNT=$((RETRY_COUNT + 1))
+              if [ $RETRY_COUNT -lt $MAX_RETRIES ]; then
+                echo "Git fetch failed, retrying ($RETRY_COUNT/$MAX_RETRIES)..."
+                sleep 5
+              else
+                echo "ERROR: Failed to fetch from GitHub after $MAX_RETRIES attempts"
+                echo "Using existing code if available..."
+              fi
+            fi
+          done
+          
+          # Reset to latest only if fetch succeeded
+          if git fetch origin 2>&1 >/dev/null; then
+            git reset --hard origin/master || git reset --hard origin/main
+          else
+            echo "WARNING: Using existing code due to fetch failure"
+          fi
           
           # Set environment variables for docker-compose
           export ENVIRONMENT=production

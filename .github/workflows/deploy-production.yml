@@ -47,6 +47,10 @@ jobs:
           SENTRY_DSN: ${{ secrets.SENTRY_DSN || '' }}
           STACK_NAME: ${{ secrets.STACK_NAME || 'wiseman-palace-production' }}
           TAG: ${{ inputs.image_tag || 'latest' }}
+          SMTP_PORT: ${{ secrets.SMTP_PORT || '587' }}
+          SMTP_TLS: ${{ secrets.SMTP_TLS || 'True' }}
+          SMTP_SSL: ${{ secrets.SMTP_SSL || 'False' }}
+          EMAILS_FROM_NAME: ${{ secrets.EMAILS_FROM_NAME || 'Finance Tracker' }}
         run: |
           ssh -o StrictHostKeyChecking=accept-new ${SERVER_USER}@${SERVER_HOST} \
             "APP_DIR='$APP_DIR' \
@@ -68,6 +72,14 @@ jobs:
              SENTRY_DSN='$SENTRY_DSN' \
              STACK_NAME='$STACK_NAME' \
              TAG='$TAG' \
+             SMTP_PORT='${SMTP_PORT:-587}' \
+             SMTP_TLS='${SMTP_TLS:-True}' \
+             SMTP_SSL='${SMTP_SSL:-False}' \
+             EMAILS_FROM_NAME='${EMAILS_FROM_NAME:-Finance Tracker}' \
+             SMTP_PORT='${{ secrets.SMTP_PORT || '587' }}' \
+             SMTP_TLS='${{ secrets.SMTP_TLS || 'True' }}' \
+             SMTP_SSL='${{ secrets.SMTP_SSL || 'False' }}' \
+             EMAILS_FROM_NAME='${{ secrets.EMAILS_FROM_NAME || 'Finance Tracker' }}' \
              bash -s" << 'ENDSSH'
           set -euo pipefail
           
@@ -113,6 +125,37 @@ jobs:
           export DOCKER_IMAGE_BACKEND=wiseman-palace-backend
           export DOCKER_IMAGE_FRONTEND=wiseman-palace-frontend
           export TAG=${TAG:-latest}
+          
+          # Create .env file from environment variables
+          echo "Creating .env file..."
+          cat > .env << EOF
+DOMAIN=${DOMAIN}
+FRONTEND_HOST=${FRONTEND_HOST}
+ENVIRONMENT=${ENVIRONMENT}
+STACK_NAME=${STACK_NAME:-wiseman-palace-production}
+BACKEND_CORS_ORIGINS=${BACKEND_CORS_ORIGINS}
+SECRET_KEY=${SECRET_KEY}
+FIRST_SUPERUSER=${FIRST_SUPERUSER}
+FIRST_SUPERUSER_PASSWORD=${FIRST_SUPERUSER_PASSWORD}
+SMTP_HOST=${SMTP_HOST:-}
+SMTP_USER=${SMTP_USER:-}
+SMTP_PASSWORD=${SMTP_PASSWORD:-}
+SMTP_PORT=${SMTP_PORT:-587}
+SMTP_TLS=${SMTP_TLS:-True}
+SMTP_SSL=${SMTP_SSL:-False}
+EMAILS_FROM_EMAIL=${EMAILS_FROM_EMAIL:-}
+EMAILS_FROM_NAME=${EMAILS_FROM_NAME:-Finance Tracker}
+POSTGRES_SERVER=${POSTGRES_SERVER}
+POSTGRES_PORT=${POSTGRES_PORT}
+POSTGRES_DB=${POSTGRES_DB}
+POSTGRES_USER=${POSTGRES_USER}
+POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+SENTRY_DSN=${SENTRY_DSN:-}
+DOCKER_IMAGE_BACKEND=${DOCKER_IMAGE_BACKEND}
+DOCKER_IMAGE_FRONTEND=${DOCKER_IMAGE_FRONTEND}
+TAG=${TAG}
+EOF
+          echo ".env file created"
           
           # Verify Docker is available - try multiple methods
           echo "Checking Docker installation..."

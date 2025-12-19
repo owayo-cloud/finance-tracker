@@ -11,7 +11,7 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 30  # Increased timeout for long builds
     env:
       SERVER_USER: ${{ secrets.SERVER_USER }}
       SERVER_HOST: ${{ secrets.SERVER_HOST }}
@@ -52,7 +52,12 @@ jobs:
           SMTP_SSL: ${{ secrets.SMTP_SSL || 'False' }}
           EMAILS_FROM_NAME: ${{ secrets.EMAILS_FROM_NAME || 'Finance Tracker' }}
         run: |
-          ssh -o StrictHostKeyChecking=accept-new ${SERVER_USER}@${SERVER_HOST} \
+          ssh -o StrictHostKeyChecking=accept-new \
+              -o ServerAliveInterval=60 \
+              -o ServerAliveCountMax=10 \
+              -o TCPKeepAlive=yes \
+              -o ConnectTimeout=30 \
+              ${SERVER_USER}@${SERVER_HOST} \
             "APP_DIR='$APP_DIR' \
              GIT_REPOSITORY='${{ github.repository }}' \
              DOMAIN='$DOMAIN' \
@@ -214,9 +219,16 @@ jobs:
           fi
           
           # Build and deploy using found docker command
-          echo "Building Docker images..."
+          echo "Building Docker images (this may take 10-15 minutes)..."
           # Use docker compose (plugin) - this is what's installed with modern Docker
-          $DOCKER_CMD compose -f docker-compose.yml build
+          # Use nohup and redirect output to prevent SSH connection issues
+          if ! $DOCKER_CMD compose -f docker-compose.yml build --progress=plain 2>&1 | tee /tmp/docker-build.log; then
+            echo "ERROR: Docker build failed"
+            echo "Last 50 lines of build log:"
+            tail -50 /tmp/docker-build.log || true
+            exit 1
+          fi
+          echo "Docker build completed successfully"
           
           echo "Starting services..."
           # Start services and capture output
@@ -267,6 +279,10 @@ jobs:
           SERVER_HOST: ${{ secrets.SERVER_HOST }}
           APP_DIR: ${{ secrets.APP_DIR || '/root/code/finance-tracker' }}
         run: |
-          ssh -o StrictHostKeyChecking=accept-new ${SERVER_USER}@${SERVER_HOST} \
+          ssh -o StrictHostKeyChecking=accept-new \
+              -o ServerAliveInterval=60 \
+              -o ServerAliveCountMax=3 \
+              -o TCPKeepAlive=yes \
+              ${SERVER_USER}@${SERVER_HOST} \
             "export PATH=\$PATH:/usr/bin:/usr/local/bin && cd ${APP_DIR} && docker compose ps && docker compose logs --tail=20 backend"
 

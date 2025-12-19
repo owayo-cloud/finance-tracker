@@ -220,15 +220,43 @@ jobs:
           
           # Build and deploy using found docker command
           echo "Building Docker images (this may take 10-15 minutes)..."
+          echo "Start time: $(date)"
+          echo "Docker version: $($DOCKER_CMD --version)"
+          echo "Docker Compose version: $($DOCKER_CMD compose version)"
+          echo "Available disk space:"
+          df -h / | tail -1
+          echo ""
+          
           # Use docker compose (plugin) - this is what's installed with modern Docker
-          # Use nohup and redirect output to prevent SSH connection issues
-          if ! $DOCKER_CMD compose -f docker-compose.yml build --progress=plain 2>&1 | tee /tmp/docker-build.log; then
-            echo "ERROR: Docker build failed"
-            echo "Last 50 lines of build log:"
-            tail -50 /tmp/docker-build.log || true
+          # --progress=plain shows full build output, must be BEFORE the subcommand
+          # Use timeout to prevent infinite hangs (30 minutes = 1800 seconds)
+          # Build in background with output logging to monitor progress
+          echo "Starting build process..."
+          BUILD_LOG="/tmp/docker-build-$(date +%s).log"
+          
+          # Start build with timeout and progress monitoring
+          if timeout 1800 $DOCKER_CMD compose --progress=plain -f docker-compose.yml build 2>&1 | tee "$BUILD_LOG"; then
+            echo ""
+            echo "End time: $(date)"
+            echo "✓ Docker build completed successfully"
+          else
+            EXIT_CODE=$?
+            echo ""
+            echo "ERROR: Docker build failed or timed out (exit code: $EXIT_CODE)"
+            echo "End time: $(date)"
+            echo ""
+            echo "=== Last 100 lines of build log ==="
+            tail -100 "$BUILD_LOG" 2>/dev/null || echo "Could not read build log"
+            echo ""
+            echo "=== Docker system status ==="
+            $DOCKER_CMD ps -a | head -20 || true
+            echo ""
+            $DOCKER_CMD system df || true
+            echo ""
+            echo "=== Checking for stuck processes ==="
+            ps aux | grep -E "docker|build" | grep -v grep | head -10 || true
             exit 1
           fi
-          echo "Docker build completed successfully"
           
           echo "Starting services..."
           # Start services and capture output

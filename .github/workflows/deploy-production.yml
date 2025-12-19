@@ -25,6 +25,44 @@ jobs:
         with:
           ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
 
+      - name: Verify server connectivity
+        env:
+          SERVER_USER: ${{ secrets.SERVER_USER }}
+          SERVER_HOST: ${{ secrets.SERVER_HOST }}
+        run: |
+          echo "Testing SSH connectivity to ${SERVER_USER}@${SERVER_HOST}..."
+          MAX_RETRIES=5
+          RETRY_COUNT=0
+          RETRY_DELAY=10
+          
+          while [ $RETRY_COUNT -lt $MAX_RETRIES ]; do
+            if ssh -o StrictHostKeyChecking=accept-new \
+                   -o ConnectTimeout=10 \
+                   -o ServerAliveInterval=30 \
+                   -o ServerAliveCountMax=3 \
+                   -o TCPKeepAlive=yes \
+                   ${SERVER_USER}@${SERVER_HOST} \
+                   "echo 'Connection successful' && uptime"; then
+              echo "✓ Server is reachable"
+              exit 0
+            else
+              RETRY_COUNT=$((RETRY_COUNT + 1))
+              if [ $RETRY_COUNT -lt $MAX_RETRIES ]; then
+                echo "⚠ Connection attempt $RETRY_COUNT/$MAX_RETRIES failed. Retrying in ${RETRY_DELAY} seconds..."
+                sleep $RETRY_DELAY
+                RETRY_DELAY=$((RETRY_DELAY * 2))  # Exponential backoff
+              else
+                echo "✗ Failed to connect after $MAX_RETRIES attempts"
+                echo "Please check:"
+                echo "  1. Server is running and accessible"
+                echo "  2. Firewall allows SSH (port 22)"
+                echo "  3. SSH key is correctly configured"
+                echo "  4. Server IP/hostname is correct"
+                exit 1
+              fi
+            fi
+          done
+
       - name: Deploy to production server
         env:
           SERVER_USER: ${{ secrets.SERVER_USER }}
@@ -52,13 +90,21 @@ jobs:
           SMTP_SSL: ${{ secrets.SMTP_SSL || 'False' }}
           EMAILS_FROM_NAME: ${{ secrets.EMAILS_FROM_NAME || 'Finance Tracker' }}
         run: |
-          ssh -o StrictHostKeyChecking=accept-new \
-              -o ServerAliveInterval=60 \
-              -o ServerAliveCountMax=10 \
-              -o TCPKeepAlive=yes \
-              -o ConnectTimeout=30 \
-              ${SERVER_USER}@${SERVER_HOST} \
-            "APP_DIR='$APP_DIR' \
+          # Retry SSH connection with exponential backoff
+          MAX_SSH_RETRIES=3
+          SSH_RETRY_COUNT=0
+          SSH_RETRY_DELAY=5
+          
+          while [ $SSH_RETRY_COUNT -lt $MAX_SSH_RETRIES ]; do
+            echo "SSH connection attempt $((SSH_RETRY_COUNT + 1))/$MAX_SSH_RETRIES..."
+            if ssh -o StrictHostKeyChecking=accept-new \
+                   -o ServerAliveInterval=30 \
+                   -o ServerAliveCountMax=10 \
+                   -o TCPKeepAlive=yes \
+                   -o ConnectTimeout=15 \
+                   -o BatchMode=yes \
+                   ${SERVER_USER}@${SERVER_HOST} \
+              "APP_DIR='$APP_DIR' \
              GIT_REPOSITORY='${{ github.repository }}' \
              DOMAIN='$DOMAIN' \
              FRONTEND_HOST='$FRONTEND_HOST' \
@@ -299,7 +345,24 @@ jobs:
           
           # Show service status
           $DOCKER_CMD compose ps
-          ENDSSH
+          ENDSSH"; then
+              echo "✓ Deployment completed successfully"
+              exit 0
+            else
+              SSH_EXIT_CODE=$?
+              SSH_RETRY_COUNT=$((SSH_RETRY_COUNT + 1))
+              if [ $SSH_RETRY_COUNT -lt $MAX_SSH_RETRIES ]; then
+                echo "⚠ SSH connection failed (exit code: $SSH_EXIT_CODE, attempt $SSH_RETRY_COUNT/$MAX_SSH_RETRIES)"
+                echo "Retrying in ${SSH_RETRY_DELAY} seconds..."
+                sleep $SSH_RETRY_DELAY
+                SSH_RETRY_DELAY=$((SSH_RETRY_DELAY * 2))
+              else
+                echo "✗ Failed to complete deployment after $MAX_SSH_RETRIES SSH attempts"
+                echo "Last exit code: $SSH_EXIT_CODE"
+                exit 1
+              fi
+            fi
+          done
 
       - name: Verify deployment
         env:

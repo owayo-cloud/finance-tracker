@@ -11,7 +11,7 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    timeout-minutes: 30  # Increased timeout for long builds
+    timeout-minutes: 60  # Increased from 30 to 60 minutes
     env:
       SERVER_USER: ${{ secrets.SERVER_USER }}
       SERVER_HOST: ${{ secrets.SERVER_HOST }}
@@ -50,38 +50,9 @@ jobs:
               if [ $RETRY_COUNT -lt $MAX_RETRIES ]; then
                 echo "⚠ Connection attempt $RETRY_COUNT/$MAX_RETRIES failed. Retrying in ${RETRY_DELAY} seconds..."
                 sleep $RETRY_DELAY
-                RETRY_DELAY=$((RETRY_DELAY * 2))  # Exponential backoff
+                RETRY_DELAY=$((RETRY_DELAY * 2))
               else
                 echo "✗ Failed to connect after $MAX_RETRIES attempts"
-                echo ""
-                echo "=========================================="
-                echo "TROUBLESHOOTING STEPS:"
-                echo "=========================================="
-                echo ""
-                echo "1. Verify server is running:"
-                echo "   - Check hosting provider dashboard"
-                echo "   - Verify server is powered on"
-                echo ""
-                echo "2. Test SSH from your local machine:"
-                echo "   ssh -v ${SERVER_USER}@${SERVER_HOST}"
-                echo ""
-                echo "3. Check firewall rules:"
-                echo "   - Linode: Dashboard → Firewalls → Allow port 22 from 0.0.0.0/0"
-                echo "   - UFW: sudo ufw allow 22/tcp"
-                echo "   - iptables: Check rules with 'sudo iptables -L -n | grep 22'"
-                echo ""
-                echo "4. Verify GitHub Secrets:"
-                echo "   - SERVER_HOST: Should be IP or hostname"
-                echo "   - SERVER_USER: Usually 'root'"
-                echo "   - SSH_PRIVATE_KEY: Should match server's authorized_keys"
-                echo ""
-                echo "5. Check SSH service on server:"
-                echo "   sudo systemctl status ssh"
-                echo ""
-                echo "6. For detailed troubleshooting, see:"
-                echo "   SSH_CONNECTION_TROUBLESHOOTING.md"
-                echo ""
-                echo "=========================================="
                 exit 1
               fi
             fi
@@ -114,7 +85,6 @@ jobs:
           SMTP_SSL: ${{ secrets.SMTP_SSL || 'False' }}
           EMAILS_FROM_NAME: ${{ secrets.EMAILS_FROM_NAME || 'WiseManPalace' }}
         run: |
-          # Retry SSH connection with exponential backoff
           MAX_SSH_RETRIES=3
           SSH_RETRY_COUNT=0
           SSH_RETRY_DELAY=5
@@ -152,36 +122,15 @@ jobs:
                    SMTP_SSL='${SMTP_SSL}' \
                    EMAILS_FROM_NAME='${EMAILS_FROM_NAME}' \
                    bash -s" << 'ENDSSH'
-          # Export environment variables passed from GitHub Actions
-          export APP_DIR
-          export GIT_REPOSITORY
-          export DOMAIN
-          export FRONTEND_HOST
-          export BACKEND_CORS_ORIGINS
-          export SECRET_KEY
-          export FIRST_SUPERUSER
-          export FIRST_SUPERUSER_PASSWORD
-          export SMTP_HOST
-          export SMTP_USER
-          export SMTP_PASSWORD
-          export EMAILS_FROM_EMAIL
-          export POSTGRES_PORT
-          export POSTGRES_DB
-          export POSTGRES_USER
-          export POSTGRES_PASSWORD
-          export SENTRY_DSN
-          export STACK_NAME
-          export TAG
-          export SMTP_PORT
-          export SMTP_TLS
-          export SMTP_SSL
-          export EMAILS_FROM_NAME
+          export APP_DIR GIT_REPOSITORY DOMAIN FRONTEND_HOST BACKEND_CORS_ORIGINS
+          export SECRET_KEY FIRST_SUPERUSER FIRST_SUPERUSER_PASSWORD
+          export SMTP_HOST SMTP_USER SMTP_PASSWORD EMAILS_FROM_EMAIL
+          export POSTGRES_PORT POSTGRES_DB POSTGRES_USER POSTGRES_PASSWORD
+          export SENTRY_DSN STACK_NAME TAG SMTP_PORT SMTP_TLS SMTP_SSL EMAILS_FROM_NAME
           
-          # Execute deployment script
           set -euo pipefail
           
-          # Ensure Docker is in PATH for non-interactive shells
-          # Try common Docker installation locations
+          # Find Docker
           for docker_path in /usr/bin/docker /usr/local/bin/docker /snap/bin/docker $(command -v docker); do
             if [ -x "$docker_path" ] 2>/dev/null; then
               export PATH="$(dirname $docker_path):$PATH"
@@ -190,70 +139,37 @@ jobs:
           done
           
           export PATH=$PATH:/usr/bin:/usr/local/bin:/snap/bin
-          
-          # Load environment if .bashrc or .profile exists
           [ -f ~/.bashrc ] && source ~/.bashrc || true
           [ -f ~/.profile ] && source ~/.profile || true
           
-          # Validate required envs
           if [ -z "${DOMAIN:-}" ]; then echo "ERROR: DOMAIN is not set"; exit 1; fi
           if [ -z "${SECRET_KEY:-}" ]; then echo "ERROR: SECRET_KEY is not set"; exit 1; fi
           
           APP_DIR_PATH="${APP_DIR:-/root/code/finance-tracker}"
           
-          # Clone repository if it doesn't exist
+          # Clone or update repository
           if [ ! -d "${APP_DIR_PATH}/.git" ]; then
-            echo "Repository not found on server. Cloning fresh copy..."
+            echo "Cloning repository..."
             rm -rf "${APP_DIR_PATH}"
             mkdir -p "${APP_DIR_PATH}"
-            
-            # Try HTTPS first, fallback to SSH if available
-            if ! git clone "https://github.com/${GIT_REPOSITORY}.git" "${APP_DIR_PATH}" 2>&1; then
-              echo "HTTPS clone failed, trying SSH..."
-              if ! git clone "git@github.com:${GIT_REPOSITORY}.git" "${APP_DIR_PATH}" 2>&1; then
-                echo "ERROR: Failed to clone repository via both HTTPS and SSH"
-                echo "This might be a network connectivity issue or authentication problem"
-                exit 1
-              fi
-            fi
+            git clone "https://github.com/${GIT_REPOSITORY}.git" "${APP_DIR_PATH}" || \
+            git clone "git@github.com:${GIT_REPOSITORY}.git" "${APP_DIR_PATH}"
           fi
           
           cd "${APP_DIR_PATH}"
           
-          # Pull latest code from GitHub with retry logic
           echo "Fetching latest code..."
-          MAX_RETRIES=3
-          RETRY_COUNT=0
-          while [ $RETRY_COUNT -lt $MAX_RETRIES ]; do
-            if git fetch origin 2>&1; then
-              break
-            else
-              RETRY_COUNT=$((RETRY_COUNT + 1))
-              if [ $RETRY_COUNT -lt $MAX_RETRIES ]; then
-                echo "Git fetch failed, retrying ($RETRY_COUNT/$MAX_RETRIES)..."
-                sleep 5
-              else
-                echo "ERROR: Failed to fetch from GitHub after $MAX_RETRIES attempts"
-                echo "Using existing code if available..."
-              fi
-            fi
-          done
+          git fetch origin 2>&1 && (git reset --hard origin/master || git reset --hard origin/main) || \
+          echo "WARNING: Using existing code"
           
-          # Reset to latest only if fetch succeeded
-          if git fetch origin 2>&1 >/dev/null; then
-            git reset --hard origin/master || git reset --hard origin/main
-          else
-            echo "WARNING: Using existing code due to fetch failure"
-          fi
-          
-          # Set environment variables for docker-compose
+          # Set environment variables
           export ENVIRONMENT=production
           export POSTGRES_SERVER=db
           export DOCKER_IMAGE_BACKEND=wiseman-palace-backend
           export DOCKER_IMAGE_FRONTEND=wiseman-palace-frontend
           export TAG=${TAG:-latest}
           
-          # Create .env file from environment variables
+          # Create .env file
           echo "Creating .env file..."
           {
             echo "DOMAIN=${DOMAIN}"
@@ -283,117 +199,89 @@ jobs:
             echo "DOCKER_IMAGE_FRONTEND=${DOCKER_IMAGE_FRONTEND}"
             echo "TAG=${TAG}"
           } > .env
-          echo ".env file created"
           
-          # Verify Docker is available - try multiple methods
-          echo "Checking Docker installation..."
+          # Find Docker command
           DOCKER_CMD=""
           for cmd in docker /usr/bin/docker /usr/local/bin/docker /snap/bin/docker; do
             if $cmd --version &>/dev/null; then
               DOCKER_CMD="$cmd"
               echo "Docker found at: $DOCKER_CMD"
-              $cmd --version
               break
             fi
           done
           
           if [ -z "$DOCKER_CMD" ]; then
-            echo "ERROR: Docker command not found"
-            echo "PATH: $PATH"
-            echo "Trying to find docker..."
-            find /usr -name docker -type f 2>/dev/null | head -3
+            echo "ERROR: Docker not found"
             exit 1
           fi
           
-          # Create traefik-public network if it doesn't exist
-          echo "Checking traefik-public network..."
+          # Create network if needed
           if ! $DOCKER_CMD network inspect traefik-public &>/dev/null; then
-            echo "Creating traefik-public network..."
             $DOCKER_CMD network create traefik-public
-          else
-            echo "traefik-public network already exists"
           fi
           
-          # Build and deploy using found docker command
-          echo "Building Docker images (this may take 10-15 minutes)..."
+          # Clean up Docker build cache if space is low
+          echo "Checking disk space..."
+          DISK_USAGE=$(df / | tail -1 | awk '{print $5}' | sed 's/%//')
+          if [ "$DISK_USAGE" -gt 80 ]; then
+            echo "Disk usage is ${DISK_USAGE}%, cleaning Docker build cache..."
+            $DOCKER_CMD builder prune -af --filter "until=24h" || true
+            $DOCKER_CMD image prune -af --filter "until=24h" || true
+          fi
+          
+          echo "Building Docker images..."
           echo "Start time: $(date)"
           echo "Docker version: $($DOCKER_CMD --version)"
-          echo "Docker Compose version: $($DOCKER_CMD compose version)"
-          echo "Available disk space:"
-          df -h / | tail -1
-          echo ""
+          echo "Available disk: $(df -h / | tail -1 | awk '{print $4}')"
           
-          # Use docker compose (plugin) - this is what's installed with modern Docker
-          # --progress=plain shows full build output, must be BEFORE the subcommand
-          # Use timeout to prevent infinite hangs (30 minutes = 1800 seconds)
-          # Build in background with output logging to monitor progress
-          echo "Starting build process..."
           BUILD_LOG="/tmp/docker-build-$(date +%s).log"
           
-          # Start build with timeout and progress monitoring
-          if timeout 1800 $DOCKER_CMD compose --progress=plain -f docker-compose.yml build 2>&1 | tee "$BUILD_LOG"; then
-            echo ""
-            echo "End time: $(date)"
-            echo "✓ Docker build completed successfully"
+          # Build with longer timeout (45 minutes = 2700 seconds)
+          # Use --no-cache for fresh builds if you're having issues
+          if timeout 2700 $DOCKER_CMD compose --progress=plain -f docker-compose.yml build 2>&1 | tee "$BUILD_LOG"; then
+            echo "✓ Build completed at $(date)"
           else
             EXIT_CODE=$?
-            echo ""
-            echo "ERROR: Docker build failed or timed out (exit code: $EXIT_CODE)"
-            echo "End time: $(date)"
-            echo ""
-            echo "=== Last 100 lines of build log ==="
-            tail -100 "$BUILD_LOG" 2>/dev/null || echo "Could not read build log"
-            echo ""
-            echo "=== Docker system status ==="
+            echo "ERROR: Build failed (exit: $EXIT_CODE) at $(date)"
+            echo "=== Last 100 lines ==="
+            tail -100 "$BUILD_LOG"
+            echo "=== Docker status ==="
             $DOCKER_CMD ps -a | head -20 || true
-            echo ""
             $DOCKER_CMD system df || true
-            echo ""
-            echo "=== Checking for stuck processes ==="
-            ps aux | grep -E "docker|build" | grep -v grep | head -10 || true
             exit 1
           fi
           
           echo "Starting services..."
-          # Start services and capture output
           if ! $DOCKER_CMD compose -f docker-compose.yml up -d; then
             echo "ERROR: Services failed to start"
-            echo "Checking prestart logs..."
-            $DOCKER_CMD compose logs prestart 2>&1 || true
-            echo "Checking all service status..."
+            $DOCKER_CMD compose logs prestart || true
             $DOCKER_CMD compose ps -a
             exit 1
           fi
           
-          # Wait a moment for services to initialize
           sleep 5
           
-          # Check prestart container status and logs
-          echo "Checking prestart service status..."
+          # Check prestart
           PRESTART_CONTAINER=$($DOCKER_CMD compose ps -q prestart 2>/dev/null || true)
           if [ -n "$PRESTART_CONTAINER" ]; then
             PRESTART_STATUS=$($DOCKER_CMD inspect $PRESTART_CONTAINER --format='{{.State.Status}}' 2>/dev/null || echo "unknown")
             if [ "$PRESTART_STATUS" = "exited" ]; then
-              PRESTART_EXIT=$($DOCKER_CMD inspect $PRESTART_CONTAINER --format='{{.State.ExitCode}}' 2>/dev/null || echo "unknown")
+              PRESTART_EXIT=$($DOCKER_CMD inspect $PRESTART_CONTAINER --format='{{.State.ExitCode}}' 2>/dev/null || echo "0")
               if [ "$PRESTART_EXIT" != "0" ] && [ "$PRESTART_EXIT" != "unknown" ]; then
-                echo "ERROR: Prestart service failed with exit code $PRESTART_EXIT"
-                echo "Prestart logs:"
-                $DOCKER_CMD compose logs prestart 2>&1
+                echo "ERROR: Prestart failed with exit $PRESTART_EXIT"
+                $DOCKER_CMD compose logs prestart
                 exit 1
               fi
             fi
           fi
           
-          # Restart supervisor processes in backend container
-          echo "Restarting supervisor processes..."
-          BACKEND_CONTAINER=$($DOCKER_CMD compose ps -q backend 2>/dev/null || $DOCKER_CMD ps -q -f name=backend)
+          # Restart backend supervisor
+          BACKEND_CONTAINER=$($DOCKER_CMD compose ps -q backend 2>/dev/null || true)
           if [ -n "$BACKEND_CONTAINER" ]; then
             $DOCKER_CMD exec $BACKEND_CONTAINER supervisorctl restart all || true
           fi
           
-          echo "Deployment completed successfully!"
-          
-          # Show service status
+          echo "✓ Deployment completed!"
           $DOCKER_CMD compose ps
           ENDSSH
             then
@@ -403,13 +291,11 @@ jobs:
               SSH_EXIT_CODE=$?
               SSH_RETRY_COUNT=$((SSH_RETRY_COUNT + 1))
               if [ $SSH_RETRY_COUNT -lt $MAX_SSH_RETRIES ]; then
-                echo "⚠ SSH connection failed (exit code: $SSH_EXIT_CODE, attempt $SSH_RETRY_COUNT/$MAX_SSH_RETRIES)"
-                echo "Retrying in ${SSH_RETRY_DELAY} seconds..."
+                echo "⚠ SSH failed (exit: $SSH_EXIT_CODE), retrying..."
                 sleep $SSH_RETRY_DELAY
                 SSH_RETRY_DELAY=$((SSH_RETRY_DELAY * 2))
               else
-                echo "✗ Failed to complete deployment after $MAX_SSH_RETRIES SSH attempts"
-                echo "Last exit code: $SSH_EXIT_CODE"
+                echo "✗ Failed after $MAX_SSH_RETRIES attempts"
                 exit 1
               fi
             fi
@@ -423,8 +309,5 @@ jobs:
         run: |
           ssh -o StrictHostKeyChecking=accept-new \
               -o ServerAliveInterval=60 \
-              -o ServerAliveCountMax=3 \
-              -o TCPKeepAlive=yes \
               ${SERVER_USER}@${SERVER_HOST} \
             "export PATH=\$PATH:/usr/bin:/usr/local/bin && cd ${APP_DIR} && docker compose ps && docker compose logs --tail=20 backend"
-

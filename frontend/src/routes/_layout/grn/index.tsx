@@ -36,6 +36,7 @@ import type {
 } from "@/client"
 import { GrnService, ProductsService } from "@/client"
 import useCustomToast from "@/hooks/useCustomToast"
+import { usePageMetadata } from "@/hooks/usePageMetadata"
 
 // Utility function to calculate optimal dropdown position
 const calculateDropdownPosition = (
@@ -94,6 +95,11 @@ interface GRNItemFormData {
 }
 
 function GRNCreatePage() {
+  usePageMetadata({
+    title: "Goods Receipt Note",
+    description: "Create and manage goods receipt notes for inventory management",
+  })
+
   const queryClient = useQueryClient()
   const { showSuccessToast, showErrorToast } = useCustomToast()
 

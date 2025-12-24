@@ -13,6 +13,7 @@ import {
   PaginationPrevTrigger,
   PaginationRoot,
 } from "@/components/ui/pagination.tsx"
+import { usePageMetadata } from "@/hooks/usePageMetadata"
 
 const usersSearchSchema = z.object({
   page: z.number().catch(1),
@@ -150,6 +151,11 @@ function UsersTable() {
 }
 
 function Admin() {
+  usePageMetadata({
+    title: "User Management",
+    description: "Manage users, roles, and permissions",
+  })
+
   return (
     <Container maxW="full" minH="100vh">
       <Flex direction="column" gap={6} pt={12} pb={8}>

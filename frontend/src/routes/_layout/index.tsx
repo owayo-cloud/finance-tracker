@@ -10,6 +10,7 @@ import { RevenueSalesPurchaseCards } from "@/components/Dashboard/RevenueSalesPu
 import { SalesChart } from "@/components/Dashboard/SalesChart"
 import { StatsCards } from "@/components/Dashboard/StatsCards"
 import useAuth from "@/hooks/useAuth"
+import { usePageMetadata } from "@/hooks/usePageMetadata"
 
 export const Route = createFileRoute("/_layout/")({
   component: Dashboard,
@@ -19,6 +20,11 @@ export const Route = createFileRoute("/_layout/")({
 function Dashboard() {
   const { user: currentUser } = useAuth()
   const [isMounted, setIsMounted] = useState(false)
+
+  usePageMetadata({
+    title: "Dashboard",
+    description: "View your business overview, sales statistics, and recent activity",
+  })
 
   useEffect(() => {
     setIsMounted(true)

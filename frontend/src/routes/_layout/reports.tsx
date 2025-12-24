@@ -24,12 +24,18 @@ import { ExpensesBreakdown } from "@/components/Reports/ExpensesBreakdown"
 import { SalesBreakdown } from "@/components/Reports/SalesBreakdown"
 import { StockReport } from "@/components/Reports/StockReport"
 import { SummaryCards } from "@/components/Reports/SummaryCards"
+import { usePageMetadata } from "@/hooks/usePageMetadata"
 
 export const Route = createFileRoute("/_layout/reports")({
   component: Reports,
 })
 
 function Reports() {
+  usePageMetadata({
+    title: "Reports",
+    description: "View sales reports, expenses breakdown, and business analytics",
+  })
+
   const today = new Date()
   const firstDayOfMonth = new Date(today.getFullYear(), today.getMonth(), 1)
 

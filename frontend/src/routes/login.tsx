@@ -23,6 +23,7 @@ import { Field } from "@/components/ui/field"
 import { InputGroup } from "@/components/ui/input-group"
 import { PasswordInput } from "@/components/ui/password-input"
 import useAuth, { isLoggedIn } from "@/hooks/useAuth"
+import { usePageMetadata } from "@/hooks/usePageMetadata"
 import { emailPattern, passwordRules } from "../utils"
 
 export const Route = createFileRoute("/login")({
@@ -39,6 +40,11 @@ export const Route = createFileRoute("/login")({
 function Login() {
   const { loginMutation, resetError } = useAuth()
   const [formError, setFormError] = useState<string | null>(null)
+
+  usePageMetadata({
+    title: "Login",
+    description: "Sign in to your WiseManPalace account",
+  })
   const {
     register,
     handleSubmit,

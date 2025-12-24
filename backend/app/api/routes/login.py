@@ -1,6 +1,4 @@
-import datetime
-from datetime import timedelta
-from time import timezone
+from datetime import datetime, timedelta, timezone
 from typing import Annotated, Any
 
 from fastapi import APIRouter, Depends, HTTPException
@@ -63,7 +61,13 @@ def login_access_token(
         expires_at=refresh_token_expires,
     )
     session.add(refresh_token)
-    session.commit()
+    try:
+        session.commit()
+    except Exception as e:
+        session.rollback()
+        raise HTTPException(
+            status_code=500, detail="Failed to create refresh token. Please try again."
+        ) from e
 
     return Token(
         access_token=access_token,
@@ -91,7 +95,7 @@ def refresh_token(session: SessionDep, body: RefreshTokenRequest) -> Token:
 
     # Get user
     user = session.get(User, refresh_token.user_id)
-    if not user or user.is_active:
+    if not user or not user.is_active:
         raise HTTPException(status_code=404, detail="User not found or inactive")
 
     # Create new access token

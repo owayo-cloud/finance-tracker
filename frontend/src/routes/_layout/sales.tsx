@@ -23,6 +23,7 @@ import {
 } from "../../client"
 import useAuth from "../../hooks/useAuth"
 import useCustomToast from "../../hooks/useCustomToast"
+import { usePageMetadata } from "../../hooks/usePageMetadata"
 
 export const Route = createFileRoute("/_layout/sales")({
   component: Sales,
@@ -33,6 +34,11 @@ function Sales() {
   const showToast = useCustomToast()
   const { user } = useAuth()
   const isAuditor = user?.is_auditor ?? false
+
+  usePageMetadata({
+    title: "Point of Sale",
+    description: "Process sales transactions and manage customer orders",
+  })
 
   // Show toast notification for auditors on mount
   useEffect(() => {

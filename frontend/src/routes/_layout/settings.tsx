@@ -6,6 +6,7 @@ import ChangePassword from "@/components/UserSettings/ChangePassword"
 import DeleteAccount from "@/components/UserSettings/DeleteAccount"
 import UserInformation from "@/components/UserSettings/UserInformation"
 import useAuth from "@/hooks/useAuth"
+import { usePageMetadata } from "@/hooks/usePageMetadata"
 
 const tabsConfig = [
   { value: "my-profile", title: "My profile", component: UserInformation },
@@ -23,6 +24,11 @@ function UserSettings() {
   const finalTabs = currentUser?.is_superuser
     ? tabsConfig.slice(0, 3)
     : tabsConfig
+
+  usePageMetadata({
+    title: "Settings",
+    description: "Manage your account settings, profile, and preferences",
+  })
 
   if (!currentUser) {
     return null

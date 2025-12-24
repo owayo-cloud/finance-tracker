@@ -29,6 +29,7 @@ import {
   PaginationRoot,
 } from "@/components/ui/pagination.tsx"
 import useCustomToast from "@/hooks/useCustomToast"
+import { usePageMetadata } from "@/hooks/usePageMetadata"
 import { handleError } from "@/utils"
 
 const productsSearchSchema = z.object({
@@ -124,6 +125,11 @@ function ProductsTable() {
   const { page, search, category, status, pageSize } = Route.useSearch()
   const queryClient = useQueryClient()
   const { showSuccessToast } = useCustomToast()
+
+  usePageMetadata({
+    title: "Products",
+    description: "Manage your product inventory, categories, and stock levels",
+  })
 
   // Local search state with debouncing
   const [searchQuery, setSearchQuery] = useState(search)

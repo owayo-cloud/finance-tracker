@@ -30,12 +30,18 @@ import {
 } from "@/client"
 import { formatCurrency } from "@/components/Dashboard/utils"
 import { AddExpense } from "@/components/Expenses/AddExpense"
+import { usePageMetadata } from "@/hooks/usePageMetadata"
 
 export const Route = createFileRoute("/_layout/expenses")({
   component: Expenses,
 })
 
 function Expenses() {
+  usePageMetadata({
+    title: "Expenses",
+    description: "Track and manage business expenses by category",
+  })
+
   const [page, setPage] = useState(1)
   const [search, setSearch] = useState("")
   const [selectedCategory, setSelectedCategory] = useState<string>("")

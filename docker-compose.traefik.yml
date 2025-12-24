@@ -1,12 +1,14 @@
 services:
   traefik:
-    image: traefik:v3.6.2
+    image: traefik:v3.2
     ports:
       # Listen on port 80, default for HTTP, necessary to redirect to HTTPS
       - 80:80
       # Listen on port 443, default for HTTPS
       - 443:443
     restart: always
+    security_opt:
+      - no-new-privileges:true
     labels:
       # Enable Traefik for this service, to make it available in the public network
       - traefik.enable=true
@@ -35,6 +37,17 @@ services:
       - traefik.http.middlewares.admin-auth.basicauth.users=${USERNAME?Variable not set}:${HASHED_PASSWORD?Variable not set}
       # Enable HTTP Basic auth, using the middleware created above
       - traefik.http.routers.traefik-dashboard-https.middlewares=admin-auth
+      # Security headers middleware
+      - traefik.http.middlewares.security-headers.headers.frameDeny=true
+      - traefik.http.middlewares.security-headers.headers.sslRedirect=true
+      - traefik.http.middlewares.security-headers.headers.browserXssFilter=true
+      - traefik.http.middlewares.security-headers.headers.contentTypeNosniff=true
+      - traefik.http.middlewares.security-headers.headers.forceSTS=true
+      - traefik.http.middlewares.security-headers.headers.stsIncludeSubdomains=true
+      - traefik.http.middlewares.security-headers.headers.stsPreload=true
+      - traefik.http.middlewares.security-headers.headers.stsSeconds=31536000
+      # Compression middleware
+      - traefik.http.middlewares.compress.compress=true
     volumes:
       # Add Docker as a mounted volume, so that Traefik can read the labels of other services
       - /var/run/docker.sock:/var/run/docker.sock:ro
@@ -49,6 +62,8 @@ services:
       - --entrypoints.http.address=:80
       # Create an entrypoint "https" listening on port 443
       - --entrypoints.https.address=:443
+      # Enable HTTP/2
+      - --entrypoints.https.http2.enabled=true
       # Create the certificate resolver "le" for Let's Encrypt, uses the environment variable EMAIL
       - --certificatesresolvers.le.acme.email=${EMAIL?Variable not set}
       # Store the Let's Encrypt certificates in the mounted volume
@@ -59,8 +74,15 @@ services:
       - --accesslog
       # Enable the Traefik log, for configurations and errors
       - --log
+      # Set log level (INFO for production, DEBUG for troubleshooting)
+      - --log.level=INFO
       # Enable the Dashboard and API
       - --api
+      # Enable API dashboard (read-only by default)
+      - --api.dashboard=true
+      # Global rate limiting (optional - uncomment if needed)
+      # - --entrypoints.http.forwardedHeaders.trustedIPs=127.0.0.1/32,10.0.0.0/8
+      # - --entrypoints.https.forwardedHeaders.trustedIPs=127.0.0.1/32,10.0.0.0/8
     networks:
       # Use the public network created to be shared between Traefik and
       # any other service that needs to be publicly available with HTTPS
@@ -75,3 +97,4 @@ networks:
   # services that need to be publicly available via this Traefik
   traefik-public:
     external: true
+

@@ -127,31 +127,33 @@ jobs:
                    -o TCPKeepAlive=yes \
                    -o ConnectTimeout=15 \
                    -o BatchMode=yes \
-                   ${SERVER_USER}@${SERVER_HOST} \
-              "APP_DIR='$APP_DIR' \
-             GIT_REPOSITORY='${{ github.repository }}' \
-             DOMAIN='$DOMAIN' \
-             FRONTEND_HOST='$FRONTEND_HOST' \
-             BACKEND_CORS_ORIGINS='$BACKEND_CORS_ORIGINS' \
-             SECRET_KEY='$SECRET_KEY' \
-             FIRST_SUPERUSER='$FIRST_SUPERUSER' \
-             FIRST_SUPERUSER_PASSWORD='$FIRST_SUPERUSER_PASSWORD' \
-             SMTP_HOST='$SMTP_HOST' \
-             SMTP_USER='$SMTP_USER' \
-             SMTP_PASSWORD='$SMTP_PASSWORD' \
-             EMAILS_FROM_EMAIL='$EMAILS_FROM_EMAIL' \
-             POSTGRES_PORT='$POSTGRES_PORT' \
-             POSTGRES_DB='$POSTGRES_DB' \
-             POSTGRES_USER='$POSTGRES_USER' \
-             POSTGRES_PASSWORD='$POSTGRES_PASSWORD' \
-             SENTRY_DSN='$SENTRY_DSN' \
-             STACK_NAME='$STACK_NAME' \
-             TAG='$TAG' \
-             SMTP_PORT='$SMTP_PORT' \
-             SMTP_TLS='$SMTP_TLS' \
-             SMTP_SSL='$SMTP_SSL' \
-             EMAILS_FROM_NAME='$EMAILS_FROM_NAME' \
-             bash -s" << 'ENDSSH'
+                   ${SERVER_USER}@${SERVER_HOST} << 'ENDSSH'
+          # Export environment variables
+          export APP_DIR='$APP_DIR'
+          export GIT_REPOSITORY='${{ github.repository }}'
+          export DOMAIN='$DOMAIN'
+          export FRONTEND_HOST='$FRONTEND_HOST'
+          export BACKEND_CORS_ORIGINS='$BACKEND_CORS_ORIGINS'
+          export SECRET_KEY='$SECRET_KEY'
+          export FIRST_SUPERUSER='$FIRST_SUPERUSER'
+          export FIRST_SUPERUSER_PASSWORD='$FIRST_SUPERUSER_PASSWORD'
+          export SMTP_HOST='$SMTP_HOST'
+          export SMTP_USER='$SMTP_USER'
+          export SMTP_PASSWORD='$SMTP_PASSWORD'
+          export EMAILS_FROM_EMAIL='$EMAILS_FROM_EMAIL'
+          export POSTGRES_PORT='$POSTGRES_PORT'
+          export POSTGRES_DB='$POSTGRES_DB'
+          export POSTGRES_USER='$POSTGRES_USER'
+          export POSTGRES_PASSWORD='$POSTGRES_PASSWORD'
+          export SENTRY_DSN='$SENTRY_DSN'
+          export STACK_NAME='$STACK_NAME'
+          export TAG='$TAG'
+          export SMTP_PORT='$SMTP_PORT'
+          export SMTP_TLS='$SMTP_TLS'
+          export SMTP_SSL='$SMTP_SSL'
+          export EMAILS_FROM_NAME='$EMAILS_FROM_NAME'
+          
+          # Execute deployment script
           set -euo pipefail
           
           # Ensure Docker is in PATH for non-interactive shells
@@ -369,7 +371,8 @@ jobs:
           
           # Show service status
           $DOCKER_CMD compose ps
-          ENDSSH"; then
+ENDSSH
+            ; then
               echo "✓ Deployment completed successfully"
               exit 0
             else

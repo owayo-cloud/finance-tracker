@@ -30,4 +30,3 @@ export const usePageMetadata = ({ title, description }: PageMetadata) => {
     }
   }, [title, description])
 }
-

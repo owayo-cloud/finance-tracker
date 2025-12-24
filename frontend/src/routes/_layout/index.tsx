@@ -23,7 +23,8 @@ function Dashboard() {
 
   usePageMetadata({
     title: "Dashboard",
-    description: "View your business overview, sales statistics, and recent activity",
+    description:
+      "View your business overview, sales statistics, and recent activity",
   })
 
   useEffect(() => {

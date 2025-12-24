@@ -9,7 +9,8 @@ export const Route = createFileRoute("/_layout/debts")({
 function Debts() {
   usePageMetadata({
     title: "Debts & Credits",
-    description: "Track credit sales, customer account balances, and payment history",
+    description:
+      "Track credit sales, customer account balances, and payment history",
   })
   return (
     <Container maxW="full">

@@ -33,7 +33,8 @@ export const Route = createFileRoute("/_layout/reports")({
 function Reports() {
   usePageMetadata({
     title: "Reports",
-    description: "View sales reports, expenses breakdown, and business analytics",
+    description:
+      "View sales reports, expenses breakdown, and business analytics",
   })
 
   const today = new Date()

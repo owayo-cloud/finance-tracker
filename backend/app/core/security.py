@@ -19,6 +19,7 @@ def create_access_token(subject: str | Any, expires_delta: timedelta) -> str:
     encoded_jwt = jwt.encode(to_encode, settings.SECRET_KEY, algorithm=ALGORITHM)
     return encoded_jwt
 
+
 def create_refresh_token() -> str:
     """Generate a secure random refresh token"""
     return secrets.token_urlsafe(32)

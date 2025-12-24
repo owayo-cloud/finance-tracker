@@ -97,7 +97,8 @@ interface GRNItemFormData {
 function GRNCreatePage() {
   usePageMetadata({
     title: "Goods Receipt Note",
-    description: "Create and manage goods receipt notes for inventory management",
+    description:
+      "Create and manage goods receipt notes for inventory management",
   })
 
   const queryClient = useQueryClient()

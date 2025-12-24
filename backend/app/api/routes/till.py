@@ -125,6 +125,20 @@ def open_till(
                 detail=f"Expected shift type '{expected_shift}' (alternating from last shift). Last shift was '{last_shift.shift_type}'",
             )
 
+        # Validate opening balance if previous shift not reconciled
+        if last_shift.status != "reconciled":
+            if not till_in.opening_balance or till_in.opening_balance <= 0:
+                raise HTTPException(
+                    status_code=400,
+                    detail=f"Opening balance is required because the previous shift (ID: {last_shift.id}) has not been reconciled yet. Previous cashier left {last_shift.closing_cash_float or 0}.",
+                )
+            # Warn if opening balance doesn't match closing balance
+            if last_shift.closing_cash_float:
+                expected_balance = last_shift.closing_cash_float
+                if abs(float(till_in.opening_balance) - float(expected_balance)) > 0.01:
+                    # Allow but could log warning - amounts might differ due to rounding
+                    pass
+
     # Create new till shift
     till_shift = TillShift(
         shift_type=shift_type,
@@ -210,6 +224,26 @@ def close_till(
             status_code=403, detail="Only the cashier who opened this till can close it"
         )
 
+    # Validate closing cash float
+    if closing_cash_float < 0:
+        raise HTTPException(
+            status_code=400, detail="Closing cash float cannot be negative"
+        )
+
+    # Calculate shift duration
+    shift_duration = datetime.now(timezone.utc) - till_shift.opening_time
+    duration_hours = shift_duration.total_seconds() / 3600
+
+    # Warn if shift is very short or very long (optional validation)
+    if duration_hours < 0.5:  # Less than 30 minutes
+        # Allow but could log warning
+        pass
+    elif duration_hours > 24:  # More than 24 hours
+        raise HTTPException(
+            status_code=400,
+            detail=f"Shift duration exceeds 24 hours ({duration_hours:.1f} hours). Please verify before closing.",
+        )
+
     # Update till shift
     till_shift.closing_time = datetime.now(timezone.utc)
     till_shift.closing_cash_float = closing_cash_float
@@ -236,14 +270,39 @@ def close_till(
 
 
 @router.get("/system-counts", response_model=dict)
-def get_system_counts(*, session: SessionDep, current_user: CurrentUser) -> Any:
+def get_system_counts(
+    *,
+    session: SessionDep,
+    current_user: CurrentUser,
+    shift_id: uuid.UUID | None = Query(None, description="Specific shift ID (for closed shifts)"),
+) -> Any:
     """
-    Get system counts (auto-calculated) for the current open shift.
+    Get system counts (auto-calculated) for a shift.
+    - If shift_id is provided, returns counts for that closed shift (for reconciliation)
+    - Otherwise, returns counts for the currently open shift
     Returns amounts by payment method based on recorded sales.
     """
-    till_shift = get_current_open_shift(session)
-    if not till_shift:
-        raise HTTPException(status_code=404, detail="No till is currently open")
+    if shift_id:
+        # Get specific closed shift for reconciliation
+        till_shift = session.get(TillShift, shift_id)
+        if not till_shift:
+            raise HTTPException(status_code=404, detail="Shift not found")
+        if till_shift.status == "open":
+            raise HTTPException(
+                status_code=400,
+                detail="Cannot get system counts for open shift. Use current shift endpoint instead.",
+            )
+        # Check authorization
+        if not current_user.is_superuser and till_shift.opened_by_id != current_user.id:
+            raise HTTPException(
+                status_code=403,
+                detail="You can only view system counts for your own shifts",
+            )
+    else:
+        # Get current open shift
+        till_shift = get_current_open_shift(session)
+        if not till_shift:
+            raise HTTPException(status_code=404, detail="No till is currently open")
 
     system_counts = calculate_system_counts(session, till_shift)
 
@@ -264,6 +323,7 @@ def reconcile_shift(
     current_user: CurrentUser,
     physical_counts: dict[str, Any],  # {payment_method_id: amount}
     notes: str | None = None,
+    shift_id: uuid.UUID | None = Query(None, description="Specific shift ID to reconcile"),
 ) -> Any:
     """
     Reconcile a closed shift.
@@ -271,14 +331,32 @@ def reconcile_shift(
     - Records payment method reconciliations
     - Calculates variances
     - Creates cashier variance record if any variance exists
+    - Validates variance thresholds and creates alerts if needed
     """
-    # Get the most recently closed shift
-    till_shift = get_last_closed_shift(session)
-    if not till_shift or till_shift.status == "reconciled":
-        raise HTTPException(
-            status_code=400,
-            detail="No closed shift available for reconciliation or shift already reconciled",
-        )
+    # Get the shift to reconcile
+    if shift_id:
+        till_shift = session.get(TillShift, shift_id)
+        if not till_shift:
+            raise HTTPException(status_code=404, detail="Shift not found")
+        if till_shift.status == "open":
+            raise HTTPException(
+                status_code=400, detail="Cannot reconcile an open shift. Close it first."
+            )
+        if till_shift.status == "reconciled":
+            raise HTTPException(
+                status_code=400, detail="This shift has already been reconciled"
+            )
+    else:
+        # Get the most recently closed shift
+        till_shift = get_last_closed_shift(session)
+        if not till_shift:
+            raise HTTPException(
+                status_code=400, detail="No closed shift available for reconciliation"
+            )
+        if till_shift.status == "reconciled":
+            raise HTTPException(
+                status_code=400, detail="The last closed shift has already been reconciled"
+            )
 
     # Check authorization
     if not current_user.is_superuser and till_shift.opened_by_id != current_user.id:
@@ -330,27 +408,31 @@ def reconcile_shift(
         session.add(pm_reconciliation)
         payment_reconciliations.append(pm_reconciliation)
 
-    # Create cashier variance record if there's any variance
-    if total_variance != 0:
-        variance_type = "shortage" if total_variance < 0 else "overage"
-        cashier_variance = CashierVariance(
-            till_shift_id=till_shift.id,
-            cashier_id=till_shift.opened_by_id,
-            total_variance=abs(total_variance),
-            variance_type=variance_type,
-            notes=notes,
-        )
-        session.add(cashier_variance)
+    # Determine variance type and create cashier variance record
+    if total_variance == 0:
+        variance_type = "none"
     else:
-        # Record zero variance
-        cashier_variance = CashierVariance(
-            till_shift_id=till_shift.id,
-            cashier_id=till_shift.opened_by_id,
-            total_variance=Decimal(0),
-            variance_type="none",
-            notes=notes,
-        )
-        session.add(cashier_variance)
+        variance_type = "shortage" if total_variance < 0 else "overage"
+    
+    # Variance threshold check (configurable - default 100)
+    VARIANCE_THRESHOLD = Decimal("100.00")  # Could be moved to settings
+    variance_amount = abs(total_variance)
+    is_significant_variance = variance_amount >= VARIANCE_THRESHOLD
+    
+    # Add threshold info to notes if significant
+    final_notes = notes or ""
+    if is_significant_variance:
+        threshold_note = f"\n[ALERT: Variance exceeds threshold of {VARIANCE_THRESHOLD}]"
+        final_notes = final_notes + threshold_note if final_notes else threshold_note
+    
+    cashier_variance = CashierVariance(
+        till_shift_id=till_shift.id,
+        cashier_id=till_shift.opened_by_id,
+        total_variance=variance_amount,
+        variance_type=variance_type,
+        notes=final_notes,
+    )
+    session.add(cashier_variance)
 
     # Mark shift as reconciled
     till_shift.status = "reconciled"
@@ -454,6 +536,83 @@ def get_cashier_variances(
         total_shortage=total_shortage,
         total_overage=total_overage,
     )
+
+
+@router.get("/summary/{shift_id}", response_model=dict)
+def get_shift_summary(
+    *,
+    session: SessionDep,
+    current_user: CurrentUser,
+    shift_id: uuid.UUID,
+) -> Any:
+    """
+    Get comprehensive summary for a specific shift.
+    Includes sales totals, payment method breakdown, duration, and variance info.
+    """
+    till_shift = session.get(TillShift, shift_id)
+    if not till_shift:
+        raise HTTPException(status_code=404, detail="Shift not found")
+
+    # Check authorization
+    if not current_user.is_superuser and till_shift.opened_by_id != current_user.id:
+        raise HTTPException(
+            status_code=403, detail="You can only view summaries for your own shifts"
+        )
+
+    # Calculate system counts
+    system_counts = calculate_system_counts(session, till_shift)
+
+    # Get sales during shift
+    conditions: list[ColumnElement[bool]] = [
+        col(Sale.sale_date) >= till_shift.opening_time,
+        col(Sale.created_by_id) == till_shift.opened_by_id,
+    ]
+    if till_shift.closing_time:
+        conditions.append(col(Sale.sale_date) <= till_shift.closing_time)
+
+    sales = session.exec(select(Sale).where(and_(*conditions))).all()
+
+    # Calculate totals
+    total_sales = sum(Decimal(str(sale.total_amount or 0)) for sale in sales)
+    total_items = sum(sale.quantity or 0 for sale in sales)
+
+    # Calculate duration
+    if till_shift.closing_time:
+        duration_seconds = (till_shift.closing_time - till_shift.opening_time).total_seconds()
+        duration_hours = duration_seconds / 3600
+    else:
+        duration_seconds = (datetime.now(timezone.utc) - till_shift.opening_time).total_seconds()
+        duration_hours = duration_seconds / 3600
+
+    # Get variance if reconciled
+    variance_info = None
+    if till_shift.status == "reconciled":
+        variance = session.exec(
+            select(CashierVariance).where(CashierVariance.till_shift_id == till_shift.id)
+        ).first()
+        if variance:
+            variance_info = {
+                "total_variance": float(variance.total_variance),
+                "variance_type": variance.variance_type,
+            }
+
+    return {
+        "shift_id": str(till_shift.id),
+        "shift_type": till_shift.shift_type,
+        "status": till_shift.status,
+        "opened_by": till_shift.opened_by.full_name or till_shift.opened_by.email if till_shift.opened_by else None,
+        "opening_time": till_shift.opening_time.isoformat(),
+        "closing_time": till_shift.closing_time.isoformat() if till_shift.closing_time else None,
+        "duration_hours": round(duration_hours, 2),
+        "opening_cash_float": float(till_shift.opening_cash_float),
+        "opening_balance": float(till_shift.opening_balance) if till_shift.opening_balance else 0,
+        "closing_cash_float": float(till_shift.closing_cash_float) if till_shift.closing_cash_float else None,
+        "total_sales": float(total_sales),
+        "total_transactions": len(sales),
+        "total_items_sold": total_items,
+        "payment_methods": list(system_counts.values()),
+        "variance": variance_info,
+    }
 
 
 @router.get("", response_model=TillShiftsPublic)

@@ -13,6 +13,7 @@ import { ProductTable } from "@/components/POS/ProductTable"
 import { ReceiptDetails } from "@/components/POS/ReceiptDetails"
 import { ReceiptPreviewModal } from "@/components/POS/ReceiptPreviewModal"
 import { RecentReceiptsModal } from "@/components/POS/RecentReceiptsModal"
+import { QuickSaleHistory } from "@/components/POS/QuickSaleHistory"
 import type { CartItem, SuspendedSale } from "@/components/POS/types"
 import { toaster } from "@/components/ui/toaster"
 import {
@@ -62,6 +63,7 @@ function Sales() {
   const [isCustomerPanelOpen, setIsCustomerPanelOpen] = useState(false) // Mobile: customer panel collapsed by default
   const [isRecentReceiptsModalOpen, setIsRecentReceiptsModalOpen] =
     useState(false)
+  const [isQuickSaleHistoryOpen, setIsQuickSaleHistoryOpen] = useState(false)
   const [isReceiptPreviewModalOpen, setIsReceiptPreviewModalOpen] =
     useState(false)
   const [isCreditNoteModalOpen, setIsCreditNoteModalOpen] = useState(false)
@@ -177,6 +179,11 @@ function Sales() {
           }
         }
       }
+      // F5 - Quick Sale History
+      if (e.key === "F5") {
+        e.preventDefault()
+        setIsQuickSaleHistoryOpen(true)
+      }
     }
 
     window.addEventListener("keydown", handleKeyDown)
@@ -192,6 +199,7 @@ function Sales() {
     pricelist,
     remarks,
     showToast,
+    setIsQuickSaleHistoryOpen,
   ])
 
   // Check till status
@@ -315,13 +323,34 @@ function Sales() {
     )
   }
 
-  const updateDiscount = (productId: string, discount: number) => {
+  const updateDiscount = (
+    productId: string,
+    discount: number,
+    discountType: "percentage" | "fixed" = "percentage",
+    fixedDiscount?: number,
+  ) => {
     setCart((prevCart) =>
-      prevCart.map((item) =>
-        item.product.id === productId
-          ? { ...item, discount: Math.max(0, Math.min(100, discount)) }
-          : item,
-      ),
+      prevCart.map((item) => {
+        if (item.product.id === productId) {
+          if (discountType === "fixed") {
+            const maxDiscount = Number(item.product.selling_price) * item.quantity
+            return {
+              ...item,
+              discount: 0,
+              discountType: "fixed",
+              fixedDiscount: Math.max(0, Math.min(maxDiscount, fixedDiscount ?? discount)),
+            }
+          } else {
+            return {
+              ...item,
+              discount: Math.max(0, Math.min(100, discount)),
+              discountType: "percentage",
+              fixedDiscount: undefined,
+            }
+          }
+        }
+        return item
+      }),
     )
   }
 
@@ -329,8 +358,11 @@ function Sales() {
   const cartTotal = useMemo(() => {
     return cart.reduce((total, item) => {
       const price = Number(item.product.selling_price)
+      const discountType = item.discountType || "percentage"
       const discountAmount =
-        (price * item.quantity * (item.discount || 0)) / 100
+        discountType === "fixed" && item.fixedDiscount
+          ? item.fixedDiscount
+          : (price * item.quantity * (item.discount || 0)) / 100
       return total + (price * item.quantity - discountAmount)
     }, 0)
   }, [cart])
@@ -464,8 +496,11 @@ function Sales() {
       for (let itemIndex = 0; itemIndex < cart.length; itemIndex++) {
         const item = cart[itemIndex]
         const unitPrice = Number(item.product.selling_price)
+        const discountType = item.discountType || "percentage"
         const discountAmount =
-          (unitPrice * item.quantity * (item.discount || 0)) / 100
+          discountType === "fixed" && item.fixedDiscount
+            ? item.fixedDiscount
+            : (unitPrice * item.quantity * (item.discount || 0)) / 100
         const itemTotal = unitPrice * item.quantity - discountAmount
 
         // Calculate payment amounts proportionally for this item
@@ -737,6 +772,7 @@ function Sales() {
         onCompleteSale={openPaymentModal}
         onCreditNote={() => setIsCreditNoteModalOpen(true)}
         onCashMovement={() => setIsCashMovementModalOpen(true)}
+        onQuickSaleHistory={() => setIsQuickSaleHistoryOpen(true)}
         cartLength={cart.length}
         selectedSaleId={selectedSaleId}
         isPending={createSale.isPending}
@@ -941,6 +977,16 @@ function Sales() {
           setSelectedReceiptId(null)
         }}
         receiptId={selectedReceiptId}
+      />
+
+      <QuickSaleHistory
+        isOpen={isQuickSaleHistoryOpen}
+        onClose={() => setIsQuickSaleHistoryOpen(false)}
+        onViewReceipt={(receiptId) => {
+          setSelectedReceiptId(receiptId)
+          setIsReceiptPreviewModalOpen(true)
+          setIsQuickSaleHistoryOpen(false)
+        }}
       />
 
       <CreditNoteModal

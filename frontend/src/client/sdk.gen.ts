@@ -2014,6 +2014,31 @@ export class SalesService {
     }
     
     /**
+     * Get Recent Sales
+     * Get recent sales for quick access in POS.
+     * Returns the most recent sales for the current cashier (or all sales for admin).
+     * Useful for quick lookup and voiding recent transactions.
+     * @param data The data for the request.
+     * @param data.limit Number of recent sales to return
+     * @param data.includeVoided Include voided sales
+     * @returns SalesPublic Successful Response
+     * @throws ApiError
+     */
+    public static getRecentSales(data: { limit?: number; includeVoided?: boolean } = {}): CancelablePromise<SalesReadSalesResponse> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/v1/sales/recent',
+            query: {
+                limit: data.limit,
+                include_voided: data.includeVoided
+            },
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+    
+    /**
      * Get Today Sales Summary
      * Get today's sales summary for the current cashier.
      * Returns total sales, total amount, and breakdown by payment method.

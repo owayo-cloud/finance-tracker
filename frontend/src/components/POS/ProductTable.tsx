@@ -55,7 +55,7 @@ export function ProductTable({
                 Price
               </Table.ColumnHeader>
               <Table.ColumnHeader color="text.primary">
-                Disc%
+                Discount
               </Table.ColumnHeader>
               <Table.ColumnHeader color="text.primary">
                 Total
@@ -66,8 +66,11 @@ export function ProductTable({
           <Table.Body>
             {cart.map((item) => {
               const price = Number(item.product.selling_price)
+              const discountType = item.discountType || "percentage"
               const discountAmount =
-                (price * item.quantity * (item.discount || 0)) / 100
+                discountType === "fixed" && item.fixedDiscount
+                  ? item.fixedDiscount
+                  : (price * item.quantity * (item.discount || 0)) / 100
               const total = price * item.quantity - discountAmount
               return (
                 <Table.Row key={item.product.id}>
@@ -130,33 +133,47 @@ export function ProductTable({
                   </Table.Cell>
                   <Table.Cell>
                     {isAuditor ? (
-                      <Text textAlign="center" color="text.primary">
-                        {item.discount || 0}%
+                      <Text textAlign="center" color="text.primary" fontSize="xs">
+                        {discountType === "fixed"
+                          ? `Ksh ${formatCurrency(item.fixedDiscount || 0)}`
+                          : `${item.discount || 0}%`}
                       </Text>
                     ) : (
-                      <Input
-                        type="number"
-                        value={item.discount || 0}
-                        onChange={(e) =>
-                          onUpdateDiscount(
-                            item.product.id,
-                            parseFloat(e.target.value) || 0,
-                          )
-                        }
-                        size="sm"
-                        w="80px"
-                        min={0}
-                        max={100}
-                        step="0.001"
-                        textAlign="center"
-                        bg="input.bg"
-                        borderColor="input.border"
-                        color="text.primary"
-                        _focus={{
-                          borderColor: "input.focus.border",
-                          boxShadow: "input.focus.shadow",
-                        }}
-                      />
+                      <HStack gap={1}>
+                        <Input
+                          type="number"
+                          value={
+                            discountType === "fixed"
+                              ? item.fixedDiscount || 0
+                              : item.discount || 0
+                          }
+                          onChange={(e) => {
+                            const value = parseFloat(e.target.value) || 0
+                            if (discountType === "fixed") {
+                              onUpdateDiscount(item.product.id, 0, "fixed", value)
+                            } else {
+                              onUpdateDiscount(item.product.id, value)
+                            }
+                          }}
+                          size="sm"
+                          w="70px"
+                          min={0}
+                          max={discountType === "fixed" ? price * item.quantity : 100}
+                          step={discountType === "fixed" ? "0.01" : "0.1"}
+                          textAlign="center"
+                          bg="input.bg"
+                          borderColor="input.border"
+                          color="text.primary"
+                          placeholder={discountType === "fixed" ? "0.00" : "0"}
+                          _focus={{
+                            borderColor: "input.focus.border",
+                            boxShadow: "input.focus.shadow",
+                          }}
+                        />
+                        <Text fontSize="xs" color="text.muted" minW="20px">
+                          {discountType === "fixed" ? "Ksh" : "%"}
+                        </Text>
+                      </HStack>
                     )}
                   </Table.Cell>
                   <Table.Cell

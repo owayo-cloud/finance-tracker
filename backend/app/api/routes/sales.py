@@ -210,7 +210,7 @@ def create_sale(
     if not open_shift:
         raise HTTPException(
             status_code=403,
-            detail="POS is locked. Please open a till before making sales.",
+            detail="POS is locked. Please open a till shift before making sales. Go to Shift Reconciliation to open a till.",
         )
 
     # Verify current_user is valid and active
@@ -250,9 +250,19 @@ def create_sale(
         )
 
     if product.current_stock < sale_in.quantity:
+        available = product.current_stock
+        requested = sale_in.quantity
+        shortfall = requested - available
         raise HTTPException(
             status_code=400,
-            detail=f"Insufficient stock for '{product.name}'. Available: {product.current_stock}, Requested: {sale_in.quantity}",
+            detail=f"Insufficient stock for '{product.name}'. Available: {available}, Requested: {requested}, Shortfall: {shortfall}",
+        )
+
+    # Warn if stock is low (less than 5 units remaining after sale)
+    remaining_stock = product.current_stock - sale_in.quantity
+    if remaining_stock < 5:
+        logger.warning(
+            f"Low stock warning: Product '{product.name}' will have {remaining_stock} units remaining after this sale"
         )
 
     # Validate payment method
@@ -346,7 +356,7 @@ def create_sale_with_multiple_payments(
     if not open_shift:
         raise HTTPException(
             status_code=403,
-            detail="POS is locked. Please open a till before making sales.",
+            detail="POS is locked. Please open a till shift before making sales. Go to Shift Reconciliation to open a till.",
         )
 
     # Verify current_user is valid and active
@@ -773,6 +783,54 @@ def read_sales(
     return SalesPublic(data=sales, count=count)
 
 
+@router.get("/recent", response_model=SalesPublic)
+def get_recent_sales(
+    session: SessionDep,
+    current_user: CurrentUser,
+    limit: int = Query(10, ge=1, le=50, description="Number of recent sales to return"),
+    include_voided: bool = Query(False, description="Include voided sales"),
+) -> Any:
+    """
+    Get recent sales for quick access in POS.
+    Returns the most recent sales for the current cashier (or all sales for admin).
+    Useful for quick lookup and voiding recent transactions.
+    """
+    from app.api.utils.till_utils import get_current_open_shift
+
+    conditions: list[ColumnElement[bool]] = []
+
+    # Filter by cashier unless admin
+    if not current_user.is_superuser:
+        conditions.append(Sale.created_by_id == current_user.id)  # type: ignore[arg-type]
+
+    # Exclude voided sales unless requested
+    if not include_voided:
+        conditions.append(Sale.voided.is_(False))  # type: ignore[arg-type]
+
+    # Get current shift if open
+    open_shift = get_current_open_shift(session)
+    if open_shift and not current_user.is_superuser:
+        # For cashiers, only show sales from current shift
+        conditions.append(Sale.sale_date >= open_shift.opening_time)  # type: ignore[arg-type]
+
+    statement = (
+        select(Sale)
+        .options(
+            selectinload(Sale.product),
+            selectinload(Sale.payment_method),
+            selectinload(Sale.created_by),
+        )
+        .where(and_(*conditions) if conditions else True)
+        .order_by(desc(Sale.sale_date))
+        .limit(limit)
+    )
+
+    sales = session.exec(statement).all()
+    count = len(sales)
+
+    return SalesPublic(data=sales, count=count)
+
+
 @router.get("/today-summary", response_model=dict)
 def get_today_sales_summary(session: SessionDep, current_user: CurrentUser) -> Any:
     """
@@ -856,15 +914,110 @@ def read_sale(
     return sale
 
 
+@router.post("/{sale_id}/void", response_model=SalePublic)
+def void_sale(
+    *,
+    session: SessionDep,
+    current_user: CurrentUser,
+    sale_id: uuid.UUID,
+    reason: str = Query(..., min_length=1, max_length=500, description="Reason for voiding the sale"),
+) -> Any:
+    """
+    Void a sale (mark as cancelled).
+    - Restores product stock
+    - Marks sale as voided (doesn't delete)
+    - Only the cashier who made the sale or admin can void it
+    - Can only void sales from current shift (unless admin)
+    """
+    # Check if till is open
+    from app.api.utils.till_utils import get_current_open_shift
+
+    open_shift = get_current_open_shift(session)
+    if not open_shift:
+        raise HTTPException(
+            status_code=403,
+            detail="POS is locked. Please open a till before voiding sales.",
+        )
+
+    # Get sale with product locked to prevent race conditions
+    sale = session.exec(
+        select(Sale)
+        .where(Sale.id == sale_id)
+        .options(selectinload(Sale.product))
+        .with_for_update()
+    ).first()
+
+    if not sale:
+        raise HTTPException(status_code=404, detail="Sale not found")
+
+    # Check if already voided
+    if sale.voided:
+        raise HTTPException(
+            status_code=400, detail="This sale has already been voided"
+        )
+
+    # Authorization: Only the cashier who made the sale or admin can void it
+    if not current_user.is_superuser and sale.created_by_id != current_user.id:
+        raise HTTPException(
+            status_code=403,
+            detail="You can only void sales that you created",
+        )
+
+    # Check if sale is from current shift (optional - can be relaxed for admin)
+    if not current_user.is_superuser:
+        if sale.sale_date < open_shift.opening_time:
+            raise HTTPException(
+                status_code=400,
+                detail="Cannot void sales from previous shifts. Only current shift sales can be voided.",
+            )
+
+    # Restore product stock
+    product = sale.product
+    if product:
+        product.current_stock = (product.current_stock or 0) + sale.quantity
+        session.add(product)
+
+    # Mark sale as voided
+    sale.voided = True
+    sale.void_reason = reason
+    sale.updated_at = datetime.now(timezone.utc)
+
+    session.add(sale)
+
+    try:
+        session.commit()
+        session.refresh(sale)
+    except Exception as e:
+        session.rollback()
+        raise HTTPException(
+            status_code=500, detail=f"Failed to void sale: {str(e)}"
+        )
+
+    # Load relationships for response
+    session.refresh(sale.product)
+    session.refresh(sale.payment_method)
+    session.refresh(sale.created_by)
+
+    return sale
+
+
 @router.delete("/{sale_id}")
 def delete_sale(session: SessionDep, admin_user: AdminUser, sale_id: uuid.UUID) -> Any:
     """
     Delete a sale (admin only).
     Note: This also restores the product stock.
+    Prefer voiding sales instead of deleting them to maintain audit trail.
     """
     sale = session.get(Sale, sale_id)
     if not sale:
         raise HTTPException(status_code=404, detail="Sale not found")
+
+    # Warn if trying to delete a non-voided sale
+    if not sale.voided:
+        raise HTTPException(
+            status_code=400,
+            detail="Cannot delete a non-voided sale. Please void it first, then delete if necessary.",
+        )
 
     # Restore product stock with row lock to prevent race conditions
     product = session.exec(

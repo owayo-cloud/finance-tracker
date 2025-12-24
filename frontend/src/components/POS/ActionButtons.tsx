@@ -4,6 +4,7 @@ import {
   FiCreditCard,
   FiDollarSign,
   FiFileText,
+  FiHistory,
   FiHome,
   FiLogOut,
   FiPause,
@@ -19,6 +20,7 @@ interface ActionButtonsProps {
   onCompleteSale: () => void
   onCreditNote?: () => void
   onCashMovement?: () => void
+  onQuickSaleHistory?: () => void
   cartLength: number
   selectedSaleId: string | null
   isPending?: boolean
@@ -34,6 +36,7 @@ export function ActionButtons({
   onCompleteSale,
   onCreditNote,
   onCashMovement,
+  onQuickSaleHistory,
   cartLength,
   selectedSaleId,
   isPending = false,
@@ -144,6 +147,18 @@ export function ActionButtons({
               <Icon as={FiCreditCard} mr={2} />
               Payment
             </Button>
+            {onQuickSaleHistory && (
+              <Button
+                bg="brand.primary"
+                color="white"
+                _hover={{ bg: "brand.primary.hover" }}
+                size="sm"
+                onClick={onQuickSaleHistory}
+              >
+                <Icon as={FiHistory} mr={2} />
+                Quick History (F5)
+              </Button>
+            )}
           </>
         )}
       </Flex>

@@ -375,8 +375,11 @@ export function CustomerPanel({
                   suspendedSales.map((sale) => {
                     const total = sale.cart.reduce((sum, item) => {
                       const price = Number(item.product.selling_price)
+                      const discountType = item.discountType || "percentage"
                       const discountAmount =
-                        (price * item.quantity * (item.discount || 0)) / 100
+                        discountType === "fixed" && item.fixedDiscount
+                          ? item.fixedDiscount
+                          : (price * item.quantity * (item.discount || 0)) / 100
                       return sum + (price * item.quantity - discountAmount)
                     }, 0)
                     const itemsCount = sale.cart.reduce(

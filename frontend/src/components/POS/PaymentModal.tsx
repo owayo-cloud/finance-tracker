@@ -549,8 +549,11 @@ export function PaymentModal({
                     <Table.Body>
                       {cart.map((item) => {
                         const price = Number(item.product.selling_price)
+                        const discountType = item.discountType || "percentage"
                         const discountAmount =
-                          (price * item.quantity * (item.discount || 0)) / 100
+                          discountType === "fixed" && item.fixedDiscount
+                            ? item.fixedDiscount
+                            : (price * item.quantity * (item.discount || 0)) / 100
                         const itemTotal = price * item.quantity - discountAmount
                         return (
                           <Table.Row key={item.product.id}>

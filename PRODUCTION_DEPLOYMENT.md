@@ -150,16 +150,173 @@ cd /root/code/finance-tracker
 
 From your **local machine**, copy the project files:
 
+## For Windows Users
+
+You have two options:
+
+### Option A: Use WSL (Recommended - Already Using Bash)
+
+**Install rsync in WSL:**
+
 ```bash
-# Option 1: Using rsync (recommended - excludes node_modules, __pycache__, etc.)
-rsync -avz --exclude 'node_modules' --exclude '__pycache__' --exclude '.git' \
-  --exclude 'dist' --exclude 'htmlcov' --exclude '*.pyc' \
+# Open WSL terminal and run:
+sudo apt update && sudo apt install -y rsync
+```
+
+**Then use the rsync commands below.**
+
+### Option B: Use Windows PowerShell
+
+If you prefer PowerShell, you can use `scp` (comes with Windows 10/11) or install `rsync` via WSL and call it from PowerShell:
+
+```powershell
+# From PowerShell, call WSL rsync:
+wsl rsync -avz --exclude-from=.rsyncignore `
+  /mnt/c/Users/uchiha/Documents/projects/finance-tracker/ `
+  root@173.255.249.250:/root/code/finance-tracker/
+```
+
+**Note:** In PowerShell, use backticks (`) for line continuation instead of backslashes.
+
+---
+
+## Deployment Methods
+
+```bash
+# Option 1: Using rsync (recommended - excludes unnecessary files)
+rsync -avz \
+  --exclude '.git' \
+  --exclude 'node_modules' \
+  --exclude '__pycache__' \
+  --exclude '*.pyc' \
+  --exclude '*.pyo' \
+  --exclude '*.pyd' \
+  --exclude '.pytest_cache' \
+  --exclude '.ruff_cache' \
+  --exclude '.mypy_cache' \
+  --exclude 'dist' \
+  --exclude 'build' \
+  --exclude 'htmlcov' \
+  --exclude 'coverage' \
+  --exclude 'test-results' \
+  --exclude 'blob-report' \
+  --exclude '.vite' \
+  --exclude '.tanstack' \
+  --exclude '*.log' \
+  --exclude '*.tsbuildinfo' \
+  --exclude 'bundle-analysis.html' \
+  --exclude '*.md' \
+  --exclude '*.MD' \
+  --exclude 'tests' \
+  --exclude 'test_*.py' \
+  --exclude 'test_*.csv' \
+  --exclude 'test-*.sh' \
+  --exclude 'fix-*.sh' \
+  --exclude 'cleanup-*.sh' \
+  --exclude 'diagnose-*.sh' \
+  --exclude 'troubleshoot-*.sh' \
+  --exclude 'check-*.sh' \
+  --exclude 'watch-*.sh' \
+  --exclude 'setup-*.sh' \
+  --exclude 'install-*.sh' \
+  --exclude 'restart-*.sh' \
+  --exclude 'deploy-*.sh' \
+  --exclude 'manual-deploy.sh' \
+  --exclude 'docker-compose.override.yml' \
+  --exclude 'example.env' \
+  --exclude '.env.local' \
+  --exclude '.env.*.local' \
+  --exclude '.vscode' \
+  --exclude '.idea' \
+  --exclude '.DS_Store' \
+  --exclude 'Thumbs.db' \
+  --exclude '*.swp' \
+  --exclude '*.swo' \
+  --exclude '*.tmp' \
+  --exclude '*.bak' \
+  --exclude '*.backup' \
   /home/uchiha/Documents/projects/finance-tracker/ \
   root@YOUR_LINODE_IP:/root/code/finance-tracker/
+```
 
-# Option 2: Using scp (simpler but slower)
-scp -r /home/uchiha/Documents/projects/finance-tracker/* \
-  root@YOUR_LINODE_IP:/root/code/finance-tracker/
+**Note:** Replace `YOUR_LINODE_IP` with your actual server IP address (e.g., `173.255.249.250`).
+
+**Simpler Option: Use .rsyncignore file (recommended)**
+
+A `.rsyncignore` file has been created in the project root with all necessary exclusions. Use this simpler command:
+
+**For WSL users (Windows):**
+
+```bash
+# Navigate to your project in WSL
+# Windows path C:\Users\uchiha\Documents\projects\finance-tracker
+# becomes /mnt/c/Users/uchiha/Documents/projects/finance-tracker in WSL
+
+cd /mnt/c/Users/uchiha/Documents/projects/finance-tracker
+
+# Deploy using rsync
+rsync -avz --exclude-from=.rsyncignore \
+  /mnt/c/Users/uchiha/Documents/projects/finance-tracker/ \
+  root@173.255.249.250:/root/code/finance-tracker/
+```
+
+**For Linux/Mac users:**
+
+```bash
+cd /home/uchiha/Documents/projects/finance-tracker
+
+rsync -avz --exclude-from=.rsyncignore \
+  /home/uchiha/Documents/projects/finance-tracker/ \
+  root@173.255.249.250:/root/code/finance-tracker/
+```
+
+This will exclude:
+- All `.md` documentation files
+- Test files and directories
+- Development scripts (`fix-*.sh`, `cleanup-*.sh`, etc.)
+- Build artifacts (`dist/`, `node_modules/`, `__pycache__/`, etc.)
+- IDE and OS files
+- Temporary and backup files
+- Development-only Docker compose files
+
+**Alternative: Using tar + ssh (if rsync is not available):**
+
+If you can't install rsync, you can use tar with exclusions:
+
+```bash
+cd /home/uchiha/Documents/projects/finance-tracker
+
+# Create a tar archive excluding unnecessary files
+tar --exclude='.git' \
+    --exclude='node_modules' \
+    --exclude='__pycache__' \
+    --exclude='*.pyc' \
+    --exclude='dist' \
+    --exclude='build' \
+    --exclude='htmlcov' \
+    --exclude='test-results' \
+    --exclude='blob-report' \
+    --exclude='*.md' \
+    --exclude='tests' \
+    --exclude='test_*.py' \
+    --exclude='test_*.csv' \
+    --exclude='fix-*.sh' \
+    --exclude='cleanup-*.sh' \
+    --exclude='docker-compose.override.yml' \
+    --exclude='.vscode' \
+    --exclude='.idea' \
+    -czf - . | ssh root@173.255.249.250 "cd /root/code && rm -rf finance-tracker && mkdir -p finance-tracker && cd finance-tracker && tar -xzf -"
+```
+
+**Or using tar with .rsyncignore (convert to tar exclusions):**
+
+```bash
+cd /home/uchiha/Documents/projects/finance-tracker
+
+# Convert .rsyncignore to tar exclusions
+EXCLUDES=$(grep -v '^#' .rsyncignore | grep -v '^$' | sed 's/^/--exclude=/' | tr '\n' ' ')
+
+tar $EXCLUDES -czf - . | ssh root@173.255.249.250 "cd /root/code && rm -rf finance-tracker && mkdir -p finance-tracker && cd finance-tracker && tar -xzf -"
 ```
 
 ### 5.3 Create Production .env File
@@ -243,7 +400,69 @@ export BACKEND_CORS_ORIGINS="https://dashboard.wiseman-palace.co.ke,https://api.
 
 ## Step 6: Deploy the Application
 
-### 6.1 Build and Start Services
+### 6.1 Create Minimal Tests Directory (Required)
+
+Since the `tests` directory is excluded by `.rsyncignore`, create a minimal structure to avoid Docker build failures:
+
+```bash
+cd /root/code/finance-tracker
+
+# Create minimal tests directory structure
+mkdir -p backend/tests
+touch backend/tests/__init__.py
+
+# Verify it was created
+ls -la backend/tests/
+```
+
+### 6.2 Check and Free Disk Space (If Needed)
+
+If you encounter "no space left on device" errors, clean up Docker:
+
+```bash
+# Check disk space
+df -h
+
+# Check Docker disk usage
+docker system df
+
+# Clean up Docker (removes unused images, containers, networks, build cache)
+docker system prune -a --volumes -f
+
+# Remove dangling images
+docker image prune -a -f
+
+# Remove unused volumes
+docker volume prune -f
+
+# Check space again
+df -h
+```
+
+**Note:** The `docker system prune -a` command will remove ALL unused Docker resources. Make sure no other applications are using Docker images you need.
+
+### 6.3 Generate Frontend Client (If Needed)
+
+The frontend client files should be generated before building. If they're missing, generate them:
+
+```bash
+cd /root/code/finance-tracker
+
+# Option 1: If backend is running, download OpenAPI spec and generate
+# First, make sure backend is accessible or copy openapi.json from your local machine
+
+# Option 2: Generate client from existing openapi.json (if present)
+if [ -f "frontend/openapi.json" ]; then
+    cd frontend
+    npm install  # Ensure dependencies are installed
+    npm run generate-client
+    cd ..
+fi
+```
+
+**Note:** The Dockerfile will also attempt to generate the client during build if `openapi.json` exists.
+
+### 6.4 Build and Start Services
 
 ```bash
 cd /root/code/finance-tracker
@@ -251,7 +470,13 @@ docker compose -f docker-compose.yml build
 docker compose -f docker-compose.yml up -d
 ```
 
-### 6.2 Check Service Status
+**Note on Build Optimization:**
+The frontend build is configured with code splitting to reduce initial bundle size:
+- Vendor libraries are split into separate chunks (React, TanStack, Chakra UI, etc.)
+- This improves initial page load time by loading only what's needed
+- The main bundle should now be under 500 KB (gzipped)
+
+### 6.5 Check Service Status
 
 ```bash
 # Check all containers
@@ -266,7 +491,7 @@ docker compose logs frontend
 docker compose logs db
 ```
 
-### 6.3 Verify Supervisor Processes
+### 6.6 Verify Supervisor Processes
 
 ```bash
 # Get backend container name

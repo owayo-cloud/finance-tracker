@@ -149,8 +149,12 @@ export function ProductTable({
                           }
                           onChange={(e) => {
                             const value = parseFloat(e.target.value) || 0
+                            // Note: onUpdateDiscount only accepts (productId, discount)
+                            // The discount type handling should be done in the parent component
                             if (discountType === "fixed") {
-                              onUpdateDiscount(item.product.id, 0, "fixed", value)
+                              // Convert fixed discount to percentage for the callback
+                              const percentageDiscount = price > 0 ? (value / price) * 100 : 0
+                              onUpdateDiscount(item.product.id, percentageDiscount)
                             } else {
                               onUpdateDiscount(item.product.id, value)
                             }

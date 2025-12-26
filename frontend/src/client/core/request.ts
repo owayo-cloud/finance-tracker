@@ -108,37 +108,6 @@ export const getFormData = (options: ApiRequestOptions): FormData | undefined =>
 	return undefined;
 };
 
-export const getUrlEncodedFormData = (options: ApiRequestOptions): string | undefined => {
-	if (options.formData && options.mediaType === 'application/x-www-form-urlencoded') {
-		const params = new URLSearchParams();
-
-		const process = (key: string, value: unknown) => {
-			if (isString(value)) {
-				params.append(key, value);
-			} else if (isBlob(value)) {
-				// For blobs, we can't use URL-encoded, so this shouldn't happen
-				// but if it does, we'll skip it silently
-				// Note: Blobs should not be used with URL-encoded form data
-			} else {
-				params.append(key, String(value));
-			}
-		};
-
-		Object.entries(options.formData)
-			.filter(([, value]) => value !== undefined && value !== null)
-			.forEach(([key, value]) => {
-				if (Array.isArray(value)) {
-					value.forEach(v => process(key, v));
-				} else {
-					process(key, value);
-				}
-			});
-
-		return params.toString();
-	}
-	return undefined;
-};
-
 type Resolver<T> = (options: ApiRequestOptions<T>) => Promise<T>;
 
 export const resolve = async <T>(options: ApiRequestOptions<T>, resolver?: T | Resolver<T>): Promise<T | undefined> => {
@@ -202,10 +171,6 @@ export const getHeaders = async <T>(config: OpenAPIConfig, options: ApiRequestOp
 export const getRequestBody = (options: ApiRequestOptions): unknown => {
 	if (options.body) {
 		return options.body;
-	}
-	// If mediaType is URL-encoded, convert formData to URL-encoded string
-	if (options.formData && options.mediaType === 'application/x-www-form-urlencoded') {
-		return getUrlEncodedFormData(options);
 	}
 	return undefined;
 };
@@ -344,10 +309,7 @@ export const request = <T>(config: OpenAPIConfig, options: ApiRequestOptions<T>,
 	return new CancelablePromise(async (resolve, reject, onCancel) => {
 		try {
 			const url = getUrl(config, options);
-			// Only use FormData if mediaType is NOT URL-encoded
-			const formData = (options.formData && options.mediaType !== 'application/x-www-form-urlencoded') 
-				? getFormData(options) 
-				: undefined;
+			const formData = getFormData(options);
 			const body = getRequestBody(options);
 			const headers = await getHeaders(config, options);
 

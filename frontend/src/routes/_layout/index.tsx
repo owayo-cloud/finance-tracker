@@ -38,7 +38,6 @@ function Dashboard() {
       SalesService.readSales({
         skip: 0,
         limit: 100,
-        excludeWithDebt: true, // Exclude sales with unpaid debts from revenue
       }),
   })
 

@@ -1,0 +1,112 @@
+# Git
+.git
+.gitignore
+
+# Python
+__pycache__
+*.pyc
+*.pyo
+*.pyd
+.Python
+*.so
+*.egg-info
+*.egg
+.pytest_cache
+.ruff_cache
+.mypy_cache
+.coverage
+htmlcov
+.venv
+venv
+ENV
+env
+.python-version
+
+# Node.js / Frontend
+node_modules
+.pnpm-store
+dist
+build
+.vite
+.tanstack
+test-results
+blob-report
+coverage
+.nyc_output
+*.log
+*.tsbuildinfo
+bundle-analysis.html
+
+# Documentation
+*.md
+*.MD
+
+# Tests
+tests
+test_*.py
+test_*.csv
+test-*.sh
+
+# Development Scripts
+fix-*.sh
+cleanup-*.sh
+diagnose-*.sh
+troubleshoot-*.sh
+check-*.sh
+watch-*.sh
+setup-*.sh
+install-*.sh
+restart-*.sh
+deploy-*.sh
+manual-deploy.sh
+
+# Docker Development
+docker-compose.override.yml
+
+# Environment Files (keep example.env for reference, but exclude local variants)
+.env.local
+.env.*.local
+
+# IDE and Editor
+.vscode
+.idea
+*.swp
+*.swo
+*~
+.project
+.classpath
+.settings
+*.sublime-project
+*.sublime-workspace
+
+# OS Files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+desktop.ini
+
+# Temporary Files
+tmp
+temp
+*.tmp
+*.bak
+*.backup
+
+# Core Dumps (only root-level core files, not directories named 'core')
+/core
+core.*
+# Note: Removed blanket 'core' pattern to avoid excluding backend/app/core/ directory
+
+# Database Files
+*.db
+*.sqlite
+*.sqlite3
+
+# Uploads (if you want to exclude uploaded files)
+# backend/uploads/**/*
+# !backend/uploads/**/.gitkeep
+

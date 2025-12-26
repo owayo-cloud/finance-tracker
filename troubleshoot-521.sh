@@ -121,7 +121,7 @@ echo "8. Checking Traefik routing configuration..."
 echo "----------------------------------------"
 if [ -n "$TRAEFIK_CONTAINER" ]; then
     echo "   Checking Traefik API for registered routers:"
-    TRAEFIK_API=$(docker port "$TRAEFIK_CONTAINER" 2>/dev/null | grep 8080 | awk '{print $3}' | cut -d: -f1)
+    TRAEFIK_API=$(docker port "$TRAEFIK_CONTAINER" 2>/dev/null | grep 8080 | awk '{print $3}' | cut -d: -f2)
     if [ -n "$TRAEFIK_API" ]; then
         curl -s "http://localhost:$TRAEFIK_API/api/http/routers" 2>/dev/null | grep -o '"name":"[^"]*"' | head -10 || echo "   ⚠ Cannot query Traefik API"
     else
@@ -170,4 +170,3 @@ echo "6. Check firewall/iptables:"
 echo "   sudo iptables -L -n | grep -E '80|443'"
 echo "   sudo ufw status"
 echo ""
-

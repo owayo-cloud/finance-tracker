@@ -10,7 +10,7 @@ import {
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { useState } from "react"
 import { FiRefreshCw, FiX } from "react-icons/fi"
-import { SalesService } from "@/client"
+import { SalesService, type SalePublic } from "@/client"
 import {
   DialogBody,
   DialogCloseTrigger,
@@ -48,13 +48,16 @@ export function QuickSaleHistory({
   const [selectedSaleId, setSelectedSaleId] = useState<string | null>(null)
 
   // Fetch recent sales
-  const { data: recentSales, isLoading, refetch } = useQuery({
+  const { data: recentSalesResponse, isLoading, refetch } = useQuery({
     queryKey: ["recent-sales"],
-    queryFn: () => SalesService.getRecentSales({ limit: 20, includeVoided: false }),
+    queryFn: () => SalesService.readSales({ skip: 0, limit: 20 }),
     enabled: isOpen,
     refetchInterval: 10000, // Refresh every 10 seconds
   })
-
+  
+  // Extract sales array from response (API returns { data: SalePublic[], count: number })
+  const sales = (recentSalesResponse as any)?.data || []
+  
   // Void sale mutation
   const voidSaleMutation = useMutation({
     mutationFn: async ({ saleId, reason }: { saleId: string; reason: string }) => {
@@ -89,8 +92,6 @@ export function QuickSaleHistory({
       voidSaleMutation.mutate({ saleId, reason: reason.trim() })
     }
   }
-
-  const sales = recentSales?.data || []
 
   return (
     <DialogRoot
@@ -143,7 +144,7 @@ export function QuickSaleHistory({
                     </Table.Row>
                   </Table.Header>
                   <Table.Body>
-                    {sales.map((sale) => (
+                    {sales.map((sale: SalePublic) => (
                       <Table.Row
                         key={sale.id}
                         cursor="pointer"

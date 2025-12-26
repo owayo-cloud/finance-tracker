@@ -39,7 +39,6 @@ export function SalesChart(_props: SalesChartProps) {
         limit: 1000,
         startDate: startDate,
         endDate: endDate,
-        excludeWithDebt: true, // Exclude unpaid debt sales from revenue
       }),
   })
 

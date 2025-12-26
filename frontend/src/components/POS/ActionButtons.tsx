@@ -4,7 +4,7 @@ import {
   FiCreditCard,
   FiDollarSign,
   FiFileText,
-  FiHistory,
+  FiClock,
   FiHome,
   FiLogOut,
   FiPause,
@@ -155,7 +155,7 @@ export function ActionButtons({
                 size="sm"
                 onClick={onQuickSaleHistory}
               >
-                <Icon as={FiHistory} mr={2} />
+                <Icon as={FiClock} mr={2} />
                 Quick History (F5)
               </Button>
             )}

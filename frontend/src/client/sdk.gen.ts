@@ -3,7 +3,7 @@
 import type { CancelablePromise } from './core/CancelablePromise';
 import { OpenAPI } from './core/OpenAPI';
 import { request as __request } from './core/request';
-import type { AnalyticsGetSalesSummaryData, AnalyticsGetSalesSummaryResponse, AnalyticsGetStockSummaryResponse, AnalyticsGetBalanceSheetData, AnalyticsGetBalanceSheetResponse, AnalyticsGetDashboardStatsResponse, BulkImportDownloadTemplateResponse, BulkImportUploadFileData, BulkImportUploadFileResponse, BulkImportMapColumnsData, BulkImportMapColumnsResponse, BulkImportGetValidationResultsData, BulkImportGetValidationResultsResponse, BulkImportFixRowData, BulkImportFixRowResponse, BulkImportImportProductsData, BulkImportImportProductsResponse, BulkImportGetImportStatusData, BulkImportGetImportStatusResponse, CustomersGetCustomersData, CustomersGetCustomersResponse, DebtsReadDebtsData, DebtsReadDebtsResponse, DebtsCreateDebtData, DebtsCreateDebtResponse, DebtsReadDebtData, DebtsReadDebtResponse, DebtsUpdateDebtData, DebtsUpdateDebtResponse, DebtsDeleteDebtData, DebtsDeleteDebtResponse, DebtsCreateDebtPaymentData, DebtsCreateDebtPaymentResponse, DebtsReadDebtPaymentsData, DebtsReadDebtPaymentsResponse, DebtsGetCustomerBalanceData, DebtsGetCustomerBalanceResponse, ExpensesReadExpenseCategoriesData, ExpensesReadExpenseCategoriesResponse, ExpensesCreateExpenseCategoryData, ExpensesCreateExpenseCategoryResponse, ExpensesReadExpenseCategoryData, ExpensesReadExpenseCategoryResponse, ExpensesUpdateExpenseCategoryData, ExpensesUpdateExpenseCategoryResponse, ExpensesDeleteExpenseCategoryData, ExpensesDeleteExpenseCategoryResponse, ExpensesReadExpensesData, ExpensesReadExpensesResponse, ExpensesCreateExpenseData, ExpensesCreateExpenseResponse, ExpensesReadExpenseData, ExpensesReadExpenseResponse, ExpensesUpdateExpenseData, ExpensesUpdateExpenseResponse, ExpensesDeleteExpenseData, ExpensesDeleteExpenseResponse, ExpensesGetExpenseSummaryData, ExpensesGetExpenseSummaryResponse, GrnReadSuppliersData, GrnReadSuppliersResponse, GrnCreateSupplierData, GrnCreateSupplierResponse, GrnReadSupplierData, GrnReadSupplierResponse, GrnUpdateSupplierData, GrnUpdateSupplierResponse, GrnDeleteSupplierData, GrnDeleteSupplierResponse, GrnReadTransportersData, GrnReadTransportersResponse, GrnCreateTransporterData, GrnCreateTransporterResponse, GrnReadTransporterData, GrnReadTransporterResponse, GrnUpdateTransporterData, GrnUpdateTransporterResponse, GrnDeleteTransporterData, GrnDeleteTransporterResponse, GrnReadGrnsData, GrnReadGrnsResponse, GrnCreateGrnData, GrnCreateGrnResponse, GrnReadGrnData, GrnReadGrnResponse, GrnUpdateGrnData, GrnUpdateGrnResponse, GrnDeleteGrnData, GrnDeleteGrnResponse, GrnApproveGrnData, GrnApproveGrnResponse, LoginLoginAccessTokenData, LoginLoginAccessTokenResponse, LoginRefreshTokenData, LoginRefreshTokenResponse, LoginRevokeRefreshTokenData, LoginRevokeRefreshTokenResponse, LoginTestTokenResponse, LoginRecoverPasswordData, LoginRecoverPasswordResponse, LoginResetPasswordData, LoginResetPasswordResponse, LoginRecoverPasswordHtmlContentData, LoginRecoverPasswordHtmlContentResponse, MediaUploadImageData, MediaUploadImageResponse, MediaServeImageData, MediaServeImageResponse, MediaDeleteMediaData, MediaDeleteMediaResponse, MediaListMediaData, MediaListMediaResponse, NotificationsListNotificationsData, NotificationsListNotificationsResponse, NotificationsGetUnreadCountResponse, NotificationsMarkAsReadData, NotificationsMarkAsReadResponse, NotificationsMarkAllAsReadResponse, NotificationsDeleteNotificationData, NotificationsDeleteNotificationResponse, NotificationsGetNotificationTypesResponse, PrivateCreateUserData, PrivateCreateUserResponse, ProductsReadCategoriesResponse, ProductsReadStatusesResponse, ProductsReadProductsData, ProductsReadProductsResponse, ProductsCreateProductData, ProductsCreateProductResponse, ProductsReadProductData, ProductsReadProductResponse, ProductsUpdateProductData, ProductsUpdateProductResponse, ProductsDeleteProductData, ProductsDeleteProductResponse, RemindersListReminderSettingsResponse, RemindersCreateReminderSettingData, RemindersCreateReminderSettingResponse, RemindersGetReminderSettingData, RemindersGetReminderSettingResponse, RemindersUpdateReminderSettingData, RemindersUpdateReminderSettingResponse, RemindersDeleteReminderSettingData, RemindersDeleteReminderSettingResponse, RemindersListReminderLogsData, RemindersListReminderLogsResponse, RemindersGetReminderStatisticsResponse, RemindersGetReminderTypesResponse, SalesReadPaymentMethodsData, SalesReadPaymentMethodsResponse, SalesCreatePaymentMethodData, SalesCreatePaymentMethodResponse, SalesUpdatePaymentMethodData, SalesUpdatePaymentMethodResponse, SalesSearchProductsForSaleData, SalesSearchProductsForSaleResponse, SalesCreateSaleData, SalesCreateSaleResponse, SalesReadSalesData, SalesReadSalesResponse, SalesCreateSaleWithMultiplePaymentsData, SalesCreateSaleWithMultiplePaymentsResponse, SalesReadSalePaymentsData, SalesReadSalePaymentsResponse, SalesGetTodaySalesSummaryResponse, SalesReadSaleData, SalesReadSaleResponse, SalesDeleteSaleData, SalesDeleteSaleResponse, ShiftReconciliationCreateShiftReconciliationData, ShiftReconciliationCreateShiftReconciliationResponse, ShiftReconciliationReadShiftReconciliationsData, ShiftReconciliationReadShiftReconciliationsResponse, ShiftReconciliationReadShiftReconciliationData, ShiftReconciliationReadShiftReconciliationResponse, ShiftReconciliationUpdateShiftReconciliationData, ShiftReconciliationUpdateShiftReconciliationResponse, ShiftReconciliationGetCurrentCashSummaryData, ShiftReconciliationGetCurrentCashSummaryResponse, StockEntriesSearchProductsForStockEntryData, StockEntriesSearchProductsForStockEntryResponse, StockEntriesReadStockEntriesData, StockEntriesReadStockEntriesResponse, StockEntriesCreateStockEntryData, StockEntriesCreateStockEntryResponse, StockEntriesReadStockEntryData, StockEntriesReadStockEntryResponse, StockEntriesUpdateStockEntryData, StockEntriesUpdateStockEntryResponse, StockEntriesDeleteStockEntryData, StockEntriesDeleteStockEntryResponse, SupplierDebtsListSupplierDebtsData, SupplierDebtsListSupplierDebtsResponse, SupplierDebtsCreateSupplierDebtData, SupplierDebtsCreateSupplierDebtResponse, SupplierDebtsGetSummaryResponse, SupplierDebtsGetAgingReportData, SupplierDebtsGetAgingReportResponse, SupplierDebtsGetSupplierDebtData, SupplierDebtsGetSupplierDebtResponse, SupplierDebtsUpdateSupplierDebtData, SupplierDebtsUpdateSupplierDebtResponse, SupplierDebtsRecordPaymentData, SupplierDebtsRecordPaymentResponse, SupplierDebtsListInstallmentsData, SupplierDebtsListInstallmentsResponse, SupplierDebtsCreateInstallmentsData, SupplierDebtsCreateInstallmentsResponse, TillOpenTillData, TillOpenTillResponse, TillGetCurrentTillResponse, TillGetTillStatusResponse, TillCloseTillData, TillCloseTillResponse, TillGetSystemCountsResponse, TillReconcileShiftData, TillReconcileShiftResponse, TillGetCashierVariancesData, TillGetCashierVariancesResponse, TillGetTillShiftsData, TillGetTillShiftsResponse, UsersReadUsersData, UsersReadUsersResponse, UsersCreateUserData, UsersCreateUserResponse, UsersReadUserMeResponse, UsersDeleteUserMeResponse, UsersUpdateUserMeData, UsersUpdateUserMeResponse, UsersUpdatePasswordMeData, UsersUpdatePasswordMeResponse, UsersRegisterUserData, UsersRegisterUserResponse, UsersReadUserByIdData, UsersReadUserByIdResponse, UsersUpdateUserData, UsersUpdateUserResponse, UsersDeleteUserData, UsersDeleteUserResponse, UtilsTestEmailData, UtilsTestEmailResponse, UtilsHealthCheckResponse } from './types.gen';
+import type { AnalyticsGetSalesSummaryData, AnalyticsGetSalesSummaryResponse, AnalyticsGetStockSummaryResponse, AnalyticsGetBalanceSheetData, AnalyticsGetBalanceSheetResponse, AnalyticsGetDashboardStatsResponse, BulkImportDownloadTemplateResponse, BulkImportUploadFileData, BulkImportUploadFileResponse, BulkImportMapColumnsData, BulkImportMapColumnsResponse, BulkImportGetValidationResultsData, BulkImportGetValidationResultsResponse, BulkImportFixRowData, BulkImportFixRowResponse, BulkImportImportProductsData, BulkImportImportProductsResponse, BulkImportGetImportStatusData, BulkImportGetImportStatusResponse, CustomersGetCustomersData, CustomersGetCustomersResponse, DebtsReadDebtsData, DebtsReadDebtsResponse, DebtsCreateDebtData, DebtsCreateDebtResponse, DebtsReadDebtData, DebtsReadDebtResponse, DebtsUpdateDebtData, DebtsUpdateDebtResponse, DebtsDeleteDebtData, DebtsDeleteDebtResponse, DebtsCreateDebtPaymentData, DebtsCreateDebtPaymentResponse, DebtsReadDebtPaymentsData, DebtsReadDebtPaymentsResponse, DebtsGetCustomerBalanceData, DebtsGetCustomerBalanceResponse, ExpensesReadExpenseCategoriesData, ExpensesReadExpenseCategoriesResponse, ExpensesCreateExpenseCategoryData, ExpensesCreateExpenseCategoryResponse, ExpensesReadExpenseCategoryData, ExpensesReadExpenseCategoryResponse, ExpensesUpdateExpenseCategoryData, ExpensesUpdateExpenseCategoryResponse, ExpensesDeleteExpenseCategoryData, ExpensesDeleteExpenseCategoryResponse, ExpensesReadExpensesData, ExpensesReadExpensesResponse, ExpensesCreateExpenseData, ExpensesCreateExpenseResponse, ExpensesReadExpenseData, ExpensesReadExpenseResponse, ExpensesUpdateExpenseData, ExpensesUpdateExpenseResponse, ExpensesDeleteExpenseData, ExpensesDeleteExpenseResponse, ExpensesGetExpenseSummaryData, ExpensesGetExpenseSummaryResponse, GrnReadSuppliersData, GrnReadSuppliersResponse, GrnCreateSupplierData, GrnCreateSupplierResponse, GrnReadSupplierData, GrnReadSupplierResponse, GrnUpdateSupplierData, GrnUpdateSupplierResponse, GrnDeleteSupplierData, GrnDeleteSupplierResponse, GrnReadTransportersData, GrnReadTransportersResponse, GrnCreateTransporterData, GrnCreateTransporterResponse, GrnReadTransporterData, GrnReadTransporterResponse, GrnUpdateTransporterData, GrnUpdateTransporterResponse, GrnDeleteTransporterData, GrnDeleteTransporterResponse, GrnReadGrnsData, GrnReadGrnsResponse, GrnCreateGrnData, GrnCreateGrnResponse, GrnReadGrnData, GrnReadGrnResponse, GrnUpdateGrnData, GrnUpdateGrnResponse, GrnDeleteGrnData, GrnDeleteGrnResponse, GrnApproveGrnData, GrnApproveGrnResponse, LoginLoginAccessTokenData, LoginLoginAccessTokenResponse, LoginTestTokenResponse, LoginRecoverPasswordData, LoginRecoverPasswordResponse, LoginResetPasswordData, LoginResetPasswordResponse, LoginRecoverPasswordHtmlContentData, LoginRecoverPasswordHtmlContentResponse, MediaUploadImageData, MediaUploadImageResponse, MediaServeImageData, MediaServeImageResponse, MediaDeleteMediaData, MediaDeleteMediaResponse, MediaListMediaData, MediaListMediaResponse, NotificationsListNotificationsData, NotificationsListNotificationsResponse, NotificationsGetUnreadCountResponse, NotificationsMarkAsReadData, NotificationsMarkAsReadResponse, NotificationsMarkAllAsReadResponse, NotificationsDeleteNotificationData, NotificationsDeleteNotificationResponse, NotificationsGetNotificationTypesResponse, PrivateCreateUserData, PrivateCreateUserResponse, ProductsReadCategoriesResponse, ProductsReadStatusesResponse, ProductsReadProductsData, ProductsReadProductsResponse, ProductsCreateProductData, ProductsCreateProductResponse, ProductsReadProductData, ProductsReadProductResponse, ProductsUpdateProductData, ProductsUpdateProductResponse, ProductsDeleteProductData, ProductsDeleteProductResponse, RemindersListReminderSettingsResponse, RemindersCreateReminderSettingData, RemindersCreateReminderSettingResponse, RemindersGetReminderSettingData, RemindersGetReminderSettingResponse, RemindersUpdateReminderSettingData, RemindersUpdateReminderSettingResponse, RemindersDeleteReminderSettingData, RemindersDeleteReminderSettingResponse, RemindersListReminderLogsData, RemindersListReminderLogsResponse, RemindersGetReminderStatisticsResponse, RemindersGetReminderTypesResponse, SalesReadPaymentMethodsData, SalesReadPaymentMethodsResponse, SalesCreatePaymentMethodData, SalesCreatePaymentMethodResponse, SalesUpdatePaymentMethodData, SalesUpdatePaymentMethodResponse, SalesSearchProductsForSaleData, SalesSearchProductsForSaleResponse, SalesCreateSaleData, SalesCreateSaleResponse, SalesReadSalesData, SalesReadSalesResponse, SalesCreateSaleWithMultiplePaymentsData, SalesCreateSaleWithMultiplePaymentsResponse, SalesReadSalePaymentsData, SalesReadSalePaymentsResponse, SalesGetTodaySalesSummaryResponse, SalesReadSaleData, SalesReadSaleResponse, SalesDeleteSaleData, SalesDeleteSaleResponse, ShiftReconciliationCreateShiftReconciliationData, ShiftReconciliationCreateShiftReconciliationResponse, ShiftReconciliationReadShiftReconciliationsData, ShiftReconciliationReadShiftReconciliationsResponse, ShiftReconciliationReadShiftReconciliationData, ShiftReconciliationReadShiftReconciliationResponse, ShiftReconciliationUpdateShiftReconciliationData, ShiftReconciliationUpdateShiftReconciliationResponse, ShiftReconciliationGetCurrentCashSummaryData, ShiftReconciliationGetCurrentCashSummaryResponse, StockEntriesSearchProductsForStockEntryData, StockEntriesSearchProductsForStockEntryResponse, StockEntriesReadStockEntriesData, StockEntriesReadStockEntriesResponse, StockEntriesCreateStockEntryData, StockEntriesCreateStockEntryResponse, StockEntriesReadStockEntryData, StockEntriesReadStockEntryResponse, StockEntriesUpdateStockEntryData, StockEntriesUpdateStockEntryResponse, StockEntriesDeleteStockEntryData, StockEntriesDeleteStockEntryResponse, SupplierDebtsListSupplierDebtsData, SupplierDebtsListSupplierDebtsResponse, SupplierDebtsCreateSupplierDebtData, SupplierDebtsCreateSupplierDebtResponse, SupplierDebtsGetSummaryResponse, SupplierDebtsGetAgingReportData, SupplierDebtsGetAgingReportResponse, SupplierDebtsGetSupplierDebtData, SupplierDebtsGetSupplierDebtResponse, SupplierDebtsUpdateSupplierDebtData, SupplierDebtsUpdateSupplierDebtResponse, SupplierDebtsRecordPaymentData, SupplierDebtsRecordPaymentResponse, SupplierDebtsListInstallmentsData, SupplierDebtsListInstallmentsResponse, SupplierDebtsCreateInstallmentsData, SupplierDebtsCreateInstallmentsResponse, TillOpenTillData, TillOpenTillResponse, TillGetCurrentTillResponse, TillGetTillStatusResponse, TillCloseTillData, TillCloseTillResponse, TillGetSystemCountsResponse, TillReconcileShiftData, TillReconcileShiftResponse, TillGetCashierVariancesData, TillGetCashierVariancesResponse, TillGetTillShiftsData, TillGetTillShiftsResponse, UsersReadUsersData, UsersReadUsersResponse, UsersCreateUserData, UsersCreateUserResponse, UsersReadUserMeResponse, UsersDeleteUserMeResponse, UsersUpdateUserMeData, UsersUpdateUserMeResponse, UsersUpdatePasswordMeData, UsersUpdatePasswordMeResponse, UsersRegisterUserData, UsersRegisterUserResponse, UsersReadUserByIdData, UsersReadUserByIdResponse, UsersUpdateUserData, UsersUpdateUserResponse, UsersDeleteUserData, UsersDeleteUserResponse, UtilsTestEmailData, UtilsTestEmailResponse, UtilsHealthCheckResponse } from './types.gen';
 
 export class AnalyticsService {
     /**
@@ -1136,46 +1136,6 @@ export class LoginService {
     }
     
     /**
-     * Refresh Token
-     * Refresh access token using refresh token
-     * @param data The data for the request.
-     * @param data.requestBody
-     * @returns Token Successful Response
-     * @throws ApiError
-     */
-    public static refreshToken(data: LoginRefreshTokenData): CancelablePromise<LoginRefreshTokenResponse> {
-        return __request(OpenAPI, {
-            method: 'POST',
-            url: '/api/v1/login/refresh-token',
-            body: data.requestBody,
-            mediaType: 'application/json',
-            errors: {
-                422: 'Validation Error'
-            }
-        });
-    }
-    
-    /**
-     * Revoke Refresh Token
-     * Revoke a refresh token (logout)
-     * @param data The data for the request.
-     * @param data.requestBody
-     * @returns Message Successful Response
-     * @throws ApiError
-     */
-    public static revokeRefreshToken(data: LoginRevokeRefreshTokenData): CancelablePromise<LoginRevokeRefreshTokenResponse> {
-        return __request(OpenAPI, {
-            method: 'POST',
-            url: '/api/v1/login/revoke-refresh-token',
-            body: data.requestBody,
-            mediaType: 'application/json',
-            errors: {
-                422: 'Validation Error'
-            }
-        });
-    }
-    
-    /**
      * Test Token
      * Test access token
      * @returns UserPublic Successful Response
@@ -1937,7 +1897,6 @@ export class SalesService {
      * @param data.categoryId Filter by product category
      * @param data.cashierName Filter by cashier name (searches full_name and username)
      * @param data.search Search by receipt number (last 6 chars) or notes
-     * @param data.excludeWithDebt Exclude sales that have associated debts (for receipts view)
      * @returns SalesPublic Successful Response
      * @throws ApiError
      */
@@ -1954,8 +1913,7 @@ export class SalesService {
                 end_date: data.endDate,
                 category_id: data.categoryId,
                 cashier_name: data.cashierName,
-                search: data.search,
-                exclude_with_debt: data.excludeWithDebt
+                search: data.search
             },
             errors: {
                 422: 'Validation Error'
@@ -2006,31 +1964,6 @@ export class SalesService {
             url: '/api/v1/sales/{sale_id}/payments',
             path: {
                 sale_id: data.saleId
-            },
-            errors: {
-                422: 'Validation Error'
-            }
-        });
-    }
-    
-    /**
-     * Get Recent Sales
-     * Get recent sales for quick access in POS.
-     * Returns the most recent sales for the current cashier (or all sales for admin).
-     * Useful for quick lookup and voiding recent transactions.
-     * @param data The data for the request.
-     * @param data.limit Number of recent sales to return
-     * @param data.includeVoided Include voided sales
-     * @returns SalesPublic Successful Response
-     * @throws ApiError
-     */
-    public static getRecentSales(data: { limit?: number; includeVoided?: boolean } = {}): CancelablePromise<SalesReadSalesResponse> {
-        return __request(OpenAPI, {
-            method: 'GET',
-            url: '/api/v1/sales/recent',
-            query: {
-                limit: data.limit,
-                include_voided: data.includeVoided
             },
             errors: {
                 422: 'Validation Error'

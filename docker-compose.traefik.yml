@@ -1,6 +1,6 @@
 services:
   traefik:
-    image: traefik:v3.2
+    image: traefik:v3.6.1
     ports:
       # Listen on port 80, default for HTTP, necessary to redirect to HTTPS
       - 80:80
@@ -42,7 +42,6 @@ services:
       - traefik.http.middlewares.security-headers.headers.sslRedirect=true
       - traefik.http.middlewares.security-headers.headers.browserXssFilter=true
       - traefik.http.middlewares.security-headers.headers.contentTypeNosniff=true
-      - traefik.http.middlewares.security-headers.headers.forceSTS=true
       - traefik.http.middlewares.security-headers.headers.stsIncludeSubdomains=true
       - traefik.http.middlewares.security-headers.headers.stsPreload=true
       - traefik.http.middlewares.security-headers.headers.stsSeconds=31536000
@@ -61,15 +60,16 @@ services:
       # Create an entrypoint "http" listening on port 80
       - --entrypoints.http.address=:80
       # Create an entrypoint "https" listening on port 443
+      # HTTP/2 is enabled by default in Traefik v3 for HTTPS
       - --entrypoints.https.address=:443
-      # Enable HTTP/2
-      - --entrypoints.https.http2.enabled=true
       # Create the certificate resolver "le" for Let's Encrypt, uses the environment variable EMAIL
       - --certificatesresolvers.le.acme.email=${EMAIL?Variable not set}
       # Store the Let's Encrypt certificates in the mounted volume
       - --certificatesresolvers.le.acme.storage=/certificates/acme.json
-      # Use the TLS Challenge for Let's Encrypt
-      - --certificatesresolvers.le.acme.tlschallenge=true
+      # Use the HTTP Challenge for Let's Encrypt (easier than TLS-ALPN-01)
+      - --certificatesresolvers.le.acme.httpchallenge=true
+      # Allow Let's Encrypt to verify the domain via HTTP on port 80
+      - --certificatesresolvers.le.acme.httpchallenge.entrypoint=http
       # Enable the access log, with HTTP requests
       - --accesslog
       # Enable the Traefik log, for configurations and errors
@@ -97,4 +97,3 @@ networks:
   # services that need to be publicly available via this Traefik
   traefik-public:
     external: true
-

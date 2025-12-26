@@ -49,6 +49,10 @@ COPY ./scripts /app/scripts
 COPY ./pyproject.toml ./uv.lock ./alembic.ini /app/
 
 COPY ./app /app/app
+
+# Copy tests directory if it exists
+# Note: For production deployments where tests are excluded by .rsyncignore,
+# create an empty tests/__init__.py file on the server before building
 COPY ./tests /app/tests
 
 # Copy supervisor configuration
@@ -61,9 +65,9 @@ RUN mkdir -p /app/app/email-templates/build && \
         mjml "$file" -o "/app/app/email-templates/build/$(basename "$file" .mjml).html"; \
     done
 
-# Sync the project
+# Sync the project (install the app package)
 # Ref: https://docs.astral.sh/uv/guides/integration/docker/#intermediate-layers
 RUN --mount=type=cache,target=/root/.cache/uv \
     uv sync
-
+    
 CMD ["/usr/bin/supervisord", "-c", "/etc/supervisor/conf.d/supervisord.conf"]

@@ -122,7 +122,6 @@ export function RecentReceiptsModal({
         // Don't filter by cashier - show all receipts for the date range
         // cashierName: appliedFilters.cashier || undefined,
         search: appliedFilters.search || undefined,
-        excludeWithDebt: true, // Exclude sales with debts - those appear in invoices
       })
       // Debug logging
       console.log("Receipts query result:", {

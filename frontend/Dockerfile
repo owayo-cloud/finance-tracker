@@ -18,6 +18,14 @@ ENV VITE_API_URL=${VITE_API_URL}
 # Increase Node.js memory limit for build and add timeout handling
 ENV NODE_OPTIONS="--max-old-space-size=4096 --unhandled-rejections=strict"
 
+# Generate OpenAPI client if openapi.json exists and core files are missing
+RUN if [ -f "openapi.json" ] && [ ! -d "src/client/core" ]; then \
+        echo "Generating OpenAPI client..." && \
+        npm run generate-client || echo "Client generation failed, continuing..."; \
+    else \
+        echo "Skipping client generation (openapi.json not found or core files exist)"; \
+    fi
+
 # Build with progress output and error handling
 RUN echo "Starting frontend build..." && \
     npm run build || (echo "Build failed! Exit code: $?" && exit 1) && \
